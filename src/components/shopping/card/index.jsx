@@ -38,12 +38,12 @@ const Card = ({ name, description, price, img, path, id }) => {
 					}}
 				/>
 			</div>
-			<div className="flex p-4 flex-col items-center justify-between leading-normal font-coolvetica  text-center">
-				<h5 className="mb-1 text-2xl  font-bold tracking-tight">
+			<div className="flex px-4 flex-col items-center justify-between leading-normal font-coolvetica  text-center">
+				<h5 className="mb-1 mt-4 text-2xl  font-bold tracking-tight">
 					{capitalizeWords(name)}
 				</h5>
 				<p className="mb-1 text-xs text-gray-600">{description}</p>
-				<span className="font-bold text-2xl mb-3 text-black">
+				<span className="font-bold text-2xl mb-5 text-black">
 					{currencyFormat(price)}
 				</span>
 			</div>
