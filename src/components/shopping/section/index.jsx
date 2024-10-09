@@ -78,7 +78,7 @@ const Section = ({ products = [], path }) => {
 					)}
 					{ourCollection.length > 0 && (
 						<div className="section">
-							<p className="font-bold text-5xl text-center  mb-4 text-black font-coolvetica">
+							<p className="font-bold mt-8 text-5xl text-center  mb-4 text-black font-coolvetica">
 								Masterpieces
 							</p>
 							<div className=" grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
