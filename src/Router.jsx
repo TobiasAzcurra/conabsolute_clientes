@@ -37,15 +37,6 @@ const AppRouter = () => {
 
 	return (
 		<div className="flex flex-col">
-			{/* {pathLocation === "menu" || pathLocation === "NADA" ? null : (
-				<>
-					<div className="fixed z-[9999] w-full">
-						<Navbar />
-					</div>
-					<NavNSectionSpace />
-				</>
-			)} */}
-
 			<Routes>
 				<Route path="/menu" element={<RouterMenu />}>
 					<Route
