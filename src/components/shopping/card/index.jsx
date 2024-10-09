@@ -9,7 +9,7 @@ const Card = ({ name, description, price, img, path, id }) => {
 				onClick={(e) => {
 					if (img === "proximamente") e.preventDefault();
 				}}
-				className="flex items-center justify-center p-24 gap-4 shadow flex-row bg-red-main text-white min-w-full max-w-[400px]"
+				className="flex items-center justify-center p-24 gap-4 shadow-md rounded-lg bg-gray-200 text-gray-700 min-w-full max-w-[400px] hover:shadow-lg transition duration-300"
 			>
 				<div className="flex flex-col items-center justify-center leading-normal font-antonio">
 					<h5 className="mb-2 text-2xl font-bold tracking-tight uppercase">
@@ -23,23 +23,31 @@ const Card = ({ name, description, price, img, path, id }) => {
 	return (
 		<Link
 			to={`/menu/${path}/${id}`}
-			className="flex items-center p-4 gap-4 shadow flex-row bg-red-main hover:bg-black hover:text-red-main h-52 text-white min-w-full max-w-[400px]"
+			className="flex flex-col items-center gap-4 shadow-md rounded-lg bg-gray-100 hover:shadow-lg transition duration-300 h-[340px] w-full max-w-[400px] text-black"
 		>
-			<img
-				className={`object-cover w-1/3  h-auto md:h-auto md:w-48 ${
-					img === "bURGERS.png" ? "pb-20" : ""
-				}`}
-				src={`/menu/${img}`}
-				alt={img}
-			/>
-			<div className="flex flex-col  justify-between leading-normal font-antonio">
-				<h5 className="mb-2 text-2xl font-bold tracking-tight ">
+			<div className="h-[150px] overflow-hidden rounded-t-lg w-full bg-gradient-to-b from-gray-300 to-red-400">
+				<img
+					className={`object-cover w-full h-full ${
+						img === "bURGERS.png" ? "pb-4" : ""
+					}`}
+					src={`/menu/${img}`}
+					alt={img}
+					style={{
+						objectPosition: "center", // Ajusta la posición según lo que prefieras
+					}}
+				/>
+			</div>
+			<div className="flex flex-col items-center justify-between leading-normal font-antonio px-2 text-center">
+				<h5 className="mb-2 text-xl font-bold tracking-tight">
 					{name.toUpperCase()}
 				</h5>
-				<p className="mb-2 text-xs ">{description}</p>
-				<span className="font-bold">{currencyFormat(price)}</span>
+				<p className="mb-2 text-sm text-gray-600">{description}</p>
+				<span className="font-bold text-lg text-black">
+					{currencyFormat(price)}
+				</span>
 			</div>
 		</Link>
 	);
 };
+
 export default Card;
