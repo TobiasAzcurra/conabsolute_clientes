@@ -44,17 +44,6 @@ const MenuPage = () => {
 	return (
 		<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
 			<div className="text-center">
-				{/* Alternativa 1: Zoom In Animation */}
-				{/* <img
-					className="mb-2 w-72 animate__animated animate__zoomIn animate__slow"
-					src={logo}
-					alt="ANHELO"
-				/>
-				<p className="text-white text-sm font-semibold animate__animated animate__zoomIn animate__slow animate__delay-1s">
-					Vas a pedir más.
-				</p> */}
-
-				{/* Alternativa 4: Fade In Up Animation */}
 				<img
 					className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow"
 					src={logo}
