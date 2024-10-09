@@ -1,5 +1,6 @@
 // src/auth.js
-import { projectAuth, provider } from "./firebase"; // Asegúrate de tener la ruta correcta
+
+import { projectAuth, provider } from "./config";
 
 const signInWithGoogle = async () => {
   try {
