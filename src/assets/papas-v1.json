@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Papas Anhelo ®",
+    "description": "Dos cajas de papas Anhelo.",
+    "price": 2800,
+    "id": "4564GDS8",
+    "img": "papas.png",
+    "category": "papas"
+  },
+  {
+    "name": "Papas con Cheddar ®",
+    "description": "Dos cajas de papas Anhelo con un pote de muuucho cheddar.",
+    "price": 4100,
+    "id": "GUI32IASD",
+    "img": "papasCheddar.png",
+    "category": "papas"
+  },
+  {
+    "name": "Pote Cheddar",
+    "description": "Como la pileta de cheddar del MC.",
+    "price": 1300,
+    "id": "GUI32IsASD",
+    "img": "poteCheddar.png",
+    "category": "papas"
+  }
+]

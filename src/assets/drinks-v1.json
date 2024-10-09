@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Coca-Cola (310 ml.)",
+    "description": "",
+    "price": 1340,
+    "id": "ADAZ214",
+    "img": "coca.png",
+    "category": "drinks"
+  },
+  {
+    "name": "Fanta de naranja (310 ml.)",
+    "description": "",
+    "price": 1340,
+    "id": "421ASFA",
+    "img": "fanta.png",
+    "category": "drinks"
+  },
+  {
+    "name": "Sprite (310 ml.)",
+    "description": "",
+    "price": 1340,
+    "id": "NDUS9GN987",
+    "img": "sprite.png",
+    "category": "drinks"
+  }
+]

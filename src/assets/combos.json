@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Combo Satisfayer *batteries not included",
+    "description": "1 Burger + 1 Side + 1 Drink. The classic American combination par excellence: Smash Burger to choose with VICIO Fries and a drink.",
+    "price": 1590,
+    "id": "IOJGOIJNS1"
+  },
+  {
+    "name": "Couple Goals *couple not included",
+    "description": "2 Burgers + 1 Side + 2 Drinks + 1 Dessert. Share two Smash Burgers to choose from with a couple of drinks, have it with a side and have a happy ending with a dessert.",
+    "price": 3390,
+    "id": "354ASDR2"
+  },
+  {
+    "name": "Sex on the beach *beach not included",
+    "description": "4 Burgers + 2 Sides + 4 Drinks + 2 Desserts. Have a feast by choosing four Smash Burgers and four drinks. Share two sides and two desserts.",
+    "price": 6690,
+    "id": "53125213SD"
+  }
+]

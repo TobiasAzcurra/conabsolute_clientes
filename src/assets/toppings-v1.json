@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "Bacon",
+    "price": 300
+  },
+  {
+    "id": 2,
+    "name": "Lechuga",
+    "price": 300
+  },
+  {
+    "id": 3,
+    "name": "Tomate",
+    "price": 300
+  },
+  {
+    "id": 5,
+    "name": "Cebolla caramelizada",
+    "price": 300
+  },
+  {
+    "id": 6,
+    "name": "Salsa ANHELO",
+    "price": 300
+  },
+  {
+    "id": 7,
+    "name": "Mayonesa",
+    "price": 0
+  },
+  {
+    "id": 8,
+    "name": "Ketchup",
+    "price": 0
+  },
+  {
+    "id": 9,
+    "name": "Salsa barbecue",
+    "price": 0
+  }
+]

@@ -1,0 +1,1 @@
+export { Pedido } from './Pedido';
