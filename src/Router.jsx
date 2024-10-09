@@ -38,50 +38,46 @@ const AppRouter = () => {
 	return (
 		<div className="flex flex-col">
 			<Routes>
-				<Route path="/menu" element={<RouterMenu />}>
-					<Route
-						path="/menu/burgers"
-						element={<Section path={"burgers"} products={burgersArray} />}
-					/>
+				{/* Mostrar `RouterMenu` solo en la ruta raíz */}
+				<Route path="/" element={<RouterMenu />} />
 
-					<Route
-						path="/menu/combos"
-						element={<Section path={"combos"} products={combosArray} />}
-					/>
+				{/* Rutas del menú */}
+				<Route
+					path="/menu/burgers"
+					element={<Section path={"burgers"} products={burgersArray} />}
+				/>
+				<Route
+					path="/menu/combos"
+					element={<Section path={"combos"} products={combosArray} />}
+				/>
+				<Route
+					path="/menu/bebidas"
+					element={<Section path={"bebidas"} products={drinksArray} />}
+				/>
+				<Route
+					path="/menu/papas"
+					element={<Section path={"papas"} products={papasArray} />}
+				/>
 
-					<Route
-						path="/menu/bebidas"
-						element={<Section path={"bebidas"} products={drinksArray} />}
-					/>
-
-					<Route
-						path="/menu/papas"
-						element={<Section path={"papas"} products={papasArray} />}
-					/>
-				</Route>
-
-				{/* details */}
-
+				{/* Rutas de detalles */}
 				<Route
 					path="/menu/burgers/:id"
 					element={<DetailCard products={burgersArray} type={"burgers"} />}
 				/>
-
 				<Route
 					path="/menu/combos/:id"
 					element={<DetailCard products={combosArray} type={"combos"} />}
 				/>
-
 				<Route
 					path="/menu/bebidas/:id"
 					element={<DetailCard products={drinksArray} type={"bebidas"} />}
 				/>
-
 				<Route
 					path="/menu/papas/:id"
 					element={<DetailCard products={papasArray} type={"papas"} />}
 				/>
-				<Route path="/" element={<RouterMenu />} />
+
+				{/* Otras rutas */}
 				<Route path="/carrito" element={<CartItems />} />
 				<Route path="/order" element={<OrderForm />} />
 				<Route path="/pedido" element={<Pedido />} />
@@ -89,11 +85,8 @@ const AppRouter = () => {
 				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
 			</Routes>
 
-			{pathLocation === "menu" || pathLocation === "NADA" ? null : (
-				<>
-					<Footer />
-				</>
-			)}
+			{/* Mostrar el Footer si no estamos en "menu" o en la raíz */}
+			{pathLocation === "menu" || pathLocation === "NADA" ? null : <Footer />}
 		</div>
 	);
 };
