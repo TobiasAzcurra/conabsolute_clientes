@@ -8,11 +8,11 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 
 	return (
 		<Link
-			className={`flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 hover:shadow-lg transition duration-300 w-full max-w-[400px] text-black`}
+			className={`flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 hover:shadow-lg p-1 transition duration-300 w-full max-w-[400px] text-black`}
 			to={name === "PROMOCIONES" ? "/menu/burgers" : `/menu/${name}`}
 			onClick={() => handleItemClick(name)}
 		>
-			<div className="h-[70px] w-full rounded-t-xl overflow-hidden bg-gradient-to-b from-gray-300 to-red-400 relative flex  justify-center">
+			<div className="h-[70px] w-full rounded-t-xl overflow-hidden bg-gradient-to-b from-gray-300 to-red-400  relative flex  justify-center">
 				<img className="object-cover " src={img} alt={name} />
 			</div>
 			<div className=" h-[50px] font-coolvetica text-center">
