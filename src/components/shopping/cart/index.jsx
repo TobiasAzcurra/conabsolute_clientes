@@ -36,16 +36,10 @@ const drinksArray = Object.values(drinks).map((product) => ({
 }));
 
 // Concatenar todos los productos en un solo array
-const allProducts = [
-	...burgersArray,
-	...combosArray,
-	...papasArray,
-	...drinksArray,
-];
+const allProducts = [...burgersArray, ...papasArray, ...drinksArray];
 
 export const items = {
 	burgers: "burgers",
-	combos: "combos",
 	papas: "papas",
 	bebidas: "bebidas",
 };
