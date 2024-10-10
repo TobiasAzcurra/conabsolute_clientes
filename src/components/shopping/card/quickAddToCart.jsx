@@ -36,7 +36,9 @@ const QuickAddToCart = ({ product }) => {
 				dispatch(addItem(burgerObject));
 			}
 			setIsAdding(false);
-			setIsEditing(false);
+			setTimeout(() => {
+				setIsEditing(false);
+			}, 300); // Añadimos un pequeño retraso para completar la animación de cierre
 		}, 2000);
 	};
 
@@ -45,9 +47,9 @@ const QuickAddToCart = ({ product }) => {
 			{isEditing ? (
 				<motion.div
 					initial={{ width: 35 }}
-					animate={{ width: 100 }}
+					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
-					className="flex items-center absolute right-0 top-0 flex-row w-[100px] rounded-lg font-black border border-black border-opacity-20 bg-gray-100"
+					className="flex items-center absolute right-0 top-0 flex-row rounded-lg font-black border border-black border-opacity-20 bg-gray-100"
 				>
 					<div
 						className="text-black font-bold text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
