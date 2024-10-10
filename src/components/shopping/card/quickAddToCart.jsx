@@ -99,16 +99,16 @@ const QuickAddToCart = ({ product }) => {
 					className="flex items-center absolute right-0 top-0 flex-row rounded-lg font-black border border-black border-opacity-20 bg-gray-100"
 				>
 					<div
-						className="text-black font-bold text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
 						onClick={handleDecrement}
 					>
 						-
 					</div>
-					<span className="font-antonio font-bold text-center items-center flex justify-center w-[35px] h-[35px]">
+					<span className="font-coolvetica  font-black text-center items-center flex justify-center w-[35px] h-[35px]">
 						{quantity}
 					</span>
 					<div
-						className="text-black font-bold text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+						className="text-black  font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
 						onClick={handleIncrement}
 					>
 						+
@@ -120,7 +120,7 @@ const QuickAddToCart = ({ product }) => {
 						cartQuantity > 0
 							? "bg-black border border-gray-100  border-opacity-100 text-gray-100"
 							: "bg-gray-100"
-					} rounded-lg font-black border border-black border-opacity-20 pt-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
+					} rounded-lg font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
 					{cartQuantity > 0 ? cartQuantity : "+"}
