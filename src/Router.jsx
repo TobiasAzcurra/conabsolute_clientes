@@ -1,6 +1,8 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import Section from "./components/shopping/section";
 import { RouterMenu } from "./common/RouterMenu";
+import Carrusel from "./components/Carrusel"; // Importa el componente Carrusel
+import NavMenu from "./components/NavMenu";
 import burgers from "./assets/burgers-v1.json";
 import combos from "./assets/combos.json";
 import papas from "./assets/papas-v1.json";
@@ -8,10 +10,8 @@ import drinks from "./assets/drinks-v1.json";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
-import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
-import NavNSectionSpace from "./components/NavNSectionSpace";
 import { Pedido } from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 
@@ -35,8 +35,19 @@ const AppRouter = () => {
 		}
 	}, [pathname]);
 
+	// Mostrar Carrusel y NavMenu solo cuando la ruta es /menu o una de sus subrutas
+	const shouldShowCarruselAndNavMenu = pathname.startsWith("/menu");
+
 	return (
 		<div className="flex flex-col">
+			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
+			{shouldShowCarruselAndNavMenu && (
+				<>
+					<Carrusel />
+					<NavMenu />
+				</>
+			)}
+
 			<Routes>
 				{/* Mostrar `RouterMenu` solo en la ruta raíz */}
 				<Route path="/" element={<RouterMenu />} />
