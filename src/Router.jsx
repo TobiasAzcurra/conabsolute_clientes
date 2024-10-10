@@ -35,8 +35,10 @@ const AppRouter = () => {
 		}
 	}, [pathname]);
 
-	// Mostrar Carrusel y NavMenu solo cuando la ruta es /menu o una de sus subrutas
-	const shouldShowCarruselAndNavMenu = pathname.startsWith("/menu");
+	// Mostrar Carrusel y NavMenu solo cuando la ruta es /menu o una de sus subrutas, pero no contiene un ID adicional
+	const shouldShowCarruselAndNavMenu =
+		pathname.startsWith("/menu") &&
+		!pathname.match(/\/menu\/(burgers|combos|bebidas|papas)\/.+/);
 
 	return (
 		<div className="flex flex-col">
@@ -44,7 +46,7 @@ const AppRouter = () => {
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
 					<Carrusel />
-					<div className="top-[200px] inset-0 absolute">
+					<div className="top-[220px] inset-0 absolute">
 						<NavMenu />
 					</div>
 				</div>

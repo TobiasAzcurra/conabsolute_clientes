@@ -12,7 +12,7 @@ export const items = {
 const NavMenu = ({ selectedItem, handleItemClick, locationMenu }) => {
 	return (
 		<div>
-			<p className="text-gray-100 text-center text-5xl mb-3 font-bold font-coolvetica">
+			<p className="text-gray-100 text-center text-2xl mb-3 font-bold font-coolvetica">
 				Elegí
 			</p>
 			<nav className="flex flex-row w-full gap-2 justify-center px-4">
