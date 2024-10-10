@@ -105,8 +105,8 @@ const AppRouter = () => {
 				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
 			</Routes>
 
-			{/* Mostrar el carrito flotante si hay productos en el carrito */}
-			{totalQuantity > 0 && (
+			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en la ruta raíz */}
+			{totalQuantity > 0 && pathname !== "/" && (
 				<FloatingCart totalQuantity={totalQuantity} cart={cart} />
 			)}
 		</div>
