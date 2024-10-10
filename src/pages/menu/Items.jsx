@@ -12,8 +12,10 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 	// Verificamos si estamos en la ruta /carrito
 	const isCarrito = location.pathname === "/carrito";
 
-	const className =
-		"flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 p-1 transition duration-300 w-full max-w-[400px] text-black";
+	// Ajustamos las clases de los estilos dependiendo de la ruta actual
+	const className = `flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 p-1 transition duration-300 text-black ${
+		isCarrito ? "w-[100px]" : "w-full max-w-[400px]"
+	}`;
 
 	// Ajustamos la fuente de la imagen solo si estamos en /carrito
 	let imageSrc = img;
