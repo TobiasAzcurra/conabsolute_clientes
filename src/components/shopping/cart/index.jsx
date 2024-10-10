@@ -33,7 +33,7 @@ const drinksArray = Object.values(drinks).map((product) => ({
 }));
 
 // Concatenar todos los productos en un solo array
-const allProducts = [...burgersArray, ...papasArray, ...drinksArray];
+const allProducts = [...papasArray, ...drinksArray, ...burgersArray];
 
 export const items = {
 	burgers: "burgers",
@@ -96,7 +96,7 @@ const CartItems = () => {
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Agrega. Esto no es para tibios.</p>
-				<div className="flex flex-wrap gap-4 justify-center">
+				<div className="flex flex-row gap-2 justify-center">
 					{allProducts.map((product, index) => (
 						<Items
 							key={product.id || index}
@@ -111,7 +111,24 @@ const CartItems = () => {
 					))}
 				</div>
 			</div>
-			{/* ... el resto de tu componente */}
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Detalle de la entrega</p>
+				<div>Mapa + form</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Metodo de pago</p>
+				<div>Form</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Resumen</p>
+				<div>Detalle</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Pedir</p>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Imagen</p>
+			</div>
 		</div>
 	);
 };
