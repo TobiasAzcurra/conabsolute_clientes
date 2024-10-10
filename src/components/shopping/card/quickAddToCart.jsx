@@ -1,13 +1,17 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addItem } from "../../../redux/cart/cartSlice";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
 const QuickAddToCart = ({ product }) => {
 	const dispatch = useDispatch();
+	const { cart } = useSelector((state) => state.cartState);
 	const [quantity, setQuantity] = useState(1);
 	const [isAdding, setIsAdding] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
+
+	const cartItem = cart.find((item) => item.name === product.name);
+	const cartQuantity = cartItem ? cartItem.quantity : 0;
 
 	const handleIncrement = () => {
 		setQuantity((prevQuantity) => prevQuantity + 1);
@@ -69,10 +73,12 @@ const QuickAddToCart = ({ product }) => {
 				</motion.div>
 			) : (
 				<div
-					className="bg-gray-100 rounded-lg font-black border border-black border-opacity-20 pt-0.5 w-[35px] h-[35px] text-center cursor-pointer"
+					className={`${
+						cartQuantity > 0 ? "bg-black text-gray-100" : "bg-gray-100"
+					} rounded-lg font-black border border-black border-opacity-20 pt-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
-					+
+					{cartQuantity > 0 ? cartQuantity : "+"}
 				</div>
 			)}
 		</div>
