@@ -15,8 +15,8 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 			<div className="h-[70px] w-full rounded-t-xl overflow-hidden bg-gradient-to-b from-gray-300 to-red-400 relative flex  justify-center">
 				<img className="object-cover " src={img} alt={name} />
 			</div>
-			<div className="flex px-4 flex-col items-center justify-between leading-normal font-coolvetica text-center">
-				<h5 className="mb-1 mt-4 text-xs font-medium tracking-tight">
+			<div className=" h-[50px] font-coolvetica text-center">
+				<h5 className=" mt-1 text-xs font-medium tracking-tight">
 					{capitalizeWords(name)}
 				</h5>
 			</div>
