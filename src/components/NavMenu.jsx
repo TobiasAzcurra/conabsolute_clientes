@@ -11,26 +11,31 @@ export const items = {
 
 const NavMenu = ({ selectedItem, handleItemClick, locationMenu }) => {
 	return (
-		<nav className="flex flex-row w-full gap-2 justify-center px-4">
-			<Items
-				selectedItem={selectedItem}
-				img={"/menu/coca.png"}
-				name={items.bebidas}
-				handleItemClick={handleItemClick}
-			/>
-			<Items
-				selectedItem={selectedItem}
-				img={box}
-				name={items.burgers}
-				handleItemClick={handleItemClick}
-			/>
-			<Items
-				selectedItem={selectedItem}
-				img={fries}
-				name={items.papas}
-				handleItemClick={handleItemClick}
-			/>
-		</nav>
+		<div>
+			<p className="text-gray-100 text-center text-5xl mb-3 font-bold font-coolvetica">
+				Elegí
+			</p>
+			<nav className="flex flex-row w-full gap-2 justify-center px-4">
+				<Items
+					selectedItem={selectedItem}
+					img={"/menu/coca.png"}
+					name={items.bebidas}
+					handleItemClick={handleItemClick}
+				/>
+				<Items
+					selectedItem={selectedItem}
+					img={box}
+					name={items.burgers}
+					handleItemClick={handleItemClick}
+				/>
+				<Items
+					selectedItem={selectedItem}
+					img={fries}
+					name={items.papas}
+					handleItemClick={handleItemClick}
+				/>
+			</nav>
+		</div>
 	);
 };
 

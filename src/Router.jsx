@@ -44,7 +44,7 @@ const AppRouter = () => {
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
 					<Carrusel />
-					<div className="top-[260px] inset-0 absolute">
+					<div className="top-[200px] inset-0 absolute">
 						<NavMenu />
 					</div>
 				</div>
