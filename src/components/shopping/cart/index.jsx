@@ -104,6 +104,20 @@ const CartItems = () => {
 				<p className="text-2xl font-bold">Detalle de la entrega</p>
 				<div>Mapa + form</div>
 			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Metodo de pago</p>
+				<div>Form</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Resumen</p>
+				<div>Detalle</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Pedir</p>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Imagen</p>
+			</div>
 		</div>
 	);
 };
