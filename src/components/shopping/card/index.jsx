@@ -30,7 +30,7 @@ const Card = ({ name, description, price, img, path, id }) => {
 			className="flex  flex-col items-center border border-black border-1 border-opacity-20 rounded-xl bg-gray-100  transition duration-300  w-full max-w-[400px] text-black"
 		>
 			<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-300 relative to-red-400">
-				<div className="absolute right-2 top-2 z-50">
+				<div className="absolute right-2 top-2 z-40">
 					<QuickAddToCart />{" "}
 					{/* Usa el componente correctamente con mayúscula */}
 				</div>

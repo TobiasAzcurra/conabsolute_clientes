@@ -16,7 +16,6 @@ import { Pedido } from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import currencyFormat from "./helpers/currencyFormat";
 import FloatingCart from "./components/shopping/FloatingCart";
 
 const burgersArray = Object.values(burgers);
