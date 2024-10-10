@@ -92,11 +92,20 @@ const CartItems = () => {
 				<p className="text-2xl font-bold">Tu carrito</p>
 				<div>Card del carrito</div>
 			</div>
-			<div className="flex justify-center flex-col mt-6  items-start">
+			<div className="flex justify-center flex-col mt-6 items-start">
 				<p className="text-2xl font-bold mx-auto mb-2">
 					Agrega. Esto no es para tibios.
 				</p>
-				<div className="flex flex-row gap-2 overflow-x-auto justify-center">
+				<div
+					className="flex gap-2 overflow-x-auto overflow-y-hidden justify-center w-full custom-scrollbar"
+					style={{
+						maxHeight: "300px", // Ajusta este valor según el espacio que necesites
+						maxWidth: "100%",
+						paddingBottom: "1rem",
+						scrollBehavior: "smooth",
+						WebkitOverflowScrolling: "touch",
+					}}
+				>
 					{allProducts.map((product, index) => (
 						<Items
 							key={product.id || index}
@@ -129,6 +138,26 @@ const CartItems = () => {
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Imagen</p>
 			</div>
+			<style>
+				{`
+				.custom-scrollbar::-webkit-scrollbar {
+					height: 8px;
+				}
+				.custom-scrollbar::-webkit-scrollbar-track {
+					background: #f3f4f6; /* bg-gray-100 */
+				}
+				.custom-scrollbar::-webkit-scrollbar-thumb {
+					background: #f3f4f6; /* bg-gray-100 */
+					border-radius: 10px;
+					border: 2px solid transparent;
+					background-clip: padding-box;
+				}
+				.custom-scrollbar {
+					scrollbar-width: thin; /* Firefox */
+					scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
+				}
+			`}
+			</style>
 		</div>
 	);
 };
