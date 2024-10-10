@@ -10,12 +10,10 @@ import drinks from "./assets/drinks-v1.json";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
-import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 import { Pedido } from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import FloatingCart from "./components/shopping/FloatingCart";
 
 const burgersArray = Object.values(burgers);
