@@ -22,10 +22,7 @@ const burgersArray = Object.values(burgers).map((product) => ({
 	...product,
 	category: "burgers",
 }));
-const combosArray = Object.values(combos).map((product) => ({
-	...product,
-	category: "combos",
-}));
+
 const papasArray = Object.values(papas).map((product) => ({
 	...product,
 	category: "papas",
