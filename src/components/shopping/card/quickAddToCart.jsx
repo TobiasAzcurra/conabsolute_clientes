@@ -1,5 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { addItem, updateItemQuantity } from "../../../redux/cart/cartSlice";
+import {
+	addItem,
+	updateItemQuantity,
+	removeItem,
+} from "../../../redux/cart/cartSlice";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 
@@ -24,7 +28,7 @@ const QuickAddToCart = ({ product }) => {
 	};
 
 	const handleDecrement = () => {
-		if (quantity > 1) {
+		if (quantity > 0) {
 			console.log("Decrementing quantity");
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
@@ -39,7 +43,13 @@ const QuickAddToCart = ({ product }) => {
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
-			if (quantityRef.current >= 1) {
+			if (quantityRef.current === 0 && cartItem) {
+				console.log("Removing item from cart", {
+					name: product.name,
+				});
+				const itemIndex = cart.findIndex((item) => item.name === product.name);
+				dispatch(removeItem(itemIndex));
+			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
 					console.log("Updating item quantity in cart", {
 						name: product.name,
@@ -68,8 +78,8 @@ const QuickAddToCart = ({ product }) => {
 
 					dispatch(addItem(burgerObject));
 				}
-				console.log("Current cart state:", cart);
 			}
+			console.log("Current cart state:", cart);
 			setIsAdding(false);
 			console.log("Finished adding item");
 			setTimeout(() => {
