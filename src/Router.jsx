@@ -101,7 +101,7 @@ const AppRouter = () => {
 			</Routes>
 
 			{/* Mostrar el Footer si no estamos en "menu" o en la raíz */}
-			{pathLocation === "menu" || pathLocation === "NADA" ? null : <Footer />}
+			{/* {pathLocation === "menu" || pathLocation === "NADA" ? null : <Footer />} */}
 		</div>
 	);
 };
