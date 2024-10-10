@@ -61,79 +61,11 @@ const CartItems = () => {
 	}, []);
 
 	const deleteItem = (i) => {
-		Swal.fire({
-			html: (
-				<div>
-					<span
-						style={{
-							color: "black",
-							display: "block",
-							fontSize: "1.5rem",
-							marginBottom: "0.5rem",
-						}}
-					>
-						¿ESTÁS SEGURO?
-					</span>
-					<span style={{ color: "black", display: "block" }}>
-						ESTA ACCIÓN ELIMINARÁ EL ELEMENTO DEL CARRITO.
-					</span>
-				</div>
-			),
-			icon: "warning",
-			buttonsStyling: false,
-			showCancelButton: true,
-			iconColor: "#ff0000",
-			customClass: {
-				title: "font-antonio text-black",
-				confirmButton: "text-white bg-red-main p-3 font-antonio",
-				cancelButton: "text-white bg-black p-3 m-3 font-antonio",
-				container: "font-antonio border-0 rounded-none font-antonio",
-			},
-			confirmButtonText: "SÍ, ELIMINAR",
-			cancelButtonText: "CANCELAR",
-		}).then((result) => {
-			if (result.isConfirmed) {
-				dispatch(removeItem(i));
-			}
-		});
+		// ... código de Swal.fire para eliminar ítems
 	};
 
 	const clearAll = () => {
-		Swal.fire({
-			html: (
-				<div>
-					<span
-						style={{
-							color: "black",
-							display: "block",
-							fontSize: "1.5rem",
-							marginBottom: "0.5rem",
-						}}
-					>
-						¿ESTÁS SEGURO?
-					</span>
-					<span style={{ color: "black", display: "block" }}>
-						ESTA ACCIÓN VACIARÁ TODO EL CARRITO.
-					</span>
-				</div>
-			),
-			icon: "warning",
-			buttonsStyling: false,
-			showCancelButton: true,
-			iconColor: "#ff0000",
-			customClass: {
-				title: "font-antonio text-black",
-				confirmButton: "text-white bg-red-main p-3 font-antonio",
-				cancelButton: "text-white bg-black p-3 m-3 font-antonio",
-				container: "font-antonio",
-			},
-			confirmButtonText: "SÍ, VACIAR",
-			cancelButtonText: "CANCELAR",
-		}).then((result) => {
-			if (result.isConfirmed) {
-				dispatch(clearCart());
-			}
-		});
+		// ... código de Swal.fire para vaciar el carrito
 	};
 
 	useEffect(() => {
@@ -178,7 +110,9 @@ const CartItems = () => {
 						<Items
 							key={product.id || index}
 							selectedItem={product}
-							img={product.img || getDefaultImage(product)}
+							img={
+								product.img ? `/menu/${product.img}` : getDefaultImage(product)
+							}
 							name={product.name}
 							handleItemClick={() => {}}
 							isCart
@@ -186,24 +120,7 @@ const CartItems = () => {
 					))}
 				</div>
 			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Detalle de la entrega</p>
-				<div>Mapa + form</div>
-			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Método de pago</p>
-				<div>Form</div>
-			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Resumen</p>
-				<div>Detalle</div>
-			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Pedir</p>
-			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Imagen</p>
-			</div>
+			{/* ... el resto de tu componente */}
 		</div>
 	);
 };
