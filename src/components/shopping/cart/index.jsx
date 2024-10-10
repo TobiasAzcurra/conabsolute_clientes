@@ -17,11 +17,23 @@ import combos from "../../../assets/combos.json";
 import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 
-// Convertir los objetos importados a arrays
-const burgersArray = Object.values(burgers);
-const combosArray = Object.values(combos);
-const papasArray = Object.values(papas);
-const drinksArray = Object.values(drinks);
+// Agregar la categoría a cada producto
+const burgersArray = Object.values(burgers).map((product) => ({
+	...product,
+	category: "burgers",
+}));
+const combosArray = Object.values(combos).map((product) => ({
+	...product,
+	category: "combos",
+}));
+const papasArray = Object.values(papas).map((product) => ({
+	...product,
+	category: "papas",
+}));
+const drinksArray = Object.values(drinks).map((product) => ({
+	...product,
+	category: "bebidas",
+}));
 
 // Concatenar todos los productos en un solo array
 const allProducts = [
@@ -50,20 +62,31 @@ const CartItems = () => {
 
 	const deleteItem = (i) => {
 		Swal.fire({
-			html: ` 
-      <div>
-        <span style="color: black;  display: block; font-size: 1.5rem; margin-bottom: 0.5rem "> ¿ESTÁS SEGURO? </span>
-        <span style="color: black;  display: block">ESTA ACCIÓN ELIMINARÁ EL ELEMENTO DEL CARRITO.</span>
-      </div>
-      `,
+			html: (
+				<div>
+					<span
+						style={{
+							color: "black",
+							display: "block",
+							fontSize: "1.5rem",
+							marginBottom: "0.5rem",
+						}}
+					>
+						¿ESTÁS SEGURO?
+					</span>
+					<span style={{ color: "black", display: "block" }}>
+						ESTA ACCIÓN ELIMINARÁ EL ELEMENTO DEL CARRITO.
+					</span>
+				</div>
+			),
 			icon: "warning",
 			buttonsStyling: false,
 			showCancelButton: true,
 			iconColor: "#ff0000",
 			customClass: {
 				title: "font-antonio text-black",
-				confirmButton: " text-white bg-red-main p-3 font-antonio",
-				cancelButton: " text-white bg-black p-3 m-3 font-antonio",
+				confirmButton: "text-white bg-red-main p-3 font-antonio",
+				cancelButton: "text-white bg-black p-3 m-3 font-antonio",
 				container: "font-antonio border-0 rounded-none font-antonio",
 			},
 			confirmButtonText: "SÍ, ELIMINAR",
@@ -77,20 +100,31 @@ const CartItems = () => {
 
 	const clearAll = () => {
 		Swal.fire({
-			html: ` 
-      <div>
-        <span style="color: black;  display: block; font-size: 1.5rem; margin-bottom: 0.5rem "> ¿ESTÁS SEGURO? </span>
-        <span style="color: black;  display: block">ESTA ACCIÓN VACIARÁ TODO EL CARRITO.</span>
-      </div>
-      `,
+			html: (
+				<div>
+					<span
+						style={{
+							color: "black",
+							display: "block",
+							fontSize: "1.5rem",
+							marginBottom: "0.5rem",
+						}}
+					>
+						¿ESTÁS SEGURO?
+					</span>
+					<span style={{ color: "black", display: "block" }}>
+						ESTA ACCIÓN VACIARÁ TODO EL CARRITO.
+					</span>
+				</div>
+			),
 			icon: "warning",
 			buttonsStyling: false,
 			showCancelButton: true,
 			iconColor: "#ff0000",
 			customClass: {
 				title: "font-antonio text-black",
-				confirmButton: " text-white bg-red-main p-3 font-antonio",
-				cancelButton: " text-white bg-black p-3 m-3 font-antonio",
+				confirmButton: "text-white bg-red-main p-3 font-antonio",
+				cancelButton: "text-white bg-black p-3 m-3 font-antonio",
 				container: "font-antonio",
 			},
 			confirmButtonText: "SÍ, VACIAR",
@@ -118,6 +152,19 @@ const CartItems = () => {
 		dispatch(addOneItem(index));
 	};
 
+	// Función para obtener la imagen predeterminada basada en la categoría
+	const getDefaultImage = (product) => {
+		if (product.category === "burgers") {
+			return box;
+		} else if (product.category === "papas") {
+			return fries;
+		} else if (product.category === "bebidas") {
+			return "/menu/coca.png";
+		} else {
+			return "/ruta/a/imagen/default.png";
+		}
+	};
+
 	return (
 		<div className="flex flex-col font-coolvetica">
 			<div className="flex justify-center flex-col mt-6 items-center">
@@ -127,19 +174,14 @@ const CartItems = () => {
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Agrega. Esto no es para tibios.</p>
 				<div className="flex flex-wrap gap-4 justify-center">
-					{Object.keys(items).map((key, index) => (
+					{allProducts.map((product, index) => (
 						<Items
-							key={index}
-							selectedItem={key}
-							img={
-								key === items.bebidas
-									? "/menu/coca.png"
-									: key === items.burgers
-									? box
-									: fries
-							}
-							name={items[key]}
+							key={product.id || index}
+							selectedItem={product}
+							img={product.img || getDefaultImage(product)}
+							name={product.name}
 							handleItemClick={() => {}}
+							isCart
 						/>
 					))}
 				</div>
@@ -149,7 +191,7 @@ const CartItems = () => {
 				<div>Mapa + form</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Metodo de pago</p>
+				<p className="text-2xl font-bold">Método de pago</p>
 				<div>Form</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
