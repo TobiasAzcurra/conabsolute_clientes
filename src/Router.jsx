@@ -42,7 +42,7 @@ const AppRouter = () => {
 		<div className="flex flex-col">
 			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
-				<div className="relative">
+				<div className="relative mb-[85px]">
 					<Carrusel />
 					<div className="top-[260px] inset-0 absolute">
 						<NavMenu />
