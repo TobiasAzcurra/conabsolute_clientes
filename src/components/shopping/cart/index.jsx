@@ -93,7 +93,7 @@ const CartItems = () => {
 				<div>Card del carrito</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6  items-start">
-				<p className="text-2xl font-bold mx-auto ">
+				<p className="text-2xl font-bold mx-auto mb-2">
 					Agrega. Esto no es para tibios.
 				</p>
 				<div className="flex flex-row gap-2 overflow-x-auto justify-center">
