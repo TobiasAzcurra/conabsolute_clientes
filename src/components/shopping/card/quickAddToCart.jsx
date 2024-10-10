@@ -36,13 +36,13 @@ const QuickAddToCart = ({ product }) => {
 			}
 			setIsAdding(false);
 			setIsEditing(false);
-		}, 5000000000);
+		}, 2000);
 	};
 
 	return (
-		<div className="bg-gray-100 rounded-lg font-black border border-black border-opacity-20 pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center">
+		<div className="  pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
 			{isEditing ? (
-				<div className="flex items-center flex-row w-[100px]  rounded-lg font-black border border-black border-opacity-20 bg-gray-100">
+				<div className="flex items-center absolute right-0 top-0 flex-row w-[100px]  rounded-lg font-black border border-black border-opacity-20 bg-gray-100">
 					<div
 						className=" text-black font-bold text-center items-center flex justify-center w-[35px] h-[35px]"
 						onClick={handleDecrement}
