@@ -10,10 +10,12 @@ import drinks from "./assets/drinks-v1.json";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
+import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 import { Pedido } from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import FloatingCart from "./components/shopping/FloatingCart";
 
 const burgersArray = Object.values(burgers);
@@ -97,13 +99,14 @@ const AppRouter = () => {
 
 				{/* Otras rutas */}
 				<Route path="/carrito" element={<CartItems />} />
+				<Route path="/order" element={<OrderForm />} />
 				<Route path="/pedido" element={<Pedido />} />
 				<Route path="/feedback" element={<Feedback />} />
 				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
 			</Routes>
 
-			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en la ruta raíz */}
-			{totalQuantity > 0 && pathname !== "/" && (
+			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en la ruta raíz ni en la ruta del carrito */}
+			{totalQuantity > 0 && pathname !== "/" && pathname !== "/carrito" && (
 				<FloatingCart totalQuantity={totalQuantity} cart={cart} />
 			)}
 		</div>
