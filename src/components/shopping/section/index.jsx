@@ -1,5 +1,4 @@
 import { items } from "../../../pages/menu/MenuPage";
-import MyTextChange from "../../text";
 import Card from "../card";
 
 const Section = ({ products = [], path }) => {

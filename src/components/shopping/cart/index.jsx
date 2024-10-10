@@ -8,9 +8,17 @@ import {
 } from "../../../redux/cart/cartSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import ArrowBack from "../../back";
 import Swal from "sweetalert2";
-import fire from "../../../assets/icon-fire.gif";
+import Items from "../../../pages/menu/Items";
+import box from "../../../assets/box.png";
+import fries from "../../../assets/fries.png";
+
+export const items = {
+	burgers: "burgers",
+	combos: "combos",
+	papas: "papas",
+	bebidas: "bebidas",
+};
 
 const CartItems = () => {
 	const { cart, total } = useSelector((state) => state.cartState);
@@ -25,7 +33,6 @@ const CartItems = () => {
         <span style="color: black;  display: block; font-size: 1.5rem; margin-bottom: 0.5rem "> ¿ESTÁS SEGURO? </span>
         <span style="color: black;  display: block">ESTA ACCIÓN ELIMINARÁ EL ELEMENTO DEL CARRITO.</span>
       </div>
-      
       `,
 			icon: "warning",
 			buttonsStyling: false,
@@ -53,7 +60,6 @@ const CartItems = () => {
         <span style="color: black;  display: block; font-size: 1.5rem; margin-bottom: 0.5rem "> ¿ESTÁS SEGURO? </span>
         <span style="color: black;  display: block">ESTA ACCIÓN VACIARÁ TODO EL CARRITO.</span>
       </div>
-      
       `,
 			icon: "warning",
 			buttonsStyling: false,
@@ -91,14 +97,30 @@ const CartItems = () => {
 	};
 
 	return (
-		<div className="flex flex-col  font-coolvetica">
+		<div className="flex flex-col font-coolvetica">
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Tu carrito</p>
 				<div>Card del carrito</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Agrega. Esto no es para tibios.</p>
-				<div>Card de extras</div>
+				<div className="flex flex-wrap gap-4 justify-center">
+					{Object.keys(items).map((key, index) => (
+						<Items
+							key={index}
+							selectedItem={key}
+							img={
+								key === items.bebidas
+									? "/menu/coca.png"
+									: key === items.burgers
+									? box
+									: fries
+							}
+							name={items[key]}
+							handleItemClick={() => {}}
+						/>
+					))}
+				</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Detalle de la entrega</p>
