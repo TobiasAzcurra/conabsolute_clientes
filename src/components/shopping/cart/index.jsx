@@ -8,12 +8,10 @@ import {
 } from "../../../redux/cart/cartSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import Swal from "sweetalert2";
 import Items from "../../../pages/menu/Items";
 import box from "../../../assets/box.png";
 import fries from "../../../assets/fries.png";
 import burgers from "../../../assets/burgers-v1.json";
-import combos from "../../../assets/combos.json";
 import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 
@@ -94,9 +92,11 @@ const CartItems = () => {
 				<p className="text-2xl font-bold">Tu carrito</p>
 				<div>Card del carrito</div>
 			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Agrega. Esto no es para tibios.</p>
-				<div className="flex flex-row gap-2 justify-center">
+			<div className="flex justify-center flex-col mt-6  items-start">
+				<p className="text-2xl font-bold mx-auto ">
+					Agrega. Esto no es para tibios.
+				</p>
+				<div className="flex flex-row gap-2 overflow-x-auto justify-center">
 					{allProducts.map((product, index) => (
 						<Items
 							key={product.id || index}
