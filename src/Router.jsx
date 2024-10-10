@@ -14,6 +14,10 @@ import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 import { Pedido } from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import currencyFormat from "./helpers/currencyFormat";
+import FloatingCart from "./components/shopping/FloatingCart";
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -23,6 +27,8 @@ const drinksArray = Object.values(drinks);
 const AppRouter = () => {
 	const { pathname } = useLocation();
 	const [pathLocation, setPathLocation] = useState("");
+	const cart = useSelector((state) => state.cartState.cart);
+	const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
 	useEffect(() => {
 		const pathParts = pathname.split("/");
@@ -100,8 +106,10 @@ const AppRouter = () => {
 				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
 			</Routes>
 
-			{/* Mostrar el Footer si no estamos en "menu" o en la raíz */}
-			{/* {pathLocation === "menu" || pathLocation === "NADA" ? null : <Footer />} */}
+			{/* Mostrar el carrito flotante si hay productos en el carrito */}
+			{totalQuantity > 0 && (
+				<FloatingCart totalQuantity={totalQuantity} cart={cart} />
+			)}
 		</div>
 	);
 };
