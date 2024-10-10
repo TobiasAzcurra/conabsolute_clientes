@@ -12,6 +12,24 @@ import Swal from "sweetalert2";
 import Items from "../../../pages/menu/Items";
 import box from "../../../assets/box.png";
 import fries from "../../../assets/fries.png";
+import burgers from "../../../assets/burgers-v1.json";
+import combos from "../../../assets/combos.json";
+import papas from "../../../assets/papas-v1.json";
+import drinks from "../../../assets/drinks-v1.json";
+
+// Convertir los objetos importados a arrays
+const burgersArray = Object.values(burgers);
+const combosArray = Object.values(combos);
+const papasArray = Object.values(papas);
+const drinksArray = Object.values(drinks);
+
+// Concatenar todos los productos en un solo array
+const allProducts = [
+	...burgersArray,
+	...combosArray,
+	...papasArray,
+	...drinksArray,
+];
 
 export const items = {
 	burgers: "burgers",
@@ -23,8 +41,12 @@ export const items = {
 const CartItems = () => {
 	const { cart, total } = useSelector((state) => state.cartState);
 	const navigate = useNavigate();
-
 	const dispatch = useDispatch();
+
+	// Hacer console.log de todos los productos disponibles
+	useEffect(() => {
+		console.log("Todos los productos disponibles:", allProducts);
+	}, []);
 
 	const deleteItem = (i) => {
 		Swal.fire({
