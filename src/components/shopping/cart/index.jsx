@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import ArrowBack from "../../back";
 import Swal from "sweetalert2";
 import fire from "../../../assets/icon-fire.gif";
+import OrderForm from "../../../pages/order";
 
 const CartItems = () => {
 	const { cart, total } = useSelector((state) => state.cartState);
@@ -139,7 +140,6 @@ const CartItems = () => {
 					</button>
 				</div>
 			</div>
-
 			<div className="mt-4">
 				{cart.length > 0 ? (
 					<div>
@@ -216,6 +216,7 @@ const CartItems = () => {
 					<p className="h-screen bg-red-main">Carrito Vacio</p>
 				)}
 			</div>
+			<OrderForm />
 		</div>
 	);
 };

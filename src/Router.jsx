@@ -97,7 +97,6 @@ const AppRouter = () => {
 
 				{/* Otras rutas */}
 				<Route path="/carrito" element={<CartItems />} />
-				<Route path="/order" element={<OrderForm />} />
 				<Route path="/pedido" element={<Pedido />} />
 				<Route path="/feedback" element={<Feedback />} />
 				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
