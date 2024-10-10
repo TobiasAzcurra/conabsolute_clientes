@@ -117,9 +117,7 @@ const QuickAddToCart = ({ product }) => {
 			) : (
 				<div
 					className={`${
-						cartQuantity > 0
-							? "bg-black border border-gray-100  border-opacity-100 text-gray-100"
-							: "bg-gray-100"
+						cartQuantity > 0 ? "bg-black border  text-gray-100" : "bg-gray-100"
 					} rounded-lg font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
