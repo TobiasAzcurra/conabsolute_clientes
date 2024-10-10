@@ -11,18 +11,19 @@ const Carrusel = () => {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-		}, 1000);
+		}, 100);
 
 		return () => clearInterval(interval);
 	}, [images.length]);
 
 	return (
-		<div className="w-full h-[300px] overflow-hidden">
+		<div className="w-full h-[300px] overflow-hidden relative">
 			<img
 				src={images[currentIndex]}
 				alt={`Carrusel ${currentIndex + 1}`}
 				className="object-cover w-full h-full"
 			/>
+			<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent"></div>
 		</div>
 	);
 };
