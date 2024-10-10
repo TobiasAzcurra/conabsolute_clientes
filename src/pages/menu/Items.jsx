@@ -8,7 +8,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 
 	return (
 		<Link
-			className={`flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 hover:shadow-lg p-1 transition duration-300 w-full max-w-[400px] text-black`}
+			className={`flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100  p-1 transition duration-300 w-full max-w-[400px] text-black`}
 			to={name === "PROMOCIONES" ? "/menu/burgers" : `/menu/${name}`}
 			onClick={() => handleItemClick(name)}
 		>

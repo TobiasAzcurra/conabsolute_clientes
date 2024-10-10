@@ -9,7 +9,7 @@ const Card = ({ name, description, price, img, path, id }) => {
 				onClick={(e) => {
 					if (img === "proximamente") e.preventDefault();
 				}}
-				className="flex items-center justify-center p-24 gap-4 shadow-md rounded-xl bg-gray-200 text-gray-700 min-w-full max-w-[400px] hover:shadow-lg transition duration-300"
+				className="flex items-center justify-center p-24 gap-4  rounded-xl bg-gray-200 text-gray-700 min-w-full max-w-[400px]  transition duration-300"
 			>
 				<div className="flex flex-col items-center justify-center leading-normal font-coolvetica">
 					<h5 className="mb-2 text-2xl font-bold tracking-tight uppercase">
@@ -26,7 +26,7 @@ const Card = ({ name, description, price, img, path, id }) => {
 	return (
 		<Link
 			to={`/menu/${path}/${id}`}
-			className="flex  flex-col items-center border border-black border-1 border-opacity-20 rounded-xl bg-gray-100 hover:shadow-lg transition duration-300  w-full max-w-[400px] text-black"
+			className="flex  flex-col items-center border border-black border-1 border-opacity-20 rounded-xl bg-gray-100  transition duration-300  w-full max-w-[400px] text-black"
 		>
 			<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-300 relative to-red-400">
 				<div className="bg-gray-100 rounded-lg font-black border border-black border-1  border-opacity-20 pt-0.5 right-2 top-2 w-[35px] h-[35px] text-center  absolute">
