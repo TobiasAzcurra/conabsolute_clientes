@@ -96,6 +96,14 @@ const CartItems = () => {
 				<p className="text-2xl font-bold">Tu carrito</p>
 				<div>Card del carrito</div>
 			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Agrega. Esto no es para tibios.</p>
+				<div>Card de extras</div>
+			</div>
+			<div className="flex justify-center flex-col mt-6 items-center">
+				<p className="text-2xl font-bold">Detalle de la entrega</p>
+				<div>Mapa + form</div>
+			</div>
 		</div>
 	);
 };
