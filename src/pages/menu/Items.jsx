@@ -12,16 +12,11 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 			to={name === "PROMOCIONES" ? "/menu/burgers" : `/menu/${name}`}
 			onClick={() => handleItemClick(name)}
 		>
-			<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-300 to-red-400 relative">
-				<img
-					className="object-cover w-full h-full"
-					src={img}
-					alt={name}
-					style={{ objectPosition: "center" }}
-				/>
+			<div className="h-[70px] w-full rounded-t-xl overflow-hidden bg-gradient-to-b from-gray-300 to-red-400 relative flex  justify-center">
+				<img className="object-cover " src={img} alt={name} />
 			</div>
 			<div className="flex px-4 flex-col items-center justify-between leading-normal font-coolvetica text-center">
-				<h5 className="mb-1 mt-4 text-2xl font-bold tracking-tight">
+				<h5 className="mb-1 mt-4 text-xs font-medium tracking-tight">
 					{capitalizeWords(name)}
 				</h5>
 			</div>
