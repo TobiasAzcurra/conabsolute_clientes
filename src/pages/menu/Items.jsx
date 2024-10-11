@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
 
 const Items = ({ selectedItem, img, name, handleItemClick }) => {
 	// Importamos useLocation para obtener la ruta actual
@@ -33,10 +34,21 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 					alt={name}
 				/>
 			</div>
-			<div className="h-[50px] font-coolvetica text-center">
+			<div
+				className={` font-coolvetica text-center ${
+					isCarrito
+						? "flex flex-col items-center justify-between h-[90px]"
+						: "h-[50px]"
+				}`}
+			>
 				<h5 className="mt-1 text-xs font-medium tracking-tight">
 					{capitalizeWords(name)}
 				</h5>
+				{isCarrito && selectedItem && (
+					<div className=" pb-1">
+						<QuickAddToCart product={selectedItem} />
+					</div>
+				)}
 			</div>
 		</>
 	);
