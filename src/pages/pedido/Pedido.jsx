@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ReadOrdersForTodayByPhone } from "../../firebase/getPedido";
 import { CardPedido } from "./CardPedido";
 import logo from "../../assets/anheloTMblack.png";
+import arrow from "../../assets/arrowIcon.png";
 
 export const Pedido = () => {
 	const [phoneNumber, setPhoneNumber] = useState("");
@@ -21,7 +22,7 @@ export const Pedido = () => {
 	};
 
 	return (
-		<>
+		<div>
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
@@ -49,7 +50,11 @@ export const Pedido = () => {
         `}
 			</style>
 
-			<div className="bg-gray-100 flex flex-col items-center h-screen justify-center">
+			<div className="bg-gray-100 relative flex flex-col items-center h-screen justify-center">
+				<div className="absolute top-2 left-4 flex flex-row items-center gap-2">
+					<img src={arrow} className="h-2 rotate-180" alt="" />
+					<p className="font-coolvetica font-bold">Volver</p>
+				</div>
 				<div className="flex items-center flex-col">
 					<img src={logo} className="w-1/2" alt="Logo" />
 					<p className="text-black font-coolvetica font-bold mt-[-3px]">
@@ -86,7 +91,7 @@ export const Pedido = () => {
 					</p>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 };
 
