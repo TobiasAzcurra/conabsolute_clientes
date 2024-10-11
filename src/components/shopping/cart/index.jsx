@@ -188,7 +188,6 @@ const CartItems = () => {
 								Tu numero de telefono
 							</p>
 						</div>
-						<img src={arrow} className="h-2" alt="" />
 					</div>
 					<div className="flex flex-row gap-2 pl-3 h-10 items-center">
 						<svg
