@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import carrusel1 from "../assets/carrusel1.jpg";
 import carrusel2 from "../assets/carrusel2.jpg";
 import carrusel3 from "../assets/carrusel3.jpg";
@@ -7,6 +8,7 @@ import carrusel4 from "../assets/carrusel4.jpg";
 const Carrusel = () => {
 	const images = [carrusel1, carrusel2, carrusel3, carrusel4];
 	const [currentIndex, setCurrentIndex] = useState(0);
+	const location = useLocation();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -16,6 +18,11 @@ const Carrusel = () => {
 		return () => clearInterval(interval);
 	}, [images.length]);
 
+	const gradientClass =
+		location.pathname === "/carrito"
+			? "bg-gradient-to-b from-black to-transparent"
+			: "bg-gradient-to-t from-black to-transparent";
+
 	return (
 		<div className="w-full h-[300px] overflow-hidden relative">
 			<img
@@ -23,7 +30,9 @@ const Carrusel = () => {
 				alt={`Carrusel ${currentIndex + 1}`}
 				className="object-cover w-full h-full"
 			/>
-			<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent"></div>
+			<div
+				className={`absolute top-0 left-0 right-0 h-1/3 ${gradientClass}`}
+			></div>
 		</div>
 	);
 };

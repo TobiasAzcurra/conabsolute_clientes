@@ -17,6 +17,7 @@ import drinks from "../../../assets/drinks-v1.json";
 import CartCard from "./CartCard";
 import arrow from "../../../assets/arrowIcon.png";
 import Carrusel from "../../Carrusel";
+import logo from "../../../assets/anheloTMwhite.png";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -213,7 +214,12 @@ const CartItems = () => {
 			<p className="text-2xl text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold">
 				Pedir
 			</p>
-			<div className="flex justify-center flex-col mt-6 items-center">
+			<div className="flex justify-center flex-col mt-6 items-center relative">
+				<p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-2xl font-bold">
+					Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
+				</p>
+				<img src={logo} className="absolute top-30 h-10 right-4 z-50" alt="" />
+
 				<Carrusel />
 			</div>
 			<style>
