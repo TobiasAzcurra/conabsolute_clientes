@@ -97,7 +97,7 @@ const CartItems = () => {
 					Agrega. Esto no es para tibios.
 				</p>
 				<div
-					className="flex gap-2 overflow-x-auto overflow-y-hidden ml-4 custom-scrollbar"
+					className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
 					style={{
 						maxHeight: "300px", // Ajusta este valor según el espacio que necesites
 						paddingBottom: "1rem",
