@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ReadOrdersForTodayByPhone } from "../../firebase/getPedido";
 import { CardPedido } from "./CardPedido";
+import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import logo from "../../assets/anheloTMblack.png";
 import arrow from "../../assets/arrowIcon.png";
 
@@ -8,6 +9,7 @@ export const Pedido = () => {
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const [orders, setOrders] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const navigate = useNavigate(); // Inicializar useNavigate
 
 	const handlePhoneNumberChange = (event) => {
 		setPhoneNumber(event.target.value);
@@ -19,6 +21,10 @@ export const Pedido = () => {
 			setOrders(pedidos);
 			setLoading(false);
 		});
+	};
+
+	const handleGoBack = () => {
+		navigate("/"); // Navegar a la página principal
 	};
 
 	return (
@@ -51,7 +57,10 @@ export const Pedido = () => {
 			</style>
 
 			<div className="bg-gray-100 relative flex flex-col items-center h-screen justify-center">
-				<div className="absolute top-2 left-4 flex flex-row items-center gap-2">
+				<div
+					className="absolute top-2 left-4 flex flex-row items-center gap-2 cursor-pointer"
+					onClick={handleGoBack}
+				>
 					<img src={arrow} className="h-2 rotate-180" alt="" />
 					<p className="font-coolvetica font-bold">Volver</p>
 				</div>

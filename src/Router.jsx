@@ -51,13 +51,29 @@ const AppRouter = () => {
 			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
+					<div className="flex justify-center">
+						<p className="bg-gray-100 border border-black border-opacity-20 shadow-black  w-5/6 h-10 flex items-center justify-center absolute z-50 top-2 font-coolvetica rounded-lg">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+								className="ml-[-10px] mr-[10px] h-6"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+							Busca tu pedido con tu numero de cel:
+						</p>
+					</div>
 					<Carrusel />
 					<div className="top-[215px] inset-0 absolute">
 						<NavMenu />
 					</div>
 				</div>
 			)}
-
 			<Routes>
 				{/* Mostrar `RouterMenu` solo en la ruta raíz */}
 				<Route path="/" element={<RouterMenu />} />
