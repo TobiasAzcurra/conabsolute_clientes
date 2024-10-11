@@ -30,7 +30,12 @@ const Carrusel = () => {
 				}`}
 			/>
 			{!isCarritoPage && (
-				<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent"></div>
+				<>
+					{/* Fade desde abajo */}
+					<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent opacity-50"></div>
+					{/* Fade desde arriba */}
+					<div className="absolute opacity-50 top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent"></div>
+				</>
 			)}
 		</div>
 	);
