@@ -91,7 +91,7 @@ const CartItems = () => {
 		<div className="flex flex-col font-coolvetica">
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Tu carrito</p>
-				<div className="flex flex-col gap-2">
+				<div className="flex flex-col gap-2 w-full px-4">
 					{cart.map((item, index) => (
 						<CartCard
 							key={item.id || index}
