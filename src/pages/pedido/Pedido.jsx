@@ -44,7 +44,7 @@ export const Pedido = () => {
               #000 100%
             );
             background-size: 400% 100%;
-            animation: loadingBar 2s linear infinite;
+            animation: loadingBar 5s linear infinite;
           }
         `}
 			</style>
@@ -60,8 +60,8 @@ export const Pedido = () => {
 					{/* Línea horizontal con animación */}
 					<div className="w-full flex flex-row gap-2">
 						<div className="w-1/4 h-3.5 bg-black animated-loading"></div>
-						<div className="w-1/4 h-3.5 bg-gray-100 border-black border-1 border"></div>
-						<div className="w-1/2 h-3.5 bg-gray-100 border-black border-1 border"></div>
+						<div className="w-1/4 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+						<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
 					</div>
 					<p className="text-black font-coolvetica font-bold mt-2">
 						Anhelo está preparando tu pedido...
