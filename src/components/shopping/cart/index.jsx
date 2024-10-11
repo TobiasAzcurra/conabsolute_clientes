@@ -44,11 +44,6 @@ const CartItems = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	// Hacer console.log de todos los productos disponibles
-	useEffect(() => {
-		console.log("Todos los productos disponibles:", allProducts);
-	}, []);
-
 	const deleteItem = (i) => {
 		// ... código de Swal.fire para eliminar ítems
 	};
