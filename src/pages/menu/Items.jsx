@@ -37,7 +37,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 			<div
 				className={` font-coolvetica text-center ${
 					isCarrito
-						? "flex flex-col items-center justify-between h-[90px]"
+						? "flex flex-col items-center justify-between h-[93px]"
 						: "h-[50px]"
 				}`}
 			>
