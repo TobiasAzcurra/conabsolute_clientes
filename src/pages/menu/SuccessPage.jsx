@@ -142,7 +142,7 @@ const SuccessPage = () => {
 
 					{/* Mensaje de éxito con animación */}
 					<h2 className="text-gray-100 font-coolvetica text-2xl font-medium text-animation">
-						Que lo disfrutes
+						¡Que lo disfrutes!
 					</h2>
 				</div>
 			</div>
