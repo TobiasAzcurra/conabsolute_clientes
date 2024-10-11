@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // Reimportar useNavigate
+import { useLocation } from "react-router-dom"; // Eliminamos useNavigate ya que no se usa
 import logo from "../../assets/anheloTMwhite.png";
 
 export const items = {
@@ -11,7 +11,6 @@ export const items = {
 
 const SuccessPage = () => {
 	const { pathname } = useLocation();
-	const navigate = useNavigate(); // Inicializar useNavigate
 
 	const [selectedItem, setSelectedItem] = useState("");
 	const [locationMenu, setLocationMenu] = useState(true);
@@ -30,48 +29,44 @@ const SuccessPage = () => {
 		setLocationMenu(pathname.startsWith("/menu/"));
 	}, [pathname, selectedItem]);
 
-	// Añadir useEffect para redirección después de 2 segundos
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			navigate("/pedido"); // Redirigir a /pedido
-		}, 2000); // 2000 milisegundos = 2 segundos
-
-		// Limpiar el temporizador al desmontar el componente
-		return () => clearTimeout(timer);
-	}, [navigate]);
-
 	return (
 		<>
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-          @keyframes fadeInScale {
-            0% {
-              opacity: 0;
-              transform: scale(0.5);
+          @keyframes drawCircle {
+            from {
+              stroke-dashoffset: 157; /* Circunferencia de un círculo con r=25: 2 * π * 25 ≈ 157 */
             }
-            70% {
-              opacity: 0.7;
-              transform: scale(1.05);
-            }
-            100% {
-              opacity: 1;
-              transform: scale(1);
+            to {
+              stroke-dashoffset: 0;
             }
           }
 
-          @keyframes fadeInUpCustom {
-            0% {
-              opacity: 0;
-              transform: translateY(20px);
+          @keyframes drawCheck {
+            from {
+              stroke-dashoffset: 50; /* Longitud aproximada del check */
             }
-            100% {
-              opacity: 1;
-              transform: translateY(0);
+            to {
+              stroke-dashoffset: 0;
             }
           }
 
-          /* Animación que se repite infinitamente */
+          @keyframes drawIcon {
+            0% {
+              stroke-dashoffset: 157;
+            }
+            50% {
+              stroke-dashoffset: 157;
+            }
+            60% {
+              stroke-dashoffset: 107; /* 157 - 50 */
+            }
+            100% {
+              stroke-dashoffset: 0;
+            }
+          }
+
           @keyframes pulse {
             0% {
               transform: scale(1);
@@ -87,8 +82,21 @@ const SuccessPage = () => {
             }
           }
 
+          .circle-animation {
+            stroke-dasharray: 157;
+            stroke-dashoffset: 157;
+            animation: drawCircle 2s ease-out infinite;
+          }
+
+          .check-animation {
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: drawCheck 1s ease-out infinite;
+            animation-delay: 1s; /* Inicia después de que el círculo empiece */
+          }
+
           .success-icon {
-            animation: pulse 1.5s infinite;
+            animation: pulse 2s infinite;
           }
 
           .logo-animation {
@@ -100,33 +108,42 @@ const SuccessPage = () => {
             animation: fadeInUpCustom 1s ease-out forwards;
             animation-delay: 1s;
           }
+
+          @keyframes fadeInUpCustom {
+            0% {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
         `}
 			</style>
 
 			<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
 				<div className="text-center">
-					{/* Ícono de éxito con animación */}
+					{/* Ícono de éxito con animaciones de dibujo en bucle */}
 					<svg
 						className="success-icon mb-4 w-16 h-16 mx-auto text-gray-100"
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 52 52"
 						aria-label="Operación exitosa"
 					>
-						<circle
-							cx="26"
-							cy="26"
-							r="25"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-						/>
 						<path
+							className="check-animation"
 							fill="none"
 							stroke="currentColor"
 							strokeWidth="5"
 							d="M14 27 L22 35 L38 19"
 						/>
 					</svg>
+
+					{/* Mensaje de éxito con animación */}
+					<h2 className="text-gray-100 font-coolvetica text-2xl font-medium text-animation">
+						¡Que lo disfrutes!
+					</h2>
 				</div>
 			</div>
 		</>
