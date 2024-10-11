@@ -17,6 +17,7 @@ import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import FloatingCart from "./components/shopping/FloatingCart";
+import SuccessPage from "./pages/menu/SuccessPage";
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -100,6 +101,7 @@ const AppRouter = () => {
 				{/* Otras rutas */}
 				<Route path="/carrito" element={<CartItems />} />
 				<Route path="/order" element={<OrderForm />} />
+				<Route path="/success" element={<SuccessPage />} />
 				<Route path="/pedido" element={<Pedido />} />
 				<Route path="/feedback" element={<Feedback />} />
 				<Route
