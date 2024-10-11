@@ -115,7 +115,7 @@ export const Pedido = () => {
 				<img src={logo} className="w-1/2" alt="Logo" />
 				<p className="text-black font-coolvetica font-bold mt-[-3px]">RIDERS</p>
 			</div>
-			<div className="flex items-center flex-col w-full px-4 mt-4">
+			<div className="flex items-center flex-col w-full px-4 mt-8">
 				{/* Línea horizontal */}
 				<div className="w-full flex flex-row gap-2">
 					<div className="w-1/4 h-3.5 bg-black"></div>
