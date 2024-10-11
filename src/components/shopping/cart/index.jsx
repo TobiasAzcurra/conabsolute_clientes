@@ -166,7 +166,7 @@ const CartItems = () => {
 							<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
 						</svg>
 
-						<p>Efectivo</p>
+						<p className=" text-opacity-20 text-black">Efectivo</p>
 					</div>
 					<div className="flex flex-row gap-2 pl-4 h-10 items-center">
 						<svg
@@ -184,7 +184,7 @@ const CartItems = () => {
 							<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
 						</svg>
 
-						<p>Efectivo</p>
+						<p className=" text-opacity-20 text-black">Efectivo</p>
 					</div>
 				</div>
 			</div>
