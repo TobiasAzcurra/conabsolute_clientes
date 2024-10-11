@@ -97,27 +97,37 @@ const CartItems = () => {
 					Agrega. Esto no es para tibios.
 				</p>
 				<div
-					className="flex gap-2 overflow-x-auto overflow-y-hidden justify-center w-full custom-scrollbar"
+					className="flex gap-2 overflow-x-auto overflow-y-hidden ml-4 custom-scrollbar"
 					style={{
 						maxHeight: "300px", // Ajusta este valor según el espacio que necesites
-						maxWidth: "100%",
 						paddingBottom: "1rem",
 						scrollBehavior: "smooth",
 						WebkitOverflowScrolling: "touch",
+						width: "100%",
 					}}
 				>
-					{allProducts.map((product, index) => (
-						<Items
-							key={product.id || index}
-							selectedItem={product}
-							img={
-								product.img ? `/menu/${product.img}` : getDefaultImage(product)
-							}
-							name={product.name}
-							handleItemClick={() => {}}
-							isCart
-						/>
-					))}
+					<div
+						className="flex gap-2"
+						style={{
+							display: "flex",
+							width: "max-content",
+						}}
+					>
+						{allProducts.map((product, index) => (
+							<Items
+								key={product.id || index}
+								selectedItem={product}
+								img={
+									product.img
+										? `/menu/${product.img}`
+										: getDefaultImage(product)
+								}
+								name={product.name}
+								handleItemClick={() => {}}
+								isCart
+							/>
+						))}
+					</div>
 				</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
