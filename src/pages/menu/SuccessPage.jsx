@@ -126,7 +126,7 @@ const SuccessPage = () => {
 				<div className="text-center">
 					{/* Ícono de éxito con animaciones de dibujo en bucle */}
 					<svg
-						className="success-icon mb-4 w-16 h-16 mx-auto text-gray-100"
+						className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 52 52"
 						aria-label="Operación exitosa"
