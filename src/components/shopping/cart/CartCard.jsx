@@ -20,9 +20,9 @@ const CartCard = ({
 			/>
 			<div className="flex flex-col justify-between py-2">
 				<div>
-					<h3 className="text-2xl font-bold ">{name}</h3>
-					<p className="text-xs">Sin aclaraciones</p>
-					<p className="text-xs">Presiona para editar</p>
+					<h3 className="text-2xl font-bold mb-1">{name}</h3>
+					<p className="text-xs font-medium">Sin aclaraciones</p>
+					<p className="text-xs font-medium">Presiona para editar</p>
 				</div>
 				<div>
 					<p className="text-2xl font-bold">{currencyFormat(price)}</p>
