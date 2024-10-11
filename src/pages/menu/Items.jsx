@@ -45,7 +45,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 					{capitalizeWords(name)}
 				</h5>
 				{isCarrito && selectedItem && (
-					<div className=" pb-1">
+					<div className=" pb-3">
 						<QuickAddToCart product={selectedItem} />
 					</div>
 				)}
