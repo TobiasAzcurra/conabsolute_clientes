@@ -52,7 +52,7 @@ const AppRouter = () => {
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center">
-						<p className="bg-gray-100 border border-black border-opacity-20 shadow-black  w-5/6 h-10 flex items-center justify-center absolute z-50 top-2 font-coolvetica rounded-lg">
+						<p className="bg-gray-100 border  border-black border-opacity-20 shadow-black  w-5/6 h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-lg">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
