@@ -12,7 +12,7 @@ const CartCard = ({
 	const { name, price, quantity, category, img } = item;
 
 	return (
-		<div className="flex items-center bg-white shadow-md rounded-lg p-4  w-full max-w-md">
+		<div className="flex flex-row border border-black border-opacity-20 rounded-xl">
 			<img
 				src={img ? `/menu/${img}` : getDefaultImage(item)}
 				alt={name}

@@ -91,17 +91,19 @@ const CartItems = () => {
 		<div className="flex flex-col font-coolvetica">
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Tu carrito</p>
-				{cart.map((item, index) => (
-					<CartCard
-						key={item.id || index}
-						item={item}
-						index={index}
-						getDefaultImage={getDefaultImage}
-						decrementQuantity={decrementQuantity}
-						incrementQuantity={incrementQuantity}
-						deleteItem={deleteItem}
-					/>
-				))}
+				<div className="flex flex-col gap-2">
+					{cart.map((item, index) => (
+						<CartCard
+							key={item.id || index}
+							item={item}
+							index={index}
+							getDefaultImage={getDefaultImage}
+							decrementQuantity={decrementQuantity}
+							incrementQuantity={incrementQuantity}
+							deleteItem={deleteItem}
+						/>
+					))}
+				</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-start">
 				<p className="text-2xl font-bold mx-auto mb-2">
