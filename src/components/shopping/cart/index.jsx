@@ -170,11 +170,9 @@ const CartItems = () => {
 					<p className="font-bold">{currencyFormat(total + 2000 - 900)}</p>
 				</div>
 			</div>
-			<div className="">
-				<p className="text-2xl text-center flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold">
-					Pedir
-				</p>
-			</div>
+			<p className="text-2xl text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold">
+				Pedir
+			</p>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Imagen</p>
 			</div>
