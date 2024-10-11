@@ -46,7 +46,7 @@ export const MapDirection = ({
 			text: "La ubicación ha sido validada con éxito.",
 			icon: "success",
 			confirmButtonText: "OK",
-			timer: 1200, // Tiempo en milisegundos (3000 ms = 3 segundos)
+			timer: 1200, // Tiempo en milisegundos (1200 ms = 1.2 segundos)
 			timerProgressBar: true, // Muestra una barra de progreso para el temporizador
 			didOpen: (toast) => {
 				toast.addEventListener("mouseenter", Swal.stopTimer);
@@ -61,14 +61,14 @@ export const MapDirection = ({
 			solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
 		>
 			<div
-				className="w-full rounded-t-xl md:w-6/12"
+				className="w-full md:w-6/12 rounded-t-xl overflow-hidden"
 				style={{
 					height: "15vh",
 				}}
 			>
 				{/* <div className="autocomplete-control w-full">
-					<PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
-				</div> */}
+                    <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
+                </div> */}
 				<Map
 					style={{
 						height: "100%",
@@ -93,12 +93,12 @@ export const MapDirection = ({
 				/>
 			</div>
 			{/* <button
-				className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-antonio p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
-				onClick={() => setNoEncontre(true)}
-				type="button"
-			>
-				¿No encontras tu direccion?
-			</button> */}
+                className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-antonio p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
+                onClick={() => setNoEncontre(true)}
+                type="button"
+            >
+                ¿No encontras tu direccion?
+            </button> */}
 		</APIProvider>
 	);
 };
@@ -126,10 +126,10 @@ const MapHandler = ({ place, marker, setPlace }) => {
 			}));
 		};
 
-		// Use Google Maps event listener directly
+		// Usa directamente el listener de eventos de Google Maps
 		google.maps.event.addListener(marker, "dragend", handleDragEnd);
 
-		// Cleanup function to remove the listener when the component unmounts
+		// Función de limpieza para remover el listener cuando el componente se desmonta
 		return () => {
 			google.maps.event.clearListeners(marker, "dragend");
 		};
@@ -146,7 +146,7 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
 	useEffect(() => {
 		if (!places || !inputRef.current) return;
 
-		// Create a bounding box with sides ~20km away from the center point
+		// Crea un bounding box con lados ~20km alejados del punto central
 		const defaultBounds = {
 			north: position.lat + 0.2,
 			south: position.lat - 0.2,
@@ -170,14 +170,15 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
 		});
 	}, [onPlaceSelect, placeAutocomplete]);
 
+	// Descomentar y ajustar el input según sea necesario
 	// return (
-	// 	<div style={{ width: "100%" }}>
-	// 		<input
-	// 			className="font-antonio focus:border-none focus:outline-none bg-gray-300 text-xs p-2 mb-[-23px] text-black ml-[-23px]"
-	// 			ref={inputRef}
-	// 			placeholder="ESCRIBI TU DIRECCION"
-	// 			style={{ width: "100%", boxSizing: "border-box" }}
-	// 		/>
-	// 	</div>
+	//     <div style={{ width: "100%" }}>
+	//         <input
+	//             className="font-antonio focus:border-none focus:outline-none bg-gray-300 text-xs p-2 mb-[-23px] text-black ml-[-23px]"
+	//             ref={inputRef}
+	//             placeholder="ESCRIBI TU DIRECCION"
+	//             style={{ width: "100%", boxSizing: "border-box" }}
+	//         />
+	//     </div>
 	// );
 };
