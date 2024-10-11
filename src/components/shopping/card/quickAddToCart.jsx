@@ -96,7 +96,7 @@ const QuickAddToCart = ({ product }) => {
 					initial={{ width: 35 }}
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
-					className="flex items-center absolute right-0 top-0 flex-row rounded-lg font-black border border-black border-opacity-20 bg-gray-100"
+					className="flex items-center absolute right-0 top-0 flex-row rounded-lg font-black  border-black border-2 bg-gray-100"
 				>
 					<div
 						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
