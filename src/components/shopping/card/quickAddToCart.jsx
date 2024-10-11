@@ -6,6 +6,7 @@ import {
 } from "../../../redux/cart/cartSlice";
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
 const QuickAddToCart = ({ product }) => {
 	const dispatch = useDispatch();
@@ -14,6 +15,7 @@ const QuickAddToCart = ({ product }) => {
 	const [isAdding, setIsAdding] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const quantityRef = useRef(quantity);
+	const location = useLocation();
 
 	const cartItem = cart.find((item) => item.name === product.name);
 	const cartQuantity = cartItem ? cartItem.quantity : 0;
@@ -89,6 +91,8 @@ const QuickAddToCart = ({ product }) => {
 		}, 2000);
 	};
 
+	const isCarritoPage = location.pathname === "/carrito";
+
 	return (
 		<div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
 			{isEditing ? (
@@ -96,7 +100,9 @@ const QuickAddToCart = ({ product }) => {
 					initial={{ width: 35 }}
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
-					className="flex items-center absolute right-0 top-0 flex-row rounded-lg font-black  border-black border-2 bg-gray-100"
+					className={`flex items-center absolute ${
+						isCarritoPage ? "left-0" : "right-0"
+					} top-0 flex-row rounded-lg font-black border-black border-2 bg-gray-100`}
 				>
 					<div
 						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
@@ -104,11 +110,11 @@ const QuickAddToCart = ({ product }) => {
 					>
 						-
 					</div>
-					<span className="font-coolvetica  font-black text-center items-center flex justify-center w-[35px] h-[35px]">
+					<span className="font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px]">
 						{quantity}
 					</span>
 					<div
-						className="text-black  font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
 						onClick={handleIncrement}
 					>
 						+
@@ -117,7 +123,7 @@ const QuickAddToCart = ({ product }) => {
 			) : (
 				<div
 					className={`${
-						cartQuantity > 0 ? "bg-black border  text-gray-100" : "bg-gray-100"
+						cartQuantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
 					} rounded-lg font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
