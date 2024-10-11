@@ -18,26 +18,14 @@ const CartCard = ({
 				alt={name}
 				className="w-16 h-16 object-cover rounded"
 			/>
-			<div className="flex flex-col">
-				<div className="ml-4 flex-1">
-					<h3 className="text-lg font-semibold">{name}</h3>
-					<p className="text-gray-600">{currencyFormat(price)}</p>
-					<p className="text-gray-500 capitalize">{category}</p>
+			<div className="flex flex-col justify-between py-2">
+				<div>
+					<h3 className="text-2xl font-bold ">{name}</h3>
+					<p className="text-xs">Sin aclaraciones</p>
+					<p className="text-xs">Presiona para editar</p>
 				</div>
-				<div className="flex items-center">
-					<button
-						onClick={() => decrementQuantity(index, quantity)}
-						className="px-2 py-1 bg-gray-200 rounded"
-					>
-						-
-					</button>
-					<span className="mx-2">{quantity}</span>
-					<button
-						onClick={() => incrementQuantity(index)}
-						className="px-2 py-1 bg-gray-200 rounded"
-					>
-						+
-					</button>
+				<div>
+					<p className="text-2xl font-bold">{currencyFormat(price)}</p>
 				</div>
 			</div>
 		</div>
