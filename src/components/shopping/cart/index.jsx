@@ -147,7 +147,7 @@ const CartItems = () => {
 				</div>
 			</div>
 			<div className="flex justify-center flex-col mt-3.5 items-center px-4">
-				<p className="text-2xl font-bold mb-2">Detalle de la entrega</p>
+				<p className="text-2xl font-bold mb-2">Datos para la entrega</p>
 				<div className="w-full items-center    rounded-xl border-2 border-black ">
 					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
 						<div className="flex flex-row gap-2">
