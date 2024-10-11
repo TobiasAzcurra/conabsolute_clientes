@@ -59,6 +59,11 @@ const CartItems = () => {
 		}
 	}, [cart]);
 
+	// Agregar console.log para mostrar el carrito completo
+	useEffect(() => {
+		console.log("Current cart state:", cart);
+	}, [cart]);
+
 	const decrementQuantity = (index, quantity) => {
 		if (quantity > 1) {
 			dispatch(removeOneItem(index));
@@ -95,7 +100,7 @@ const CartItems = () => {
 				<div
 					className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
 					style={{
-						maxHeight: "300px", // Ajusta este valor según el espacio que necesites
+						maxHeight: "300px",
 						paddingBottom: "1rem",
 						scrollBehavior: "smooth",
 						WebkitOverflowScrolling: "touch",
