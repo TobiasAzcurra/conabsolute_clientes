@@ -24,7 +24,7 @@ const CartCard = ({
 
 			<div className="flex flex-col w-2/3 justify-between px-4 pt-2 pb-4">
 				<div>
-					<h3 className="text-2xl font-bold mb-1 leading-6">{name}</h3>
+					<h3 className="text-2xl font-bold mb-1.5 leading-6">{name}</h3>
 					<p className="text-xs font-medium">Sin aclaraciones</p>
 					<p className="text-xs font-medium">Presiona para editar</p>
 				</div>
