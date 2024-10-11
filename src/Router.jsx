@@ -102,7 +102,14 @@ const AppRouter = () => {
 				<Route path="/order" element={<OrderForm />} />
 				<Route path="/pedido" element={<Pedido />} />
 				<Route path="/feedback" element={<Feedback />} />
-				<Route path="*" element={<h4>Esta pagina no existe</h4>} />
+				<Route
+					path="*"
+					element={
+						<p className="font-bold text-xs text-center mt-8">
+							¿Te perdiste? Esta no te la esperabas.
+						</p>
+					}
+				/>
 			</Routes>
 
 			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en la ruta raíz ni en la ruta del carrito */}
