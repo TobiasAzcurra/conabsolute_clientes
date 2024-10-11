@@ -105,9 +105,14 @@ const AppRouter = () => {
 				<Route
 					path="*"
 					element={
-						<p className="font-bold text-xs text-center mt-8">
-							¿Te perdiste? Esta no te la esperabas.
-						</p>
+						<div className="flex flex-col">
+							<p className="font-bold text-xs text-center mt-8">
+								¿Te perdiste? Esta no te la esperabas,
+							</p>
+							<p className="font-bold text-xs text-center">
+								elegi arriba alguna burger.
+							</p>
+						</div>
 					}
 				/>
 			</Routes>
