@@ -18,6 +18,7 @@ import CartCard from "./CartCard";
 import arrow from "../../../assets/arrowIcon.png";
 import Carrusel from "../../Carrusel";
 import logo from "../../../assets/anheloTMwhite.png";
+import { MapDirection } from "../../form/MapDirection";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -149,6 +150,7 @@ const CartItems = () => {
 			<div className="flex justify-center flex-col mt-3.5 items-center px-4">
 				<p className="text-2xl font-bold mb-2">Datos para la entrega</p>
 				<div className="w-full items-center    rounded-xl border-2 border-black ">
+					<MapDirection />
 					<div className="flex flex-row justify-between px-3 h-10 items-center border-t border-black border-opacity-20">
 						<div className="flex flex-row gap-2">
 							<svg
