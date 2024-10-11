@@ -148,7 +148,7 @@ const CartItems = () => {
 				<div>Mapa + form</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center px-4">
-				<p className="text-2xl font-bold">Metodo de pago</p>
+				<p className="text-2xl font-bold mb-2">Metodo de pago</p>
 				<div className="w-full items-center    rounded-xl border-2 border-black ">
 					<div className="flex flex-row gap-2 pl-4 h-10 items-center border border-black border-opacity-20">
 						<svg
