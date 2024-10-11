@@ -13,13 +13,15 @@ const CartCard = ({
 	const { name, price, quantity, category, img } = item;
 
 	return (
-		<div className="flex flex-row border w-full  border-black border-opacity-20 rounded-xl">
-			<img
-				src={img ? `/menu/${img}` : getDefaultImage(item)}
-				alt={name}
-				className="w-16 h-16 object-cover rounded"
-			/>
-			<div className="flex flex-col justify-between gap-5 pt-2 pb-4">
+		<div className="flex flex-row border w-full h-[200px] border-black border-opacity-20 rounded-xl">
+			<div className="w-1/3">
+				<img
+					src={img ? `/menu/${img}` : getDefaultImage(item)}
+					alt={name}
+					className="h-full  object-cover rounded"
+				/>
+			</div>
+			<div className="flex flex-col justify-between pt-2 pb-4">
 				<div>
 					<h3 className="text-2xl font-bold mb-1">{name}</h3>
 					<p className="text-xs font-medium">Sin aclaraciones</p>
