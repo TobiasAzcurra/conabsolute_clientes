@@ -125,7 +125,7 @@ const CartItems = () => {
 					</div>
 				</div>
 			</div>
-			<div className="flex justify-center flex-col mt-6 items-center">
+			<div className="flex justify-center flex-col mt-3.5 items-center">
 				<p className="text-2xl font-bold">Detalle de la entrega</p>
 				<div>Mapa + form</div>
 			</div>
