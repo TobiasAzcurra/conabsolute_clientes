@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Reimportar useNavigate
 import logo from "../../assets/anheloTMwhite.png";
 
 export const items = {
@@ -11,8 +11,7 @@ export const items = {
 
 const SuccessPage = () => {
 	const { pathname } = useLocation();
-	// Eliminamos navigate ya que ya no lo usaremos para redireccionar
-	// const navigate = useNavigate();
+	const navigate = useNavigate(); // Inicializar useNavigate
 
 	const [selectedItem, setSelectedItem] = useState("");
 	const [locationMenu, setLocationMenu] = useState(true);
@@ -31,15 +30,15 @@ const SuccessPage = () => {
 		setLocationMenu(pathname.startsWith("/menu/"));
 	}, [pathname, selectedItem]);
 
-	// Eliminamos el useEffect que redirige automáticamente
-	/*
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate("/menu/burgers");
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [navigate]);
-  */
+	// Añadir useEffect para redirección después de 2 segundos
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			navigate("/pedido"); // Redirigir a /pedido
+		}, 2000); // 2000 milisegundos = 2 segundos
+
+		// Limpiar el temporizador al desmontar el componente
+		return () => clearTimeout(timer);
+	}, [navigate]);
 
 	return (
 		<>
