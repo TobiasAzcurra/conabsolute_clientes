@@ -60,11 +60,11 @@ export const Pedido = () => {
 					{/* Línea horizontal con animación */}
 					<div className="w-full flex flex-row gap-2">
 						<div className="w-1/4 h-3.5 bg-black animated-loading"></div>
-						<div className="w-1/4 h-3.5 bg-black"></div>
-						<div className="w-1/2 h-3.5 bg-black"></div>
+						<div className="w-1/4 h-3.5 bg-gray-100 border-black border-1 border"></div>
+						<div className="w-1/2 h-3.5 bg-gray-100 border-black border-1 border"></div>
 					</div>
 					<p className="text-black font-coolvetica font-bold mt-2">
-						Anhelo está preparando tu pedido
+						Anhelo está preparando tu pedido...
 					</p>
 					<p className="text-black font-coolvetica font-medium mt-2">
 						Entrega estimada:{" "}
