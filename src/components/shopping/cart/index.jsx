@@ -153,7 +153,22 @@ const CartItems = () => {
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Resumen</p>
-				<div>Detalle</div>
+				<div className="flex flex-row justify-between w-full px-4">
+					<p>Productos</p>
+					<p>$9.000</p>
+				</div>
+				<div className="flex flex-row justify-between w-full px-4">
+					<p>Envio</p>
+					<p>$2.000</p>
+				</div>
+				<div className="flex flex-row justify-between w-full px-4">
+					<p>Descuentos</p>
+					<p>-$900</p>
+				</div>
+				<div className="flex flex-row justify-between w-full px-4">
+					<p className="font-bold">Total</p>
+					<p className="font-bold">$10.100</p>
+				</div>
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Pedir</p>
