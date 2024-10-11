@@ -18,7 +18,7 @@ const CartCard = ({
 				<img
 					src={img ? `/menu/${img}` : getDefaultImage(item)}
 					alt={name}
-					className=" h-[250px] object-cover"
+					className=" h-[270px] object-cover"
 				/>
 			</div>
 
