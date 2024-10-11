@@ -16,6 +16,7 @@ import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 import CartCard from "./CartCard";
 import arrow from "../../../assets/arrowIcon.png";
+import Carrusel from "../../Carrusel";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -213,7 +214,7 @@ const CartItems = () => {
 				Pedir
 			</p>
 			<div className="flex justify-center flex-col mt-6 items-center">
-				<p className="text-2xl font-bold">Imagen</p>
+				<Carrusel />
 			</div>
 			<style>
 				{`
