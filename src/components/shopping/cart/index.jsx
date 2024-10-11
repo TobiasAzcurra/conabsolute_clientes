@@ -151,7 +151,7 @@ const CartItems = () => {
 			<div className="flex justify-center flex-col mt-6 items-center px-4">
 				<p className="text-2xl font-bold mb-2">Metodo de pago</p>
 				<div className="w-full items-center    rounded-xl border-2 border-black ">
-					<div className="flex flex-row justify-between px-4 h-10 items-center border border-black border-opacity-20">
+					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
 						<div className="flex flex-row gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +172,7 @@ const CartItems = () => {
 						</div>
 						<img src={arrow} className="h-2" alt="" />
 					</div>
-					<div className="flex flex-row gap-2 pl-4 h-10 items-center">
+					<div className="flex flex-row gap-2 pl-3 h-10 items-center">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
