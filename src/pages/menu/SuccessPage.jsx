@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom"; // Eliminamos useNavigate ya que no se usa
+import { useLocation, useNavigate } from "react-router-dom"; // Agregamos useNavigate para redirección
 import logo from "../../assets/anheloTMwhite.png";
 
 export const items = {
@@ -11,6 +11,7 @@ export const items = {
 
 const SuccessPage = () => {
 	const { pathname } = useLocation();
+	const navigate = useNavigate();
 
 	const [selectedItem, setSelectedItem] = useState("");
 	const [locationMenu, setLocationMenu] = useState(true);
@@ -28,6 +29,15 @@ const SuccessPage = () => {
 
 		setLocationMenu(pathname.startsWith("/menu/"));
 	}, [pathname, selectedItem]);
+
+	// Redirección después de la animación
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			navigate("/pedido");
+		}, 2000); // Redirige después de 2 segundos
+
+		return () => clearTimeout(timer);
+	}, [navigate]);
 
 	return (
 		<>
@@ -52,21 +62,6 @@ const SuccessPage = () => {
             }
           }
 
-          @keyframes drawIcon {
-            0% {
-              stroke-dashoffset: 157;
-            }
-            50% {
-              stroke-dashoffset: 157;
-            }
-            60% {
-              stroke-dashoffset: 107; /* 157 - 50 */
-            }
-            100% {
-              stroke-dashoffset: 0;
-            }
-          }
-
           @keyframes pulse {
             0% {
               transform: scale(1);
@@ -85,18 +80,18 @@ const SuccessPage = () => {
           .circle-animation {
             stroke-dasharray: 157;
             stroke-dashoffset: 157;
-            animation: drawCircle 2s ease-out infinite;
+            animation: drawCircle 2s ease-out;
           }
 
           .check-animation {
             stroke-dasharray: 50;
             stroke-dashoffset: 50;
-            animation: drawCheck 1s ease-out infinite;
+            animation: drawCheck 1s ease-out;
             animation-delay: 1s; /* Inicia después de que el círculo empiece */
           }
 
           .success-icon {
-            animation: pulse 2s infinite;
+            animation: pulse 2s;
           }
 
           .logo-animation {
@@ -124,7 +119,7 @@ const SuccessPage = () => {
 
 			<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
 				<div className="text-center">
-					{/* Ícono de éxito con animaciones de dibujo en bucle */}
+					{/* Ícono de éxito con animaciones de dibujo */}
 					<svg
 						className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
 						xmlns="http://www.w3.org/2000/svg"
