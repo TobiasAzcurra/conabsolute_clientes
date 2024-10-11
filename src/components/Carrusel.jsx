@@ -6,9 +6,9 @@ import carrusel3 from "../assets/carrusel3.jpg";
 import carrusel4 from "../assets/carrusel4.jpg";
 
 const Carrusel = () => {
+	const location = useLocation();
 	const images = [carrusel1, carrusel2, carrusel3, carrusel4];
 	const [currentIndex, setCurrentIndex] = useState(0);
-	const location = useLocation();
 
 	useEffect(() => {
 		const interval = setInterval(() => {
@@ -18,21 +18,20 @@ const Carrusel = () => {
 		return () => clearInterval(interval);
 	}, [images.length]);
 
-	const gradientClass =
-		location.pathname === "/carrito"
-			? "bg-gradient-to-b from-black to-transparent"
-			: "bg-gradient-to-t from-black to-transparent";
+	const isCarritoPage = location.pathname === "/carrito";
 
 	return (
 		<div className="w-full h-[300px] overflow-hidden relative">
 			<img
 				src={images[currentIndex]}
 				alt={`Carrusel ${currentIndex + 1}`}
-				className="object-cover w-full h-full"
+				className={`object-cover w-full h-full ${
+					isCarritoPage ? "brightness-50" : ""
+				}`}
 			/>
-			<div
-				className={`absolute top-0 left-0 right-0 h-1/3 ${gradientClass}`}
-			></div>
+			{!isCarritoPage && (
+				<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent"></div>
+			)}
 		</div>
 	);
 };
