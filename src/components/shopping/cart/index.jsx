@@ -14,6 +14,7 @@ import fries from "../../../assets/fries.png";
 import burgers from "../../../assets/burgers-v1.json";
 import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
+import CartCard from "./CartCard";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -85,7 +86,7 @@ const CartItems = () => {
 		<div className="flex flex-col font-coolvetica">
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Tu carrito</p>
-				<div>Card del carrito</div>
+				<CartCard />
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-start">
 				<p className="text-2xl font-bold mx-auto mb-2">
