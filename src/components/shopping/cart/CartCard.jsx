@@ -21,7 +21,7 @@ const CartCard = ({
 					className="h-full  object-cover rounded"
 				/>
 			</div>
-			<div className="flex flex-col justify-between pt-2 pb-4">
+			<div className="flex flex-col justify-between px-4 pt-2 pb-4">
 				<div>
 					<h3 className="text-2xl font-bold mb-1">{name}</h3>
 					<p className="text-xs font-medium">Sin aclaraciones</p>
