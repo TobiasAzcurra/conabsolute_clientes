@@ -14,7 +14,7 @@ const VideoSlider = () => {
 		{
 			type: "video",
 			src: video2,
-			title: "Atractivo",
+			title: "Muy sexy",
 		},
 		{
 			type: "video",
