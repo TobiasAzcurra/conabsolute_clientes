@@ -14,11 +14,10 @@ const toppingPrice = 300;
 const toppingsArray = Object.values(toppings);
 const toppingsFree = toppingsArray.filter((t) => t.price === 0);
 const toppings100 = toppingsArray.filter((t) => t.price === toppingPrice);
+
 const DetailCard = ({ products, type }) => {
 	const { id } = useParams();
-
 	const dispatch = useDispatch();
-
 	const navigate = useNavigate();
 	const [disable, setDisable] = useState(false);
 	const [dataTopping, setDataTopping] = useState([]);
@@ -73,28 +72,28 @@ const DetailCard = ({ products, type }) => {
 
 	return (
 		<div>
-			<div className="flex flex-col mx-auto max-w-screen-lg  lg:px-0 min-h-screen">
+			<div className="flex flex-col mx-auto max-w-screen-lg lg:px-0 min-h-screen">
 				<ArrowBack />
-				<div className="flex flex-col pt-16  justify-items-center items-center ">
-					<h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black  text-center px-4 leading-9 ">
+				<div className="flex flex-col pt-16 justify-items-center items-center ">
+					<h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
 						{product.name}
 					</h4>
-					<p className=" font-coolvetica px-4 text-xs  w-full mt-1 text-black text-center">
+					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}
 					</p>
 					<img
-						className=" mt-[-130px]"
+						className="mt-[-130px]"
 						src={`/menu/${product.img}`}
 						alt="imagen"
 					/>
 					<div className="flex flex-col items-center mb-8 mt-[-70px] gap-2">
-						<QuickAddToCart />
+						{/* Pasa el producto al QuickAddToCart */}
+						<QuickAddToCart product={product} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
 							Por <strong>{currencyFormat(product.price)}</strong>. La versión
 							accesible de Anhelo, para que puedas pedir más en todo momento.
 						</p>
 					</div>
-					{/* <img src={carrusel2} className="w-full " alt="" /> */}
 				</div>
 				<div className="bg-black ">
 					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
@@ -103,8 +102,8 @@ const DetailCard = ({ products, type }) => {
 					</p>
 
 					<VideoSlider />
-					<div className="flex flex-col mt-32  items-center  mx-auto mb-16 justify-center">
-						<img src={logo} className=" h-6  mb-1  " alt="" />
+					<div className="flex flex-col mt-32 items-center mx-auto mb-16 justify-center">
+						<img src={logo} className="h-6 mb-1" alt="" />
 						<p className="text-gray-100 font-bold text-xs font-coolvetica">
 							Vas a pedir más.
 						</p>
