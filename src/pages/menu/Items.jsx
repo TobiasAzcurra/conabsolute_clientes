@@ -46,7 +46,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 				</h5>
 				{isCarrito && selectedItem && (
 					<div className=" pb-3">
-						<QuickAddToCart product={selectedItem} />
+						<QuickAddToCart product={selectedItem} animateFromCenter={true} />
 					</div>
 				)}
 			</div>

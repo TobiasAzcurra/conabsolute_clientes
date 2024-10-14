@@ -8,7 +8,7 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
-const QuickAddToCart = ({ product }) => {
+const QuickAddToCart = ({ product, animateFromCenter }) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
 	const [quantity, setQuantity] = useState(1);
@@ -92,9 +92,9 @@ const QuickAddToCart = ({ product }) => {
 	};
 
 	const isCarritoPage = location.pathname === "/carrito";
-	const shouldAnimateBothSides = /^\/menu\/(burgers|bebidas|papas)\/.+/.test(
-		location.pathname
-	);
+	const shouldAnimateBothSides =
+		/^\/menu\/(burgers|bebidas|papas)\/.+/.test(location.pathname) ||
+		animateFromCenter;
 
 	return (
 		<div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
