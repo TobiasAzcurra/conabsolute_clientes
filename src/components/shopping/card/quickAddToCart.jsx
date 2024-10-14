@@ -21,7 +21,6 @@ const QuickAddToCart = ({ product }) => {
 	const cartQuantity = cartItem ? cartItem.quantity : 0;
 
 	const handleIncrement = () => {
-		console.log("Incrementing quantity");
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
@@ -31,7 +30,6 @@ const QuickAddToCart = ({ product }) => {
 
 	const handleDecrement = () => {
 		if (quantity > 0) {
-			console.log("Decrementing quantity");
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
@@ -41,22 +39,14 @@ const QuickAddToCart = ({ product }) => {
 	};
 
 	const startAddingProcess = () => {
-		console.log("Starting adding process");
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
 			if (quantityRef.current === 0 && cartItem) {
-				console.log("Removing item from cart", {
-					name: product.name,
-				});
 				const itemIndex = cart.findIndex((item) => item.name === product.name);
 				dispatch(removeItem(itemIndex));
 			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
-					console.log("Updating item quantity in cart", {
-						name: product.name,
-						quantity: quantityRef.current,
-					});
 					dispatch(
 						updateItemQuantity({
 							name: product.name,
@@ -65,10 +55,6 @@ const QuickAddToCart = ({ product }) => {
 						})
 					);
 				} else {
-					console.log("Adding item to cart", {
-						name: product.name,
-						quantity: quantityRef.current,
-					});
 					const burgerObject = {
 						name: product.name,
 						price: product.price,
@@ -81,16 +67,14 @@ const QuickAddToCart = ({ product }) => {
 					dispatch(addItem(burgerObject));
 				}
 			}
-			console.log("Current cart state:", cart);
 			setIsAdding(false);
-			console.log("Finished adding item");
 			setTimeout(() => {
 				setIsEditing(false);
-				console.log("Finished editing");
-			}, 300); // Añadimos un pequeño retraso para completar la animación de cierre
+			}, 300);
 		}, 2000);
 	};
 
+	const isBurgerPage = location.pathname.startsWith("/menu/burgers/");
 	const isCarritoPage = location.pathname === "/carrito";
 
 	return (
@@ -100,9 +84,7 @@ const QuickAddToCart = ({ product }) => {
 					initial={{ width: 35 }}
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
-					className={`flex items-center absolute ${
-						isCarritoPage ? "left-0" : "right-0"
-					} top-0 flex-row rounded-lg font-black border-black border-2 bg-gray-100`}
+					className={`flex items-center absolute left-1/2 top-0 transform -translate-x-1/2 flex-row rounded-lg font-black border-black border-2 bg-gray-100`}
 				>
 					<div
 						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
@@ -123,11 +105,19 @@ const QuickAddToCart = ({ product }) => {
 			) : (
 				<div
 					className={`${
-						cartQuantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
-					} rounded-lg font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
+						cartQuantity > 0 ? "bg-black border text-gray-100" : ""
+					} rounded-lg font-black font-coolvetica border border-black  flex items-center justify-center ${
+						isBurgerPage
+							? "pt-2 pb-3 px-5 text-4xl font-medium border-2 text-gray-100 bg-black  rounded-full "
+							: "w-[35px] border-opacity-20 text-black bg-gray-100 h-[35px]"
+					} text-center cursor-pointer whitespace-nowrap`}
 					onClick={startAddingProcess}
 				>
-					{cartQuantity > 0 ? cartQuantity : "+"}
+					{isBurgerPage && cartQuantity === 0
+						? "Comprar"
+						: cartQuantity > 0
+						? cartQuantity
+						: "+"}
 				</div>
 			)}
 		</div>
