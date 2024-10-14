@@ -92,6 +92,10 @@ const QuickAddToCart = ({ product }) => {
 	};
 
 	const isCarritoPage = location.pathname === "/carrito";
+	const shouldAnimateBothSides = /^\/menu\/(burgers|bebidas|papas)\/.+/.test(
+		location.pathname
+	);
+
 	return (
 		<div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
 			{isEditing ? (
@@ -100,7 +104,11 @@ const QuickAddToCart = ({ product }) => {
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
 					className={`flex items-center absolute ${
-						isCarritoPage ? "left-0" : "right-0"
+						shouldAnimateBothSides
+							? "left-1/2 transform -translate-x-1/2"
+							: isCarritoPage
+							? "left-0"
+							: "right-0"
 					} top-0 flex-row rounded-lg font-black border-black border-2 bg-gray-100`}
 				>
 					<div
