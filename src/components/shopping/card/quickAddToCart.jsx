@@ -106,10 +106,10 @@ const QuickAddToCart = ({ product }) => {
 				<div
 					className={`${
 						cartQuantity > 0 ? "bg-black border text-gray-100" : ""
-					} rounded-lg font-black font-coolvetica border border-black  flex items-center justify-center ${
+					}  font-black font-coolvetica border border-black  flex items-center justify-center ${
 						isBurgerPage
 							? "pt-2 pb-3 px-5 text-4xl font-medium border-2 text-gray-100 bg-black  rounded-full "
-							: "w-[35px] border-opacity-20 text-black bg-gray-100 h-[35px]"
+							: "w-[35px] border-opacity-20 rounded-lg text-black bg-gray-100 h-[35px]"
 					} text-center cursor-pointer whitespace-nowrap`}
 					onClick={startAddingProcess}
 				>
