@@ -97,9 +97,11 @@ const DetailCard = ({ products, type }) => {
 					{/* <img src={carrusel2} className="w-full " alt="" /> */}
 				</div>
 				<div className="bg-black ">
-					<p className="text-2xl mt-8 px-4 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-						Por que la gente pide mas:
+					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
+						<span className="opacity-50">Por que la gente queda</span> pidiendo
+						mas:
 					</p>
+
 					<VideoSlider />
 					<div className="flex flex-col mt-32  items-center  mx-auto mb-16 justify-center">
 						<img src={logo} className=" h-6  mb-1  " alt="" />
