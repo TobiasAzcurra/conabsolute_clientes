@@ -21,7 +21,6 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 	const cartQuantity = cartItem ? cartItem.quantity : 0;
 
 	const handleIncrement = () => {
-		console.log("Incrementing quantity");
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
@@ -31,7 +30,6 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 
 	const handleDecrement = () => {
 		if (quantity > 0) {
-			console.log("Decrementing quantity");
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
@@ -41,22 +39,14 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 	};
 
 	const startAddingProcess = () => {
-		console.log("Starting adding process");
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
 			if (quantityRef.current === 0 && cartItem) {
-				console.log("Removing item from cart", {
-					name: product.name,
-				});
 				const itemIndex = cart.findIndex((item) => item.name === product.name);
 				dispatch(removeItem(itemIndex));
 			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
-					console.log("Updating item quantity in cart", {
-						name: product.name,
-						quantity: quantityRef.current,
-					});
 					dispatch(
 						updateItemQuantity({
 							name: product.name,
@@ -65,10 +55,6 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 						})
 					);
 				} else {
-					console.log("Adding item to cart", {
-						name: product.name,
-						quantity: quantityRef.current,
-					});
 					const burgerObject = {
 						name: product.name,
 						price: product.price,
@@ -81,20 +67,21 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 					dispatch(addItem(burgerObject));
 				}
 			}
-			console.log("Current cart state:", cart);
 			setIsAdding(false);
-			console.log("Finished adding item");
 			setTimeout(() => {
 				setIsEditing(false);
-				console.log("Finished editing");
 			}, 300); // Añadimos un pequeño retraso para completar la animación de cierre
 		}, 2000);
 	};
 
 	const isCarritoPage = location.pathname === "/carrito";
 	const shouldAnimateBothSides =
-		/^\/menu\/(burgers|bebidas|papas)\/.+/.test(location.pathname) ||
+		/^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(location.pathname) ||
 		animateFromCenter;
+
+	const isMenuProductPage = /^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(
+		location.pathname
+	);
 
 	return (
 		<div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
@@ -127,6 +114,13 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 						+
 					</div>
 				</motion.div>
+			) : isMenuProductPage && cartQuantity === 0 ? (
+				<button
+					className="bg-black text-white rounded-full px-4 py-2 font-black"
+					onClick={startAddingProcess}
+				>
+					Agregar
+				</button>
 			) : (
 				<div
 					className={`${
