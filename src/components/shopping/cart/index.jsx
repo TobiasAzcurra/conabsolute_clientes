@@ -19,6 +19,7 @@ import arrow from "../../../assets/arrowIcon.png";
 import Carrusel from "../../Carrusel";
 import logo from "../../../assets/anheloTMwhite.png";
 import { MapDirection } from "../../form/MapDirection";
+import ArrowBack from "../../back";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -100,6 +101,7 @@ const CartItems = () => {
 
 	return (
 		<div className="flex flex-col font-coolvetica">
+			<ArrowBack />
 			<div className="flex justify-center flex-col mt-6 items-center">
 				<p className="text-2xl font-bold">Tu carrito</p>
 				<div className="flex flex-col gap-2 w-full mt-2 px-4">
