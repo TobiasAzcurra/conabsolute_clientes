@@ -36,7 +36,7 @@ const VideoSlider = () => {
 			title: (
 				<>
 					<span className="opacity-50">Entendelo</span>{" "}
-					<span className="opacity-100">personalmente</span>
+					<span className="opacity-100">personalmente.</span>
 				</>
 			),
 		},
