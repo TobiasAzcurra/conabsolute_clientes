@@ -89,7 +89,7 @@ const DetailCard = ({ products, type }) => {
 					</p>
 					{/* Select para elegir toppings */}
 					{product.type === "originals" && (
-						<div className="flex flex-col items-center">
+						<div className="flex flex-col mt-2 items-center">
 							{toppingsArray.map((topping) => (
 								<label key={topping.name} className="flex items-center mb-1">
 									<input
