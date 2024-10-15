@@ -155,7 +155,7 @@ const DetailCard = ({ products, type }) => {
 				</div>
 				<div className="bg-black ">
 					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-						<span className="opacity-50">Porque todos quedan</span> pidiendo
+						<span className="opacity-50">Por que todos quedan</span> pidiendo
 						más:
 					</p>
 
