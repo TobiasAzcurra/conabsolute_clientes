@@ -1,3 +1,5 @@
+// QuickAddToCart.jsx
+
 import { useDispatch, useSelector } from "react-redux";
 import {
 	addItem,
@@ -8,7 +10,7 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
-const QuickAddToCart = ({ product, animateFromCenter }) => {
+const QuickAddToCart = ({ product, animateFromCenter, toppings = [] }) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
 	const [quantity, setQuantity] = useState(1);
@@ -17,7 +19,10 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 	const quantityRef = useRef(quantity);
 	const location = useLocation();
 
-	const cartItem = cart.find((item) => item.name === product.name);
+	const cartItem = cart.find(
+		(item) =>
+			item.name === product.name && compareToppings(item.toppings, toppings)
+	);
 	const cartQuantity = cartItem ? cartItem.quantity : 0;
 
 	const handleIncrement = () => {
@@ -43,14 +48,18 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 		setIsAdding(true);
 		setTimeout(() => {
 			if (quantityRef.current === 0 && cartItem) {
-				const itemIndex = cart.findIndex((item) => item.name === product.name);
+				const itemIndex = cart.findIndex(
+					(item) =>
+						item.name === product.name &&
+						compareToppings(item.toppings, toppings)
+				);
 				dispatch(removeItem(itemIndex));
 			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
 					dispatch(
 						updateItemQuantity({
 							name: product.name,
-							toppings: [],
+							toppings: toppings,
 							quantity: quantityRef.current,
 						})
 					);
@@ -59,7 +68,7 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 						name: product.name,
 						price: product.price,
 						img: product.img,
-						toppings: [],
+						toppings: toppings,
 						quantity: quantityRef.current,
 						category: product.category || "default",
 					};
@@ -133,6 +142,14 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 			)}
 		</div>
 	);
+};
+
+// Función auxiliar para comparar toppings
+const compareToppings = (toppings1, toppings2) => {
+	if (toppings1.length !== toppings2.length) return false;
+	const sorted1 = [...toppings1].sort((a, b) => a.id - b.id);
+	const sorted2 = [...toppings2].sort((a, b) => a.id - b.id);
+	return sorted1.every((t, index) => t.id === sorted2[index].id);
 };
 
 export default QuickAddToCart;

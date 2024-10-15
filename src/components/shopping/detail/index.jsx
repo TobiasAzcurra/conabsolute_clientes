@@ -22,7 +22,11 @@ const DetailCard = ({ products, type }) => {
 	const [dataTopping, setDataTopping] = useState([]);
 	const [quantity, setQuantity] = useState(1);
 
-	const [product] = products.filter((p) => p.id === id);
+	const product = products.find((p) => p.id === id);
+
+	if (!product) {
+		return <div>Producto no encontrado.</div>;
+	}
 
 	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
@@ -31,7 +35,7 @@ const DetailCard = ({ products, type }) => {
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
-	}, [window]);
+	}, []); // Arreglo de dependencias vacío
 
 	const handleToppingChange = (event) => {
 		const toppingName = event.target.value;
@@ -41,9 +45,19 @@ const DetailCard = ({ products, type }) => {
 
 		if (selectedTopping) {
 			if (isChecked) {
-				setDataTopping([...dataTopping, selectedTopping]);
+				setDataTopping((prevToppings) => {
+					const updatedToppings = [...prevToppings, selectedTopping];
+					console.log("Toppings seleccionados (agregado):", updatedToppings);
+					return updatedToppings;
+				});
 			} else {
-				setDataTopping(dataTopping.filter((item) => item !== selectedTopping));
+				setDataTopping((prevToppings) => {
+					const updatedToppings = prevToppings.filter(
+						(item) => item !== selectedTopping
+					);
+					console.log("Toppings seleccionados (eliminado):", updatedToppings);
+					return updatedToppings;
+				});
 			}
 		}
 	};
@@ -60,21 +74,21 @@ const DetailCard = ({ products, type }) => {
 			category,
 		};
 
+		console.log("Producto a agregar al carrito:", burgerObject);
+
 		dispatch(addItem(burgerObject));
 		navigate(-1);
 	};
 
 	const incrementQuantity = () => {
-		setQuantity(quantity + 1);
+		setQuantity((prevQuantity) => prevQuantity + 1);
 	};
 
 	const decrementQuantity = () => {
-		if (quantity > 1) {
-			setQuantity(quantity - 1);
-		}
+		setQuantity((prevQuantity) =>
+			prevQuantity > 1 ? prevQuantity - 1 : prevQuantity
+		);
 	};
-
-	console.log(product);
 
 	return (
 		<div>
@@ -97,6 +111,7 @@ const DetailCard = ({ products, type }) => {
 										value={topping.name}
 										onChange={handleToppingChange}
 										className="mr-2 bg-black"
+										checked={dataTopping.includes(topping)}
 									/>
 									<p className="font-bold font-coolvetica">
 										{capitalizeWords(topping.name)}:{" "}
@@ -112,12 +127,12 @@ const DetailCard = ({ products, type }) => {
 						<img
 							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
 							src={`/menu/${product.img}`}
-							alt="imagen"
+							alt={product.name}
 						/>
 					</div>
 					<div className="flex flex-col items-center mb-8 mt-8 gap-2">
 						{/* Pasa el producto al QuickAddToCart */}
-						<QuickAddToCart product={product} />
+						<QuickAddToCart product={product} toppings={dataTopping} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
 							Por <strong>{currencyFormat(product.price)}</strong>.{" "}
 							{product.type === "satisfyer"
@@ -138,7 +153,7 @@ const DetailCard = ({ products, type }) => {
 
 					<VideoSlider />
 					<div className="flex flex-col mt-32 items-center mx-auto mb-16 justify-center">
-						<img src={logo} className="h-6 mb-1" alt="" />
+						<img src={logo} className="h-6 mb-1" alt="Logo de Anhelo" />
 						<p className="text-gray-100 font-bold text-xs font-coolvetica">
 							Vas a pedir más.
 						</p>
