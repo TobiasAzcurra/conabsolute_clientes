@@ -5,7 +5,6 @@ import toppings from "../../../assets/toppings-v1.json";
 import { addItem } from "../../../redux/cart/cartSlice";
 import currencyFormat from "../../../helpers/currencyFormat";
 import ArrowBack from "../../back";
-import carrusel2 from "../../../assets/carrusel2.jpg";
 import logo from "../../../assets/anheloTMwhite.png";
 import QuickAddToCart from "../card/quickAddToCart";
 import VideoSlider from "./VideoSlider";
@@ -81,12 +80,14 @@ const DetailCard = ({ products, type }) => {
 					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}
 					</p>
-					<img
-						className="mt-[-130px]"
-						src={`/menu/${product.img}`}
-						alt="imagen"
-					/>
-					<div className="flex flex-col items-center mb-8 mt-[-70px] gap-2">
+					<div className="w-full max-w-md h-[400px] mt-8 flex items-center justify-center">
+						<img
+							className="w-full h-full object-cover object-center"
+							src={`/menu/${product.img}`}
+							alt="imagen"
+						/>
+					</div>
+					<div className="flex flex-col items-center mb-8 mt-8 gap-2">
 						{/* Pasa el producto al QuickAddToCart */}
 						<QuickAddToCart product={product} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
