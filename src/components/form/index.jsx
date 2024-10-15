@@ -14,6 +14,7 @@ import { MapDirection } from "./MapDirection";
 import { canjearVoucher } from "../../firebase/validateVoucher";
 import Payment from "../mercadopago/Payment";
 import SignInButton from "../google/SignInButton";
+import Navbar from "../Navbar";
 
 const calculateDiscountedTotal = (cart, numCupones) => {
   // 1. Calcular la cantidad de hamburguesas a las que se aplicará el descuento
@@ -234,7 +235,7 @@ const FormCustom = ({ cart, total }) => {
           return (
             <Form>
               <div className="flex flex-col mb-2">
-                <SignInButton />
+                <Navbar />
                 <a className="font-antonio mb-2 mt-1 font-bold text-2xl">
                   TELEFONO:
                 </a>
