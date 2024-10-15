@@ -2,6 +2,8 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { GoogleAuthProvider } from "firebase/auth";
+import "firebase/compat/functions";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -17,4 +19,5 @@ firebase.initializeApp(firebaseConfig);
 
 const projectAuth = firebase.auth();
 const provider = new GoogleAuthProvider();
-export { projectAuth, provider };
+const functions = firebase.functions(); // Esto inicializa Firebase Functions
+export { projectAuth, provider, functions };

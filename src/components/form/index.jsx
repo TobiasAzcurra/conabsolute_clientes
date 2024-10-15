@@ -1,18 +1,18 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import MyTextInput from "./MyTextInput";
-import ArrowBack from "../back";
-import MyRadioGroup from "./MyRadioGroup";
-import DeliveryDetails from "./DeliveryDetails";
-import validations from "./validations";
-import handleSubmit from "./handleSubmit";
-import fire from "../../assets/icon-fire.gif";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addLastCart, clearCart } from "../../redux/cart/cartSlice";
-import { useState } from "react";
-import { MapDirection } from "./MapDirection";
-import { canjearVoucher } from "../../firebase/validateVoucher";
-import Payment from "../mercadopago/Payment";
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import MyTextInput from './MyTextInput';
+import ArrowBack from '../back';
+import MyRadioGroup from './MyRadioGroup';
+import DeliveryDetails from './DeliveryDetails';
+import validations from './validations';
+import handleSubmit from './handleSubmit';
+import fire from '../../assets/icon-fire.gif';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addLastCart, clearCart } from '../../redux/cart/cartSlice';
+import { useState } from 'react';
+import { MapDirection } from './MapDirection';
+import { canjearVoucher } from '../../firebase/validateVoucher';
+import Payment from '../mercadopago/Payment';
 
 const calculateDiscountedTotal = (cart, numCupones) => {
   // 1. Calcular la cantidad de hamburguesas a las que se aplicará el descuento
@@ -26,7 +26,7 @@ const calculateDiscountedTotal = (cart, numCupones) => {
         price: item.price,
         toppingsPrice: item.toppings.reduce(
           (sum, topping) => sum + topping.price,
-          0,
+          0
         ),
       });
     }
@@ -34,7 +34,7 @@ const calculateDiscountedTotal = (cart, numCupones) => {
 
   // 3. Ordenar las hamburguesas de mayor a menor precio total
   allBurgers.sort(
-    (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice),
+    (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice)
   );
 
   // 4. Seleccionar las hamburguesas mas caras según la cantidad de cupones
@@ -44,14 +44,14 @@ const calculateDiscountedTotal = (cart, numCupones) => {
   const discountedTotal =
     discountedBurgers.reduce(
       (sum, burger) => sum + burger.price + burger.toppingsPrice,
-      0,
+      0
     ) / 2;
 
   // 6. Calcular el total del resto del carrito
   const remainingBurgers = allBurgers.slice(discountedBurgersCount);
   const remainingTotal = remainingBurgers.reduce(
     (sum, burger) => sum + burger.price + burger.toppingsPrice,
-    0,
+    0
   );
 
   // 7. Sumar ambos totales
@@ -63,30 +63,30 @@ const calculateDiscountedTotal = (cart, numCupones) => {
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
   const handlePaymentSuccess = async (payment) => {
-    console.log("Pago exitoso, guardando pedido...");
+    console.log('Pago exitoso, guardando pedido...');
   };
 
   const handlePaymentFailure = (payment) => {
-    console.error("Pago fallido:", payment);
+    console.error('Pago fallido:', payment);
     // Manejar el fallo del pago (mostrar un mensaje al usuario, etc.)
   };
 
   const handlePaymentPending = (payment) => {
-    console.warn("Pago en proceso:", payment);
+    console.warn('Pago en proceso:', payment);
     // Manejar pagos pendientes
   };
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const formValidations = validations(total + envio);
-  const [mapUrl, setUrl] = useState("");
+  const [mapUrl, setUrl] = useState('');
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
 
   const [discountedTotal, setDiscountedTotal] = useState(total);
 
-  const [couponCodes, setCouponCodes] = useState([""]);
-  const [voucherStatus, setVoucherStatus] = useState([""]);
+  const [couponCodes, setCouponCodes] = useState(['']);
+  const [voucherStatus, setVoucherStatus] = useState(['']);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
 
@@ -95,8 +95,8 @@ const FormCustom = ({ cart, total }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const addCouponField = () => {
-    setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
-    setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo status vacío para el nuevo cupón
+    setCouponCodes([...couponCodes, '']); // Añadir un nuevo campo vacío
+    setVoucherStatus([...voucherStatus, '']); // Añadir un nuevo status vacío para el nuevo cupón
   };
   const handleCouponChange = (index, value) => {
     const updatedCoupons = [...couponCodes];
@@ -111,7 +111,7 @@ const FormCustom = ({ cart, total }) => {
     // Recorre el carrito
     for (const item of cart) {
       // Verifica si el item es una hamburguesa
-      if (item.category === "burger") {
+      if (item.category === 'burger') {
         burgerCount += item.quantity;
       }
 
@@ -131,7 +131,7 @@ const FormCustom = ({ cart, total }) => {
     // Primero, validar si el cupón ya fue ingresado en otro input
     if (couponCodes.indexOf(couponCodes[index]) !== index) {
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "Este codigo ya fue ingresado.";
+      updatedVoucherStatus[index] = 'Este codigo ya fue ingresado.';
       setVoucherStatus(updatedVoucherStatus);
       return; // Detener la validación si hay un duplicado
     }
@@ -158,20 +158,20 @@ const FormCustom = ({ cart, total }) => {
         // Calcular el total con el descuento del cupón actual
         const newTotal = calculateDiscountedTotal(cart, couponCodes.length);
         setDiscountedTotal(newTotal);
-        updatedVoucherStatus[index] = "¡codigo válido!";
+        updatedVoucherStatus[index] = '¡codigo válido!';
 
         // Borrar los valores de los inputs de pago
-        setFieldValue("efectivoCantidad", "");
-        setFieldValue("mercadopagoCantidad", "");
+        setFieldValue('efectivoCantidad', '');
+        setFieldValue('mercadopagoCantidad', '');
       } else {
-        updatedVoucherStatus[index] = "codigo no válido.";
+        updatedVoucherStatus[index] = 'codigo no válido.';
       }
       setVoucherStatus(updatedVoucherStatus);
     } catch (error) {
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "Error al validar el cupón.";
+      updatedVoucherStatus[index] = 'Error al validar el cupón.';
       setVoucherStatus(updatedVoucherStatus);
-      console.error("Error al validar el cupón:", error);
+      console.error('Error al validar el cupón:', error);
     }
   };
 
@@ -181,18 +181,18 @@ const FormCustom = ({ cart, total }) => {
       <Formik
         initialValues={{
           subTotal: discountedTotal,
-          phone: "",
-          deliveryMethod: "delivery",
-          references: "",
-          paymentMethod: "",
-          money: "",
-          address: "",
-          hora: "",
+          phone: '',
+          deliveryMethod: 'delivery',
+          references: '',
+          paymentMethod: '',
+          money: '',
+          address: '',
+          hora: '',
           efectivoCantidad: 0,
           mercadopagoCantidad: 0,
         }}
         onSubmit={async (values) => {
-          if (values.paymentMethod === "mercadopago") {
+          if (values.paymentMethod === 'mercadopago') {
           }
           // handleSubmit(
           //   values,
@@ -215,20 +215,20 @@ const FormCustom = ({ cart, total }) => {
             const montoEfectivo = parseFloat(e.target.value) || 0;
             const montoMercadoPago = Math.max(
               discountedTotal + envio - montoEfectivo,
-              0,
+              0
             );
-            setFieldValue("efectivoCantidad", montoEfectivo);
-            setFieldValue("mercadopagoCantidad", montoMercadoPago);
+            setFieldValue('efectivoCantidad', montoEfectivo);
+            setFieldValue('mercadopagoCantidad', montoMercadoPago);
           };
 
           const handleMercadoPagoChange = (e) => {
             const montoMercadoPago = parseFloat(e.target.value) || 0;
             const montoEfectivo = Math.max(
               discountedTotal + envio - montoMercadoPago,
-              0,
+              0
             );
-            setFieldValue("mercadopagoCantidad", montoMercadoPago);
-            setFieldValue("efectivoCantidad", montoEfectivo);
+            setFieldValue('mercadopagoCantidad', montoMercadoPago);
+            setFieldValue('efectivoCantidad', montoEfectivo);
           };
           return (
             <Form>
@@ -282,9 +282,9 @@ const FormCustom = ({ cart, total }) => {
                           {voucherStatus[index] && (
                             <p
                               className={`text-xs mb-2 font-antonio ${
-                                voucherStatus[index] === "¡codigo válido!"
-                                  ? "text-green-500"
-                                  : "text-red-500"
+                                voucherStatus[index] === '¡codigo válido!'
+                                  ? 'text-green-500'
+                                  : 'text-red-500'
                               }`}
                             >
                               {voucherStatus[index]}
@@ -312,13 +312,13 @@ const FormCustom = ({ cart, total }) => {
                   <MyRadioGroup
                     name="paymentMethod"
                     options={[
-                      { value: "efectivo", label: "EFECTIVO" },
-                      { value: "mercadopago", label: "MERCADOPAGO" },
-                      { value: "ambos", label: "UTILIZAR AMBOS" },
+                      { value: 'efectivo', label: 'EFECTIVO' },
+                      { value: 'mercadopago', label: 'MERCADOPAGO' },
+                      { value: 'ambos', label: 'UTILIZAR AMBOS' },
                     ]}
                   />
                 </div>
-                {getFieldProps("paymentMethod").value === "ambos" && (
+                {getFieldProps('paymentMethod').value === 'ambos' && (
                   <div className="flex flex-col ">
                     <label className="font-antonio uppercase mb-2 font-bold text-2xl">
                       Pago en Efectivo:
@@ -328,7 +328,7 @@ const FormCustom = ({ cart, total }) => {
                       type="number"
                       placeholder="Monto a pagar en efectivo"
                       onChange={handleEfectivoChange}
-                      value={values.efectivoCantidad || ""}
+                      value={values.efectivoCantidad || ''}
                     />
                     <label className="font-antonio uppercase mb-2 font-bold text-2xl ">
                       Pago con MercadoPago:
@@ -337,7 +337,7 @@ const FormCustom = ({ cart, total }) => {
                       name="mercadopagoCantidad"
                       type="number"
                       placeholder="Monto a pagar con MercadoPago"
-                      value={values.mercadopagoCantidad || ""}
+                      value={values.mercadopagoCantidad || ''}
                       onChange={handleMercadoPagoChange}
                     />
                   </div>
@@ -408,7 +408,7 @@ const FormCustom = ({ cart, total }) => {
                 </Field>
               )}
 
-              {values.paymentMethod === "mercadopago" ? (
+              {values.paymentMethod === 'mercadopago' ? (
                 <Payment
                   cart={cart} // Pasamos el carrito de compras al componente hijo
                   values={values} // Pasamos los valores de la dirección, teléfono, etc.
