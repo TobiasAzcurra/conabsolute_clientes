@@ -92,10 +92,12 @@ const VideoSlider = () => {
 								autoPlay
 								loop
 								muted
-								className={`w-full h-auto object-cover rounded-3xl`}
+								playsInline
+								webkit-playsinline="true"
+								className="w-full h-auto object-cover rounded-3xl"
 							/>
 						) : (
-							<div className="w-full h-full flex items-center justify-start bg-black text-white font-coolvetica  rounded-3xl p-8 text-left">
+							<div className="w-full h-full flex items-center justify-start bg-black text-white font-coolvetica rounded-3xl p-8 text-left">
 								<h2 className="text-2xl font-bold">{slide.title}</h2>
 							</div>
 						)}
@@ -105,7 +107,8 @@ const VideoSlider = () => {
 						{slide.type !== "text" && (
 							<div className="absolute bottom-5 left-5 text-white">
 								<h2 className="text-xl font-bold">{slide.title}</h2>
-								<p className="text-lg">{slide.description}</p>
+								{/* Si no tienes una descripción, puedes eliminar esta línea */}
+								{/* <p className="text-lg">{slide.description}</p> */}
 							</div>
 						)}
 					</div>
