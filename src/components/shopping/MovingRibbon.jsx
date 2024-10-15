@@ -53,488 +53,2467 @@ const MovingRibbon = ({ angle }) => {
 				<div className="flex flex-row gap-4">
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>{" "}
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
-								ANHELO
-							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
-								ANHELO
-							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
-								ANHELO
-							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
-								ANHELO
-							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							; export default MovingRibbon{" "}
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
-								ANHELO
-							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
 								Vas a pedir más.
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className="text mb-[-20px] text-end text-black font-black  font-coolvetica">
-								Vas a pedir más.
-							</p>
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 					<div className="flex flex-row items-center mt-2 gap-8">
 						<div className="flex flex-col">
-							<p className=" text-black font-black text-9xl italic font-coolvetica">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
 								ANHELO
 							</p>
-							<p className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4">
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
 								Vas a pedir más.
 							</p>
 						</div>
-						<p className="font-black text-9xl text-black mb-2">-</p>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>{" "}
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>{" "}
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>{" "}
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>{" "}
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								className="text mb-[-20px] text-end text-black font-black  font-coolvetica"
+								style={{ opacity: 0.85 }}
+							>
+								Vas a pedir más.
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
+					</div>
+					<div className="flex flex-row items-center mt-2 gap-8">
+						<div className="flex flex-col">
+							<p
+								style={{ opacity: 0.85 }}
+								className=" text-black font-black text-9xl italic font-coolvetica"
+							>
+								ANHELO
+							</p>
+							<p
+								style={{ opacity: 0.85 }}
+								className="text mt-[-20px] text-start text-black font-black  font-coolvetica mb-4"
+							>
+								Vas a pedir más.
+							</p>
+						</div>
+						<p
+							style={{ opacity: 0.85 }}
+							className="font-black text-9xl text-black mb-2"
+						>
+							-
+						</p>
 					</div>
 				</div>
 			</div>
