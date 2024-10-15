@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { changeLastCart } from "../redux/cart/cartSlice";
 import SignInButton from "./google/SignInButton";
-import { projectAuth } from "../firebase/config";
-import { useState } from "react";
 import { useEffect } from "react";
+import { clearUser, setUser } from "../redux/user/userSlice";
+import { projectAuth } from "../firebase/config";
 
 const Navbar = () => {
   const { cart, lastCart } = useSelector((state) => state.cartState);
@@ -17,15 +17,13 @@ const Navbar = () => {
   useEffect(() => {
     const unsubscribe = projectAuth.onAuthStateChanged((authUser) => {
       if (authUser) {
-        // Si el usuario está autenticado, lo guardamos en Redux
         dispatch(setUser(authUser));
       } else {
-        // Si no hay usuario, limpiamos el estado en Redux
         dispatch(clearUser());
       }
     });
 
-    return () => unsubscribe(); // Limpia la suscripción al desmontar
+    return () => unsubscribe();
   }, [dispatch]);
 
   return (
@@ -35,7 +33,6 @@ const Navbar = () => {
           <Link to="/menu">
             <img src={Logo} className="h-5" />
           </Link>
-          <SignInButton />
           <h3>Bienvenido a ANHELO</h3>
           {user ? (
             <div>
