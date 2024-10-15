@@ -9,6 +9,7 @@ import logo from "../../../assets/anheloTMwhite.png";
 import satisfyerPic from "../../../assets/satisfyerPic.png";
 import masterpiecesPic from "../../../assets/djPic.png";
 import originalsPic from "../../../assets/masterpiecesPic.png";
+import friesPic from "../../../assets/friesPic.png";
 import QuickAddToCart from "../card/quickAddToCart";
 import VideoSlider from "./VideoSlider";
 
@@ -105,10 +106,18 @@ const DetailCard = ({ products, type }) => {
 				return masterpiecesPic;
 			case "originals":
 				return originalsPic;
+			case "papas":
+				return friesPic;
 			default:
-				return satisfyerPic;
+				return masterpiecesPic;
 		}
 	};
+
+	const getObjectPositionForType = (type) => {
+		return type === "originals" ? "object-top" : "object-bottom";
+	};
+
+	console.log(product);
 
 	return (
 		<div>
@@ -164,12 +173,17 @@ const DetailCard = ({ products, type }) => {
 								: ""}
 						</p>
 					</div>
-					<div className="w-full h-[300px] overflow-hidden">
+					<div className="relative w-full h-[300px] overflow-hidden">
 						<img
-							src={getImageForType(product.type)}
-							className="w-full h-full object-cover object-bottom"
+							src={getImageForType(
+								product.type ? product.type : product.category
+							)}
+							className={`w-full h-full object-cover ${getObjectPositionForType(
+								product.type ? product.type : product.category
+							)}`}
 							alt=""
 						/>
+						<div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black to-transparent"></div>
 					</div>
 				</div>
 				<div className="bg-black ">
