@@ -3,9 +3,9 @@ import currencyFormat from "../../../helpers/currencyFormat";
 import { Link } from "react-router-dom";
 
 const Card = ({ name, description, price, img, path, id, category }) => {
-	// Función para capitalizar cada palabra
+	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
-		return str.replace(/\b\w/g, (char) => char.toUpperCase());
+		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 	};
 
 	return (

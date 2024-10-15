@@ -5,9 +5,9 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 	// Importamos useLocation para obtener la ruta actual
 	const location = useLocation();
 
-	// Función para capitalizar cada palabra
+	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
-		return str.replace(/\b\w/g, (char) => char.toUpperCase());
+		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 	};
 
 	// Verificamos si estamos en la ruta /carrito

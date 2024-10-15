@@ -24,6 +24,11 @@ const DetailCard = ({ products, type }) => {
 
 	const [product] = products.filter((p) => p.id === id);
 
+	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
+	const capitalizeWords = (str) => {
+		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+	};
+
 	useEffect(() => {
 		window.scrollTo(0, 0);
 	}, [window]);
@@ -75,7 +80,7 @@ const DetailCard = ({ products, type }) => {
 				<ArrowBack />
 				<div className="flex flex-col pt-16 justify-items-center items-center ">
 					<h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
-						{product.name}
+						{capitalizeWords(product.name)}
 					</h4>
 					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}

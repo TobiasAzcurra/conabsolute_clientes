@@ -12,6 +12,11 @@ const CartCard = ({
 }) => {
 	const { name, price, quantity, category, img } = item;
 
+	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
+	const capitalizeWords = (str) => {
+		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+	};
+
 	return (
 		<div className="flex flex-row border w-full h-[200px] border-black border-opacity-20 rounded-xl">
 			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-300 to-red-400 rounded-l-xl overflow-hidden">
@@ -24,7 +29,9 @@ const CartCard = ({
 
 			<div className="flex flex-col w-2/3 justify-between px-4 pt-2 pb-4">
 				<div>
-					<h3 className="text-2xl font-bold mb-1.5 leading-6">{name}</h3>
+					<h3 className="text-2xl font-bold mb-1.5 leading-6">
+						{capitalizeWords(name)}
+					</h3>
 					<p className="text-xs font-medium">Sin aclaraciones</p>
 					<p className="text-xs font-medium">Presiona para editar</p>
 				</div>
