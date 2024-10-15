@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toppings from "../../../assets/toppings-v1.json";
@@ -22,7 +22,11 @@ const DetailCard = ({ products, type }) => {
 	const [dataTopping, setDataTopping] = useState([]);
 	const [quantity, setQuantity] = useState(1);
 
-	const [product] = products.filter((p) => p.id === id);
+	const product = products.find((p) => p.id === id);
+
+	if (!product) {
+		return <div>Producto no encontrado.</div>;
+	}
 
 	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
@@ -31,7 +35,7 @@ const DetailCard = ({ products, type }) => {
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
-	}, [window]);
+	}, []); // Arreglo de dependencias vacío
 
 	const handleToppingChange = (event) => {
 		const toppingName = event.target.value;
@@ -41,9 +45,19 @@ const DetailCard = ({ products, type }) => {
 
 		if (selectedTopping) {
 			if (isChecked) {
-				setDataTopping([...dataTopping, selectedTopping]);
+				setDataTopping((prevToppings) => {
+					const updatedToppings = [...prevToppings, selectedTopping];
+					"Toppings seleccionados (agregado):", updatedToppings;
+					return updatedToppings;
+				});
 			} else {
-				setDataTopping(dataTopping.filter((item) => item !== selectedTopping));
+				setDataTopping((prevToppings) => {
+					const updatedToppings = prevToppings.filter(
+						(item) => item !== selectedTopping
+					);
+					"Toppings seleccionados (eliminado):", updatedToppings;
+					return updatedToppings;
+				});
 			}
 		}
 	};
@@ -60,19 +74,29 @@ const DetailCard = ({ products, type }) => {
 			category,
 		};
 
+		"Producto a agregar al carrito:", burgerObject;
+
 		dispatch(addItem(burgerObject));
 		navigate(-1);
 	};
 
 	const incrementQuantity = () => {
-		setQuantity(quantity + 1);
+		setQuantity((prevQuantity) => prevQuantity + 1);
 	};
 
 	const decrementQuantity = () => {
-		if (quantity > 1) {
-			setQuantity(quantity - 1);
-		}
+		setQuantity((prevQuantity) =>
+			prevQuantity > 1 ? prevQuantity - 1 : prevQuantity
+		);
 	};
+
+	// Calcula el precio total incluyendo toppings pagados
+	const totalPrice = useMemo(() => {
+		const toppingsCost = dataTopping
+			.filter((t) => t.price > 0)
+			.reduce((acc, t) => acc + t.price, 0);
+		return product.price + toppingsCost;
+	}, [product.price, dataTopping]);
 
 	return (
 		<div>
@@ -85,31 +109,59 @@ const DetailCard = ({ products, type }) => {
 					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}
 					</p>
+					{/* Select para elegir toppings */}
+					{product.type === "originals" && (
+						<div className="flex flex-col mt-2 items-center">
+							{toppingsArray.map((topping) => (
+								<label key={topping.name} className="flex items-center mb-1">
+									<input
+										type="checkbox"
+										value={topping.name}
+										onChange={handleToppingChange}
+										className="mr-2 bg-black"
+										checked={dataTopping.includes(topping)}
+									/>
+									<p className="font-bold font-coolvetica">
+										{capitalizeWords(topping.name)}:{" "}
+										{topping.price === 0
+											? "Gratis"
+											: currencyFormat(topping.price)}
+									</p>
+								</label>
+							))}
+						</div>
+					)}
 					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
 						<img
 							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
 							src={`/menu/${product.img}`}
-							alt="imagen"
+							alt={product.name}
 						/>
 					</div>
 					<div className="flex flex-col items-center mb-8 mt-8 gap-2">
 						{/* Pasa el producto al QuickAddToCart */}
-						<QuickAddToCart product={product} />
+						<QuickAddToCart product={product} toppings={dataTopping} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
-							Por <strong>{currencyFormat(product.price)}</strong>. La versión
-							accesible de Anhelo, para que puedas pedir más en todo momento.
+							Por <strong>{currencyFormat(totalPrice)}</strong>.{" "}
+							{product.type === "satisfyer"
+								? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
+								: product.type === "originals"
+								? "Anhelo creado por vos."
+								: product.type === "our"
+								? "Nuestras mejores combinaciones."
+								: ""}
 						</p>
 					</div>
 				</div>
 				<div className="bg-black ">
 					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
 						<span className="opacity-50">Por que todos quedan</span> pidiendo
-						mas:
+						más:
 					</p>
 
 					<VideoSlider />
 					<div className="flex flex-col mt-32 items-center mx-auto mb-16 justify-center">
-						<img src={logo} className="h-6 mb-1" alt="" />
+						<img src={logo} className="h-6 mb-1" alt="Logo de Anhelo" />
 						<p className="text-gray-100 font-bold text-xs font-coolvetica">
 							Vas a pedir más.
 						</p>

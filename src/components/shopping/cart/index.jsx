@@ -16,10 +16,11 @@ import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 import CartCard from "./CartCard";
 import arrow from "../../../assets/arrowIcon.png";
-import Carrusel from "../../Carrusel";
+import carrusel from "../../../assets/carrusel3.jpg";
 import logo from "../../../assets/anheloTMwhite.png";
 import { MapDirection } from "../../form/MapDirection";
 import ArrowBack from "../../back";
+import MovingRibbon from "../MovingRibbon";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -64,9 +65,9 @@ const CartItems = () => {
 		}
 	}, [cart, navigate]);
 
-	// Agregar console.log para mostrar el carrito completo
+	// Agregar  para mostrar el carrito completo
 	useEffect(() => {
-		console.log("Current cart state:", cart);
+		"Current cart state:", cart;
 	}, [cart]);
 
 	const decrementQuantity = (index, quantity) => {
@@ -200,6 +201,26 @@ const CartItems = () => {
 							</p>
 						</div>
 					</div>
+					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
+						<div className="flex flex-row gap-2">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+								className="h-6"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+
+							<p className=" text-opacity-20 text-black">
+								¿Queres reservar para mas tarde?
+							</p>
+						</div>
+					</div>
 					<div className="flex flex-row gap-2 pl-3 h-10 items-center">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -281,18 +302,18 @@ const CartItems = () => {
 			{/* Botón "Pedir" modificado */}
 			<button
 				onClick={handlePedir}
-				className="text-4xl text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
+				className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
 			>
 				Pedir
 			</button>
 
-			<div className="flex justify-center flex-col mt-6 items-center relative">
-				<p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
+			<div className="flex justify-center flex-col mt-16 items-center relative">
+				{/* <p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
 					Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
-				</p>
-				<img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" />
-
-				<Carrusel />
+				</p> */}
+				<MovingRibbon angle={0} />
+				{/* <img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" /> */}
+				<img src={carrusel} className=" w-full mt-28" alt="" />
 			</div>
 			<style>
 				{`

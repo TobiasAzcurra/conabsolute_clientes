@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
-import classNames from "classnames";
-import { functions } from "../../firebase/config";
-import { httpsCallable } from "firebase/functions";
+import React, { useState } from 'react';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+import classNames from 'classnames';
+import { functions } from '../../firebase/config';
+import { httpsCallable } from 'firebase/functions';
 
 // Inicializa Mercado Pago con tu clave pública
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY);
@@ -54,7 +54,7 @@ const Payment = ({
     setIsLoading(true);
     try {
       // Llamar a la función de Firebase
-      const createPreference = httpsCallable(functions, "createPreference");
+      const createPreference = httpsCallable(functions, 'createPreference');
       const result = await createPreference({
         values,
         cart,
@@ -67,7 +67,7 @@ const Payment = ({
       // Asumiendo que el resultado contiene el ID de la preferencia
       setPreferenceId(result.data.id);
     } catch (error) {
-      console.error("Error al crear preferencia:", error);
+      console.error('Error al crear preferencia:', error);
     } finally {
       setIsLoading(false);
     }
@@ -93,57 +93,57 @@ const Payment = ({
           btn-lg
           btn-block
         >
-          {isLoading ? "Cargando..." : "Pagar con Mercado Pago"}
+          {isLoading ? 'Cargando...' : 'Pagar con Mercado Pago'}
         </button>
       ) : (
         <div
-          className={classNames("payment-form", {
-            "payment-form--hidden": !isReady,
+          className={classNames('payment-form', {
+            'payment-form--hidden': !isReady,
           })}
         >
           <Wallet
             initialization={{
               preferenceId: preferenceId, // Pasa el preferenceId al Wallet
-              redirectMode: "self",
+              redirectMode: 'self',
             }}
             locale="es-AR"
             customization={{
               texts: {
-                action: "pay",
-                valueProp: "security_safety",
+                action: 'pay',
+                valueProp: 'security_safety',
               },
               visual: {
                 hideValueProp: false,
-                buttonBackground: "default", // Personaliza el botón
-                valuePropColor: "grey",
-                buttonHeight: "48px",
-                borderRadius: "6px",
-                verticalPadding: "16px",
-                horizontalPadding: "0px",
+                buttonBackground: 'default', // Personaliza el botón
+                valuePropColor: 'grey',
+                buttonHeight: '48px',
+                borderRadius: '6px',
+                verticalPadding: '16px',
+                horizontalPadding: '0px',
               },
               checkout: {
                 theme: {
-                  elementsColor: "#4287F5",
-                  headerColor: "#4287F5",
+                  elementsColor: '#4287F5',
+                  headerColor: '#4287F5',
                 },
               },
             }}
             onReady={handleOnReady} // Indica cuándo el Wallet está listo
             callbacks={{
               onPaymentApproved: (payment) => {
-                console.log("Pago aprobado:", payment);
+                'Pago aprobado:', payment;
                 onPaymentSuccess(payment); // Llamamos a la prop para manejar el éxito del pago
               },
               onPaymentInProcess: (payment) => {
-                console.log("Pago en proceso:", payment);
+                'Pago en proceso:', payment;
                 onPaymentPending(payment); // Llamamos a la prop para manejar los pagos pendientes
               },
               onPaymentRejected: (payment) => {
-                console.log("Pago rechazado:", payment);
+                'Pago rechazado:', payment;
                 onPaymentFailure(payment); // Llamamos a la prop para manejar el error del pago
               },
               onError: (error) => {
-                console.error("Error en el pago:", error);
+                console.error('Error en el pago:', error);
               },
             }}
           />

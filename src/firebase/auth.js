@@ -3,14 +3,14 @@
 import { projectAuth, provider } from "./config";
 
 const signInWithGoogle = async () => {
-  try {
-    const result = await projectAuth.signInWithPopup(provider);
-    // Esto te dará un objeto con los detalles del usuario
-    const user = result.user;
-    console.log("Usuario autenticado: ", user);
-  } catch (error) {
-    console.error("Error al iniciar sesión con Google: ", error);
-  }
+	try {
+		const result = await projectAuth.signInWithPopup(provider);
+		// Esto te dará un objeto con los detalles del usuario
+		const user = result.user;
+		"Usuario autenticado: ", user;
+	} catch (error) {
+		console.error("Error al iniciar sesión con Google: ", error);
+	}
 };
 
 export { signInWithGoogle };

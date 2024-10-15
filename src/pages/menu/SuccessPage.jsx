@@ -134,11 +134,6 @@ const SuccessPage = () => {
 							d="M14 27 L22 35 L38 19"
 						/>
 					</svg>
-
-					{/* Mensaje de éxito con animación */}
-					<h2 className="text-gray-100 font-coolvetica text-2xl font-medium text-animation">
-						¡Que lo disfrutes!
-					</h2>
 				</div>
 			</div>
 		</>
