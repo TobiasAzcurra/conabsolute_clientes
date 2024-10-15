@@ -87,6 +87,25 @@ const DetailCard = ({ products, type }) => {
 					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}
 					</p>
+					{/* Select para elegir toppings */}
+					{product.type === "originals" && (
+						<div className="flex flex-col items-center">
+							{toppingsArray.map((topping) => (
+								<label key={topping.name} className="flex items-center mb-1">
+									<input
+										type="checkbox"
+										value={topping.name}
+										onChange={handleToppingChange}
+										className="mr-2 bg-black"
+									/>
+									<p className="font-bold font-coolvetica">
+										{capitalizeWords(topping.name)}:{" "}
+										{currencyFormat(topping.price)}
+									</p>
+								</label>
+							))}
+						</div>
+					)}
 					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
 						<img
 							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
