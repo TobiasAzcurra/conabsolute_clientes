@@ -52,14 +52,14 @@ const AppRouter = () => {
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full ">
-						<div className="bg-gray-100 border border-black border-opacity-20 shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-3xl px-4 left-4 right-4">
+						<div className="bg-gray-100 border border-black border-opacity-20 shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-lg px-4 left-4 right-4">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="currentColor"
 								stroke="currentColor" // Añadir contorno con el color actual
 								strokeWidth="1" // Ajustar el grosor del contorno para hacerlo más "grueso"
-								className="mr-1 h-6"
+								className="mr-1 h-6 opacity-20"
 							>
 								<path
 									fillRule="evenodd"
