@@ -59,8 +59,9 @@ const CartCard = ({
 								Toppings: {formatToppings(toppings)}.
 							</p>
 						)}
-						<p className="text-xs font-medium">Sin aclaraciones</p>
-						<p className="text-xs font-medium">Presiona para editar</p>
+						<p className="text-xs font-medium">
+							Presiona para agregar una aclaracion
+						</p>
 					</div>
 				</div>
 				<div className="flex flex-col items-start">
