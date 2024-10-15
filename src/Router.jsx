@@ -57,7 +57,9 @@ const AppRouter = () => {
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="currentColor"
-								className="opacity-20 mr-1 h-6"
+								stroke="currentColor" // Añadir contorno con el color actual
+								strokeWidth="1" // Ajustar el grosor del contorno para hacerlo más "grueso"
+								className="mr-1 h-6"
 							>
 								<path
 									fillRule="evenodd"
@@ -65,6 +67,7 @@ const AppRouter = () => {
 									clipRule="evenodd"
 								/>
 							</svg>
+
 							<span className="text-opacity-20 text-black">
 								Busca tu pedido con tu número de cel
 							</span>
