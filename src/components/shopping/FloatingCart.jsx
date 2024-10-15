@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import currencyFormat from "../../helpers/currencyFormat";
 
 const FloatingCart = ({ totalQuantity, cart }) => {
-	console.log("este es el carrito", cart);
+	"este es el carrito", cart;
 
 	const totalPrice = cart.reduce((acc, item) => {
 		// Suma el precio de las hamburguesas

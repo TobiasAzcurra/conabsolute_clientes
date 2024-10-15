@@ -43,7 +43,7 @@ const CartCard = ({
 
 	const totalPrice = calculateTotalPrice();
 
-	console.log("este es el", item);
+	"este es el", item;
 
 	return (
 		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-xl mb-4">

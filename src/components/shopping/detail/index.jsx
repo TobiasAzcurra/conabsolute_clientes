@@ -47,7 +47,7 @@ const DetailCard = ({ products, type }) => {
 			if (isChecked) {
 				setDataTopping((prevToppings) => {
 					const updatedToppings = [...prevToppings, selectedTopping];
-					console.log("Toppings seleccionados (agregado):", updatedToppings);
+					"Toppings seleccionados (agregado):", updatedToppings;
 					return updatedToppings;
 				});
 			} else {
@@ -55,7 +55,7 @@ const DetailCard = ({ products, type }) => {
 					const updatedToppings = prevToppings.filter(
 						(item) => item !== selectedTopping
 					);
-					console.log("Toppings seleccionados (eliminado):", updatedToppings);
+					"Toppings seleccionados (eliminado):", updatedToppings;
 					return updatedToppings;
 				});
 			}
@@ -74,7 +74,7 @@ const DetailCard = ({ products, type }) => {
 			category,
 		};
 
-		console.log("Producto a agregar al carrito:", burgerObject);
+		"Producto a agregar al carrito:", burgerObject;
 
 		dispatch(addItem(burgerObject));
 		navigate(-1);

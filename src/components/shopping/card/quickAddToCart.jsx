@@ -51,10 +51,10 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 
 	// Logs de depuración
 	useEffect(() => {
-		console.log("Producto:", product);
-		console.log("Toppings efectivos:", effectiveToppings);
-		console.log("CartItem encontrado:", cartItem);
-		console.log("Cantidad en carrito:", cartQuantity);
+		"Producto:", product;
+		"Toppings efectivos:", effectiveToppings;
+		"CartItem encontrado:", cartItem;
+		"Cantidad en carrito:", cartQuantity;
 	}, [product, effectiveToppings, cartItem, cartQuantity]);
 
 	// Manejar incremento de cantidad
@@ -62,7 +62,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
-			console.log("Cantidad incrementada a:", newQuantity);
+			"Cantidad incrementada a:", newQuantity;
 			return newQuantity;
 		});
 	};
@@ -74,7 +74,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
-				console.log("Cantidad decrementada a:", newQuantity);
+				"Cantidad decrementada a:", newQuantity;
 				return newQuantity;
 			});
 		}
@@ -82,7 +82,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 
 	// Iniciar el proceso de agregar al carrito
 	const startAddingProcess = () => {
-		console.log("Iniciando proceso de agregar al carrito");
+		("Iniciando proceso de agregar al carrito");
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
@@ -94,7 +94,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						item.category === (product.category || "default") &&
 						compareToppings(item.toppings, effectiveToppings)
 				);
-				console.log("Eliminando ítem del carrito en el índice:", itemIndex);
+				"Eliminando ítem del carrito en el índice:", itemIndex;
 				dispatch(removeItem(itemIndex));
 			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
@@ -104,7 +104,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						toppings: effectiveToppings,
 						quantity: quantityRef.current,
 					};
-					console.log("Actualizando ítem del carrito con:", updatePayload);
+					"Actualizando ítem del carrito con:", updatePayload;
 					dispatch(updateItemQuantity(updatePayload));
 				} else {
 					const newItem = {
@@ -115,7 +115,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						quantity: quantityRef.current,
 						category: product.category || "default",
 					};
-					console.log("Agregando nuevo ítem al carrito:", newItem);
+					"Agregando nuevo ítem al carrito:", newItem;
 					dispatch(addItem(newItem));
 				}
 			}

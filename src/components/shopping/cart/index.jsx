@@ -65,9 +65,9 @@ const CartItems = () => {
 		}
 	}, [cart, navigate]);
 
-	// Agregar console.log para mostrar el carrito completo
+	// Agregar  para mostrar el carrito completo
 	useEffect(() => {
-		console.log("Current cart state:", cart);
+		"Current cart state:", cart;
 	}, [cart]);
 
 	const decrementQuantity = (index, quantity) => {
