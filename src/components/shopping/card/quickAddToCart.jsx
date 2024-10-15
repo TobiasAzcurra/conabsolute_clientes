@@ -69,8 +69,8 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 
 	// Manejar decremento de cantidad
 	const handleDecrement = () => {
-		if (quantity > 1) {
-			// Cambiado de 0 a 1 para evitar cantidades negativas
+		if (quantity > 0) {
+			// Permitir que la cantidad llegue a 0
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
@@ -86,6 +86,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
+			// Mantén o elimina este setTimeout según tus necesidades
 			if (quantityRef.current === 0 && cartItem) {
 				const itemIndex = cart.findIndex(
 					(item) =>
