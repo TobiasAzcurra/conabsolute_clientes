@@ -16,10 +16,11 @@ import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 import CartCard from "./CartCard";
 import arrow from "../../../assets/arrowIcon.png";
-import Carrusel from "../../Carrusel";
+import carrusel from "../../../assets/carrusel3.jpg";
 import logo from "../../../assets/anheloTMwhite.png";
 import { MapDirection } from "../../form/MapDirection";
 import ArrowBack from "../../back";
+import MovingRibbon from "../MovingRibbon";
 
 // Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
@@ -281,18 +282,18 @@ const CartItems = () => {
 			{/* Botón "Pedir" modificado */}
 			<button
 				onClick={handlePedir}
-				className="text-4xl text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
+				className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
 			>
 				Pedir
 			</button>
 
-			<div className="flex justify-center flex-col mt-6 items-center relative">
-				<p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
+			<div className="flex justify-center flex-col mt-16 items-center relative">
+				{/* <p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
 					Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
-				</p>
-				<img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" />
-
-				<Carrusel />
+				</p> */}
+				<MovingRibbon angle={0} />
+				{/* <img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" /> */}
+				<img src={carrusel} className=" mt-28" alt="" />
 			</div>
 			<style>
 				{`
