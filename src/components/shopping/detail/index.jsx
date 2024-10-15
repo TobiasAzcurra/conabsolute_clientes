@@ -100,7 +100,9 @@ const DetailCard = ({ products, type }) => {
 									/>
 									<p className="font-bold font-coolvetica">
 										{capitalizeWords(topping.name)}:{" "}
-										{currencyFormat(topping.price)}
+										{topping.price === 0
+											? "Gratis"
+											: currencyFormat(topping.price)}
 									</p>
 								</label>
 							))}
