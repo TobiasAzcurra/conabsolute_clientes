@@ -293,7 +293,7 @@ const CartItems = () => {
 				</p> */}
 				<MovingRibbon angle={0} />
 				{/* <img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" /> */}
-				<img src={carrusel} className=" mt-28" alt="" />
+				<img src={carrusel} className=" w-full mt-28" alt="" />
 			</div>
 			<style>
 				{`
