@@ -74,6 +74,8 @@ const DetailCard = ({ products, type }) => {
 		}
 	};
 
+	console.log(product);
+
 	return (
 		<div>
 			<div className="flex flex-col mx-auto max-w-screen-lg lg:px-0 min-h-screen">
@@ -96,8 +98,14 @@ const DetailCard = ({ products, type }) => {
 						{/* Pasa el producto al QuickAddToCart */}
 						<QuickAddToCart product={product} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
-							Por <strong>{currencyFormat(product.price)}</strong>. La versión
-							accesible de Anhelo, para que puedas pedir más en todo momento.
+							Por <strong>{currencyFormat(product.price)}</strong>.{" "}
+							{product.type === "satisfyer"
+								? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
+								: product.type === "originals"
+								? "Anhelo creado por vos."
+								: product.type === "our"
+								? "Nuestras mejores combinaciones."
+								: ""}
 						</p>
 					</div>
 				</div>
