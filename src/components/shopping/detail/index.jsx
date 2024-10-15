@@ -6,6 +6,9 @@ import { addItem } from "../../../redux/cart/cartSlice";
 import currencyFormat from "../../../helpers/currencyFormat";
 import ArrowBack from "../../back";
 import logo from "../../../assets/anheloTMwhite.png";
+import satisfyerPic from "../../../assets/satisfyerPic.png";
+import masterpiecesPic from "../../../assets/djPic.png";
+import originalsPic from "../../../assets/masterpiecesPic.png";
 import QuickAddToCart from "../card/quickAddToCart";
 import VideoSlider from "./VideoSlider";
 
@@ -47,7 +50,6 @@ const DetailCard = ({ products, type }) => {
 			if (isChecked) {
 				setDataTopping((prevToppings) => {
 					const updatedToppings = [...prevToppings, selectedTopping];
-					"Toppings seleccionados (agregado):", updatedToppings;
 					return updatedToppings;
 				});
 			} else {
@@ -55,7 +57,6 @@ const DetailCard = ({ products, type }) => {
 					const updatedToppings = prevToppings.filter(
 						(item) => item !== selectedTopping
 					);
-					"Toppings seleccionados (eliminado):", updatedToppings;
 					return updatedToppings;
 				});
 			}
@@ -73,8 +74,6 @@ const DetailCard = ({ products, type }) => {
 			quantity,
 			category,
 		};
-
-		"Producto a agregar al carrito:", burgerObject;
 
 		dispatch(addItem(burgerObject));
 		navigate(-1);
@@ -97,6 +96,19 @@ const DetailCard = ({ products, type }) => {
 			.reduce((acc, t) => acc + t.price, 0);
 		return product.price + toppingsCost;
 	}, [product.price, dataTopping]);
+
+	const getImageForType = (type) => {
+		switch (type) {
+			case "satisfyer":
+				return satisfyerPic;
+			case "our":
+				return masterpiecesPic;
+			case "originals":
+				return originalsPic;
+			default:
+				return satisfyerPic;
+		}
+	};
 
 	return (
 		<div>
@@ -131,9 +143,9 @@ const DetailCard = ({ products, type }) => {
 							))}
 						</div>
 					)}
-					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
+					<div className="w-full h-[300px] mt-8 flex items-center justify-center">
 						<img
-							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
+							className="w-full max-w-[1000px] h-[300px] object-cover object-center"
 							src={`/menu/${product.img}`}
 							alt={product.name}
 						/>
@@ -151,6 +163,13 @@ const DetailCard = ({ products, type }) => {
 								? "Nuestras mejores combinaciones."
 								: ""}
 						</p>
+					</div>
+					<div className="w-full h-[300px] overflow-hidden">
+						<img
+							src={getImageForType(product.type)}
+							className="w-full h-full object-cover object-bottom"
+							alt=""
+						/>
 					</div>
 				</div>
 				<div className="bg-black ">
