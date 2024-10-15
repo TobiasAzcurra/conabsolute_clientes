@@ -10,17 +10,24 @@ import { useEffect } from "react";
 
 const Navbar = () => {
   const { cart, lastCart } = useSelector((state) => state.cartState);
+  const { user } = useSelector((state) => state.userState); // Obtén el usuario del estado de Redux
   const dispatch = useDispatch();
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = projectAuth.onAuthStateChanged((user) => {
-      setUser(user);
+    const unsubscribe = projectAuth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        // Si el usuario está autenticado, lo guardamos en Redux
+        dispatch(setUser(authUser));
+      } else {
+        // Si no hay usuario, limpiamos el estado en Redux
+        dispatch(clearUser());
+      }
     });
 
     return () => unsubscribe(); // Limpia la suscripción al desmontar
-  }, []);
+  }, [dispatch]);
+
   return (
     <nav className="font-sans bg-[#efefef] w-full  shadow m-0">
       <div className="w-full mx-auto px-4">
