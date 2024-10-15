@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toppings from "../../../assets/toppings-v1.json";
@@ -90,6 +90,14 @@ const DetailCard = ({ products, type }) => {
 		);
 	};
 
+	// Calcula el precio total incluyendo toppings pagados
+	const totalPrice = useMemo(() => {
+		const toppingsCost = dataTopping
+			.filter((t) => t.price > 0)
+			.reduce((acc, t) => acc + t.price, 0);
+		return product.price + toppingsCost;
+	}, [product.price, dataTopping]);
+
 	return (
 		<div>
 			<div className="flex flex-col mx-auto max-w-screen-lg lg:px-0 min-h-screen">
@@ -134,7 +142,7 @@ const DetailCard = ({ products, type }) => {
 						{/* Pasa el producto al QuickAddToCart */}
 						<QuickAddToCart product={product} toppings={dataTopping} />
 						<p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
-							Por <strong>{currencyFormat(product.price)}</strong>.{" "}
+							Por <strong>{currencyFormat(totalPrice)}</strong>.{" "}
 							{product.type === "satisfyer"
 								? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
 								: product.type === "originals"
@@ -147,8 +155,8 @@ const DetailCard = ({ products, type }) => {
 				</div>
 				<div className="bg-black ">
 					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-						<span className="opacity-50">Por que todos quedan</span> pidiendo
-						mas:
+						<span className="opacity-50">Porque todos quedan</span> pidiendo
+						más:
 					</p>
 
 					<VideoSlider />
