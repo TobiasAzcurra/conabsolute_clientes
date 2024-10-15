@@ -33,7 +33,17 @@ const CartCard = ({
 		}
 	};
 
-	console.log(item);
+	// Función para calcular el precio total incluyendo los toppings pagos
+	const calculateTotalPrice = () => {
+		const toppingsTotal = toppings
+			? toppings.reduce((acc, topping) => acc + topping.price, 0)
+			: 0;
+		return price + toppingsTotal;
+	};
+
+	const totalPrice = calculateTotalPrice();
+
+	console.log("este es el", item);
 
 	return (
 		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-xl mb-4">
@@ -65,7 +75,9 @@ const CartCard = ({
 					</div>
 				</div>
 				<div className="flex flex-col items-start">
-					<p className="text-2xl font-bold mb-2">{currencyFormat(price)}</p>
+					<p className="text-2xl font-bold mb-2">
+						{currencyFormat(totalPrice)}
+					</p>
 					<QuickAddToCart product={item} />
 				</div>
 			</div>
