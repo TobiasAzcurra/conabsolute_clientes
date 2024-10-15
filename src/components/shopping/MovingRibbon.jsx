@@ -1,10 +1,13 @@
 import { useEffect, useRef } from "react";
+import ribbonTexture from "../../assets/ribbonTexture.png";
 
 const MovingRibbon = ({ angle }) => {
 	const ribbonRef = useRef(null);
+	const containerRef = useRef(null);
 
 	useEffect(() => {
 		const ribbon = ribbonRef.current;
+		const container = containerRef.current;
 		let animationFrame;
 		let position = 0;
 
@@ -14,6 +17,7 @@ const MovingRibbon = ({ angle }) => {
 				position = 0;
 			}
 			ribbon.style.transform = `translateX(${position}px)`;
+			container.style.backgroundPosition = `${position}px 0`;
 			animationFrame = requestAnimationFrame(animateRibbon);
 		};
 
@@ -24,7 +28,8 @@ const MovingRibbon = ({ angle }) => {
 
 	return (
 		<div
-			className="overflow-hidden  bg-white absolute"
+			ref={containerRef}
+			className="overflow-hidden absolute"
 			style={{
 				transform: `rotate(${angle}deg)`,
 				top: "0",
@@ -32,6 +37,9 @@ const MovingRibbon = ({ angle }) => {
 				width: "100vw",
 				overflow: "hidden",
 				zIndex: "1",
+				backgroundImage: `url(${ribbonTexture})`,
+				backgroundSize: "cover",
+				backgroundRepeat: "repeat",
 			}}
 		>
 			<div
