@@ -116,7 +116,7 @@ const QuickAddToCart = ({ product, animateFromCenter }) => {
 				</motion.div>
 			) : isMenuProductPage && cartQuantity === 0 ? (
 				<button
-					className="bg-black text-white rounded-full px-4 py-2 font-black"
+					className="bg-black font-coolvetica font-medium  text-white rounded-full px-4 pt-2 pb-4 text-4xl"
 					onClick={startAddingProcess}
 				>
 					Agregar
