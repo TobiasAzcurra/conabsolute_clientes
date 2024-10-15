@@ -36,7 +36,7 @@ const CartCard = ({
 	console.log(item);
 
 	return (
-		<div className="flex flex-row border w-full h-auto border-black border-opacity-20 rounded-xl mb-4">
+		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-xl mb-4">
 			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-300 to-red-400 rounded-l-xl overflow-hidden">
 				<img
 					src={img ? `/menu/${img}` : getDefaultImage(item)}
@@ -63,7 +63,7 @@ const CartCard = ({
 						<p className="text-xs font-medium">Presiona para editar</p>
 					</div>
 				</div>
-				<div className="flex flex-col items-end">
+				<div className="flex flex-col items-start">
 					<p className="text-2xl font-bold mb-2">{currencyFormat(price)}</p>
 					<QuickAddToCart product={item} />
 				</div>
