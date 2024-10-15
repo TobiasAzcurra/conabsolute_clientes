@@ -4,6 +4,7 @@ import { CardPedido } from "./CardPedido";
 import { useNavigate } from "react-router-dom"; // Importar useNavigate
 import logo from "../../assets/anheloTMblack.png";
 import arrow from "../../assets/arrowIcon.png";
+import ArrowBack from "../../components/back";
 
 export const Pedido = () => {
 	const [phoneNumber, setPhoneNumber] = useState("");
@@ -21,10 +22,6 @@ export const Pedido = () => {
 			setOrders(pedidos);
 			setLoading(false);
 		});
-	};
-
-	const handleGoBack = () => {
-		navigate("/"); // Navegar a la página principal
 	};
 
 	return (
@@ -57,13 +54,7 @@ export const Pedido = () => {
 			</style>
 
 			<div className="bg-gray-100 relative flex flex-col items-center h-screen justify-center">
-				<div
-					className="absolute top-2 left-4 flex flex-row items-center gap-2 cursor-pointer"
-					onClick={handleGoBack}
-				>
-					<img src={arrow} className="h-2 rotate-180" alt="" />
-					<p className="font-coolvetica font-bold">Volver</p>
-				</div>
+				<ArrowBack />
 				<div className="flex items-center flex-col">
 					<img src={logo} className="w-1/2" alt="Logo" />
 					<p className="text-black font-coolvetica font-bold mt-[-3px]">
@@ -73,9 +64,9 @@ export const Pedido = () => {
 				<div className="flex items-center flex-col w-full px-4 mt-8">
 					{/* Línea horizontal con animación */}
 					<div className="w-full flex flex-row gap-2">
-						<div className="w-1/4 h-3.5 bg-black animated-loading"></div>
+						<div className="w-1/4 h-3.5 bg-black animated-loading rounded-l-full"></div>
 						<div className="w-1/4 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
-						<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+						<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-r-full"></div>
 					</div>
 					<p className="text-black font-coolvetica font-bold mt-2">
 						Anhelo está preparando tu pedido...
