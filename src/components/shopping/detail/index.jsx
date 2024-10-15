@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import toppings from "../../../assets/toppings-v1.json";
 import { addItem } from "../../../redux/cart/cartSlice";
 import currencyFormat from "../../../helpers/currencyFormat";
@@ -25,6 +25,7 @@ const DetailCard = ({ products, type }) => {
 	const [disable, setDisable] = useState(false);
 	const [dataTopping, setDataTopping] = useState([]);
 	const [quantity, setQuantity] = useState(1);
+	const cart = useSelector((state) => state.cartState.cart);
 
 	const product = products.find((p) => p.id === id);
 
@@ -117,7 +118,7 @@ const DetailCard = ({ products, type }) => {
 		return type === "originals" ? "object-top" : "object-bottom";
 	};
 
-	console.log(product);
+	console.log(cart);
 
 	return (
 		<div>
@@ -167,9 +168,9 @@ const DetailCard = ({ products, type }) => {
 							{product.type === "satisfyer"
 								? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
 								: product.type === "originals"
-								? "Anhelo creado por vos."
+								? "Anhelo, creado por vos. Tu burger ideal."
 								: product.type === "our"
-								? "Nuestras mejores combinaciones."
+								? "Nuestras mejores combinaciones. Obras de arte."
 								: ""}
 						</p>
 					</div>
@@ -201,6 +202,7 @@ const DetailCard = ({ products, type }) => {
 					</div>
 				</div>
 			</div>
+			{cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
 		</div>
 	);
 };
