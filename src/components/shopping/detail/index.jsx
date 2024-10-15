@@ -80,9 +80,9 @@ const DetailCard = ({ products, type }) => {
 					<p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
 						{product.description}
 					</p>
-					<div className="w-full max-w-md h-[400px] mt-8 flex items-center justify-center">
+					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
 						<img
-							className="w-full h-full object-cover object-center"
+							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
 							src={`/menu/${product.img}`}
 							alt="imagen"
 						/>
