@@ -159,9 +159,9 @@ const CartItems = () => {
 			</div>
 			<div className="flex justify-center flex-col mt-3.5 items-center px-4">
 				<p className="text-2xl font-bold mb-2">Datos para la entrega</p>
-				<div className="w-full items-center rounded-xl border-2 border-black ">
+				<div className="w-full items-center rounded-3xl border-2 border-black ">
 					<MapDirection />
-					<div className="flex flex-row justify-between px-3 h-10 items-center border-t border-black border-opacity-20">
+					<div className="flex flex-row justify-between px-3 h-10 items-center border-t  border-black border-opacity-20">
 						<div className="flex flex-row gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -239,8 +239,8 @@ const CartItems = () => {
 			</div>
 			<div className="flex justify-center flex-col mt-6 items-center px-4">
 				<p className="text-2xl font-bold mb-2">Metodo de pago</p>
-				<div className="w-full items-center rounded-xl border-2 border-black ">
-					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
+				<div className="w-full items-center rounded-3xl border-2 border-black ">
+					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black rounded-t-3xl border-opacity-20">
 						<div className="flex flex-row gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -302,7 +302,7 @@ const CartItems = () => {
 			{/* Botón "Pedir" modificado */}
 			<button
 				onClick={handlePedir}
-				className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
+				className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 mx-4 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
 			>
 				Pedir
 			</button>

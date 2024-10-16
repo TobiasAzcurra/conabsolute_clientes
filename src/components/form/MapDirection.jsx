@@ -61,7 +61,7 @@ export const MapDirection = ({
 			solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
 		>
 			<div
-				className="w-full md:w-6/12 rounded-t-xl overflow-hidden"
+				className="w-full md:w-6/12 rounded-t-3xl overflow-hidden"
 				style={{
 					height: "15vh",
 				}}
