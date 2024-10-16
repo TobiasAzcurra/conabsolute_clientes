@@ -50,17 +50,11 @@ const DetailCard = ({ products, type }) => {
 
 		if (selectedTopping) {
 			if (isChecked) {
-				setDataTopping((prevToppings) => {
-					const updatedToppings = [...prevToppings, selectedTopping];
-					return updatedToppings;
-				});
+				setDataTopping((prevToppings) => [...prevToppings, selectedTopping]);
 			} else {
-				setDataTopping((prevToppings) => {
-					const updatedToppings = prevToppings.filter(
-						(item) => item !== selectedTopping
-					);
-					return updatedToppings;
-				});
+				setDataTopping((prevToppings) =>
+					prevToppings.filter((item) => item.name !== selectedTopping.name)
+				);
 			}
 		}
 	};
@@ -145,29 +139,32 @@ const DetailCard = ({ products, type }) => {
 										value={topping.name}
 										onChange={handleToppingChange}
 										className="hidden peer"
-										checked={dataTopping.includes(topping)}
+										checked={dataTopping.some((t) => t.name === topping.name)}
 									/>
 									{/* Checkbox personalizado */}
 									<span
-										className="w-5 h-5 inline-block mr-3 border border-gray-400 rounded-md flex-shrink-0 
-                       peer-checked:bg-black peer-checked:border-transparent 
-                       transition-colors duration-200 ease-in-out"
+										className="relative w-6 h-6 mr-3 border border-gray-400 rounded-full flex-shrink-0 
+                                               peer-checked:bg-black peer-checked:border-transparent 
+                                               transition-colors duration-200 ease-in-out
+                                               hover:border-black
+                                               focus:ring-2 focus:ring-blue-500
+                                               flex items-center justify-center"
 									>
 										{/* Icono de check, visible solo cuando está seleccionado */}
-										<svg
-											className="hidden w-4 h-4 text-white peer-checked:block m-auto"
-											xmlns="http://www.w3.org/2000/svg"
-											fill="none"
-											viewBox="0 0 24 24"
-											stroke="currentColor"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={3}
-												d="M5 13l4 4L19 7"
-											/>
-										</svg>
+										{dataTopping.some((t) => t.name === topping.name) && (
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												className="w-4 h-4 text-gray-100"
+											>
+												<path
+													fillRule="evenodd"
+													d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
+													clipRule="evenodd"
+												/>
+											</svg>
+										)}
 									</span>
 									{/* Texto del topping */}
 									<p className="font-bold font-coolvetica text-black text-xs">
