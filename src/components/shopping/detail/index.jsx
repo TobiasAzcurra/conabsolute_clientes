@@ -112,8 +112,6 @@ const DetailCard = ({ products, type }) => {
 		return type === "originals" ? "object-top" : "object-bottom";
 	};
 
-	console.log(cart);
-
 	return (
 		<div>
 			<div className="flex flex-col ">
