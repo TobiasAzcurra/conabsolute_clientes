@@ -51,7 +51,7 @@ const MenuPage = () => {
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				navigate("/menu"); // Redirect to /menu after the second animation ends
+				navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
 			}, 2000); // Duration of the second animation in milliseconds
 			return () => clearTimeout(timer);
 		}
