@@ -220,7 +220,7 @@ const FormCustom = ({ cart, total }) => {
 										/>
 									</div>
 								</div>
-								<div className="flex justify-center flex-col mt-3.5 items-center px-4">
+								<div className="flex justify-center flex-col mt-3.5 items-center ">
 									<p className="text-2xl font-bold mb-2">
 										Datos para la entrega
 									</p>
@@ -356,7 +356,7 @@ const FormCustom = ({ cart, total }) => {
 									</div>
 								</div>
 
-								<div className="flex justify-center flex-col mt-6 items-center px-4">
+								<div className="flex justify-center flex-col mt-6 items-center ">
 									<p className="text-2xl font-bold mb-2">Metodo de pago</p>
 									<div className="w-full items-center rounded-3xl border-2 border-black ">
 										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
@@ -455,19 +455,19 @@ const FormCustom = ({ cart, total }) => {
 
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold">Resumen</p>
-									<div className="flex flex-row justify-between w-full px-4">
+									<div className="flex flex-row justify-between w-full">
 										<p>Productos</p>
 										<p>{currencyFormat(discountedTotal)}</p>
 									</div>
-									<div className="flex flex-row justify-between w-full px-4">
+									<div className="flex flex-row justify-between w-full">
 										<p>Envio</p>
 										<p>{currencyFormat(envio)}</p>
 									</div>
-									<div className="flex flex-row justify-between w-full px-4">
+									<div className="flex flex-row justify-between w-full">
 										<p>Descuentos</p>
 										<p>-{currencyFormat(descuento)}</p>
 									</div>
-									<div className="flex flex-row justify-between w-full px-4">
+									<div className="flex flex-row justify-between w-full">
 										<p className="font-bold">Total</p>
 										<p className="font-bold">
 											{currencyFormat(discountedTotal + envio)}
