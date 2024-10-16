@@ -51,7 +51,7 @@ const MenuPage = () => {
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
+				// navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
 			}, 2000); // Duration of the second animation in milliseconds
 			return () => clearTimeout(timer);
 		}
@@ -94,7 +94,13 @@ const MenuPage = () => {
 	}, []);
 
 	return (
-		<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
+		<div
+			className={`bg-gradient-to-b ${
+				isFirstAnimation
+					? "from-gray-950 via-red-950 to-red-main"
+					: "from-gray-950 via-gray-950 to-red-main"
+			} flex items-center justify-center h-screen`}
+		>
 			{isFirstAnimation ? (
 				// First Animation: Logo moving from right to left
 				<div className="moving-logo-container">
