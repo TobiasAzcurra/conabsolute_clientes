@@ -35,7 +35,7 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 
 		// Crear 5 copias de cada sticker en lugar de 15
 		const initialStickers = availableStickers.flatMap((src) => {
-			return Array.from({ length: 5 }, () => {
+			return Array.from({ length: 1 }, () => {
 				const { x, y } = getRandomPosition(48, 48); // Tamaño ajustado
 				return {
 					id: `${Date.now()}-${Math.random()}`, // ID único
