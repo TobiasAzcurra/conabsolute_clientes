@@ -151,10 +151,10 @@ const Section = ({ products = [], path }) => {
 				{cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
 			</div>
 			{/* Integrar el Canvas de Stickers fuera del contenedor principal */}
-			<StickerCanvas
+			{/* <StickerCanvas
 				containerWidth={containerSize.width}
 				containerHeight={containerSize.height}
-			/>
+			/> */}
 		</div>
 	);
 };

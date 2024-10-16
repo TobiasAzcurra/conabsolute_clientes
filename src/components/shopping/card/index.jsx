@@ -9,7 +9,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 	};
 
 	return (
-		<div className="relative flex flex-col items-center border border-black border-opacity-20 rounded-3xl bg-gray-100 transition duration-300 w-full max-w-[400px] text-black z-50">
+		<div className="relative flex flex-col items-center border border-black border-opacity-20 rounded-xl  bg-gray-100 transition duration-300 w-full max-w-[400px] text-black z-50">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
 			<div className="absolute right-2 top-2 z-40">
 				<QuickAddToCart
