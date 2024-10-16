@@ -8,10 +8,36 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 	};
 
+	// Lógica para asignar un porcentaje de posición de imagen a cada producto
+	const getImagePosition = (productName) => {
+		const imagePositions = {
+			"Satisfyer Easter Egg": "65%",
+			"Satisfyer BCN Cheeseburger": "40%",
+			"Satisfyer ANHELO Classic": "50%",
+			"Simple Chessburger": "70%",
+			"Doble Cheeseburger": "60%",
+			"Triple Cheeseburger": "40%",
+			"Cuadruple Cheeseburger": "35%",
+			"Crispy BCN": "65%",
+			"ANHELO Classic": "55%",
+			"BCN Cheeseburger": "65%",
+			"BBQ BCN Cheeseburger": "55%",
+			"Easter Egg": "70%",
+			"Mario Inspired": "45%",
+			// Agrega más productos y porcentajes aquí si es necesario
+		};
+
+		// Retorna el porcentaje específico, o un valor por defecto si no está definido
+		return imagePositions[productName] || "50%";
+	};
+
+	// Obtener el porcentaje para este producto
+	const imgPosition = getImagePosition(name);
+
 	return (
-		<div className="relative flex flex-col items-center border border-black border-opacity-20 rounded-3xl  bg-gray-100 transition duration-300 w-full max-w-[400px] text-black z-50">
+		<div className="relative flex flex-col items-center border border-black border-opacity-20 bg-gray-100 rounded-3xl transition duration-300 w-full max-w-[400px] text-black z-50">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
-			<div className="absolute right-2 top-2 z-40">
+			<div className="absolute right-4 top-2 z-40">
 				<QuickAddToCart
 					product={{ name, description, price, img, path, id, category }}
 				/>
@@ -19,16 +45,15 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 			{/* Contenido de la tarjeta que redirige */}
 			<Link to={`/menu/${path}/${id}`} className="w-full">
-				<div className="h-[130px] overflow-hidden rounded-t-3xl w-full bg-gradient-to-b from-gray-100 to-gray-300  relative ">
+				<div className="h-[130px] overflow-hidden rounded-t-3xl w-full bg-gradient-to-b from-gray-100 to-gray-300 relative">
 					<img
 						className="object-cover w-full h-full"
+						style={{ objectPosition: `center ${imgPosition}` }}
 						src={`/menu/${img}`}
 						alt={img}
-						style={{
-							objectPosition: "center",
-						}}
 					/>
 				</div>
+
 				<div className="flex px-4 flex-col items-center justify-between leading-normal font-coolvetica text-center">
 					<h5 className="mb-1 mt-4 text-2xl font-bold tracking-tight">
 						{capitalizeWords(name)}
