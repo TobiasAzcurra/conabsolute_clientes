@@ -51,7 +51,7 @@ const MenuPage = () => {
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				// navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
+				navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
 			}, 2000); // Duration of the second animation in milliseconds
 			return () => clearTimeout(timer);
 		}
@@ -67,6 +67,18 @@ const MenuPage = () => {
         }
         100% {
           transform: translateX(-50vw) scale(4); /* Move off the left edge and maintain scale */
+        }
+      }
+
+      @keyframes gradientAnimation {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
         }
       }
 
@@ -86,6 +98,12 @@ const MenuPage = () => {
         /* Ensure the image can grow beyond its container */
         will-change: transform;
       }
+
+      .breathing-gradient {
+        background: linear-gradient(100deg, #000000, #4f1414, #C00100);
+        background-size: 200% 200%;
+        animation: gradientAnimation 6s ease infinite;
+      }
     `;
 		document.head.appendChild(style);
 		return () => {
@@ -95,26 +113,22 @@ const MenuPage = () => {
 
 	return (
 		<div
-			className={`bg-gradient-to-b ${
-				isFirstAnimation
-					? "from-gray-950 via-red-950 to-red-main"
-					: "from-gray-950 via-gray-950 to-red-main"
-			} flex items-center justify-center h-screen`}
+			className={`breathing-gradient flex items-center justify-center h-screen`}
 		>
 			{isFirstAnimation ? (
 				// First Animation: Logo moving from right to left
 				<div className="moving-logo-container">
-					<img className="moving-logo brightness-75" src={logo} alt="ANHELO" />
+					<img className="moving-logo " src={logo} alt="ANHELO" />
 				</div>
 			) : isSecondAnimation ? (
 				// Second Part: Existing content with fade-in animation
 				<div className="text-center">
 					<img
-						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow brightness-75"
+						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow "
 						src={logo}
 						alt="ANHELO"
 					/>
-					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow brightness-75 animate__delay-1s">
+					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow  animate__delay-1s">
 						Vas a pedir más.
 					</p>
 				</div>
