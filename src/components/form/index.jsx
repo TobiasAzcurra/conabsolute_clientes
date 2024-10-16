@@ -422,7 +422,6 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 									</div>
 								</div>
-
 								{/* Método de pago y cupones */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold mb-2">Método de pago</p>
@@ -430,6 +429,7 @@ const FormCustom = ({ cart, total }) => {
 										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
 											{/* Campo de selección de método de pago */}
 											<div className="flex flex-row items-center gap-2">
+												{/* Icono */}
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													viewBox="0 0 24 24"
@@ -535,7 +535,7 @@ const FormCustom = ({ cart, total }) => {
 														voucherStatus[index] !== "¡Código válido!" && (
 															<div className="flex flex-row h-10 justify-between px-3 items-start">
 																<div className="flex flex-row items-center gap-2">
-																	<p className="bg-transparent px-0 text-opacity-20 w-full">
+																	<p className="bg-transparent px-0  text-opacity-100 w-full text-red-main">
 																		{voucherStatus[index]}
 																	</p>
 																</div>
