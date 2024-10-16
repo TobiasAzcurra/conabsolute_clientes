@@ -74,16 +74,30 @@ const FormCustom = ({ cart, total }) => {
 		// Si después de recorrer el carrito no hay la cantidad mínima de hamburguesas, retorna false
 		return false;
 	}
+	const [isValidating, setIsValidating] = useState([false]); // Nuevo estado para manejar la carga
+
 	const handleVoucherValidation = async (index, setFieldValue) => {
-		// Primero, validar si el cupón ya fue ingresado en otro input
+		// Iniciar la animación de carga
+		setIsValidating((prev) => {
+			const updated = [...prev];
+			updated[index] = true; // Activar el estado de carga
+			return updated;
+		});
+
+		// Primera validación: evitar cupones duplicados
 		if (couponCodes.indexOf(couponCodes[index]) !== index) {
 			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] = "Este codigo ya fue ingresado.";
+			updatedVoucherStatus[index] = "Este código ya fue ingresado.";
 			setVoucherStatus(updatedVoucherStatus);
-			return; // Detener la validación si hay un duplicado
+			setIsValidating((prev) => {
+				const updated = [...prev];
+				updated[index] = false; // Desactivar el estado de carga
+				return updated;
+			});
+			return;
 		}
 
-		// Validar que haya al menos el número de hamburguesas necesarias en el carrito
+		// Validar que haya suficientes hamburguesas
 		const numCoupons = couponCodes.length;
 		const hasEnoughBurgers = validarCantidadDeBurgers(cart, numCoupons);
 
@@ -93,29 +107,31 @@ const FormCustom = ({ cart, total }) => {
 				numCoupons * 2
 			} hamburguesas para canjear los vouchers.`;
 			setVoucherStatus(updatedVoucherStatus);
-			return; // Detener la ejecución si no hay suficientes hamburguesas
+			setIsValidating((prev) => {
+				const updated = [...prev];
+				updated[index] = false; // Desactivar el estado de carga
+				return updated;
+			});
+			return;
 		}
 
 		try {
-			// Proceder a validar el voucher solo si no está duplicado y hay suficientes hamburguesas
+			// Validar el cupón
 			const isValid = await canjearVoucher(couponCodes[index]);
-
 			const updatedVoucherStatus = [...voucherStatus];
+
 			if (isValid) {
-				// Calcular el total con el descuento del cupón actual
 				const { newTotal, totalDescuento } = calculateDiscountedTotal(
 					cart,
 					couponCodes.length
 				);
 				setDiscountedTotal(newTotal);
 				setDescuento(totalDescuento);
-				updatedVoucherStatus[index] = "¡codigo válido!";
-
-				// Borrar los valores de los inputs de pago
+				updatedVoucherStatus[index] = "¡Código válido!";
 				setFieldValue("efectivoCantidad", "");
 				setFieldValue("mercadopagoCantidad", "");
 			} else {
-				updatedVoucherStatus[index] = "codigo no válido.";
+				updatedVoucherStatus[index] = "Código no válido.";
 			}
 			setVoucherStatus(updatedVoucherStatus);
 		} catch (error) {
@@ -124,6 +140,13 @@ const FormCustom = ({ cart, total }) => {
 			setVoucherStatus(updatedVoucherStatus);
 			console.error("Error al validar el cupón:", error);
 		}
+
+		// Desactivar la animación de carga
+		setIsValidating((prev) => {
+			const updated = [...prev];
+			updated[index] = false;
+			return updated;
+		});
 	};
 
 	useEffect(() => {
@@ -263,7 +286,7 @@ const FormCustom = ({ cart, total }) => {
 											</div>
 										)}
 
-										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black border-opacity-20">
+										<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
 											<div className="flex flex-row items-center gap-2">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
@@ -393,8 +416,11 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 										<div className="flex flex-col gap-4">
 											{couponCodes.map((coupon, index) => (
-												<div key={index} className="flex flex-col w-full gap-2">
-													<div className="flex flex-row gap-2 pl-3 h-10 items-center">
+												<div
+													key={index}
+													className="flex flex-col h-10 w-full gap-2"
+												>
+													<div className="flex flex-row gap-2 px-3  items-center">
 														<svg
 															xmlns="http://www.w3.org/2000/svg"
 															viewBox="0 0 24 24"
@@ -411,44 +437,52 @@ const FormCustom = ({ cart, total }) => {
 														<MyTextInput
 															name={`couponCode${index}`}
 															type="text"
-															placeholder="¿Tenes algun cupon?"
+															placeholder="¿Tienes algún cupón?"
 															value={couponCodes[index]}
-															onChange={(e) =>
-																handleCouponChange(index, e.target.value)
-															}
-															className="bg-transparent  px-0 h-10 text-opacity-20  outline-none w-full "
+															onChange={(e) => {
+																handleCouponChange(index, e.target.value); // Actualiza el valor del cupón
+																handleVoucherValidation(index, setFieldValue); // Inicia la validación automáticamente
+															}}
+															className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 														/>
-														{/* <button
-															type="button"
-															onClick={() =>
-																handleVoucherValidation(index, setFieldValue)
-															}
-															className="p-2 mb-2 font-antonio text-white text-xs font-bold bg-red-main"
-														>
-															VALIDAR
-														</button> */}
+
+														{/* Mostrar spinner mientras se valida */}
+														{isValidating[index] && (
+															<div
+																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
+																role="status"
+															>
+																<span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+																	Loading...
+																</span>
+															</div>
+														)}
 													</div>
+
+													{/* Mostrar el mensaje de código válido o inválido */}
 													{voucherStatus[index] && (
-														<p
-															className={`text-xs mb-2 font-antonio ${
-																voucherStatus[index] === "¡codigo válido!"
-																	? "text-green-500"
-																	: "text-red-500"
-															}`}
-														>
-															{voucherStatus[index]}
-														</p>
+														<div className="flex flex-row  h-10 justify-between px-3  items-start ">
+															<div className="flex flex-row items-center gap-2">
+																<svg
+																	xmlns="http://www.w3.org/2000/svg"
+																	viewBox="0 0 24 24"
+																	fill="currentColor"
+																	className="h-6"
+																>
+																	<path
+																		fill-rule="evenodd"
+																		d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+																		clip-rule="evenodd"
+																	/>
+																</svg>
+																<p className="bg-transparent  px-0 text-opacity-20   w-full ">
+																	Código válido, ¿Tenes alguno más?
+																</p>
+															</div>
+														</div>
 													)}
 												</div>
 											))}
-											{/* Botón de agregar más cupones, separado de los inputs
-											<button
-												type="button"
-												onClick={addCouponField}
-												className="mt-4 font-antonio text-black text-xs font-bold"
-											>
-												¿Tenes más cupones? Clickea acá.
-											</button> */}
 										</div>
 									</div>
 								</div>
