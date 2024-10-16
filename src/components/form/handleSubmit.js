@@ -1,71 +1,100 @@
-const phone = '5493584306832';
+import {
+  ReadData,
+  ReadMateriales,
+  UploadOrder,
+} from "../../firebase/uploadOrder";
+import {
+  calcularCostoHamburguesa,
+  extractCoordinates,
+  obtenerFechaActual,
+  obtenerHoraActual,
+} from "../../helpers/currencyFormat";
 
-const handleSubmit = (
+const handleSubmit = async (
   values,
   cart,
   total,
   envio,
   mapUrl,
-  address,
-  couponCodes
+  couponCodes,
 ) => {
-  const couponsText =
-    couponCodes.length > 0 ? `- *Cupón:* ${couponCodes.join(', ')}` : '';
+  const coordinates = extractCoordinates(mapUrl);
+  const materialesData = await ReadMateriales();
+  const productsData = await ReadData();
 
-  let message =
-    `¡Hola! Quiero hacer un pedido:\n\n` +
-    `${couponsText}\n` + // Aquí concatenamos los cupones
-    `- *Reserva:* ${values.hora}\n` +
-    `- *Teléfono:* ${values.phone}\n` +
-    `- *Forma de entrega:* ${values.deliveryMethod}\n` +
-    `${
-      values.deliveryMethod === 'delivery'
-        ? `- *Dirección:* ${address}\n` +
-          `- *Ubicación:* ${mapUrl}\n` +
-          `- *Referencias:* ${values.references || 'no especificado'}\n`
-        : ''
-    }` +
-    `- *Forma de pago:* ${values.paymentMethod}\n` +
-    `${
-      values.paymentMethod === 'ambos'
-        ? `- *Monto en efectivo:* $${values.efectivoCantidad}\n` +
-          `- *Monto con transferencia:* $${values.mercadopagoCantidad}\n`
-        : ''
-    }` +
-    `Aquí está el detalle de mi pedido:\n\n`;
+  const formattedData = productsData.map(({ data }) => ({
+    description: data.description || "",
+    img: data.img,
+    name: data.name,
+    price: data.price,
+    type: data.type,
+    ingredients: data.ingredients,
+    costo: calcularCostoHamburguesa(materialesData, data.ingredients),
+  }));
+  const orderDetail = {
+    envio,
+    detallePedido: cart.map((item) => {
+      const quantity = item.quantity !== undefined ? item.quantity : 0;
 
-  let items = '';
+      const productoSeleccionado = formattedData.find(
+        (producto) => producto.name === item.name,
+      );
 
-  cart.forEach((item) => {
-    items += `${item.quantity}x ${item.name}\n`;
+      const toppingsSeleccionados = item.toppings || [];
+      let costoToppings = 0;
 
-    if (item.toppings.length > 0) {
-      items += `Toppings:\n`;
-      item.toppings.forEach((topping) => {
-        items += `- ${topping.name}\n`;
+      toppingsSeleccionados.forEach((topping) => {
+        const materialTopping = materialesData.find(
+          (material) =>
+            material.nombre.toLowerCase() === topping.name.toLowerCase(),
+        );
+
+        if (materialTopping) {
+          costoToppings += materialTopping.costo;
+        }
       });
-    }
 
-    items += `: $ ${item.price}\n\n`;
-  });
+      const costoBurger = productoSeleccionado
+        ? (productoSeleccionado.costo + costoToppings) * quantity
+        : 0;
 
-  items += `Subtotal: $ ${total}\n`;
+      return {
+        burger: item.name, // Nombre de la hamburguesa
+        toppings: item.toppings.map((topping) => topping.name), // Nombres de los toppings
+        quantity: item.quantity, // Cantidad del ítem
+        priceBurger: item.price, // Precio de la hamburguesa
+        priceToppings: item.toppings.reduce(
+          (total, topping) => total + (topping.price || 0), // Precio total de los toppings seleccionados
+          0,
+        ),
+        subTotal: item.price * item.quantity, // Precio total de la hamburguesa * cantidad
+        costoBurger, // Costo de la hamburguesa incluyendo toppings y cantidad
+      };
+    }),
+    subTotal: values.subTotal,
+    total: total,
+    fecha: obtenerFechaActual(), // Asegúrate de que esta función devuelva la fecha en el formato deseado
+    aclaraciones: values.references || "",
+    metodoPago: values.paymentMethod,
+    direccion: values.address,
+    telefono: String(values.phone) || "", // Convierte a string
+    hora: values.hora || obtenerHoraActual(),
+    cerca: false, // Puedes ajustar esto según tus necesidades
+    cadete: "NO ASIGNADO",
+    referencias: values.references,
+    map: coordinates || [0, 0],
+    elaborado: false,
+    couponCodes,
+  };
 
-  if (values.deliveryMethod === 'delivery') {
-    items += `Costo de envío: $${envio}\n`;
-    total += envio;
+  try {
+    const orderId = await UploadOrder(orderDetail); // Captura el ID de la orden
+
+    return orderId; // Retorna el ID de la orden
+  } catch (error) {
+    console.error("Error al subir la orden: ", error);
+    return null;
   }
-
-  items += `TOTAL: $ ${total}\n\n`;
-
-  message += items;
-  message += 'Espero tu respuesta para confirmar mi pedido.';
-
-  const encodedMessage = encodeURIComponent(message);
-
-  const url = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-
-  window.open(url, '_blank');
 };
 
 export default handleSubmit;

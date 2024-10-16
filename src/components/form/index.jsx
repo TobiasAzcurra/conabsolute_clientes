@@ -194,17 +194,25 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
         }}
         onSubmit={async (values) => {
-          if (values.paymentMethod === "mercadopago") {
+          if (values.paymentMethod === "efectivo") {
+            const orderId = await handleSubmit(
+              values,
+              cart,
+              discountedTotal,
+              envio,
+              mapUrl,
+              couponCodes,
+            );
+
+            if (orderId) {
+              // Si el ID es válido, redirigir al usuario a la página de confirmación
+              navigate(`/pedido/${orderId}`);
+            } else {
+              // Manejar el error, como mostrar una notificación al usuario
+              console.error("Error al procesar la orden");
+            }
           }
-          // handleSubmit(
-          //   values,
-          //   cart,
-          //   discountedTotal,
-          //   envio,
-          //   mapUrl,
-          //   values.address,
-          //   couponCodes,
-          // );
+
           // dispatch(addLastCart());
           // dispatch(clearCart());
 
