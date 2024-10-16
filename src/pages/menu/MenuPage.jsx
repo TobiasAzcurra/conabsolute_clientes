@@ -100,7 +100,7 @@ const MenuPage = () => {
       }
 
       .breathing-gradient {
-        background: linear-gradient(100deg, #000000, #4f1414, #C00100);
+        background: linear-gradient(100deg, #000000, #000000, #C00100);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
