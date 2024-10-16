@@ -104,17 +104,17 @@ const MenuPage = () => {
 			{isFirstAnimation ? (
 				// First Animation: Logo moving from right to left
 				<div className="moving-logo-container">
-					<img className="moving-logo" src={logo} alt="ANHELO" />
+					<img className="moving-logo brightness-75" src={logo} alt="ANHELO" />
 				</div>
 			) : isSecondAnimation ? (
 				// Second Part: Existing content with fade-in animation
 				<div className="text-center">
 					<img
-						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow"
+						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow brightness-75"
 						src={logo}
 						alt="ANHELO"
 					/>
-					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow animate__delay-1s">
+					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow brightness-75 animate__delay-1s">
 						Vas a pedir más.
 					</p>
 				</div>
