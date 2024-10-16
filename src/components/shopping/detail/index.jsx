@@ -146,8 +146,8 @@ const DetailCard = ({ products, type }) => {
 										className="relative w-6 h-6 mr-3 border border-gray-400 rounded-full flex-shrink-0 
                                                peer-checked:bg-black peer-checked:border-transparent 
                                                transition-colors duration-200 ease-in-out
-                                               hover:border-black
-                                               focus:ring-2 focus:ring-blue-500
+                                               
+                                               
                                                flex items-center justify-center"
 									>
 										{/* Icono de check, visible solo cuando está seleccionado */}
