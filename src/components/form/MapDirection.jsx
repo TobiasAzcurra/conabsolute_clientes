@@ -62,9 +62,12 @@ export const MapDirection = ({
 			solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
 		>
 			<div
-				className="w-full  md:w-6/12 "
+				className="w-full md:w-6/12"
 				style={{
-					height: "20vh",
+					height: "25vh",
+					borderRadius: "24px", // Equivalente a rounded-3xl
+					overflow: "hidden", // Para asegurar que el contenido respete los bordes
+					maskImage: "radial-gradient(circle, white, black)", // Para ajustar el canvas interno
 				}}
 			>
 				<Map
