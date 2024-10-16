@@ -65,14 +65,14 @@ const CartCard = ({
 					<div className="flex flex-col space-y-1">
 						{/* Mostrar toppings formateados */}
 						{toppings && toppings.length > 0 && (
-							<p className="text-xs mb-2 font-medium">
+							<p className="text-xs mb-4 font-medium">
 								Toppings: {formatToppings(toppings)}.
 							</p>
 						)}
 					</div>
 				</div>
 				<div className="flex flex-col items-start">
-					<p className="text-2xl font-bold mb-2">
+					<p className="text-2xl font-bold mb-4">
 						{currencyFormat(totalPrice)}
 					</p>
 					<QuickAddToCart product={item} />
