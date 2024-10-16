@@ -1,7 +1,10 @@
 import { items } from "../../../pages/menu/MenuPage";
 import Card from "../card";
+import { useSelector } from "react-redux";
 
 const Section = ({ products = [], path }) => {
+	const cart = useSelector((state) => state.cartState.cart);
+
 	let originalsBurgers = [];
 	let ourCollection = [];
 	let satisfyer = [];
@@ -117,6 +120,7 @@ const Section = ({ products = [], path }) => {
 					)}
 				</div>
 			)}
+			{cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
 		</>
 	);
 };
