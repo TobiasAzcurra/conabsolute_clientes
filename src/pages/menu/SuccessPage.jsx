@@ -1,49 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom"; // Agregamos useNavigate para redirección
+import { useLocation, useNavigate, useParams } from "react-router-dom"; // Agregamos useNavigate para redirección
 import logo from "../../assets/anheloTMwhite.png";
 
 export const items = {
-	burgers: "burgers",
-	combos: "combos",
-	papas: "papas",
-	bebidas: "bebidas",
+  burgers: "burgers",
+  combos: "combos",
+  papas: "papas",
+  bebidas: "bebidas",
 };
 
 const SuccessPage = () => {
-	const { pathname } = useLocation();
-	const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { orderId } = useParams();
 
-	const [selectedItem, setSelectedItem] = useState("");
-	const [locationMenu, setLocationMenu] = useState(true);
+  const [selectedItem, setSelectedItem] = useState("");
+  const [locationMenu, setLocationMenu] = useState(true);
 
-	useEffect(() => {
-		const pathParts = pathname.split("/");
-		const lastPart = pathParts[pathParts.length - 1];
-		// Si selecciono PROMOCIONES, que no se actualice el selectedItem
+  useEffect(() => {
+    const pathParts = pathname.split("/");
+    const lastPart = pathParts[pathParts.length - 1];
+    // Si selecciono PROMOCIONES, que no se actualice el selectedItem
 
-		if (selectedItem === "PROMOCIONES") {
-			setSelectedItem("PROMOCIONES");
-		} else {
-			setSelectedItem(lastPart);
-		}
+    if (selectedItem === "PROMOCIONES") {
+      setSelectedItem("PROMOCIONES");
+    } else {
+      setSelectedItem(lastPart);
+    }
 
-		setLocationMenu(pathname.startsWith("/menu/"));
-	}, [pathname, selectedItem]);
+    setLocationMenu(pathname.startsWith("/menu/"));
+  }, [pathname, selectedItem]);
 
-	// Redirección después de la animación
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			navigate("/pedido");
-		}, 2000); // Redirige después de 2 segundos
+  // Redirección después de la animación
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(`/pedido/${orderId}`);
+    }, 2000); // Redirige después de 2 segundos
 
-		return () => clearTimeout(timer);
-	}, [navigate]);
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
-	return (
-		<>
-			{/* Definición de las animaciones dentro del componente */}
-			<style>
-				{`
+  return (
+    <>
+      {/* Definición de las animaciones dentro del componente */}
+      <style>
+        {`
           @keyframes drawCircle {
             from {
               stroke-dashoffset: 157; /* Circunferencia de un círculo con r=25: 2 * π * 25 ≈ 157 */
@@ -115,29 +116,29 @@ const SuccessPage = () => {
             }
           }
         `}
-			</style>
+      </style>
 
-			<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
-				<div className="text-center">
-					{/* Ícono de éxito con animaciones de dibujo */}
-					<svg
-						className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 52 52"
-						aria-label="Operación exitosa"
-					>
-						<path
-							className="check-animation"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="5"
-							d="M14 27 L22 35 L38 19"
-						/>
-					</svg>
-				</div>
-			</div>
-		</>
-	);
+      <div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
+        <div className="text-center">
+          {/* Ícono de éxito con animaciones de dibujo */}
+          <svg
+            className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 52 52"
+            aria-label="Operación exitosa"
+          >
+            <path
+              className="check-animation"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="5"
+              d="M14 27 L22 35 L38 19"
+            />
+          </svg>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default SuccessPage;

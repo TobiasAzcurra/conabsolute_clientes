@@ -1,184 +1,195 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-	APIProvider,
-	AdvancedMarker,
-	Map,
-	useMap,
-	useMapsLibrary,
-	useAdvancedMarkerRef,
+  APIProvider,
+  AdvancedMarker,
+  Map,
+  useMap,
+  useMapsLibrary,
+  useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
 import Swal from "sweetalert2";
 
 const position = { lat: -33.117142, lng: -64.347756 };
 
 export const MapDirection = ({
-	setUrl,
-	setValidarUbi,
-	setNoEncontre,
-	setFieldValue,
+  setUrl,
+  setValidarUbi,
+  setNoEncontre,
+  setFieldValue,
 }) => {
-	const APIKEY = import.meta.env.VITE_API_GOOGLE_MAPS;
+  const APIKEY = import.meta.env.VITE_API_GOOGLE_MAPS;
 
-	const [selectedPlace, setSelectedPlace] = useState(null);
-	const [markerRef, marker] = useAdvancedMarkerRef();
+  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [markerRef, marker] = useAdvancedMarkerRef();
 
-	useEffect(() => {
-		if (selectedPlace) {
-			const lat = selectedPlace.geometry?.location.lat();
-			const lng = selectedPlace.geometry?.location.lng();
-			const formattedAddress = selectedPlace.formatted_address;
-			const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+  useEffect(() => {
+    if (selectedPlace) {
+      const lat = selectedPlace.geometry?.location.lat();
+      const lng = selectedPlace.geometry?.location.lng();
+      const formattedAddress = selectedPlace.formatted_address;
+      const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
 
-			const formattedGoogleMapsUrl =
-				`https://www.google.com/maps?q=${lat},${lng}`.replace(
-					"https://",
-					"https ://"
-				);
-			setUrl(googleMapsUrl);
-			setFieldValue("address", formattedAddress); // Actualiza la dirección en Formik
-		}
-	}, [selectedPlace]);
+      const formattedGoogleMapsUrl =
+        `https://www.google.com/maps?q=${lat},${lng}`.replace(
+          "https://",
+          "https ://",
+        );
+      setUrl(googleMapsUrl);
+      setFieldValue("address", formattedAddress); // Actualiza la dirección en Formik
+    }
+  }, [selectedPlace]);
 
-	const handleValidateLocation = () => {
-		setValidarUbi(true);
-		Swal.fire({
-			title: "¡Ubicación Validada!",
-			text: "La ubicación ha sido validada con éxito.",
-			icon: "success",
-			confirmButtonText: "OK",
-			timer: 1200, // Tiempo en milisegundos (1200 ms = 1.2 segundos)
-			timerProgressBar: true, // Muestra una barra de progreso para el temporizador
-			didOpen: (toast) => {
-				toast.addEventListener("mouseenter", Swal.stopTimer);
-				toast.addEventListener("mouseleave", Swal.resumeTimer);
-			},
-		});
-	};
+  const handleValidateLocation = () => {
+    setValidarUbi(true);
+    Swal.fire({
+      title: "¡Ubicación Validada!",
+      text: "La ubicación ha sido validada con éxito.",
+      icon: "success",
+      confirmButtonText: "OK",
+      timer: 1200, // Tiempo en milisegundos (3000 ms = 3 segundos)
+      timerProgressBar: true, // Muestra una barra de progreso para el temporizador
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
+  };
 
-	return (
-		<APIProvider
-			apiKey={APIKEY}
-			solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
-		>
-			<div
-				className="w-full md:w-6/12 rounded-t-3xl overflow-hidden"
-				style={{
-					height: "15vh",
-				}}
-			>
-				{/* <div className="autocomplete-control w-full">
-                    <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
-                </div> */}
-				<Map
-					style={{
-						height: "100%",
-						width: "100%",
-					}}
-					mapId={"bf51a910020fa25a"}
-					defaultZoom={13}
-					defaultCenter={position}
-					gestureHandling={"greedy"}
-					disableDefaultUI={true}
-				>
-					<AdvancedMarker
-						ref={markerRef}
-						position={selectedPlace?.geometry?.location}
-						draggable={true}
-					/>
-				</Map>
-				<MapHandler
-					place={selectedPlace}
-					marker={marker}
-					setPlace={setSelectedPlace}
-				/>
-			</div>
-			{/* <button
-                className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-antonio p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
-                onClick={() => setNoEncontre(true)}
-                type="button"
-            >
-                ¿No encontras tu direccion?
-            </button> */}
-		</APIProvider>
-	);
+  return (
+    <APIProvider
+      apiKey={APIKEY}
+      solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
+    >
+      <div
+        className="w-full md:w-6/12"
+        style={{
+          height: "33vh",
+        }}
+      >
+        <div className="autocomplete-control w-full">
+          <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
+        </div>
+        <Map
+          style={{
+            height: "100%",
+            width: "100%",
+          }}
+          mapId={"bf51a910020fa25a"}
+          defaultZoom={13}
+          defaultCenter={position}
+          gestureHandling={"greedy"}
+          disableDefaultUI={true}
+        >
+          <AdvancedMarker
+            ref={markerRef}
+            position={selectedPlace?.geometry?.location}
+            draggable={true}
+          />
+        </Map>
+        <MapHandler
+          place={selectedPlace}
+          marker={marker}
+          setPlace={setSelectedPlace}
+        />
+      </div>
+      <button
+        className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-antonio p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
+        onClick={() => setNoEncontre(true)}
+        type="button"
+      >
+        ¿No encontras tu direccion?
+      </button>
+    </APIProvider>
+  );
 };
 
 const MapHandler = ({ place, marker, setPlace }) => {
-	const map = useMap();
+  const map = useMap();
 
-	useEffect(() => {
-		if (!map || !place || !marker) return;
+  useEffect(() => {
+    if (!map || !place || !marker) return;
 
-		if (place.geometry?.viewport) {
-			map.fitBounds(place.geometry?.viewport);
-		}
+    if (place.geometry?.viewport) {
+      map.fitBounds(place.geometry?.viewport);
+    }
 
-		marker.position = place.geometry?.location;
+    marker.position = place.geometry?.location;
 
-		const handleDragEnd = (event) => {
-			const latLng = event.latLng;
-			setPlace((prevPlace) => ({
-				...prevPlace,
-				geometry: {
-					...prevPlace.geometry,
-					location: latLng,
-				},
-			}));
-		};
+    const handleDragEnd = (event) => {
+      const latLng = event.latLng;
+      setPlace((prevPlace) => ({
+        ...prevPlace,
+        geometry: {
+          ...prevPlace.geometry,
+          location: latLng,
+        },
+      }));
+    };
 
-		// Usa directamente el listener de eventos de Google Maps
-		google.maps.event.addListener(marker, "dragend", handleDragEnd);
+    // Use Google Maps event listener directly
+    google.maps.event.addListener(marker, "dragend", handleDragEnd);
 
-		// Función de limpieza para remover el listener cuando el componente se desmonta
-		return () => {
-			google.maps.event.clearListeners(marker, "dragend");
-		};
-	}, [map, place, marker, setPlace]);
+    // Cleanup function to remove the listener when the component unmounts
+    return () => {
+      google.maps.event.clearListeners(marker, "dragend");
+    };
+  }, [map, place, marker, setPlace]);
 
-	return null;
+  return null;
 };
 
 const PlaceAutocomplete = ({ onPlaceSelect }) => {
-	const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
-	const inputRef = useRef(null);
-	const places = useMapsLibrary("places");
+  const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
+  const inputRef = useRef(null);
+  const places = useMapsLibrary("places");
 
-	useEffect(() => {
-		if (!places || !inputRef.current) return;
+  useEffect(() => {
+    if (!places || !inputRef.current) return;
 
-		// Crea un bounding box con lados ~20km alejados del punto central
-		const defaultBounds = {
-			north: position.lat + 0.2,
-			south: position.lat - 0.2,
-			east: position.lng + 0.2,
-			west: position.lng - 0.2,
-		};
-		const options = {
-			fields: ["geometry", "name", "formatted_address"],
-			bounds: defaultBounds,
-			strictBounds: true,
-		};
+    // Create a bounding box with sides ~20km away from the center point
+    const defaultBounds = {
+      north: position.lat + 0.2,
+      south: position.lat - 0.2,
+      east: position.lng + 0.2,
+      west: position.lng - 0.2,
+    };
+    const options = {
+      fields: ["geometry", "name", "formatted_address"],
+      bounds: defaultBounds,
+      strictBounds: true,
+    };
 
-		setPlaceAutocomplete(new places.Autocomplete(inputRef.current, options));
-	}, [places]);
+    setPlaceAutocomplete(new places.Autocomplete(inputRef.current, options));
+  }, [places]);
 
-	useEffect(() => {
-		if (!placeAutocomplete) return;
+  useEffect(() => {
+    if (!placeAutocomplete) return;
 
-		placeAutocomplete.addListener("place_changed", () => {
-			onPlaceSelect(placeAutocomplete.getPlace());
-		});
-	}, [onPlaceSelect, placeAutocomplete]);
+    placeAutocomplete.addListener("place_changed", () => {
+      onPlaceSelect(placeAutocomplete.getPlace());
+    });
+  }, [onPlaceSelect, placeAutocomplete]);
 
-	// Descomentar y ajustar el input según sea necesario
-	// return (
-	//     <div style={{ width: "100%" }}>
-	//         <input
-	//             className="font-antonio focus:border-none focus:outline-none bg-gray-300 text-xs p-2 mb-[-23px] text-black ml-[-23px]"
-	//             ref={inputRef}
-	//             placeholder="ESCRIBI TU DIRECCION"
-	//             style={{ width: "100%", boxSizing: "border-box" }}
-	//         />
-	//     </div>
-	// );
+  return (
+    <div className="flex flex-row gap-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-6"
+      >
+        <path
+          fillRule="evenodd"
+          d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+          clipRule="evenodd"
+        />
+      </svg>
+      <input
+        className="bg-white text-opacity-20 text-black outline-none w-full px-2" // Fondo blanco, texto negro, sin borde por defecto
+        ref={inputRef}
+        placeholder="ESCRIBI TU DIRECCION"
+        style={{ width: "100%", boxSizing: "border-box" }}
+      />
+    </div>
+  );
 };
