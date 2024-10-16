@@ -15,7 +15,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 
 	// Ajustamos las clases de los estilos dependiendo de la ruta actual
 	const className = `flex flex-col items-center border border-black border-opacity-20 rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
-		isCarrito ? "w-[110px]" : "w-full max-w-[400px]"
+		isCarrito ? "w-[110px]" : "w-full max-w-[200px]"
 	}`;
 
 	// Ajustamos la fuente de la imagen solo si estamos en /carrito
