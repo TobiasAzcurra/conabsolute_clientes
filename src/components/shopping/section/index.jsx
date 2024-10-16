@@ -1,6 +1,10 @@
+// src/components/Section.jsx
+
+import React, { useEffect } from "react";
 import { items } from "../../../pages/menu/MenuPage";
 import Card from "../card";
 import { useSelector } from "react-redux";
+import StickerCanvas from "../../StickerCanvas"; // Importación correcta
 
 const Section = ({ products = [], path }) => {
 	const cart = useSelector((state) => state.cartState.cart);
@@ -11,26 +15,23 @@ const Section = ({ products = [], path }) => {
 	let promo = [];
 
 	if (items.burgers === path) {
-		promo = products.filter((product) => {
-			return product.type.includes("promo");
-		});
+		promo = products.filter((product) => product.type.includes("promo"));
 
-		originalsBurgers = products.filter((product) => {
-			return product.type.includes("originals");
-		});
-		ourCollection = products.filter((product) => {
-			return product.type.includes("our");
-		});
-		satisfyer = products.filter((product) => {
-			return product.type.includes("satisfyer");
-		});
+		originalsBurgers = products.filter((product) =>
+			product.type.includes("originals")
+		);
+		ourCollection = products.filter((product) => product.type.includes("our"));
+		satisfyer = products.filter((product) =>
+			product.type.includes("satisfyer")
+		);
 	} else {
 		ourCollection = products;
 	}
 
-	setTimeout(() => {
+	// Es recomendable usar useEffect para el scroll
+	useEffect(() => {
 		window.scrollTo(0, 0);
-	}, 10);
+	}, []);
 
 	return (
 		<>
@@ -38,10 +39,10 @@ const Section = ({ products = [], path }) => {
 				<div className="mt-8 mb-4 mr-4 ml-4 ">
 					{satisfyer.length > 0 && (
 						<div className="section">
-							<p className="font-bold text-5xl text-center  mb-4 text-black font-coolvetica">
+							<p className="font-bold text-5xl text-center mb-4 text-black font-coolvetica">
 								Satisfyers
 							</p>
-							<div className=" grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-8 ">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-8">
 								{satisfyer.map(({ name, description, price, id, img }, i) => (
 									<Card
 										key={i}
@@ -58,10 +59,10 @@ const Section = ({ products = [], path }) => {
 					)}
 					{originalsBurgers.length > 0 && (
 						<div className="section">
-							<p className="font-bold text-5xl text-center  mb-4 text-black font-coolvetica">
+							<p className="font-bold text-5xl text-center mb-4 text-black font-coolvetica">
 								Originals
 							</p>
-							<div className=" grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-2 ">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-2">
 								{originalsBurgers.map(
 									({ name, description, price, id, img }, i) => (
 										<Card
@@ -80,10 +81,10 @@ const Section = ({ products = [], path }) => {
 					)}
 					{ourCollection.length > 0 && (
 						<div className="section">
-							<p className="font-bold mt-8 text-5xl text-center  mb-4 text-black font-coolvetica">
+							<p className="font-bold mt-8 text-5xl text-center mb-4 text-black font-coolvetica">
 								Masterpieces
 							</p>
-							<div className=" grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
 								{ourCollection.map(
 									({ name, description, price, id, img }, i) => (
 										<Card
@@ -121,6 +122,9 @@ const Section = ({ products = [], path }) => {
 				</div>
 			)}
 			{cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
+
+			{/* Integrar el Canvas de Stickers */}
+			<StickerCanvas />
 		</>
 	);
 };
