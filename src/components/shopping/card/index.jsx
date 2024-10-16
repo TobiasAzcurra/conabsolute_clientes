@@ -9,7 +9,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 	};
 
 	return (
-		<div className="relative flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 transition duration-300 w-full max-w-[400px] text-black">
+		<div className="relative flex flex-col items-center border border-black border-opacity-20 rounded-3xl bg-gray-100 transition duration-300 w-full max-w-[400px] text-black">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
 			<div className="absolute right-2 top-2 z-40">
 				<QuickAddToCart
@@ -19,7 +19,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 			{/* Contenido de la tarjeta que redirige */}
 			<Link to={`/menu/${path}/${id}`} className="w-full">
-				<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-100 to-gray-300  relative ">
+				<div className="h-[130px] overflow-hidden rounded-t-3xl w-full bg-gradient-to-b from-gray-100 to-gray-300  relative ">
 					<img
 						className="object-cover w-full h-full"
 						src={`/menu/${img}`}

@@ -14,7 +14,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 	const isCarrito = location.pathname === "/carrito";
 
 	// Ajustamos las clases de los estilos dependiendo de la ruta actual
-	const className = `flex flex-col items-center border border-black border-opacity-20 rounded-xl bg-gray-100 p-1 transition duration-300 text-black ${
+	const className = `flex flex-col items-center border border-black border-opacity-20 rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
 		isCarrito ? "w-[110px]" : "w-full max-w-[400px]"
 	}`;
 
@@ -27,7 +27,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 
 	const content = (
 		<>
-			<div className="h-[70px] w-full rounded-t-xl overflow-hidden bg-gradient-to-b from-gray-100 to-gray-300 relative flex justify-center">
+			<div className="h-[70px] w-full rounded-t-3xl overflow-hidden bg-gradient-to-b from-gray-100 to-gray-300 relative flex justify-center">
 				<img
 					className="object-cover absolute top-2.5 h-[70px]"
 					src={imageSrc}
