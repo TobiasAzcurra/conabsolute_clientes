@@ -217,7 +217,7 @@ const DetailCard = ({ products, type }) => {
 						Si esta <span className="text-gray-100">dedicacion</span> ponemos en
 						la pagina,
 						<br />
-						imaginate en las <span className="text-gray-100">burgers</span>.
+						imaginate en las <span className="text-gray-100">burgers.</span>
 					</p>
 
 					<p className="text-2xl mt-6 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
