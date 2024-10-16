@@ -17,7 +17,8 @@ import SignInButton from "../google/SignInButton";
 import Navbar from "../Navbar";
 import arrow from "../../assets/arrowIcon.png";
 import currencyFormat from "../../helpers/currencyFormat";
-import calculateDiscountedTotal from "../../helpers/currencyFormat";
+import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
+
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const FormCustom = ({ cart, total }) => {
   const [discountedTotal, setDiscountedTotal] = useState(total);
 
   const [couponCodes, setCouponCodes] = useState([""]);
+  const [descuento, setDescuento] = useState(0);
   const [voucherStatus, setVoucherStatus] = useState([""]);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
@@ -101,8 +103,12 @@ const FormCustom = ({ cart, total }) => {
       const updatedVoucherStatus = [...voucherStatus];
       if (isValid) {
         // Calcular el total con el descuento del cupón actual
-        const newTotal = calculateDiscountedTotal(cart, couponCodes.length);
+        const { newTotal, totalDescuento } = calculateDiscountedTotal(
+          cart,
+          couponCodes.length,
+        );
         setDiscountedTotal(newTotal);
+        setDescuento(totalDescuento);
         updatedVoucherStatus[index] = "¡codigo válido!";
 
         // Borrar los valores de los inputs de pago
@@ -396,7 +402,7 @@ const FormCustom = ({ cart, total }) => {
                   <p className="text-2xl font-bold">Resumen</p>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Productos</p>
-                    <p>{currencyFormat(total)}</p>
+                    <p>{currencyFormat(discountedTotal)}</p>
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Envio</p>
@@ -404,7 +410,7 @@ const FormCustom = ({ cart, total }) => {
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Descuentos</p>
-                    <p>-$900</p>
+                    <p>-{currencyFormat(descuento)}</p>
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p className="font-bold">Total</p>

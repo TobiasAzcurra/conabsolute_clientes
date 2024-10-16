@@ -69,7 +69,7 @@ export const calcularCostoHamburguesa = (materiales, ingredientes) => {
   return costoTotal;
 };
 
-export const culateDiscountedTotal = (cart, numCupones) => {
+export const calculateDiscountedTotal = (cart, numCupones) => {
   // 1. Calcular la cantidad de hamburguesas a las que se aplicará el descuento
   const discountedBurgersCount = numCupones * 2;
 
@@ -86,6 +86,12 @@ export const culateDiscountedTotal = (cart, numCupones) => {
       });
     }
   });
+
+  // Calcular el total original antes del descuento
+  const originalTotal = allBurgers.reduce(
+    (sum, burger) => sum + burger.price + burger.toppingsPrice,
+    0,
+  );
 
   // 3. Ordenar las hamburguesas de mayor a menor precio total
   allBurgers.sort(
@@ -110,7 +116,11 @@ export const culateDiscountedTotal = (cart, numCupones) => {
   );
 
   // 7. Sumar ambos totales
-  const finalTotal = discountedTotal + remainingTotal;
+  const newTotal = discountedTotal + remainingTotal;
+  const totalDescuento = originalTotal - newTotal; // Descuento real aplicado
 
-  return finalTotal;
+  return {
+    newTotal,
+    totalDescuento,
+  };
 };
