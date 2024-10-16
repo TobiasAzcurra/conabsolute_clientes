@@ -199,7 +199,7 @@ const FormCustom = ({ cart, total }) => {
 					return (
 						<Form>
 							<div className="flex flex-col mb-2">
-								<div className="flex flex-row justify-between px-3 h-auto items-start border-2 border-black rounded-3xl  ">
+								<div className="flex flex-row justify-between px-3 h-auto items-start border-2 border-black rounded-3xl  mt-4">
 									<div className="flex flex-row w-full items-center gap-2">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
