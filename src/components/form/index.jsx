@@ -215,7 +215,6 @@ const FormCustom = ({ cart, total }) => {
 					color: rgba(0, 0, 0, 0.5);
 				}
 			`}</style>
-			<ArrowBack />
 			<Formik
 				initialValues={{
 					subTotal: discountedTotal,
