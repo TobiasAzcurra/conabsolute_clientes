@@ -92,7 +92,7 @@ export const MapDirection = ({
 			</div>
 
 			{/* Colocamos el input debajo del mapa */}
-			<div className="mt-4">
+			<div className="">
 				<PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
 			</div>
 
