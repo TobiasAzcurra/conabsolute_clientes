@@ -201,7 +201,7 @@ const CartItems = () => {
 							</p>
 						</div>
 					</div>
-					<div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
+					<div className="flex flex-row justify-between px-3 h-10 items-center border-b border-black border-opacity-20">
 						<div className="flex flex-row gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
