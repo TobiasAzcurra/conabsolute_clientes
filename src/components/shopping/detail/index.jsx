@@ -118,7 +118,7 @@ const DetailCard = ({ products, type }) => {
 		<div>
 			<div className="flex flex-col ">
 				{/* <ArrowBack /> */}
-				<div className="flex flex-col pt-8 md:pt-4 justify-items-center items-center ">
+				<div className="flex flex-col pt-8 md:pt-6 justify-items-center items-center ">
 					<h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
 						{capitalizeWords(product.name)}
 					</h4>
