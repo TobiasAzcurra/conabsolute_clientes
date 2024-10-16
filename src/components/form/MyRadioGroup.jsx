@@ -9,7 +9,7 @@ const MyRadioGroup = ({ name, options }) => {
 				{options.map((option) => (
 					<div
 						key={option.value}
-						className={`p-2 font-antonio text-xs  mb-2 md:w-6/12 w-full gap-1 ${
+						className={`p-2 font-coolvetica text-xs  mb-2 md:w-6/12 w-full gap-1 ${
 							values[name] === option.value ? "bg-red-main " : "bg-gray-300"
 						}`}
 						onClick={() => {
@@ -38,7 +38,7 @@ const MyRadioGroup = ({ name, options }) => {
 			<ErrorMessage
 				name={name}
 				component="span"
-				className=" text-sm text-red-main font-antonio font-light"
+				className=" text-sm text-red-main font-coolvetica font-light"
 			/>
 		</div>
 	);

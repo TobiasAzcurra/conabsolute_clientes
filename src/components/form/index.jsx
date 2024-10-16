@@ -299,7 +299,7 @@ const FormCustom = ({ cart, total }) => {
 										<ErrorMessage
 											name="address"
 											component="span"
-											className="text-sm text-red-main font-antonio font-light"
+											className="text-sm text-red-main font-coolvetica font-light"
 										/>
 
 										{noEncontre && (
@@ -355,7 +355,7 @@ const FormCustom = ({ cart, total }) => {
 													<ErrorMessage
 														name="phone"
 														component="span"
-														className="text-sm text-red-main font-antonio font-light mt-1"
+														className="text-sm text-red-main font-coolvetica font-light mt-1"
 													/>
 												</div>
 											</div>

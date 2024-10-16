@@ -100,7 +100,7 @@ export const MapDirection = ({
 			</div>
 
 			{/* <button
-				className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-antonio p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
+				className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-coolvetica p-2 uppercase bg-red-main focus:outline-none hover:bg-black hover:text-red-main"
 				onClick={() => setNoEncontre(true)}
 				type="button"
 			>
