@@ -178,9 +178,9 @@ const DetailCard = ({ products, type }) => {
 						</div>
 					)}
 
-					<div className="w-full h-[300px] mt-8 flex items-center justify-center">
+					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
 						<img
-							className="w-full max-w-[1000px] h-[300px] object-cover object-center"
+							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
 							src={`/menu/${product.img}`}
 							alt={product.name}
 						/>
