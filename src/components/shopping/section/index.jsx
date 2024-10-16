@@ -69,7 +69,7 @@ const Section = ({ products = [], path }) => {
 								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Satisfyers
 								</p>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-8">
+								<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8">
 									{satisfyer.map(({ name, description, price, id, img }, i) => (
 										<Card
 											key={i}
@@ -89,7 +89,7 @@ const Section = ({ products = [], path }) => {
 								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Originals
 								</p>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-2">
+								<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8">
 									{originalsBurgers.map(
 										({ name, description, price, id, img }, i) => (
 											<Card
@@ -111,11 +111,11 @@ const Section = ({ products = [], path }) => {
 								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Masterpieces
 								</p>
-								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
 									{ourCollection.map(
 										({ name, description, price, id, img }, i) => (
 											<Card
-												key={i}
+												key={id}
 												img={img}
 												name={name}
 												description={description}
