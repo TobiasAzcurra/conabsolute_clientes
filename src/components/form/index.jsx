@@ -169,7 +169,7 @@ const FormCustom = ({ cart, total }) => {
             }
           }
         }}
-        // validationSchema={formValidations}
+        validationSchema={formValidations}
       >
         {({ getFieldProps, isSubmitting, setFieldValue, values }) => {
           return (
@@ -211,6 +211,7 @@ const FormCustom = ({ cart, total }) => {
                       component="span"
                       className=" text-sm text-red-main font-antonio font-light"
                     />
+
                     {noEncontre && (
                       <div className="flex flex-row justify-between px-3 h-10 items-center border-t  border-black border-opacity-20">
                         <div className="flex flex-row gap-2">
@@ -236,7 +237,7 @@ const FormCustom = ({ cart, total }) => {
                       </div>
                     )}
 
-                    <div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
+                    <div className="flex flex-row justify-between px-3 h-auto items-start border border-black border-opacity-20">
                       <div className="flex flex-row gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -252,13 +253,22 @@ const FormCustom = ({ cart, total }) => {
                           />
                         </svg>
 
-                        <MyTextInput
-                          name="phone"
-                          type="text"
-                          placeholder="Tu numero de telefono"
-                          autoComplete="phone"
-                          className="bg-white text-opacity-20 text-black outline-none w-full px-2" // Fondo blanco, texto negro, sin borde por defecto
-                        />
+                        <div className="flex flex-col w-full">
+                          {" "}
+                          {/* Contenedor para el input y el mensaje de error */}
+                          <MyTextInput
+                            name="phone"
+                            type="text"
+                            placeholder="Tu número de teléfono"
+                            autoComplete="phone"
+                            className="bg-white text-opacity-20 text-black outline-none px-2" // Fondo blanco, texto negro, sin borde por defecto
+                          />
+                          <ErrorMessage
+                            name="phone"
+                            component="span"
+                            className="text-sm text-red-main font-antonio font-light mt-1" // Margen superior para espaciar el mensaje de error
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-row justify-between px-3 h-10 items-center border-b border-black border-opacity-20">
@@ -320,8 +330,8 @@ const FormCustom = ({ cart, total }) => {
                 <div className="flex justify-center flex-col mt-6 items-center px-4">
                   <p className="text-2xl font-bold mb-2">Metodo de pago</p>
                   <div className="w-full items-center rounded-3xl border-2 border-black ">
-                    <div className="flex flex-row justify-between px-3 h-10 items-center border border-black rounded-t-3xl border-opacity-20">
-                      <div className="flex flex-row gap-2">
+                    <div className="flex flex-row justify-between items-center h-10 border border-black rounded-t-3xl border-opacity-20">
+                      <div className="flex flex-row items-center gap-2 flex-grow">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -340,13 +350,18 @@ const FormCustom = ({ cart, total }) => {
                         <Field
                           as="select"
                           name="paymentMethod"
-                          className="bg-white text-opacity-20 text-black outline-none w-full px-2"
+                          className="bg-white text-black outline-none w-full px-2 flex-grow"
+                          style={{
+                            WebkitAppearance: "none",
+                            MozAppearance: "none",
+                          }} // Ocultar la flecha del select
                         >
                           <option value="efectivo">Efectivo</option>
                           <option value="mercadopago">Mercado pago</option>
                         </Field>
                       </div>
-                      <img src={arrow} className="h-2" alt="" />
+                      <img src={arrow} className="h-4 ml-2" alt="" />{" "}
+                      {/* Adjust height of arrow if needed */}
                     </div>
                     <div className="flex flex-col gap-4">
                       {couponCodes.map((coupon, index) => (
