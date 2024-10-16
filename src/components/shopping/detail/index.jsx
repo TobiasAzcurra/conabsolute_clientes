@@ -200,7 +200,7 @@ const DetailCard = ({ products, type }) => {
 					</div>
 				</div>
 				<div className="bg-black flex flex-col md:flex-row ">
-					<div className="md:flex md:flex-row md:mx-auto md:py-8 md:gap-12">
+					<div className="md:flex md:flex-row md:mx-auto md:py-4 md:gap-8">
 						{/* imagen por cada tipo */}
 						<div className="flex flex-col  ">
 							<div className="relative w-full h-[300px] overflow-hidden">
