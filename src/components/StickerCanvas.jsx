@@ -67,7 +67,9 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 	};
 
 	return (
-		<div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+		<div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+			{" "}
+			{/* Añadido overflow-hidden */}
 			{/* Área de canvas donde se colocan los stickers */}
 			<div className="w-full h-full">
 				{stickers.map((sticker) => (
@@ -75,11 +77,12 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 						key={sticker.id}
 						position={{ x: sticker.x, y: sticker.y }}
 						onStop={(e, data) => updatePosition(sticker.id, data)}
+						bounds="parent" // Añadido para limitar el movimiento dentro del contenedor padre
 					>
 						<img
 							src={sticker.src}
 							alt="Sticker"
-							className="w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 cursor-move pointer-events-auto"
+							className="h-52 sm:w-36 sm:h-36 md:w-48 md:h-48 cursor-move pointer-events-auto"
 							onDoubleClick={() => removeSticker(sticker.id)}
 						/>
 					</Draggable>
