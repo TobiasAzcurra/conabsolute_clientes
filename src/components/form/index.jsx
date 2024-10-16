@@ -428,6 +428,7 @@ const FormCustom = ({ cart, total }) => {
 									<p className="text-2xl font-bold mb-2">Método de pago</p>
 									<div className="w-full items-center rounded-3xl border-2 border-black">
 										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
+											{/* Campo de selección de método de pago */}
 											<div className="flex flex-row items-center gap-2">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
@@ -460,13 +461,18 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 
 										{/* Campos de cupones */}
-										<div className="flex flex-col gap-4">
+										<div className="flex flex-col">
 											{couponCodes.map((coupon, index) => (
 												<div
 													key={index}
-													className={`flex flex-col w-full gap-2 transition-all duration-300`}
+													className={`flex flex-col w-full transition-all duration-300 ${
+														index !== 0
+															? "border-t border-black border-opacity-20"
+															: ""
+													}`}
 												>
 													<div className="flex flex-row gap-2 px-3 items-center">
+														{/* Icono de cupón */}
 														<svg
 															xmlns="http://www.w3.org/2000/svg"
 															viewBox="0 0 24 24"
@@ -480,6 +486,7 @@ const FormCustom = ({ cart, total }) => {
 															/>
 														</svg>
 
+														{/* Campo de entrada de cupón */}
 														<MyTextInput
 															name={`couponCode${index}`}
 															type="text"
@@ -499,14 +506,13 @@ const FormCustom = ({ cart, total }) => {
 															className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 														/>
 
+														{/* Indicador de validación */}
 														{isValidating[index] ? (
 															<div
 																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
 																role="status"
 															>
-																<span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-																	Loading...
-																</span>
+																<span className="sr-only">Loading...</span>
 															</div>
 														) : voucherStatus[index] === "¡Código válido!" ? (
 															<svg
@@ -524,6 +530,7 @@ const FormCustom = ({ cart, total }) => {
 														) : null}
 													</div>
 
+													{/* Mensaje de validación */}
 													{voucherStatus[index] &&
 														voucherStatus[index] !== "¡Código válido!" && (
 															<div className="flex flex-row h-10 justify-between px-3 items-start">
@@ -535,6 +542,7 @@ const FormCustom = ({ cart, total }) => {
 															</div>
 														)}
 
+													{/* Lógica para agregar un nuevo campo de cupón */}
 													{voucherStatus[index] === "¡Código válido!" &&
 														index === couponCodes.length - 1 &&
 														addCouponField()}
