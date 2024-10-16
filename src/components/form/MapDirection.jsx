@@ -92,7 +92,7 @@ export const MapDirection = ({
 			</div>
 
 			{/* Colocamos el input debajo del mapa */}
-			<div className="">
+			<div className="m">
 				<PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
 			</div>
 
@@ -173,6 +173,11 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
 			onPlaceSelect(placeAutocomplete.getPlace());
 		});
 	}, [onPlaceSelect, placeAutocomplete]);
+	const [inputValue, setInputValue] = useState(""); // Estado para el valor del input
+
+	const handleInputChange = (e) => {
+		setInputValue(e.target.value); // Actualiza el valor del input
+	};
 
 	return (
 		<div className="flex flex-row pl-3 items-center ">
@@ -189,8 +194,12 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
 				/>
 			</svg>
 			<input
-				className="bg-transparent h-10 text-opacity-20 text-black outline-none w-full pl-[7px]"
+				className={`bg-transparent h-10 text-black outline-none w-full pl-2 ${
+					inputValue ? "opacity-100" : "text-gray-400"
+				}`}
 				ref={inputRef}
+				value={inputValue}
+				onChange={handleInputChange} // Maneja el cambio de valor del input
 				placeholder="Escribi tu direccion"
 				style={{ width: "100%", boxSizing: "border-box" }}
 			/>
