@@ -449,7 +449,7 @@ const FormCustom = ({ cart, total }) => {
 														/>
 
 														{/* Mostrar spinner mientras se valida */}
-														{isValidating[index] && (
+														{isValidating[index] ? (
 															<div
 																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
 																role="status"
@@ -458,7 +458,20 @@ const FormCustom = ({ cart, total }) => {
 																	Loading...
 																</span>
 															</div>
-														)}
+														) : voucherStatus[index] === "¡Código válido!" ? (
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="green"
+																className="h-6"
+															>
+																<path
+																	fillRule="evenodd"
+																	d="M10.828 16.172a.75.75 0 0 1-1.06 0L5.47 11.875a.75.75 0 0 1 1.06-1.06l3.298 3.297 6.364-6.364a.75.75 0 1 1 1.06 1.06l-7.425 7.425Z"
+																	clipRule="evenodd"
+																/>
+															</svg>
+														) : null}
 													</div>
 
 													{/* Mostrar el mensaje de código válido o inválido */}
