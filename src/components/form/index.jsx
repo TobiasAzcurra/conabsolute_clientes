@@ -357,8 +357,8 @@ const FormCustom = ({ cart, total }) => {
 								<div className="flex justify-center flex-col mt-6 items-center px-4">
 									<p className="text-2xl font-bold mb-2">Metodo de pago</p>
 									<div className="w-full items-center rounded-3xl border-2 border-black ">
-										<div className="flex flex-row justify-between items-center h-10 border border-black rounded-t-3xl border-opacity-20">
-											<div className="flex flex-row items-center gap-2 flex-grow">
+										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
+											<div className="flex flex-row items-center gap-2">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													viewBox="0 0 24 24"
@@ -377,7 +377,7 @@ const FormCustom = ({ cart, total }) => {
 												<Field
 													as="select"
 													name="paymentMethod"
-													className="bg-white text-black outline-none w-full px-2 flex-grow"
+													className="bg-transparent  px-0 h-10 text-opacity-20  outline-none w-full "
 													style={{
 														WebkitAppearance: "none",
 														MozAppearance: "none",
@@ -387,7 +387,6 @@ const FormCustom = ({ cart, total }) => {
 													<option value="mercadopago">Mercado pago</option>
 												</Field>
 											</div>
-											<img src={arrow} className="h-4 ml-2" alt="" />{" "}
 											{/* Adjust height of arrow if needed */}
 										</div>
 										<div className="flex flex-col gap-4">
