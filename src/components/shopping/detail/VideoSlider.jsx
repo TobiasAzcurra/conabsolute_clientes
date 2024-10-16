@@ -94,7 +94,7 @@ const VideoSlider = () => {
 								muted
 								playsInline
 								webkit-playsinline="true"
-								className="w-full h-auto object-cover rounded-3xl"
+								className="w-full md:h-[220px] h-auto object-cover rounded-3xl"
 							/>
 						) : (
 							<div className="w-full h-full flex items-center justify-start bg-black text-white font-coolvetica rounded-3xl p-8 text-left">

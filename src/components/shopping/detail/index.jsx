@@ -116,9 +116,9 @@ const DetailCard = ({ products, type }) => {
 
 	return (
 		<div>
-			<div className="flex flex-col mx-auto max-w-screen-lg lg:px-0 min-h-screen">
-				<ArrowBack />
-				<div className="flex flex-col pt-16 justify-items-center items-center ">
+			<div className="flex flex-col ">
+				{/* <ArrowBack /> */}
+				<div className="flex flex-col pt-8 md:pt-4 justify-items-center items-center ">
 					<h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
 						{capitalizeWords(product.name)}
 					</h4>
@@ -177,10 +177,9 @@ const DetailCard = ({ products, type }) => {
 							))}
 						</div>
 					)}
-
-					<div className="w-full h-[400px] mt-8 flex items-center justify-center">
+					<div className="w-full h-[300px] mt-8 flex items-center justify-center">
 						<img
-							className="w-full max-w-[1000px] h-[400px] object-cover object-center"
+							className="max-w-full sm:w-full md:w-auto h-[300px] object-cover object-center"
 							src={`/menu/${product.img}`}
 							alt={product.name}
 						/>
@@ -199,38 +198,46 @@ const DetailCard = ({ products, type }) => {
 								: ""}
 						</p>
 					</div>
-					<div className="relative w-full h-[300px] overflow-hidden">
-						<img
-							src={getImageForType(
-								product.type ? product.type : product.category
-							)}
-							className={`w-full h-full object-cover ${getObjectPositionForType(
-								product.type ? product.type : product.category
-							)}`}
-							alt=""
-						/>
-						<div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black to-transparent"></div>
-					</div>
 				</div>
-				<div className="bg-black ">
-					<p className="text-end text-gray-100/50 text-xs font-coolvetica pt-2 pr-4">
-						Si esta <span className="text-gray-100">dedicacion</span> ponemos en
-						la pagina,
-						<br />
-						imaginate en las <span className="text-gray-100">burgers.</span>
-					</p>
+				<div className="bg-black flex flex-col md:flex-row ">
+					<div className="md:flex md:flex-row md:mx-auto md:py-8 md:gap-12">
+						{/* imagen por cada tipo */}
+						<div className="flex flex-col  ">
+							<div className="relative w-full h-[300px] overflow-hidden">
+								<img
+									src={getImageForType(
+										product.type ? product.type : product.category
+									)}
+									className={`w-full h-full object-cover ${getObjectPositionForType(
+										product.type ? product.type : product.category
+									)}`}
+									alt=""
+								/>
+								<div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black to-transparent"></div>
+							</div>
+							<p className="text-end text-gray-100/50 text-xs font-coolvetica pt-2 pr-4">
+								Si esta <span className="text-gray-100">dedicacion</span>{" "}
+								ponemos en la pagina,
+								<br />
+								imaginate en las <span className="text-gray-100">burgers.</span>
+							</p>
+						</div>
+						{/* Reels */}
+						<div className="flex flex-col ">
+							<p className="text-2xl mt-6 pl-4 md:pl-0 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
+								<span className="opacity-50">Por que todos quedan</span>{" "}
+								pidiendo más:
+							</p>
 
-					<p className="text-2xl mt-6 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-						<span className="opacity-50">Por que todos quedan</span> pidiendo
-						más:
-					</p>
-
-					<VideoSlider />
-					<div className="flex flex-col mt-32 items-center mx-auto mb-16 justify-center">
-						<img src={logo} className="h-6 mb-1" alt="Logo de Anhelo" />
-						<p className="text-gray-100 font-bold text-xs font-coolvetica">
-							Vas a pedir más.
-						</p>
+							<VideoSlider />
+						</div>
+						{/* Logo */}
+						<div className="flex flex-col  mt-32 items-center mx-auto mb-16 md:my-auto justify-center">
+							<img src={logo} className="h-6 mb-1" alt="Logo de Anhelo" />
+							<p className="text-gray-100 font-bold text-xs font-coolvetica">
+								Vas a pedir más.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
