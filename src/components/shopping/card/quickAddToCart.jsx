@@ -149,7 +149,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 							: isCarritoPage
 							? "left-0"
 							: "right-0"
-					} top-0 flex-row rounded-lg font-black border-black border-2 bg-gray-100`}
+					} top-0 flex-row rounded-3xl font-black border-black border-2 bg-gray-100`}
 				>
 					<div
 						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
@@ -190,7 +190,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 				<div
 					className={`${
 						cartQuantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
-					} rounded-lg font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
+					} rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
 					{cartQuantity > 0 ? cartQuantity : "+"}
