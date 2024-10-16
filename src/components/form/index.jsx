@@ -494,15 +494,8 @@ const FormCustom = ({ cart, total }) => {
 
 													{/* Añadir automáticamente un nuevo campo si el código actual es válido */}
 													{voucherStatus[index] === "¡Código válido!" &&
-														index === couponCodes.length - 1 && (
-															<button
-																type="button"
-																onClick={addCouponField}
-																className="text-blue-500 hover:underline mt-2"
-															>
-																Añadir otro cupón
-															</button>
-														)}
+														index === couponCodes.length - 1 &&
+														addCouponField()}
 												</div>
 											))}
 										</div>
