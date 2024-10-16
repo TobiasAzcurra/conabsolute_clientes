@@ -8,6 +8,7 @@ import {
   useAdvancedMarkerRef,
 } from "@vis.gl/react-google-maps";
 import Swal from "sweetalert2";
+import { ErrorMessage } from "formik";
 
 const position = { lat: -33.117142, lng: -64.347756 };
 
@@ -69,6 +70,7 @@ export const MapDirection = ({
         <div className="autocomplete-control w-full">
           <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
         </div>
+
         <Map
           style={{
             height: "100%",

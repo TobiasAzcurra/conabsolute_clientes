@@ -8,11 +8,7 @@ const MyTextInput = ({ ...props }) => {
   return (
     <>
       <input {...field} {...props} />
-      <ErrorMessage
-        name={props.name}
-        component="span"
-        className=" text-sm text-red-main font-antonio font-light"
-      />
+
       {/* se puede pasar el className en el ErrorMessage */}
     </>
   );

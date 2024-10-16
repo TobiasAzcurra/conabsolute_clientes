@@ -17,7 +17,8 @@ import SignInButton from "../google/SignInButton";
 import Navbar from "../Navbar";
 import arrow from "../../assets/arrowIcon.png";
 import currencyFormat from "../../helpers/currencyFormat";
-import calculateDiscountedTotal from "../../helpers/currencyFormat";
+import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
+
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const FormCustom = ({ cart, total }) => {
   const [discountedTotal, setDiscountedTotal] = useState(total);
 
   const [couponCodes, setCouponCodes] = useState([""]);
+  const [descuento, setDescuento] = useState(0);
   const [voucherStatus, setVoucherStatus] = useState([""]);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
@@ -101,8 +103,12 @@ const FormCustom = ({ cart, total }) => {
       const updatedVoucherStatus = [...voucherStatus];
       if (isValid) {
         // Calcular el total con el descuento del cupón actual
-        const newTotal = calculateDiscountedTotal(cart, couponCodes.length);
+        const { newTotal, totalDescuento } = calculateDiscountedTotal(
+          cart,
+          couponCodes.length,
+        );
         setDiscountedTotal(newTotal);
+        setDescuento(totalDescuento);
         updatedVoucherStatus[index] = "¡codigo válido!";
 
         // Borrar los valores de los inputs de pago
@@ -139,6 +145,7 @@ const FormCustom = ({ cart, total }) => {
           hora: "",
           efectivoCantidad: 0,
           mercadopagoCantidad: 0,
+          aclaraciones: "",
         }}
         onSubmit={async (values) => {
           if (values.paymentMethod === "efectivo") {
@@ -162,12 +169,31 @@ const FormCustom = ({ cart, total }) => {
             }
           }
         }}
-        // validationSchema={formValidations}
+        validationSchema={formValidations}
       >
         {({ getFieldProps, isSubmitting, setFieldValue, values }) => {
           return (
             <Form>
               <div className="flex flex-col mb-2">
+                <div className="flex flex-row gap-2 pl-3 h-10 items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-6"
+                  >
+                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                  </svg>
+
+                  <MyTextInput
+                    label="Aclaraciones"
+                    name="aclaraciones"
+                    type="text"
+                    placeholder="¿Queres dejar alguna aclaracion?"
+                    autoComplete="off"
+                    className="bg-white text-opacity-20 text-black outline-none w-full px-2"
+                  />
+                </div>
                 <div className="flex justify-center flex-col mt-3.5 items-center px-4">
                   <p className="text-2xl font-bold mb-2">
                     Datos para la entrega
@@ -185,6 +211,7 @@ const FormCustom = ({ cart, total }) => {
                       component="span"
                       className=" text-sm text-red-main font-antonio font-light"
                     />
+
                     {noEncontre && (
                       <div className="flex flex-row justify-between px-3 h-10 items-center border-t  border-black border-opacity-20">
                         <div className="flex flex-row gap-2">
@@ -210,7 +237,7 @@ const FormCustom = ({ cart, total }) => {
                       </div>
                     )}
 
-                    <div className="flex flex-row justify-between px-3 h-10 items-center border border-black border-opacity-20">
+                    <div className="flex flex-row justify-between px-3 h-auto items-start border border-black border-opacity-20">
                       <div className="flex flex-row gap-2">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -226,13 +253,22 @@ const FormCustom = ({ cart, total }) => {
                           />
                         </svg>
 
-                        <MyTextInput
-                          name="phone"
-                          type="text"
-                          placeholder="Tu numero de telefono"
-                          autoComplete="phone"
-                          className="bg-white text-opacity-20 text-black outline-none w-full px-2" // Fondo blanco, texto negro, sin borde por defecto
-                        />
+                        <div className="flex flex-col w-full">
+                          {" "}
+                          {/* Contenedor para el input y el mensaje de error */}
+                          <MyTextInput
+                            name="phone"
+                            type="text"
+                            placeholder="Tu número de teléfono"
+                            autoComplete="phone"
+                            className="bg-white text-opacity-20 text-black outline-none px-2" // Fondo blanco, texto negro, sin borde por defecto
+                          />
+                          <ErrorMessage
+                            name="phone"
+                            component="span"
+                            className="text-sm text-red-main font-antonio font-light mt-1" // Margen superior para espaciar el mensaje de error
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-row justify-between px-3 h-10 items-center border-b border-black border-opacity-20">
@@ -283,7 +319,7 @@ const FormCustom = ({ cart, total }) => {
                         label="Referencias"
                         name="references"
                         type="text"
-                        placeholder="¿Queres dejar alguna aclaracion?"
+                        placeholder="¿Queres dejar alguna referencia?"
                         autoComplete="off"
                         className="bg-white text-opacity-20 text-black outline-none w-full px-2"
                       />
@@ -294,8 +330,8 @@ const FormCustom = ({ cart, total }) => {
                 <div className="flex justify-center flex-col mt-6 items-center px-4">
                   <p className="text-2xl font-bold mb-2">Metodo de pago</p>
                   <div className="w-full items-center rounded-3xl border-2 border-black ">
-                    <div className="flex flex-row justify-between px-3 h-10 items-center border border-black rounded-t-3xl border-opacity-20">
-                      <div className="flex flex-row gap-2">
+                    <div className="flex flex-row justify-between items-center h-10 border border-black rounded-t-3xl border-opacity-20">
+                      <div className="flex flex-row items-center gap-2 flex-grow">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -314,13 +350,18 @@ const FormCustom = ({ cart, total }) => {
                         <Field
                           as="select"
                           name="paymentMethod"
-                          className="bg-white text-opacity-20 text-black outline-none w-full px-2"
+                          className="bg-white text-black outline-none w-full px-2 flex-grow"
+                          style={{
+                            WebkitAppearance: "none",
+                            MozAppearance: "none",
+                          }} // Ocultar la flecha del select
                         >
                           <option value="efectivo">Efectivo</option>
                           <option value="mercadopago">Mercado pago</option>
                         </Field>
                       </div>
-                      <img src={arrow} className="h-2" alt="" />
+                      <img src={arrow} className="h-4 ml-2" alt="" />{" "}
+                      {/* Adjust height of arrow if needed */}
                     </div>
                     <div className="flex flex-col gap-4">
                       {couponCodes.map((coupon, index) => (
@@ -376,7 +417,7 @@ const FormCustom = ({ cart, total }) => {
                   <p className="text-2xl font-bold">Resumen</p>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Productos</p>
-                    <p>{currencyFormat(total)}</p>
+                    <p>{currencyFormat(discountedTotal)}</p>
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Envio</p>
@@ -384,7 +425,7 @@ const FormCustom = ({ cart, total }) => {
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p>Descuentos</p>
-                    <p>-$900</p>
+                    <p>-{currencyFormat(descuento)}</p>
                   </div>
                   <div className="flex flex-row justify-between w-full px-4">
                     <p className="font-bold">Total</p>

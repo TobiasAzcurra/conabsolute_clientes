@@ -13,7 +13,7 @@ import {
 const handleSubmit = async (
   values,
   cart,
-  total,
+  discountedTotal,
   envio,
   mapUrl,
   couponCodes,
@@ -72,9 +72,9 @@ const handleSubmit = async (
       };
     }),
     subTotal: values.subTotal,
-    total: total + envio,
+    total: discountedTotal + envio,
     fecha: obtenerFechaActual(), // Asegúrate de que esta función devuelva la fecha en el formato deseado
-    aclaraciones: values.references || "",
+    aclaraciones: values.aclaraciones || "",
     metodoPago: values.paymentMethod,
     direccion: values.address,
     telefono: String(values.phone) || "", // Convierte a string
@@ -85,6 +85,7 @@ const handleSubmit = async (
     map: coordinates || [0, 0],
     elaborado: false,
     couponCodes,
+    ubicacion: mapUrl,
   };
 
   try {
