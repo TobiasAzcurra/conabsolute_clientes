@@ -19,7 +19,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 			{/* Contenido de la tarjeta que redirige */}
 			<Link to={`/menu/${path}/${id}`} className="w-full">
-				<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-300 relative to-red-400">
+				<div className="h-[130px] overflow-hidden rounded-t-xl w-full bg-gradient-to-b from-gray-100 to-gray-300  relative ">
 					<img
 						className="object-cover w-full h-full"
 						src={`/menu/${img}`}
