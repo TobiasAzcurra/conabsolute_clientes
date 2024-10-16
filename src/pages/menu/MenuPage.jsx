@@ -54,7 +54,7 @@ const MenuPage = () => {
           transform: translateX(100vw) scale(4); /* Start off the right edge and scaled */
         }
         100% {
-          transform: translateX(-100vw) scale(4); /* Move off the left edge and maintain scale */
+          transform: translateX(-50vw) scale(4); /* Move off the left edge and maintain scale */
         }
       }
 
