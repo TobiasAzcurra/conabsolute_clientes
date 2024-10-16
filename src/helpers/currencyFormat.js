@@ -1,4 +1,5 @@
 export default function currencyFormat(num) {
+  if (!num) return 0;
   return "$" + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
 }
 
@@ -66,4 +67,50 @@ export const calcularCostoHamburguesa = (materiales, ingredientes) => {
   }
 
   return costoTotal;
+};
+
+export const culateDiscountedTotal = (cart, numCupones) => {
+  // 1. Calcular la cantidad de hamburguesas a las que se aplicará el descuento
+  const discountedBurgersCount = numCupones * 2;
+
+  // 2. Crear un array con todas las hamburguesas, repitiendo según su cantidad
+  let allBurgers = [];
+  cart.forEach((item) => {
+    for (let i = 0; i < item.quantity; i++) {
+      allBurgers.push({
+        price: item.price,
+        toppingsPrice: item.toppings.reduce(
+          (sum, topping) => sum + topping.price,
+          0,
+        ),
+      });
+    }
+  });
+
+  // 3. Ordenar las hamburguesas de mayor a menor precio total
+  allBurgers.sort(
+    (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice),
+  );
+
+  // 4. Seleccionar las hamburguesas mas caras según la cantidad de cupones
+  const discountedBurgers = allBurgers.slice(0, discountedBurgersCount);
+
+  // 5. Calcular el total de las hamburguesas con descuento
+  const discountedTotal =
+    discountedBurgers.reduce(
+      (sum, burger) => sum + burger.price + burger.toppingsPrice,
+      0,
+    ) / 2;
+
+  // 6. Calcular el total del resto del carrito
+  const remainingBurgers = allBurgers.slice(discountedBurgersCount);
+  const remainingTotal = remainingBurgers.reduce(
+    (sum, burger) => sum + burger.price + burger.toppingsPrice,
+    0,
+  );
+
+  // 7. Sumar ambos totales
+  const finalTotal = discountedTotal + remainingTotal;
+
+  return finalTotal;
 };

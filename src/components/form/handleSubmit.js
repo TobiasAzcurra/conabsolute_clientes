@@ -72,7 +72,7 @@ const handleSubmit = async (
       };
     }),
     subTotal: values.subTotal,
-    total: total,
+    total: total + envio,
     fecha: obtenerFechaActual(), // Asegúrate de que esta función devuelva la fecha en el formato deseado
     aclaraciones: values.references || "",
     metodoPago: values.paymentMethod,
