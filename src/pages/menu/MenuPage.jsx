@@ -17,6 +17,7 @@ const MenuPage = () => {
 	const [selectedItem, setSelectedItem] = useState("");
 	const [locationMenu, setLocationMenu] = useState(true);
 	const [isFirstAnimation, setIsFirstAnimation] = useState(true);
+	const [isSecondAnimation, setIsSecondAnimation] = useState(true);
 
 	const handleItemClick = (item) => {
 		setSelectedItem(item);
@@ -44,6 +45,17 @@ const MenuPage = () => {
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
+
+	useEffect(() => {
+		// Switch to redirect after the second animation ends
+		if (!isFirstAnimation && isSecondAnimation) {
+			const timer = setTimeout(() => {
+				setIsSecondAnimation(false);
+				navigate("/menu"); // Redirect to /menu after the second animation ends
+			}, 2000); // Duration of the second animation in milliseconds
+			return () => clearTimeout(timer);
+		}
+	}, [isFirstAnimation, isSecondAnimation, navigate]);
 
 	// Inject styles into the document head
 	useEffect(() => {
@@ -88,8 +100,8 @@ const MenuPage = () => {
 				<div className="moving-logo-container">
 					<img className="moving-logo" src={logo} alt="ANHELO" />
 				</div>
-			) : (
-				// Second Part: Existing content
+			) : isSecondAnimation ? (
+				// Second Part: Existing content with fade-in animation
 				<div className="text-center">
 					<img
 						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow"
@@ -100,7 +112,7 @@ const MenuPage = () => {
 						Vas a pedir más.
 					</p>
 				</div>
-			)}
+			) : null}
 		</div>
 	);
 };
