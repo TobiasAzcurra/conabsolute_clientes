@@ -40,7 +40,7 @@ const MenuPage = () => {
 		if (isFirstAnimation) {
 			const timer = setTimeout(() => {
 				setIsFirstAnimation(false);
-			}, 3000); // Duration of the first animation in milliseconds
+			}, 1000); // Duration of the first animation in milliseconds
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
@@ -70,7 +70,7 @@ const MenuPage = () => {
         top: 50%;
         left: 100%;
         transform: translate(-50%, -50%) scale(4);
-        animation: moveRightToLeft 3s linear forwards;
+        animation: moveRightToLeft 1s linear forwards;
         /* Ensure the image can grow beyond its container */
         will-change: transform;
       }
