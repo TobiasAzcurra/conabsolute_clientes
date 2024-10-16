@@ -51,7 +51,7 @@ const MenuPage = () => {
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
+				// navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
 			}, 2000); // Duration of the second animation in milliseconds
 			return () => clearTimeout(timer);
 		}
@@ -100,7 +100,8 @@ const MenuPage = () => {
       }
 
       .breathing-gradient {
-        background: linear-gradient(100deg, #000000, #000000, #C00100);
+       background: linear-gradient(100deg, #000000 0%, #000000 25%, #C00100 100%, #000000 75%, #000000 100%);
+
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
