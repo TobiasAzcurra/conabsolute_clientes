@@ -188,7 +188,14 @@ const DetailCard = ({ products, type }) => {
 					</div>
 				</div>
 				<div className="bg-black ">
-					<p className="text-2xl mt-8 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
+					<p className="text-end text-gray-100/50 text-xs font-coolvetica pt-2 pr-4">
+						Si esta <span className="text-gray-100">dedicacion</span> ponemos en
+						la pagina,
+						<br />
+						imaginate en las <span className="text-gray-100">burgers</span>.
+					</p>
+
+					<p className="text-2xl mt-6 pl-4 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
 						<span className="opacity-50">Por que todos quedan</span> pidiendo
 						más:
 					</p>
