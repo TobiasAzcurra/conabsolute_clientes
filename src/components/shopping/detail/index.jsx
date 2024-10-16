@@ -135,15 +135,42 @@ const DetailCard = ({ products, type }) => {
 					{product.type === "originals" && (
 						<div className="flex flex-col mt-2 items-center">
 							{toppingsArray.map((topping) => (
-								<label key={topping.name} className="flex items-center mb-1">
+								<label
+									key={topping.name}
+									className="flex items-center mb-2 cursor-pointer"
+								>
+									{/* Checkbox oculto */}
 									<input
 										type="checkbox"
 										value={topping.name}
 										onChange={handleToppingChange}
-										className="mr-2 bg-black"
+										className="hidden peer"
 										checked={dataTopping.includes(topping)}
 									/>
-									<p className="font-bold font-coolvetica">
+									{/* Checkbox personalizado */}
+									<span
+										className="w-5 h-5 inline-block mr-3 border border-gray-400 rounded-md flex-shrink-0 
+                       peer-checked:bg-black peer-checked:border-transparent 
+                       transition-colors duration-200 ease-in-out"
+									>
+										{/* Icono de check, visible solo cuando está seleccionado */}
+										<svg
+											className="hidden w-4 h-4 text-white peer-checked:block m-auto"
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												strokeWidth={3}
+												d="M5 13l4 4L19 7"
+											/>
+										</svg>
+									</span>
+									{/* Texto del topping */}
+									<p className="font-bold font-coolvetica text-black text-xs">
 										{capitalizeWords(topping.name)}:{" "}
 										{topping.price === 0
 											? "Gratis"
@@ -153,6 +180,7 @@ const DetailCard = ({ products, type }) => {
 							))}
 						</div>
 					)}
+
 					<div className="w-full h-[300px] mt-8 flex items-center justify-center">
 						<img
 							className="w-full max-w-[1000px] h-[300px] object-cover object-center"
