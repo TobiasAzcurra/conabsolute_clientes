@@ -72,7 +72,7 @@ const CartCard = ({
 					</div>
 				</div>
 				<div className="flex flex-col items-start">
-					<p className="text-2xl font-bold mb-4">
+					<p className="text-2xl font-bold mb-4 mt-[-5px]">
 						{currencyFormat(totalPrice)}
 					</p>
 					<QuickAddToCart product={item} />
