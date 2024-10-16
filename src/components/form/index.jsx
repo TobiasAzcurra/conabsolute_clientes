@@ -138,6 +138,24 @@ const FormCustom = ({ cart, total }) => {
 
 	return (
 		<div className="flex mt-2  mr-4 mb-10 min-h-screen  ml-4 flex-col">
+			<style jsx>{`
+				.custom-select {
+					appearance: none; /* Elimina la flecha en la mayoría de los navegadores */
+					-webkit-appearance: none; /* Elimina la flecha en Safari y Chrome */
+					-moz-appearance: none; /* Elimina la flecha en Firefox */
+					background: transparent; /* Fondo transparente */
+					padding: 0;
+					width: 100%;
+					height: 40px;
+					border: none;
+					outline: none;
+					font-size: 16px;
+				}
+				/* Añadir un fondo personalizado si deseas imitar el comportamiento de un select */
+				.custom-select::placeholder {
+					color: rgba(0, 0, 0, 0.5); /* Opcional, color del placeholder */
+				}
+			`}</style>
 			<ArrowBack />
 			<Formik
 				initialValues={{
@@ -294,13 +312,13 @@ const FormCustom = ({ cart, total }) => {
 												<Field
 													as="select"
 													name="hora"
-													className={`bg-transparent px-0 h-10 outline-none w-full ml-[-4.1px] ${
+													className={`custom-select ${
 														selectedHora === "" ? "text-gray-400" : "text-black"
 													}`}
 													value={selectedHora}
 													onChange={handleChange}
 												>
-													<option value="" disabled className="text-opacity-20">
+													<option value="" disabled>
 														¿Queres reservar para mas tarde?
 													</option>
 													<option value="20:30">20:30</option>
