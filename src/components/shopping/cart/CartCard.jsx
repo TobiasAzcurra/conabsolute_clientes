@@ -65,13 +65,10 @@ const CartCard = ({
 					<div className="flex flex-col space-y-1">
 						{/* Mostrar toppings formateados */}
 						{toppings && toppings.length > 0 && (
-							<p className="text-xs font-medium">
+							<p className="text-xs mb-2 font-medium">
 								Toppings: {formatToppings(toppings)}.
 							</p>
 						)}
-						<p className="text-xs font-medium">
-							Presiona para agregar una aclaracion
-						</p>
 					</div>
 				</div>
 				<div className="flex flex-col items-start">
