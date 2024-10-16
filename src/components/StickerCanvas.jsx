@@ -15,15 +15,40 @@ const availableStickers = [
 const StickerCanvas = ({ containerWidth, containerHeight }) => {
 	const [stickers, setStickers] = useState([]);
 
-	// Función para generar posiciones aleatorias dentro del contenedor
-	const getRandomPosition = (stickerWidth, stickerHeight) => {
+	const MIN_DISTANCE = 60; // Distancia mínima en píxeles entre stickers
+
+	// Función para calcular la distancia euclidiana entre dos puntos
+	const distance = (x1, y1, x2, y2) => {
+		return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+	};
+
+	// Función para generar una posición aleatoria que no esté demasiado cerca de otros stickers
+	const getRandomPosition = (stickerWidth, stickerHeight, existingStickers) => {
 		const padding = 20; // Espacio desde los bordes
 		const maxX = containerWidth - stickerWidth - padding;
 		const maxY = Math.min(containerHeight - stickerHeight - padding, 1000); // Limitar a 1000px
 
-		const x = Math.floor(Math.random() * (maxX - padding)) + padding;
-		const y = Math.floor(Math.random() * (maxY - padding)) + padding;
-		return { x, y };
+		const MAX_ATTEMPTS = 100; // Número máximo de intentos para encontrar una posición válida
+
+		for (let i = 0; i < MAX_ATTEMPTS; i++) {
+			const x = Math.floor(Math.random() * (maxX - padding)) + padding;
+			const y = Math.floor(Math.random() * (maxY - padding)) + padding;
+
+			// Verificar que la nueva posición no esté demasiado cerca de ninguna existente
+			const isTooClose = existingStickers.some((sticker) => {
+				return distance(x, y, sticker.x, sticker.y) < MIN_DISTANCE;
+			});
+
+			if (!isTooClose) {
+				return { x, y };
+			}
+		}
+
+		// Si no se encuentra una posición válida después de varios intentos, retornar una posición aleatoria
+		return {
+			x: Math.floor(Math.random() * (maxX - padding)) + padding,
+			y: Math.floor(Math.random() * (maxY - padding)) + padding,
+		};
 	};
 
 	// useEffect para inicializar los stickers al cargar la página
@@ -33,17 +58,19 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 			return;
 		}
 
-		// Crear 5 copias de cada sticker en lugar de 15
-		const initialStickers = availableStickers.flatMap((src) => {
-			return Array.from({ length: 1 }, () => {
-				const { x, y } = getRandomPosition(48, 48); // Tamaño ajustado
-				return {
+		const initialStickers = [];
+
+		availableStickers.forEach((src) => {
+			for (let i = 0; i < 100; i++) {
+				// Puedes ajustar el número de stickers
+				const { x, y } = getRandomPosition(48, 48, initialStickers);
+				initialStickers.push({
 					id: `${Date.now()}-${Math.random()}`, // ID único
 					src,
 					x,
 					y,
-				};
-			});
+				});
+			}
 		});
 
 		console.log("Initial Stickers:", initialStickers); // Para depuración
@@ -68,8 +95,6 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 
 	return (
 		<div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-			{" "}
-			{/* Añadido overflow-hidden */}
 			{/* Área de canvas donde se colocan los stickers */}
 			<div className="w-full h-full">
 				{stickers.map((sticker) => (
@@ -77,7 +102,7 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 						key={sticker.id}
 						position={{ x: sticker.x, y: sticker.y }}
 						onStop={(e, data) => updatePosition(sticker.id, data)}
-						bounds="parent" // Añadido para limitar el movimiento dentro del contenedor padre
+						bounds="parent" // Limitar el movimiento dentro del contenedor padre
 					>
 						<img
 							src={sticker.src}
