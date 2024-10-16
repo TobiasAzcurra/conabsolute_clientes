@@ -66,7 +66,7 @@ const Section = ({ products = [], path }) => {
 					<div className="mt-8 mb-4 mr-4 ml-4">
 						{satisfyer.length > 0 && (
 							<div className="section">
-								<p className="font-bold text-5xl text-center mb-4 text-black font-coolvetica">
+								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Satisfyers
 								</p>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-8">
@@ -86,7 +86,7 @@ const Section = ({ products = [], path }) => {
 						)}
 						{originalsBurgers.length > 0 && (
 							<div className="section">
-								<p className="font-bold text-5xl text-center mb-4 text-black font-coolvetica">
+								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Originals
 								</p>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center mb-2">
@@ -108,7 +108,7 @@ const Section = ({ products = [], path }) => {
 						)}
 						{ourCollection.length > 0 && (
 							<div className="section">
-								<p className="font-bold mt-8 text-5xl text-center mb-4 text-black font-coolvetica">
+								<p className="relative font-bold text-5xl text-center mb-4 text-black font-coolvetica z-50">
 									Masterpieces
 								</p>
 								<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
