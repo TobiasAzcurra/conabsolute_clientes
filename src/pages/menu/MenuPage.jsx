@@ -72,13 +72,13 @@ const MenuPage = () => {
 
       @keyframes gradientAnimation {
         0% {
-          background-position: 0% 50%;
+          background-position: 0% 20%;
         }
         50% {
-          background-position: 100% 50%;
+          background-position: 20% 50%;
         }
         100% {
-          background-position: 0% 50%;
+          background-position: 50% 50%;
         }
       }
 
@@ -100,7 +100,7 @@ const MenuPage = () => {
 
       /* Primer degradado */
       .breathing-gradient-first {
-        background: linear-gradient(100deg, #000000 0%, #200000 25%, #870000 100%, #000000 75%, #000000 100%);
+        background: linear-gradient(100deg, #000000 0%, #200000 25%, #ff0000 100%, #000000 75%, #000000 100%);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
