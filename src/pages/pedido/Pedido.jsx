@@ -106,7 +106,7 @@ export const Pedido = () => {
 							Pedido a cargo de:{" "}
 							<span className="font-bold">{order.cadete}</span>
 						</p>
-						<p className="text-black font-coolvetica font-medium mt-2">
+						<p className="text-black text-center font-coolvetica font-medium mt-2">
 							Destino:{" "}
 							<span className="font-bold font-coolvetica">
 								{order.direccion}
