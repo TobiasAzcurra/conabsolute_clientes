@@ -140,10 +140,13 @@ const AppRouter = () => {
 				/>
 			</Routes>
 
-			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en la ruta raíz ni en la ruta del carrito */}
-			{totalQuantity > 0 && pathname !== "/" && pathname !== "/carrito" && (
-				<FloatingCart totalQuantity={totalQuantity} cart={cart} />
-			)}
+			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en rutas excluidas */}
+			{totalQuantity > 0 &&
+				pathname !== "/" &&
+				pathname !== "/carrito" &&
+				!pathname.startsWith("/pedido/") && ( // <-- Condición añadida
+					<FloatingCart totalQuantity={totalQuantity} cart={cart} />
+				)}
 		</div>
 	);
 };
