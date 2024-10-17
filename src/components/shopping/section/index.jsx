@@ -33,30 +33,6 @@ const Section = ({ products = [], path }) => {
 		window.scrollTo(0, 0);
 	}, []);
 
-	const containerRef = useRef(null);
-	const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-
-	useEffect(() => {
-		const updateSize = () => {
-			if (containerRef.current) {
-				const width = containerRef.current.offsetWidth;
-				const height = containerRef.current.offsetHeight;
-				console.log("Container Width:", width, "Container Height:", height); // Para depuración
-				setContainerSize({
-					width,
-					height,
-				});
-			}
-		};
-
-		// Inicializar el tamaño
-		updateSize();
-
-		// Actualizar el tamaño al cambiar el tamaño de la ventana
-		window.addEventListener("resize", updateSize);
-		return () => window.removeEventListener("resize", updateSize);
-	}, []);
-
 	return (
 		<div className="relative">
 			{" "}
@@ -150,11 +126,6 @@ const Section = ({ products = [], path }) => {
 				)}
 				{cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
 			</div>
-			{/* Integrar el Canvas de Stickers fuera del contenedor principal */}
-			{/* <StickerCanvas
-				containerWidth={containerSize.width}
-				containerHeight={containerSize.height}
-			/> */}
 		</div>
 	);
 };
