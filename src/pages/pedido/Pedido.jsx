@@ -10,7 +10,7 @@ import StickerCanvas from "../../components/StickerCanvas";
 
 export const Pedido = () => {
 	const [phoneNumber, setPhoneNumber] = useState("");
-	const [order, setOrder] = useState({});
+	const [order, setOrder] = useState(null); // Inicializado como null
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
 	const { orderId } = useParams();
@@ -35,7 +35,11 @@ export const Pedido = () => {
 	useEffect(() => {
 		setLoading(true);
 		ReadOrdersForTodayById(orderId, (pedido) => {
-			setOrder(pedido);
+			if (pedido && typeof pedido.direccion === "string") {
+				setOrder(pedido);
+			} else {
+				setOrder(null);
+			}
 			setLoading(false);
 		});
 	}, [orderId]);
@@ -101,9 +105,6 @@ export const Pedido = () => {
 			<div className="justify-center my-auto items-center  flex flex-col">
 				<div className="flex items-center flex-col">
 					<img src={logo} className="w-1/2" alt="Logo" />
-					<p className="text-black font-coolvetica font-bold mt-[-3px]">
-						RIDERS
-					</p>
 				</div>
 				{/* Mostrar un spinner de carga si los pedidos aún no están cargados */}
 				{loading && <div className="spinner">Cargando...</div>}
@@ -112,31 +113,99 @@ export const Pedido = () => {
 					<div className="flex items-center flex-col w-full px-4 mt-8">
 						{/* Línea horizontal con animación */}
 						<div className="flex flex-col w-full ">
-							<div className="mb-6">
-								<div className="w-full flex flex-row gap-2">
-									<div className="w-1/4 h-2 bg-black animated-loading rounded-full"></div>
-									<div className="w-1/4 h-2 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"></div>
-									<div className="w-1/2 h-2 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
+							<div className="mb-10">
+								<div className="w-full flex flex-row gap-2 relative">
+									<div className="w-1/4 h-2.5 bg-black animated-loading rounded-full"></div>
+									<div className="w-1/4 h-2.5 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+									<div className="w-1/2 h-2.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
+
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+										className="h-6 absolute right-1 bottom-4"
+									>
+										<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+										<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+									</svg>
 								</div>
-								<p className="text-black font-coolvetica font-bold   text-center mt-2">
+								<p className="text-black font-coolvetica font-bold text-left mt-2">
 									Anhelo está preparando tu pedido...
 								</p>
 							</div>
-							<div className="flex flex-col text-center">
-								<p className="text-black font-coolvetica font-medium ">
-									Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
-									{sumarMinutos(order.hora, 50)}
-								</p>
-								<p className="text-black font-coolvetica font-medium ">
-									Envio a cargo de: {order.cadete}
-								</p>
-								<p className="text-black font-coolvetica font-medium">
-									Destino: {order.direccion.split(",")[0]}
-								</p>
+							<div className="flex flex-col text-left gap-2">
+								<div className="flex flex-row gap-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+										className="h-6"
+									>
+										<path
+											fillRule="evenodd"
+											d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+											clipRule="evenodd"
+										/>
+									</svg>
 
-								<p className="text-black font-coolvetica font-medium ">
-									Total: ${order.total}
-								</p>
+									<p className="text-black font-coolvetica font-medium ">
+										Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
+										{sumarMinutos(order.hora, 50)}
+									</p>
+								</div>
+								<div className="flex flex-row gap-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+										className="h-6"
+									>
+										<path
+											fillRule="evenodd"
+											d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+											clipRule="evenodd"
+										/>
+									</svg>
+
+									<p className="text-black font-coolvetica font-medium ">
+										Envío a cargo de: {order.cadete || "No disponible"}
+									</p>
+								</div>
+								<div className="flex flex-row gap-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+										className="h-6"
+									>
+										<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+										<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+									</svg>
+									<p className="text-black font-coolvetica font-medium">
+										Destino:{" "}
+										{order.direccion?.split(",")[0].trim() || "No disponible"}
+									</p>
+								</div>
+								<div className="flex flex-row gap-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										fill="currentColor"
+										className="h-6"
+									>
+										<path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+										<path
+											fillRule="evenodd"
+											d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
+											clipRule="evenodd"
+										/>
+										<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
+									</svg>
+
+									<p className="text-black font-coolvetica font-medium ">
+										Total: ${order.total || "0.00"}
+									</p>
+								</div>
 							</div>
 						</div>
 					</div>
