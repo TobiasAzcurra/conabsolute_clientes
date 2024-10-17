@@ -138,14 +138,20 @@ export const Pedido = () => {
 									{/* Segunda barra condicional */}
 									<div
 										className={`w-1/4 h-2.5 rounded-full ${
-											order.elaborado
+											order.elaborado && order.cadete === "NO ASIGNADO"
+												? "bg-black animated-loading"
+												: "bg-black"
+										}`}
+									></div>
+
+									{/* Tercera barra condicional */}
+									<div
+										className={`w-1/2 h-2.5 rounded-full ${
+											order.cadete !== "NO ASIGNADO"
 												? "bg-black animated-loading"
 												: "bg-gray-100 border-opacity-20 border-black border-1 border"
 										}`}
 									></div>
-
-									{/* Tercera barra permanece inactiva */}
-									<div className="w-1/2 h-2.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
 
 									{/* SVG permanece igual */}
 									<svg
@@ -159,8 +165,10 @@ export const Pedido = () => {
 									</svg>
 								</div>
 								<p className="text-black font-coolvetica font-bold text-left mt-2">
-									{order.elaborado
-										? "Tu cadete está llegando a Anhelo"
+									{order.cadete !== "NO ASIGNADO"
+										? "Tu cadete está en camino"
+										: order.elaborado
+										? "Tu cadete está siendo asignado"
 										: "Anhelo está preparando tu pedido..."}
 								</p>
 							</div>
@@ -199,7 +207,10 @@ export const Pedido = () => {
 									</svg>
 
 									<p className="text-black font-coolvetica font-medium">
-										Envío a cargo de: {order.cadete || "No disponible"}
+										Envío a cargo de:{" "}
+										{order.cadete !== "NO ASIGNADO"
+											? order.cadete
+											: "No disponible"}
 									</p>
 								</div>
 								<div className="flex flex-row gap-2">
