@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Section from "./components/shopping/section";
 import { RouterMenu } from "./common/RouterMenu";
 import Carrusel from "./components/Carrusel";
@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
+import { ReadOrdersForTodayByPhoneNumber } from "./firebase/getPedido";
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -29,6 +30,8 @@ const AppRouter = () => {
 	const [pathLocation, setPathLocation] = useState("");
 	const cart = useSelector((state) => state.cartState.cart);
 	const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+	const [phoneNumber, setPhoneNumber] = useState(""); // Nuevo estado para el número de teléfono
+	const navigate = useNavigate(); // Hook para redirección
 
 	useEffect(() => {
 		const pathParts = pathname.split("/");
@@ -46,6 +49,24 @@ const AppRouter = () => {
 		pathname.startsWith("/menu") &&
 		!pathname.match(/\/menu\/(burgers|combos|bebidas|papas)\/.+/);
 
+	// Función para manejar el evento al presionar Enter
+	const handleKeyDown = async (e) => {
+		if (e.key === "Enter") {
+			// Llamar a la función para buscar el pedido
+			await searchOrderByPhoneNumber(phoneNumber);
+		}
+	};
+
+	// Función para buscar el pedido por número de teléfono
+	const searchOrderByPhoneNumber = async (phoneNumber) => {
+		const pedido = await ReadOrdersForTodayByPhoneNumber(phoneNumber);
+		if (pedido) {
+			navigate(`/pedido/${pedido.id}`);
+		} else {
+			alert("No se encontró un pedido con ese número de teléfono.");
+		}
+	};
+
 	return (
 		<div className="flex flex-col">
 			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
@@ -57,8 +78,8 @@ const AppRouter = () => {
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="currentColor"
-								stroke="currentColor" // Añadir contorno con el color actual
-								strokeWidth="1" // Ajustar el grosor del contorno para hacerlo más "grueso"
+								stroke="currentColor"
+								strokeWidth="1"
 								className="mr-1 h-6 opacity-20"
 							>
 								<path
@@ -68,9 +89,14 @@ const AppRouter = () => {
 								/>
 							</svg>
 
-							<span className="text-opacity-20 text-black">
-								Busca tu pedido con tu número de cel
-							</span>
+							<input
+								type="text"
+								value={phoneNumber}
+								onChange={(e) => setPhoneNumber(e.target.value)}
+								onKeyDown={handleKeyDown}
+								placeholder="Busca tu pedido con tu número de cel"
+								className="text-opacity-60 font-coolvetica text-black bg-transparent outline-none w-full"
+							/>
 						</div>
 					</div>
 					<Carrusel />
@@ -131,7 +157,7 @@ const AppRouter = () => {
 								¿Te perdiste? Esta no te la esperabas,
 							</p>
 							<p className="font-bold text-xs text-center">
-								elegi arriba alguna burger.
+								elegí arriba alguna burger.
 							</p>
 						</div>
 					}
@@ -143,7 +169,7 @@ const AppRouter = () => {
 				pathname !== "/" &&
 				pathname !== "/carrito" &&
 				!pathname.startsWith("/pedido/") &&
-				!pathname.startsWith("/success") && ( // Condición añadida para excluir /success
+				!pathname.startsWith("/success") && (
 					<FloatingCart totalQuantity={totalQuantity} cart={cart} />
 				)}
 		</div>
