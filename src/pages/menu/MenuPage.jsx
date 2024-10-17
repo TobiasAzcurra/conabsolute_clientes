@@ -100,14 +100,14 @@ const MenuPage = () => {
 
       /* Primer degradado */
       .breathing-gradient-first {
-        background: linear-gradient(100deg, #000000 0%, #200000 25%, #FA0202 100%, #000000 75%, #000000 100%);
+        background: linear-gradient(100deg, #000000 0%, #200000 25%, #870000 100%, #000000 75%, #000000 100%);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
 
       /* Segundo degradado (vertical) */
       .breathing-gradient-second {
-        background: linear-gradient(to bottom, #000000 0%, #000000 50%, #FA0202 100%);
+        background: linear-gradient(to bottom, #000000 0%, #000000 50%, #ff0000 100%);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
