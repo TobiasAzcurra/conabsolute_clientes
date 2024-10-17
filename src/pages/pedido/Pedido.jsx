@@ -66,6 +66,30 @@ export const Pedido = () => {
 
 	console.log(order);
 
+	// Funciones para determinar las clases de las barras
+	const getFirstBarClass = () => {
+		if (!order.elaborado) {
+			return "animated-loading";
+		}
+		return "bg-black";
+	};
+
+	const getSecondBarClass = () => {
+		if (order.elaborado && order.cadete === "NO ASIGNADO") {
+			return "animated-loading";
+		} else if (order.elaborado && order.cadete !== "NO ASIGNADO") {
+			return "bg-black";
+		}
+		return "bg-gray-100 border-opacity-20 border-black border-1 border";
+	};
+
+	const getThirdBarClass = () => {
+		if (order.cadete !== "NO ASIGNADO") {
+			return "animated-loading";
+		}
+		return "bg-gray-100 border-opacity-20 border-black border-1 border";
+	};
+
 	return (
 		<div
 			ref={containerRef} // Asignar la referencia aquí
@@ -74,28 +98,28 @@ export const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-                  @keyframes loadingBar {
-                    0% {
-                      background-position: -200px 0;
-                    }
-                    100% {
-                      background-position: 200px 0;
-                    }
-                  }
+          @keyframes loadingBar {
+            0% {
+              background-position: -200px 0;
+            }
+            100% {
+              background-position: 200px 0;
+            }
+          }
 
-                  .animated-loading {
-                    background: linear-gradient(
-                      to right,
-                      #000 0%,
-                      #000 40%,
-                      #555 100%,
-                      #000 60%,
-                      #000 100%
-                    );
-                    background-size: 400% 100%;
-                    animation: loadingBar 5s linear infinite;
-                  }
-                `}
+          .animated-loading {
+            background: linear-gradient(
+              to right,
+              #000 0%,
+              #000 40%,
+              #555 100%,
+              #000 60%,
+              #000 100%
+            );
+            background-size: 400% 100%;
+            animation: loadingBar 5s linear infinite;
+          }
+        `}
 			</style>
 
 			<StickerCanvas
@@ -111,7 +135,7 @@ export const Pedido = () => {
 				{loading && (
 					<div className="flex items-center justify-center">
 						<div
-							className=" mt-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-e-transparent align-[-0.125em] motion-reduce:animate-spin"
+							className="mt-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-e-transparent align-[-0.125em] motion-reduce:animate-spin"
 							role="status"
 						>
 							<span className="sr-only">Cargando...</span>
@@ -126,31 +150,19 @@ export const Pedido = () => {
 						<div className="flex flex-col w-full">
 							<div className="mb-10">
 								<div className="w-full flex flex-row gap-2 relative">
-									{/* Primera barra condicional */}
+									{/* Primera barra */}
 									<div
-										className={`w-1/4 h-2.5 rounded-full ${
-											!order.elaborado
-												? "bg-black animated-loading"
-												: "bg-black"
-										}`}
+										className={`w-1/4 h-2.5 rounded-full ${getFirstBarClass()}`}
 									></div>
 
-									{/* Segunda barra condicional */}
+									{/* Segunda barra */}
 									<div
-										className={`w-1/4 h-2.5 rounded-full ${
-											order.elaborado && order.cadete === "NO ASIGNADO"
-												? "bg-black animated-loading"
-												: "bg-black"
-										}`}
+										className={`w-1/4 h-2.5 rounded-full ${getSecondBarClass()}`}
 									></div>
 
-									{/* Tercera barra condicional */}
+									{/* Tercera barra */}
 									<div
-										className={`w-1/2 h-2.5 rounded-full ${
-											order.cadete !== "NO ASIGNADO"
-												? "bg-black animated-loading"
-												: "bg-gray-100 border-opacity-20 border-black border-1 border"
-										}`}
+										className={`w-1/2 h-2.5 rounded-full ${getThirdBarClass()}`}
 									></div>
 
 									{/* SVG permanece igual */}
@@ -166,7 +178,7 @@ export const Pedido = () => {
 								</div>
 								<p className="text-black font-coolvetica font-bold text-left mt-2">
 									{order.cadete !== "NO ASIGNADO"
-										? "En camino... Atencion, te va a llamar tu cadete."
+										? "En camino... Atención, te va a llamar tu cadete."
 										: order.elaborado
 										? "Tu cadete está llegando a Anhelo..."
 										: "Anhelo está preparando tu pedido..."}
@@ -210,7 +222,7 @@ export const Pedido = () => {
 										Envío a cargo de:{" "}
 										{order.cadete !== "NO ASIGNADO"
 											? order.cadete
-											: "Aun sin asignar."}
+											: "Aún sin asignar."}
 									</p>
 								</div>
 								<div className="flex flex-row gap-2">
@@ -243,7 +255,6 @@ export const Pedido = () => {
 										/>
 										<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
 									</svg>
-
 									<p className="text-black font-coolvetica font-medium">
 										Total: ${order.total || "0.00"}
 									</p>
