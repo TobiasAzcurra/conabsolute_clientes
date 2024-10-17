@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from "react";
 import logo from "../../assets/anheloTMwhite.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import "animate.css/animate.min.css";
-import { useEffect, useState } from "react";
 
 export const items = {
 	burgers: "burgers",
@@ -23,6 +23,22 @@ const MenuPage = () => {
 		setSelectedItem(item);
 	};
 
+	// Función para detectar dispositivo móvil
+	const isMobileDevice = () => {
+		const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+		// Regex para detectar dispositivos móviles
+		return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+			userAgent
+		);
+	};
+
+	useEffect(() => {
+		// Detectar dispositivo y redirigir si es PC
+		if (!isMobileDevice()) {
+			window.location.href = "https://onlyanhelo.com/";
+		}
+	}, []);
+
 	useEffect(() => {
 		const pathParts = pathname.split("/");
 		const lastPart = pathParts[pathParts.length - 1];
@@ -34,7 +50,7 @@ const MenuPage = () => {
 		}
 
 		setLocationMenu(pathname.startsWith("/menu/"));
-	}, [pathname]);
+	}, [pathname, selectedItem]);
 
 	useEffect(() => {
 		// Cambia a la segunda parte después de que termine la primera animación
@@ -51,7 +67,7 @@ const MenuPage = () => {
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				navigate("/menu/burgers"); // Redirige a /menu después de que termine la segunda animación
+				navigate("/menu/burgers"); // Redirige a /menu/burgers después de que termine la segunda animación
 			}, 4000); // Duración de la segunda animación en milisegundos
 			return () => clearTimeout(timer);
 		}
