@@ -275,7 +275,7 @@ const FormCustom = ({ cart, total }) => {
 											label="Aclaraciones"
 											name="aclaraciones"
 											type="text"
-											placeholder="¿Alguna aclaración sobre tu pedido?"
+											placeholder="¿Aclaraciones? Ej: La simple vegetariana"
 											autoComplete="off"
 											className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 										/>
