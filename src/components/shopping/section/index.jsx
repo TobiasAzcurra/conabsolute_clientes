@@ -1,13 +1,14 @@
-// src/components/Section.jsx
-
 import React, { useEffect, useRef, useState } from "react";
 import { items } from "../../../pages/menu/MenuPage";
 import Card from "../card";
 import { useSelector } from "react-redux";
-import StickerCanvas from "../../StickerCanvas"; // Asegúrate de que la ruta sea correcta
+import StickerCanvas from "../../StickerCanvas"; // Ensure the path is correct
 
 const Section = ({ products = [], path }) => {
 	const cart = useSelector((state) => state.cartState.cart);
+
+	// Define the containerRef using useRef
+	const containerRef = useRef(null);
 
 	let originalsBurgers = [];
 	let ourCollection = [];
@@ -28,15 +29,14 @@ const Section = ({ products = [], path }) => {
 		ourCollection = products;
 	}
 
-	// Usar useEffect para el scroll
+	// Use useEffect for scrolling
 	useEffect(() => {
 		window.scrollTo(0, 0);
 	}, []);
 
 	return (
 		<div className="relative">
-			{" "}
-			{/* Asegurarse de que el contenedor padre tenga position: relative */}
+			{/* Ensure the parent container has position: relative */}
 			<div ref={containerRef}>
 				{items.burgers === path ? (
 					<div className="mt-8 mb-4 mr-4 ml-4">
