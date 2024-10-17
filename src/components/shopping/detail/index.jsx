@@ -109,7 +109,7 @@ const DetailCard = ({ products, type }) => {
 	};
 
 	const getObjectPositionForType = (type) => {
-		return type === "originals" ? "object-top" : "object-bottom";
+		return type === "originals" ? "object-center" : "object-bottom";
 	};
 
 	return (
