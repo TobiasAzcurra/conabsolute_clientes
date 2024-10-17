@@ -1,12 +1,11 @@
-import { initMercadoPago, StatusScreen } from "@mercadopago/sdk-react";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY);
-import { functions } from "../../firebase/config";
+import { useLocation, useNavigate } from "react-router-dom"; // Importa useNavigate
 import { httpsCallable } from "firebase/functions";
+import { functions } from "../../firebase/config";
 
 const Feedback = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // Hook para redirigir
   const queryParams = new URLSearchParams(location.search);
 
   const payment_id = queryParams.get("payment_id");
@@ -21,52 +20,24 @@ const Feedback = () => {
       verifyPayment({ paymentId: payment_id, orderId })
         .then((result) => {
           console.log("Estado del pago:", result.data.status);
-          // Aquí podrías manejar la lógica para mostrar al usuario que el pago fue exitoso
+
+          if (result.data.status === "success") {
+            // Redirige a la página success/:orderId
+            navigate(`/success/${orderId}`);
+          } else {
+            console.log("El pago no fue aprobado.");
+          }
         })
         .catch((error) => {
           console.error("Error al verificar el pago:", error);
         });
     }
-  }, [status, payment_id]);
-
+  }, [status, payment_id, orderId, navigate]);
   if (!payment_id) {
     return <h1>Error: No se encontró el ID del pago.</h1>; // Mensaje de error si no se encuentra el ID
   }
 
-  return (
-    <div>
-      {/* Aquí pasamos el ID de pago correctamente */}
-      <p>
-        Tu ID de pago es: <strong>{payment_id}</strong>
-      </p>
-      <StatusScreen
-        initialization={{
-          paymentId: payment_id, // Debe ser un objeto con la propiedad paymentId
-        }}
-        customization={{
-          visual: {
-            hideStatusDetails: false, // Muestra detalles del estado si lo deseas
-            hideTransactionDate: true, // Oculte la fecha de la transacción
-            style: {
-              theme: "default", // Puedes elegir el tema que desees
-            },
-          },
-          backUrls: {
-            error: "http://localhost:3000/error",
-            return: "http://localhost:5173",
-          },
-        }}
-        callbacks={{
-          onReady: () => {
-            ("StatusScreen Brick listo");
-          },
-          onError: (error) => {
-            console.error("Error en el StatusScreen Brick:", error);
-          },
-        }}
-      />
-    </div>
-  );
+  return <div>{/* Aquí pasamos el ID de pago correctamente */}</div>;
 };
 
 export default Feedback;
