@@ -4,6 +4,7 @@ import { CardPedido } from "./CardPedido";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import arrow from "../../assets/arrowIcon.png";
+import gato from "../../assets/carrusel2.jpg";
 import ArrowBack from "../../components/back";
 import StickerCanvas from "../../components/StickerCanvas";
 
@@ -63,7 +64,7 @@ export const Pedido = () => {
 	return (
 		<div
 			ref={containerRef} // Asignar la referencia aquí
-			className="bg-gray-100 relative flex flex-col items-center h-screen justify-center"
+			className="bg-gray-100 relative flex justify-between flex-col h-screen "
 		>
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
@@ -96,46 +97,50 @@ export const Pedido = () => {
 				containerWidth={containerSize.width}
 				containerHeight={containerSize.height}
 			/>
-
-			<div className="flex items-center flex-col">
-				<img src={logo} className="w-1/2" alt="Logo" />
-				<p className="text-black font-coolvetica font-bold mt-[-3px]">RIDERS</p>
-			</div>
-
-			{/* Mostrar un spinner de carga si los pedidos aún no están cargados */}
-			{loading && <div className="spinner">Cargando...</div>}
-
-			{(!loading && order && (
-				<div className="flex items-center flex-col w-full px-4 mt-8">
-					{/* Línea horizontal con animación */}
-					<div className="w-full flex flex-row gap-2">
-						<div className="w-1/4 h-3.5 bg-black animated-loading rounded-l-full"></div>
-						<div className="w-1/4 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
-						<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-r-full"></div>
-					</div>
-					<p className="text-black font-coolvetica font-bold mt-2">
-						Anhelo está preparando tu pedido...
-					</p>
-					<p className="text-black font-coolvetica font-medium mt-2">
-						Entrega estimada:{" "}
-						<span className="font-bold font-coolvetica">
-							{sumarMinutos(order.hora, 30)} a {sumarMinutos(order.hora, 50)}
-						</span>
-					</p>
-					<p className="text-black font-coolvetica font-medium mt-2">
-						Pedido a cargo de: <span className="font-bold">{order.cadete}</span>
-					</p>
-					<p className="text-black text-center font-coolvetica font-medium mt-2">
-						Destino:{" "}
-						<span className="font-bold font-coolvetica">{order.direccion}</span>
-					</p>
-					<p className="text-black font-coolvetica font-medium mt-2">
-						Total:{" "}
-						<span className="font-bold font-coolvetica">${order.total}</span>
+			{/* contenido */}
+			<div className="justify-center my-auto items-center  flex flex-col">
+				<div className="flex items-center flex-col">
+					<img src={logo} className="w-1/2" alt="Logo" />
+					<p className="text-black font-coolvetica font-bold mt-[-3px]">
+						RIDERS
 					</p>
 				</div>
-			)) ||
-				(!loading && !order && <div>No se encontraron pedidos para hoy.</div>)}
+				{/* Mostrar un spinner de carga si los pedidos aún no están cargados */}
+				{loading && <div className="spinner">Cargando...</div>}
+
+				{(!loading && order && (
+					<div className="flex items-center flex-col w-full px-4 mt-8">
+						{/* Línea horizontal con animación */}
+						<div className="w-full flex flex-row gap-2">
+							<div className="w-1/4 h-3.5 bg-black animated-loading rounded-l-full"></div>
+							<div className="w-1/4 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+							<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-r-full"></div>
+						</div>
+						<p className="text-black font-coolvetica font-bold mt-2">
+							Anhelo está preparando tu pedido...
+						</p>
+						<p className="text-black font-coolvetica font-medium mt-2">
+							Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
+							{sumarMinutos(order.hora, 50)}
+						</p>
+						<p className="text-black font-coolvetica font-medium mt-2">
+							Envio a cargo de: {order.cadete}
+						</p>
+						<p className="text-black text-center font-coolvetica font-medium mt-2">
+							Destino: {order.direccion}
+						</p>
+						<p className="text-black font-coolvetica font-medium mt-2">
+							Total: ${order.total}
+						</p>
+						<p className="text-black font-coolvetica font-medium mt-2">
+							Unos stickers para acompañar la espera:
+						</p>
+					</div>
+				)) ||
+					(!loading && !order && (
+						<div>No se encontraron pedidos para hoy.</div>
+					))}
+			</div>
 		</div>
 	);
 };
