@@ -37,36 +37,36 @@ const MenuPage = () => {
 	}, [pathname]);
 
 	useEffect(() => {
-		// Switch to the second part after the first animation ends
+		// Cambia a la segunda parte después de que termine la primera animación
 		if (isFirstAnimation) {
 			const timer = setTimeout(() => {
 				setIsFirstAnimation(false);
-			}, 1000); // Duration of the first animation in milliseconds
+			}, 1000); // Duración de la primera animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
 
 	useEffect(() => {
-		// Switch to redirect after the second animation ends
+		// Cambia a redireccionar después de que termine la segunda animación
 		if (!isFirstAnimation && isSecondAnimation) {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
-				// navigate("/menu/burgers"); // Redirect to /menu after the second animation ends
-			}, 2000); // Duration of the second animation in milliseconds
+				// navigate("/menu/burgers"); // Redirige a /menu después de que termine la segunda animación
+			}, 2000); // Duración de la segunda animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation, isSecondAnimation, navigate]);
 
-	// Inject styles into the document head
+	// Inyecta estilos en el encabezado del documento
 	useEffect(() => {
 		const style = document.createElement("style");
 		style.innerHTML = `
       @keyframes moveRightToLeft {
         0% {
-          transform: translateX(100vw) scale(4); /* Start off the right edge and scaled */
+          transform: translateX(100vw) scale(4);
         }
         100% {
-          transform: translateX(-50vw) scale(4); /* Move off the left edge and maintain scale */
+          transform: translateX(-50vw) scale(4);
         }
       }
 
@@ -86,7 +86,7 @@ const MenuPage = () => {
         position: relative;
         width: 100%;
         height: 100%;
-        overflow: hidden; /* Ensure the logo doesn't create scrollbars */
+        overflow: hidden;
       }
 
       .moving-logo {
@@ -95,13 +95,19 @@ const MenuPage = () => {
         left: 100%;
         transform: translate(-50%, -50%) scale(4);
         animation: moveRightToLeft 1s linear forwards;
-        /* Ensure the image can grow beyond its container */
         will-change: transform;
       }
 
-      .breathing-gradient {
-       background: linear-gradient(100deg, #000000 0%, #000000 25%, #C00100 100%, #000000 75%, #000000 100%);
+      /* Primer degradado */
+      .breathing-gradient-first {
+        background: linear-gradient(100deg, #000000 0%, #200000 25%, #FA0202 100%, #000000 75%, #000000 100%);
+        background-size: 200% 200%;
+        animation: gradientAnimation 6s ease infinite;
+      }
 
+      /* Segundo degradado (vertical) */
+      .breathing-gradient-second {
+        background: linear-gradient(to bottom, #000000 0%, #000000 50%, #FA0202 100%);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
       }
@@ -114,22 +120,26 @@ const MenuPage = () => {
 
 	return (
 		<div
-			className={`breathing-gradient flex items-center justify-center h-screen`}
+			className={`${
+				isFirstAnimation
+					? "breathing-gradient-first"
+					: "breathing-gradient-second"
+			} flex items-center justify-center h-screen`}
 		>
 			{isFirstAnimation ? (
-				// First Animation: Logo moving from right to left
+				// Primera animación: Logo moviéndose de derecha a izquierda
 				<div className="moving-logo-container">
-					<img className="moving-logo " src={logo} alt="ANHELO" />
+					<img className="moving-logo" src={logo} alt="ANHELO" />
 				</div>
 			) : isSecondAnimation ? (
-				// Second Part: Existing content with fade-in animation
+				// Segunda parte: Contenido existente con animación de aparición
 				<div className="text-center">
 					<img
-						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow "
+						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow"
 						src={logo}
 						alt="ANHELO"
 					/>
-					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow  animate__delay-1s">
+					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow animate__delay-1s">
 						Vas a pedir más.
 					</p>
 				</div>
