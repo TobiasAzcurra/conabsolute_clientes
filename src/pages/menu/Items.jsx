@@ -27,7 +27,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 
 	const content = (
 		<>
-			<div className="h-[70px] w-full rounded-t-3xl overflow-hidden bg-gradient-to-b from-gray-100 to-gray-300 relative flex justify-center">
+			<div className="h-[70px] w-full rounded-t-3xl overflow-hidden bg-gradient-to-b from-gray-100 via-gray-100 to-gray-300 relative flex justify-center">
 				<img
 					className="object-cover absolute top-2.5 h-[70px]"
 					src={imageSrc}
