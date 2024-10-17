@@ -87,7 +87,7 @@ export const Pedido = () => {
 	};
 
 	const getThirdBarClass = () => {
-		if (order.cadete !== "NO ASIGNADO") {
+		if (order.elaborado && order.cadete !== "NO ASIGNADO") {
 			return "animated-loading";
 		}
 		return "bg-gray-100 border-opacity-20 border-black border-1 border";
@@ -180,11 +180,11 @@ export const Pedido = () => {
 									</svg>
 								</div>
 								<p className="text-black font-coolvetica font-bold text-left mt-2">
-									{order.cadete !== "NO ASIGNADO"
+									{!order.elaborado
+										? "Anhelo está preparando tu pedido..."
+										: order.cadete !== "NO ASIGNADO"
 										? "En camino... Atención, te va a llamar tu cadete."
-										: order.elaborado
-										? "Tu cadete está llegando a Anhelo..."
-										: "Anhelo está preparando tu pedido..."}
+										: "Tu cadete está llegando a Anhelo..."}
 								</p>
 							</div>
 							<div className="flex flex-col text-left gap-2">
