@@ -111,30 +111,33 @@ export const Pedido = () => {
 				{(!loading && order && (
 					<div className="flex items-center flex-col w-full px-4 mt-8">
 						{/* Línea horizontal con animación */}
-						<div className="w-full flex flex-row gap-2">
-							<div className="w-1/4 h-3.5 bg-black animated-loading rounded-l-full"></div>
-							<div className="w-1/4 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border"></div>
-							<div className="w-1/2 h-3.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-r-full"></div>
+						<div className="flex flex-col w-full ">
+							<div className="mb-6">
+								<div className="w-full flex flex-row gap-2">
+									<div className="w-1/4 h-2 bg-black animated-loading rounded-full"></div>
+									<div className="w-1/4 h-2 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+									<div className="w-1/2 h-2 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
+								</div>
+								<p className="text-black font-coolvetica font-bold   mt-2">
+									Anhelo está preparando tu pedido...
+								</p>
+							</div>
+							<div className="flex flex-col">
+								<p className="text-black font-coolvetica font-medium ">
+									Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
+									{sumarMinutos(order.hora, 50)}
+								</p>
+								<p className="text-black font-coolvetica font-medium ">
+									Envio a cargo de: {order.cadete}
+								</p>
+								<p className="text-black  font-coolvetica font-medium ">
+									Destino: {order.direccion}
+								</p>
+								<p className="text-black font-coolvetica font-medium ">
+									Total: ${order.total}
+								</p>
+							</div>
 						</div>
-						<p className="text-black font-coolvetica font-bold mt-2">
-							Anhelo está preparando tu pedido...
-						</p>
-						<p className="text-black font-coolvetica font-medium mt-2">
-							Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
-							{sumarMinutos(order.hora, 50)}
-						</p>
-						<p className="text-black font-coolvetica font-medium mt-2">
-							Envio a cargo de: {order.cadete}
-						</p>
-						<p className="text-black text-center font-coolvetica font-medium mt-2">
-							Destino: {order.direccion}
-						</p>
-						<p className="text-black font-coolvetica font-medium mt-2">
-							Total: ${order.total}
-						</p>
-						<p className="text-black font-coolvetica font-medium mt-2">
-							Unos stickers para acompañar la espera:
-						</p>
 					</div>
 				)) ||
 					(!loading && !order && (

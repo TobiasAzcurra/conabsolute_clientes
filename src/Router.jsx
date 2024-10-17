@@ -1,7 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import Section from "./components/shopping/section";
 import { RouterMenu } from "./common/RouterMenu";
-import Carrusel from "./components/Carrusel"; // Importa el componente Carrusel
+import Carrusel from "./components/Carrusel";
 import NavMenu from "./components/NavMenu";
 import burgers from "./assets/burgers-v1.json";
 import combos from "./assets/combos.json";
@@ -80,10 +80,8 @@ const AppRouter = () => {
 				</div>
 			)}
 			<Routes>
-				{/* Mostrar RouterMenu solo en la ruta raíz */}
+				{/* Rutas definidas aquí */}
 				<Route path="/" element={<RouterMenu />} />
-
-				{/* Rutas del menú */}
 				<Route
 					path="/menu/burgers"
 					element={<Section path={"burgers"} products={burgersArray} />}
@@ -144,7 +142,8 @@ const AppRouter = () => {
 			{totalQuantity > 0 &&
 				pathname !== "/" &&
 				pathname !== "/carrito" &&
-				!pathname.startsWith("/pedido/") && ( // <-- Condición añadida
+				!pathname.startsWith("/pedido/") &&
+				!pathname.startsWith("/success") && ( // Condición añadida para excluir /success
 					<FloatingCart totalQuantity={totalQuantity} cart={cart} />
 				)}
 		</div>
