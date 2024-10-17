@@ -52,7 +52,7 @@ const MenuPage = () => {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
 				// navigate("/menu/burgers"); // Redirige a /menu después de que termine la segunda animación
-			}, 2000); // Duración de la segunda animación en milisegundos
+			}, 3000); // Duración de la segunda animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation, isSecondAnimation, navigate]);
@@ -147,7 +147,7 @@ const MenuPage = () => {
 						src={logo}
 						alt="ANHELO"
 					/>
-					<p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-1s">
+					<p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-2s">
 						Vas a pedir más.
 					</p>
 				</div>
