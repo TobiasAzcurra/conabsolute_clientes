@@ -41,7 +41,7 @@ const MenuPage = () => {
 		if (isFirstAnimation) {
 			const timer = setTimeout(() => {
 				setIsFirstAnimation(false);
-			}, 300); // Duración de la primera animación en milisegundos
+			}, 500); // Duración de la primera animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
@@ -94,7 +94,7 @@ const MenuPage = () => {
         top: 50%;
         left: 100%;
         transform: translate(-50%, -50%) scale(4);
-        animation: moveRightToLeft 0.3s linear forwards;
+        animation: moveRightToLeft 0.5s linear forwards;
         will-change: transform;
       }
 
