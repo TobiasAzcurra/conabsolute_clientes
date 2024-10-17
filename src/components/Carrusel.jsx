@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { useMediaQuery } from "react-responsive";
 import carrusel1 from "../assets/carrusel1.jpg";
 import carrusel2 from "../assets/carrusel2.jpg";
 import carrusel3 from "../assets/carrusel3.jpg";
@@ -9,20 +10,17 @@ import carrusel6 from "../assets/carrusel6.jpg";
 
 const Carrusel = () => {
 	const location = useLocation();
-	const images = [
-		carrusel1,
-		carrusel2,
-		carrusel3,
-		carrusel4,
-		carrusel5,
-		carrusel6,
-	];
+	const isDesktop = useMediaQuery({ minWidth: 1024 });
 	const [currentIndex, setCurrentIndex] = useState(0);
+
+	const images = isDesktop
+		? [carrusel1, carrusel2, carrusel5, carrusel6]
+		: [carrusel1, carrusel2, carrusel3, carrusel4, carrusel5, carrusel6];
 
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-		}, 500);
+		}, 1000);
 
 		return () => clearInterval(interval);
 	}, [images.length]);
@@ -40,9 +38,9 @@ const Carrusel = () => {
 			/>
 			{!isCarritoPage && (
 				<>
-					{/* Fade desde abajo */}
+					{/* Degradado desde abajo */}
 					<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent opacity-50"></div>
-					{/* Fade desde arriba */}
+					{/* Degradado desde arriba */}
 					<div className="absolute opacity-30 top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent"></div>
 				</>
 			)}
