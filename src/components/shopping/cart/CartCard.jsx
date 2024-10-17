@@ -46,7 +46,7 @@ const CartCard = ({
 	"este es el", item;
 
 	return (
-		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl ">
+		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ">
 			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300  rounded-l-3xl overflow-hidden">
 				<img
 					src={img ? `/menu/${img}` : getDefaultImage(item)}

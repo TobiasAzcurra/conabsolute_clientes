@@ -102,24 +102,33 @@ const CartItems = () => {
 	};
 
 	return (
-		<div className="flex flex-col font-coolvetica">
-			<div className="flex justify-center flex-col mt-8 items-center">
+		<div className="flex flex-col font-coolvetica overflow-x-hidden">
+			<div className="flex justify-center flex-col mt-8 items-center w-full">
 				<p className="text-2xl font-bold">Tu pedido</p>
-				<div className="flex flex-col gap-2 w-full mt-2 px-4">
-					{cart.map((item, index) => (
-						<CartCard
-							key={item.id || index}
-							item={item}
-							index={index}
-							getDefaultImage={getDefaultImage}
-							decrementQuantity={decrementQuantity}
-							incrementQuantity={incrementQuantity}
-							deleteItem={deleteItem}
-						/>
-					))}
+				<div
+					className="flex flex-col md:flex-row gap-2 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
+					style={{
+						scrollBehavior: "smooth",
+						WebkitOverflowScrolling: "touch",
+					}}
+				>
+					<div className="flex flex-col md:flex-row gap-2 md:w-max">
+						{cart.map((item, index) => (
+							<CartCard
+								key={item.id || index}
+								item={item}
+								index={index}
+								getDefaultImage={getDefaultImage}
+								decrementQuantity={decrementQuantity}
+								incrementQuantity={incrementQuantity}
+								deleteItem={deleteItem}
+							/>
+						))}
+					</div>
 				</div>
 			</div>
-			<div className="flex justify-center flex-col mt-6 items-start">
+
+			<div className="flex justify-center flex-col mt-6 items-start w-full">
 				<p className="text-2xl font-bold mx-auto mb-2">
 					Agrega. Esto no es para tibios.
 				</p>
@@ -133,13 +142,7 @@ const CartItems = () => {
 						width: "100%",
 					}}
 				>
-					<div
-						className="flex gap-2"
-						style={{
-							display: "flex",
-							width: "max-content",
-						}}
-					>
+					<div className="flex gap-2" style={{ width: "max-content" }}>
 						{allProducts
 							.filter(
 								(product) =>
@@ -162,35 +165,33 @@ const CartItems = () => {
 					</div>
 				</div>
 			</div>
+
 			<FormCustom cart={cart} total={total} />
 
-			<div className="flex justify-center flex-col mt-[-10px] items-center relative">
-				{/* <p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
-                    Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
-                </p> */}
+			<div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
 				<MovingRibbon angle={0} />
-				{/* <img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" /> */}
-				<img src={carrusel} className=" w-full mt-28" alt="" />
+				<img src={carrusel} className="w-full mt-28" alt="" />
 			</div>
+
 			<style>
 				{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    height: 8px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: #f3f4f6; /* bg-gray-100 */
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #f3f4f6; /* bg-gray-100 */
-                    border-radius: 10px;
-                    border: 2px solid transparent;
-                    background-clip: padding-box;
-                }
-                .custom-scrollbar {
-                    scrollbar-width: thin; /* Firefox */
-                    scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
-                }
-            `}
+          .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f3f4f6; /* bg-gray-100 */
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #f3f4f6; /* bg-gray-100 */
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+          }
+          .custom-scrollbar {
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
+          }
+        `}
 			</style>
 		</div>
 	);
