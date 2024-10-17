@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
 import { ReadOrdersForTodayById } from "../../firebase/getPedido";
-import { CardPedido } from "./CardPedido";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import arrow from "../../assets/arrowIcon.png";
@@ -68,7 +67,7 @@ export const Pedido = () => {
 	return (
 		<div
 			ref={containerRef} // Asignar la referencia aquí
-			className="bg-gray-100 relative flex justify-between flex-col h-screen "
+			className="bg-gray-100 relative flex justify-between flex-col h-screen"
 		>
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
@@ -102,17 +101,27 @@ export const Pedido = () => {
 				containerHeight={containerSize.height}
 			/>
 			{/* contenido */}
-			<div className="justify-center my-auto items-center  flex flex-col">
+			<div className="justify-center my-auto items-center flex flex-col">
 				<div className="flex items-center flex-col">
 					<img src={logo} className="w-1/2" alt="Logo" />
 				</div>
-				{/* Mostrar un spinner de carga si los pedidos aún no están cargados */}
-				{loading && <div className="spinner">Cargando...</div>}
+				{/* Mostrar el spinner mientras se cargan los datos */}
+				{loading && (
+					<div className="flex items-center justify-center">
+						<div
+							className=" mt-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-e-transparent align-[-0.125em] motion-reduce:animate-spin"
+							role="status"
+						>
+							<span className="sr-only">Cargando...</span>
+						</div>
+					</div>
+				)}
 
+				{/* Mostrar el contenido una vez que se han cargado los datos */}
 				{(!loading && order && (
 					<div className="flex items-center flex-col w-full px-4 mt-8">
 						{/* Línea horizontal con animación */}
-						<div className="flex flex-col w-full ">
+						<div className="flex flex-col w-full">
 							<div className="mb-10">
 								<div className="w-full flex flex-row gap-2 relative">
 									<div className="w-1/4 h-2.5 bg-black animated-loading rounded-full"></div>
@@ -148,7 +157,7 @@ export const Pedido = () => {
 										/>
 									</svg>
 
-									<p className="text-black font-coolvetica font-medium ">
+									<p className="text-black font-coolvetica font-medium">
 										Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
 										{sumarMinutos(order.hora, 50)}
 									</p>
@@ -167,7 +176,7 @@ export const Pedido = () => {
 										/>
 									</svg>
 
-									<p className="text-black font-coolvetica font-medium ">
+									<p className="text-black font-coolvetica font-medium">
 										Envío a cargo de: {order.cadete || "No disponible"}
 									</p>
 								</div>
@@ -202,7 +211,7 @@ export const Pedido = () => {
 										<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
 									</svg>
 
-									<p className="text-black font-coolvetica font-medium ">
+									<p className="text-black font-coolvetica font-medium">
 										Total: ${order.total || "0.00"}
 									</p>
 								</div>
