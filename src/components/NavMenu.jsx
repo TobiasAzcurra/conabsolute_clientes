@@ -13,7 +13,7 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
 	return (
 		<div>
 			<p className="text-gray-100 text-center text-2xl mb-3 font-bold font-coolvetica">
-				Elegí
+				¿Que vas a comer hoy?
 			</p>
 			<nav className="flex flex-row w-full gap-2 justify-center px-4">
 				<Items
