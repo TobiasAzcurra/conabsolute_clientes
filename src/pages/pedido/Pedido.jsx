@@ -126,10 +126,22 @@ export const Pedido = () => {
 						<div className="flex flex-col w-full">
 							<div className="mb-10">
 								<div className="w-full flex flex-row gap-2 relative">
+									{/* Primera barra siempre activa */}
 									<div className="w-1/4 h-2.5 bg-black animated-loading rounded-full"></div>
-									<div className="w-1/4 h-2.5 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"></div>
+
+									{/* Segunda barra condicional */}
+									<div
+										className={
+											order.elaborado
+												? "w-1/4 h-2.5 bg-black animated-loading rounded-full"
+												: "w-1/4 h-2.5 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"
+										}
+									></div>
+
+									{/* Tercera barra permanece inactiva */}
 									<div className="w-1/2 h-2.5 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
 
+									{/* SVG permanece igual */}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										viewBox="0 0 24 24"
