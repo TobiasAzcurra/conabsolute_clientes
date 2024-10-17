@@ -41,7 +41,7 @@ const MenuPage = () => {
 		if (isFirstAnimation) {
 			const timer = setTimeout(() => {
 				setIsFirstAnimation(false);
-			}, 500); // Duración de la primera animación en milisegundos
+			}, 1000); // Duración de la primera animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
@@ -52,7 +52,7 @@ const MenuPage = () => {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
 				// navigate("/menu/burgers"); // Redirige a /menu después de que termine la segunda animación
-			}, 3000); // Duración de la segunda animación en milisegundos
+			}, 4000); // Duración de la segunda animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation, isSecondAnimation, navigate]);
@@ -94,7 +94,7 @@ const MenuPage = () => {
         top: 50%;
         left: 100%;
         transform: translate(-50%, -50%) scale(4);
-        animation: moveRightToLeft 0.5s linear forwards;
+        animation: moveRightToLeft 1s linear forwards;
         will-change: transform;
       }
 
