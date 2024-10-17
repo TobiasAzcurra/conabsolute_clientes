@@ -414,7 +414,7 @@ const FormCustom = ({ cart, total }) => {
 												label="Referencias"
 												name="references"
 												type="text"
-												placeholder="¿Quieres dejar alguna referencia?"
+												placeholder="¿Referencias? Ej: Casa de porton negro"
 												autoComplete="off"
 												className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 											/>
