@@ -65,9 +65,17 @@ const CartItems = () => {
 		}
 	}, [cart, navigate]);
 
+	// Desplazar al inicio cuando el componente se monta
+	useEffect(() => {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth", // Opcional: para un desplazamiento suave
+		});
+	}, []);
+
 	// Agregar  para mostrar el carrito completo
 	useEffect(() => {
-		"Current cart state:", cart;
+		console.log("Current cart state:", cart);
 	}, [cart]);
 
 	const decrementQuantity = (index, quantity) => {
@@ -153,31 +161,31 @@ const CartItems = () => {
 
 			<div className="flex justify-center flex-col mt-[-10px] items-center relative">
 				{/* <p className="absolute top-4 text-left text-gray-100 z-50 left-4 right-4 text-xl font-bold">
-					Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
-				</p> */}
+                    Cocinamos momentos que la gente ama, por eso quedan pidiendo más.
+                </p> */}
 				<MovingRibbon angle={0} />
 				{/* <img src={logo} className="absolute top-20 h-8 right-4 z-50" alt="" /> */}
 				<img src={carrusel} className=" w-full mt-28" alt="" />
 			</div>
 			<style>
 				{`
-				.custom-scrollbar::-webkit-scrollbar {
-					height: 8px;
-				}
-				.custom-scrollbar::-webkit-scrollbar-track {
-					background: #f3f4f6; /* bg-gray-100 */
-				}
-				.custom-scrollbar::-webkit-scrollbar-thumb {
-					background: #f3f4f6; /* bg-gray-100 */
-					border-radius: 10px;
-					border: 2px solid transparent;
-					background-clip: padding-box;
-				}
-				.custom-scrollbar {
-					scrollbar-width: thin; /* Firefox */
-					scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
-				}
-			`}
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: #f3f4f6; /* bg-gray-100 */
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #f3f4f6; /* bg-gray-100 */
+                    border-radius: 10px;
+                    border: 2px solid transparent;
+                    background-clip: padding-box;
+                }
+                .custom-scrollbar {
+                    scrollbar-width: thin; /* Firefox */
+                    scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
+                }
+            `}
 			</style>
 		</div>
 	);
