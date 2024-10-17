@@ -64,6 +64,8 @@ export const Pedido = () => {
 		return () => window.removeEventListener("resize", updateSize);
 	}, []);
 
+	console.log(order);
+
 	return (
 		<div
 			ref={containerRef} // Asignar la referencia aquí
@@ -72,28 +74,28 @@ export const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-          @keyframes loadingBar {
-            0% {
-              background-position: -200px 0;
-            }
-            100% {
-              background-position: 200px 0;
-            }
-          }
+              @keyframes loadingBar {
+                0% {
+                  background-position: -200px 0;
+                }
+                100% {
+                  background-position: 200px 0;
+                }
+              }
 
-          .animated-loading {
-            background: linear-gradient(
-              to right,
-              #000 0%,
-              #000 40%,
-              #555 50%,
-              #000 60%,
-              #000 100%
-            );
-            background-size: 400% 100%;
-            animation: loadingBar 5s linear infinite;
-          }
-        `}
+              .animated-loading {
+                background: linear-gradient(
+                  to right,
+                  #000 0%,
+                  #000 40%,
+                  #555 50%,
+                  #000 60%,
+                  #000 100%
+                );
+                background-size: 400% 100%;
+                animation: loadingBar 5s linear infinite;
+              }
+            `}
 			</style>
 
 			<StickerCanvas
@@ -139,7 +141,9 @@ export const Pedido = () => {
 									</svg>
 								</div>
 								<p className="text-black font-coolvetica font-bold text-left mt-2">
-									Anhelo está preparando tu pedido...
+									{order.elaborado
+										? "Tu cadete está llegando a Anhelo"
+										: "Anhelo está preparando tu pedido..."}
 								</p>
 							</div>
 							<div className="flex flex-col text-left gap-2">
