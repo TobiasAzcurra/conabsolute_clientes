@@ -170,7 +170,7 @@ const CartItems = () => {
 
 			<div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
 				<MovingRibbon angle={0} />
-				<img src={carrusel} className="w-full mt-28" alt="" />
+				<img src={carrusel} className="w-full mt-28 md:hidden" alt="" />
 			</div>
 
 			<style>
