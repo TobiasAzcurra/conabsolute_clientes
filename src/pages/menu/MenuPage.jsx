@@ -41,7 +41,7 @@ const MenuPage = () => {
 		if (isFirstAnimation) {
 			const timer = setTimeout(() => {
 				setIsFirstAnimation(false);
-			}, 1000); // Duración de la primera animación en milisegundos
+			}, 300); // Duración de la primera animación en milisegundos
 			return () => clearTimeout(timer);
 		}
 	}, [isFirstAnimation]);
@@ -94,7 +94,7 @@ const MenuPage = () => {
         top: 50%;
         left: 100%;
         transform: translate(-50%, -50%) scale(4);
-        animation: moveRightToLeft 1s linear forwards;
+        animation: moveRightToLeft 0.3s linear forwards;
         will-change: transform;
       }
 
@@ -110,6 +110,14 @@ const MenuPage = () => {
         background: linear-gradient(to bottom, #000000 0%, #000000 50%, #ff0000 100%);
         background-size: 200% 200%;
         animation: gradientAnimation 6s ease infinite;
+      }
+
+      /* Clase para el resplandor suave del logo */
+      .logo-glow {
+        /* Utiliza drop-shadow para resplandor alrededor de las letras */
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
+        /* Opcional: Añade múltiples drop-shadows para un resplandor más intenso */
+        /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4)); */
       }
     `;
 		document.head.appendChild(style);
@@ -129,17 +137,17 @@ const MenuPage = () => {
 			{isFirstAnimation ? (
 				// Primera animación: Logo moviéndose de derecha a izquierda
 				<div className="moving-logo-container">
-					<img className="moving-logo" src={logo} alt="ANHELO" />
+					<img className="moving-logo logo-glow" src={logo} alt="ANHELO" />
 				</div>
 			) : isSecondAnimation ? (
 				// Segunda parte: Contenido existente con animación de aparición
 				<div className="text-center">
 					<img
-						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow"
+						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow logo-glow"
 						src={logo}
 						alt="ANHELO"
 					/>
-					<p className="text-white text-sm font-semibold animate__animated animate__fadeInUp animate__slow animate__delay-1s">
+					<p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-1s">
 						Vas a pedir más.
 					</p>
 				</div>
