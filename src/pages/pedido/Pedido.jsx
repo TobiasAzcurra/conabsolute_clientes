@@ -221,7 +221,8 @@ export const Pedido = () => {
 									<p className="text-black font-coolvetica font-medium">
 										Envío a cargo de:{" "}
 										{order.cadete !== "NO ASIGNADO"
-											? order.cadete
+											? order.cadete.charAt(0).toUpperCase() +
+											  order.cadete.slice(1).toLowerCase()
 											: "Aún sin asignar."}
 									</p>
 								</div>
