@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Draggable from "react-draggable";
 import Bolsaa from "../assets/Bolsaa.png";
+import Fries from "../assets/friesSticker.png";
 import Box from "../assets/IMG-20240130-WA0059-removebg-preview.png";
 // Importa más stickers si lo deseas
 import { v4 as uuidv4 } from "uuid"; // Importar uuid para IDs únicos
@@ -10,6 +11,7 @@ import { v4 as uuidv4 } from "uuid"; // Importar uuid para IDs únicos
 const availableStickers = [
 	Bolsaa,
 	Box,
+	Fries,
 	// Añade más stickers aquí si es necesario
 ];
 
