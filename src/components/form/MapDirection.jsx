@@ -62,7 +62,7 @@ export const MapDirection = ({
 			solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
 		>
 			<div
-				className="w-full md:w-6/12"
+				className="w-full"
 				style={{
 					height: "25vh",
 					borderRadius: "24px", // Equivalente a rounded-3xl
