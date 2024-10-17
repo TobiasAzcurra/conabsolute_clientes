@@ -74,28 +74,28 @@ export const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-              @keyframes loadingBar {
-                0% {
-                  background-position: -200px 0;
-                }
-                100% {
-                  background-position: 200px 0;
-                }
-              }
+                  @keyframes loadingBar {
+                    0% {
+                      background-position: -200px 0;
+                    }
+                    100% {
+                      background-position: 200px 0;
+                    }
+                  }
 
-              .animated-loading {
-                background: linear-gradient(
-                  to right,
-                  #000 0%,
-                  #000 40%,
-                  #555 50%,
-                  #000 60%,
-                  #000 100%
-                );
-                background-size: 400% 100%;
-                animation: loadingBar 5s linear infinite;
-              }
-            `}
+                  .animated-loading {
+                    background: linear-gradient(
+                      to right,
+                      #000 0%,
+                      #000 40%,
+                      #555 50%,
+                      #000 60%,
+                      #000 100%
+                    );
+                    background-size: 400% 100%;
+                    animation: loadingBar 5s linear infinite;
+                  }
+                `}
 			</style>
 
 			<StickerCanvas
@@ -126,16 +126,22 @@ export const Pedido = () => {
 						<div className="flex flex-col w-full">
 							<div className="mb-10">
 								<div className="w-full flex flex-row gap-2 relative">
-									{/* Primera barra siempre activa */}
-									<div className="w-1/4 h-2.5 bg-black animated-loading rounded-full"></div>
+									{/* Primera barra condicional */}
+									<div
+										className={`w-1/4 h-2.5 rounded-full ${
+											!order.elaborado
+												? "bg-black animated-loading"
+												: "bg-black"
+										}`}
+									></div>
 
 									{/* Segunda barra condicional */}
 									<div
-										className={
+										className={`w-1/4 h-2.5 rounded-full ${
 											order.elaborado
-												? "w-1/4 h-2.5 bg-black animated-loading rounded-full"
-												: "w-1/4 h-2.5 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"
-										}
+												? "bg-black animated-loading"
+												: "bg-gray-100 border-opacity-20 border-black border-1 border"
+										}`}
 									></div>
 
 									{/* Tercera barra permanece inactiva */}
