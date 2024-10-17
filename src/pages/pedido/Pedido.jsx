@@ -130,9 +130,10 @@ export const Pedido = () => {
 								<p className="text-black font-coolvetica font-medium ">
 									Envio a cargo de: {order.cadete}
 								</p>
-								<p className="text-black  font-coolvetica font-medium ">
-									Destino: {order.direccion}
+								<p className="text-black font-coolvetica font-medium">
+									Destino: {order.direccion.split(",")[0]}
 								</p>
+
 								<p className="text-black font-coolvetica font-medium ">
 									Total: ${order.total}
 								</p>
