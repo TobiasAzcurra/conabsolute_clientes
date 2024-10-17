@@ -210,7 +210,7 @@ export const Pedido = () => {
 										Envío a cargo de:{" "}
 										{order.cadete !== "NO ASIGNADO"
 											? order.cadete
-											: "No disponible"}
+											: "Aun sin asignar."}
 									</p>
 								</div>
 								<div className="flex flex-row gap-2">
