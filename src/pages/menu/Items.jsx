@@ -13,8 +13,15 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 	// Verificamos si estamos en la ruta /carrito
 	const isCarrito = location.pathname === "/carrito";
 
-	// Ajustamos las clases de los estilos dependiendo de la ruta actual
-	const className = `flex flex-col items-center border border-black border-opacity-20 rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
+	// Determinamos si este item está seleccionado
+	const isSelected = selectedItem === name;
+
+	// Ajustamos las clases de los estilos dependiendo de si está seleccionado
+	const borderStyle = isSelected
+		? "border-2 border-black border-opacity-100"
+		: "border border-black border-opacity-20";
+
+	const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
 		isCarrito ? "w-[110px]" : "w-full max-w-[200px]"
 	}`;
 
@@ -35,7 +42,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 				/>
 			</div>
 			<div
-				className={` font-coolvetica text-center ${
+				className={`font-coolvetica text-center ${
 					isCarrito
 						? "flex flex-col items-center justify-between h-[93px]"
 						: "h-[50px]"
@@ -45,7 +52,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 					{capitalizeWords(name)}
 				</h5>
 				{isCarrito && selectedItem && (
-					<div className=" pb-3">
+					<div className="pb-3">
 						<QuickAddToCart product={selectedItem} animateFromCenter={true} />
 					</div>
 				)}
@@ -61,7 +68,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 		return (
 			<Link
 				className={className}
-				to={name === "PROMOCIONES" ? "/menu/burgers" : `/menu/${name}`}
+				to={`/menu/${name}`}
 				onClick={() => handleItemClick(name)}
 			>
 				{content}

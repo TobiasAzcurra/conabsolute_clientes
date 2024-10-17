@@ -9,7 +9,7 @@ export const items = {
 	bebidas: "bebidas",
 };
 
-const NavMenu = ({ selectedItem, handleItemClick, locationMenu }) => {
+const NavMenu = ({ selectedItem, handleItemClick }) => {
 	return (
 		<div>
 			<p className="text-gray-100 text-center text-2xl mb-3 font-bold font-coolvetica">

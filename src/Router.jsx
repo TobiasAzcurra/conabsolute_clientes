@@ -30,8 +30,16 @@ const AppRouter = () => {
 	const [pathLocation, setPathLocation] = useState("");
 	const cart = useSelector((state) => state.cartState.cart);
 	const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
-	const [phoneNumber, setPhoneNumber] = useState(""); // Nuevo estado para el número de teléfono
-	const navigate = useNavigate(); // Hook para redirección
+	const [phoneNumber, setPhoneNumber] = useState("");
+	const navigate = useNavigate();
+
+	// Agrega el estado selectedItem
+	const [selectedItem, setSelectedItem] = useState("");
+
+	// Función para manejar el clic en un item
+	const handleItemClick = (name) => {
+		setSelectedItem(name);
+	};
 
 	useEffect(() => {
 		const pathParts = pathname.split("/");
@@ -41,6 +49,11 @@ const AppRouter = () => {
 			setPathLocation("NADA");
 		} else {
 			setPathLocation(lastPart);
+
+			// Actualiza selectedItem basado en la ruta actual
+			if (["burgers", "combos", "bebidas", "papas"].includes(lastPart)) {
+				setSelectedItem(lastPart);
+			}
 		}
 	}, [pathname]);
 
@@ -101,7 +114,10 @@ const AppRouter = () => {
 					</div>
 					<Carrusel />
 					<div className="top-[215px] inset-0 absolute">
-						<NavMenu />
+						<NavMenu
+							selectedItem={selectedItem}
+							handleItemClick={handleItemClick}
+						/>
 					</div>
 				</div>
 			)}
