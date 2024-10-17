@@ -166,9 +166,9 @@ export const Pedido = () => {
 								</div>
 								<p className="text-black font-coolvetica font-bold text-left mt-2">
 									{order.cadete !== "NO ASIGNADO"
-										? "Tu cadete está en camino"
+										? "En camino... Atencion, te va a llamar tu cadete."
 										: order.elaborado
-										? "Tu cadete está llegando a Anhelo"
+										? "Tu cadete está llegando a Anhelo..."
 										: "Anhelo está preparando tu pedido..."}
 								</p>
 							</div>
