@@ -32,9 +32,11 @@ const FloatingCart = ({ totalQuantity, cart }) => {
 			</div>
 			<Link
 				to="/carrito"
-				className="bg-red-main w-full text-center items-center flex justify-center text-gray-100 h-12 text-sm px-6 py-3 rounded-3xl font-bold "
+				className="bg-red-main w-full items-center flex justify-center  h-12  px-6  rounded-3xl  "
 			>
-				Ver carrito
+				<p className="text-gray-100 mb-1 text-2xl font-bold text-center">
+					Ver pedido
+				</p>
 			</Link>
 		</div>
 	);
