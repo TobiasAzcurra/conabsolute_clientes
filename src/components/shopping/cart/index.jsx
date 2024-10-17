@@ -140,20 +140,25 @@ const CartItems = () => {
 							width: "max-content",
 						}}
 					>
-						{allProducts.map((product, index) => (
-							<Items
-								key={product.id || index}
-								selectedItem={product}
-								img={
-									product.img
-										? `/menu/${product.img}`
-										: getDefaultImage(product)
-								}
-								name={product.name}
-								handleItemClick={() => {}}
-								isCart
-							/>
-						))}
+						{allProducts
+							.filter(
+								(product) =>
+									!cart.some((cartItem) => cartItem.name === product.name)
+							)
+							.map((product, index) => (
+								<Items
+									key={product.id || index}
+									selectedItem={product}
+									img={
+										product.img
+											? `/menu/${product.img}`
+											: getDefaultImage(product)
+									}
+									name={product.name}
+									handleItemClick={() => {}}
+									isCart
+								/>
+							))}
 					</div>
 				</div>
 			</div>
