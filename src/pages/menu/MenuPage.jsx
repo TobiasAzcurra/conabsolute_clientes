@@ -23,22 +23,6 @@ const MenuPage = () => {
 		setSelectedItem(item);
 	};
 
-	// Función para detectar dispositivo móvil
-	const isMobileDevice = () => {
-		const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-		// Regex para detectar dispositivos móviles
-		return /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-			userAgent
-		);
-	};
-
-	useEffect(() => {
-		// Detectar dispositivo y redirigir si es PC
-		if (!isMobileDevice()) {
-			window.location.href = "https://onlyanhelo.com/";
-		}
-	}, []);
-
 	useEffect(() => {
 		const pathParts = pathname.split("/");
 		const lastPart = pathParts[pathParts.length - 1];
