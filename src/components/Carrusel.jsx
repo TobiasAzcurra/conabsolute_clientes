@@ -4,10 +4,19 @@ import carrusel1 from "../assets/carrusel1.jpg";
 import carrusel2 from "../assets/carrusel2.jpg";
 import carrusel3 from "../assets/carrusel3.jpg";
 import carrusel4 from "../assets/carrusel4.jpg";
+import carrusel5 from "../assets/carrusel5.jpg";
+import carrusel6 from "../assets/carrusel6.jpg";
 
 const Carrusel = () => {
 	const location = useLocation();
-	const images = [carrusel1, carrusel2, carrusel3, carrusel4];
+	const images = [
+		carrusel1,
+		carrusel2,
+		carrusel3,
+		carrusel4,
+		carrusel5,
+		carrusel6,
+	];
 	const [currentIndex, setCurrentIndex] = useState(0);
 
 	useEffect(() => {
