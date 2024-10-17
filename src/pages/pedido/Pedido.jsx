@@ -118,11 +118,11 @@ export const Pedido = () => {
 									<div className="w-1/4 h-2 rounded-full bg-gray-100 border-opacity-20 border-black border-1 border"></div>
 									<div className="w-1/2 h-2 bg-gray-100 border-opacity-20 border-black border-1 border rounded-full"></div>
 								</div>
-								<p className="text-black font-coolvetica font-bold   mt-2">
+								<p className="text-black font-coolvetica font-bold   text-center mt-2">
 									Anhelo está preparando tu pedido...
 								</p>
 							</div>
-							<div className="flex flex-col">
+							<div className="flex flex-col text-center">
 								<p className="text-black font-coolvetica font-medium ">
 									Entrega estimada: {sumarMinutos(order.hora, 30)} a{" "}
 									{sumarMinutos(order.hora, 50)}
