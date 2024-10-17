@@ -22,7 +22,7 @@ const Carrusel = () => {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-		}, 100);
+		}, 500);
 
 		return () => clearInterval(interval);
 	}, [images.length]);
