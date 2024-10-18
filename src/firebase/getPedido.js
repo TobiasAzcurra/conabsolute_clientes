@@ -1,9 +1,17 @@
 // getPedido.js
 
-import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import {
+	getFirestore,
+	doc,
+	onSnapshot,
+	getDoc,
+	updateDoc,
+	arrayRemove,
+} from "firebase/firestore";
 
 /**
  * Función para obtener la fecha actual formateada como "DD/MM/AAAA"
+ * @returns {string} Fecha actual en formato "DD/MM/AAAA"
  */
 export const obtenerFechaActual = () => {
 	const fechaActual = new Date();
@@ -19,6 +27,9 @@ export const obtenerFechaActual = () => {
 
 /**
  * Escucha en tiempo real un pedido específico por ID
+ * @param {string} orderId - ID del pedido a escuchar
+ * @param {function} callback - Función de devolución de llamada que recibe el pedido
+ * @returns {function} Función para desuscribirse del listener
  */
 export const ReadOrdersForTodayById = (orderId, callback) => {
 	const firestore = getFirestore();
@@ -61,7 +72,10 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 };
 
 /**
- * **Modificación: Nueva función para escuchar pedidos por número de teléfono en tiempo real y devolver un array**
+ * Escucha en tiempo real los pedidos asociados a un número de teléfono específico
+ * @param {string} phoneNumber - Número de teléfono para filtrar los pedidos
+ * @param {function} callback - Función de devolución de llamada que recibe un array de pedidos
+ * @returns {function} Función para desuscribirse del listener
  */
 export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 	const firestore = getFirestore();
@@ -96,4 +110,46 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 			callback([]); // Devuelve un array vacío en caso de error
 		}
 	);
+};
+
+/**
+ * Función para eliminar un pedido específico por ID
+ * @param {string} orderId - ID del pedido a eliminar
+ * @returns {Promise<void>}
+ */
+export const deleteOrder = async (orderId) => {
+	const firestore = getFirestore();
+	const todayDateString = obtenerFechaActual();
+	const [day, month, year] = todayDateString.split("/");
+
+	// Referencia al documento del día actual dentro de la colección del mes actual
+	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
+
+	try {
+		// Obtener el documento actual
+		const docSnapshot = await getDoc(ordersDocRef);
+		if (docSnapshot.exists()) {
+			const pedidosDelDia = docSnapshot.data()?.pedidos || [];
+
+			// Encontrar el pedido a eliminar
+			const pedidoAEliminar = pedidosDelDia.find(
+				(pedido) => pedido.id === orderId
+			);
+			if (!pedidoAEliminar) {
+				throw new Error("Pedido no encontrado.");
+			}
+
+			// Utilizar arrayRemove para eliminar el pedido
+			await updateDoc(ordersDocRef, {
+				pedidos: arrayRemove(pedidoAEliminar),
+			});
+
+			console.log(`Pedido con ID ${orderId} eliminado exitosamente.`);
+		} else {
+			throw new Error("No existen pedidos para el día actual.");
+		}
+	} catch (error) {
+		console.error("Error al eliminar el pedido:", error);
+		throw error; // Propagar el error para que pueda ser manejado en el frontend
+	}
 };

@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
 	ListenOrdersForTodayByPhoneNumber,
+	deleteOrder, // Importar la función de eliminación
 } from "../../firebase/getPedido";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
@@ -13,6 +14,7 @@ const Pedido = () => {
 	const [order, setOrder] = useState(null); // Para un pedido individual
 	const [pedidos, setPedidos] = useState([]); // Para múltiples pedidos
 	const [loading, setLoading] = useState(false);
+	const [deleting, setDeleting] = useState(false); // Estado para la eliminación
 	const navigate = useNavigate();
 	const { orderId } = useParams();
 	const location = useLocation(); // Para acceder al estado pasado en la navegación
@@ -20,6 +22,10 @@ const Pedido = () => {
 	// Nuevo estado para controlar la visualización de la dirección completa
 	const [showFullAddress, setShowFullAddress] = useState(false);
 	const [phoneNumber, setPhoneNumber] = useState(""); // Estado para el número de teléfono
+
+	// Estados para mensajes de éxito o error
+	const [message, setMessage] = useState(null);
+	const [error, setError] = useState(null);
 
 	// Función para sumar minutos a una hora dada
 	function sumarMinutos(hora, minutosASumar) {
@@ -138,6 +144,43 @@ const Pedido = () => {
 		return "bg-gray-100 border-opacity-20 border-black border-1 border";
 	};
 
+	/**
+	 * Función para eliminar un pedido
+	 * @param {string} orderId - ID del pedido a eliminar
+	 */
+	const eliminarPedido = async (orderId) => {
+		const confirmacion = window.confirm(
+			"¿Estás seguro de que deseas cancelar este pedido?"
+		);
+		if (!confirmacion) return;
+
+		setDeleting(true);
+		setMessage(null);
+		setError(null);
+
+		try {
+			await deleteOrder(orderId);
+			setMessage("Pedido cancelado exitosamente.");
+
+			if (orderId) {
+				// Si es un pedido individual, limpiar el estado
+				setOrder(null);
+			}
+
+			// Si hay múltiples pedidos, eliminar el pedido del estado
+			setPedidos((prevPedidos) =>
+				prevPedidos.filter((pedido) => pedido.id !== orderId)
+			);
+
+			// **Redirección eliminada**
+			// navigate("/"); // Esta línea ha sido removida
+		} catch (err) {
+			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
+		} finally {
+			setDeleting(false);
+		}
+	};
+
 	return (
 		<div
 			ref={containerRef} // Asignar la referencia aquí
@@ -176,7 +219,7 @@ const Pedido = () => {
 			/>
 			{/* Contenido */}
 			<div className="justify-center my-auto items-center flex flex-col">
-				<div className="flex items-center flex-col pt-8">
+				<div className="flex items-center flex-col pt-16">
 					<img src={logo} className="w-1/2" alt="Logo" />
 				</div>
 				{/* Mostrar el spinner mientras se cargan los datos */}
@@ -191,6 +234,12 @@ const Pedido = () => {
 					</div>
 				)}
 
+				{/* Mostrar mensajes de éxito o error */}
+				{message && (
+					<div className="mt-4 text-green-600 font-medium">{message}</div>
+				)}
+				{error && <div className="mt-4 text-red-600 font-medium">{error}</div>}
+
 				{/* Mostrar los pedidos una vez que se han cargado los datos */}
 				{!loading && pedidos.length > 0 && (
 					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
@@ -203,7 +252,7 @@ const Pedido = () => {
 							>
 								{/* Mostrar el título si hay más de un pedido */}
 								{pedidos.length > 1 && (
-									<h2 className="text-2xl w-full text-center font-bold font-coolvetica mb-8">
+									<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
 										Pedido {index + 1}
 									</h2>
 								)}
@@ -335,6 +384,17 @@ const Pedido = () => {
 											</p>
 										</div>
 									</div>
+								</div>
+
+								<div
+									onClick={() => eliminarPedido(currentOrder.id)} // Llamar a la función de eliminación
+									className={`${
+										deleting
+											? "opacity-50 cursor-not-allowed"
+											: "cursor-pointer"
+									} bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
+								>
+									{deleting ? "Cancelando..." : "Cancelar pedido"}
 								</div>
 
 								{/* Línea horizontal fina y negra, excepto en el último elemento */}
