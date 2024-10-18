@@ -1,5 +1,10 @@
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+// getPedido.js
 
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+
+/**
+ * Función para obtener la fecha actual formateada como "DD/MM/AAAA"
+ */
 export const obtenerFechaActual = () => {
 	const fechaActual = new Date();
 	const dia = String(fechaActual.getDate()).padStart(2, "0");
@@ -12,6 +17,9 @@ export const obtenerFechaActual = () => {
 	return fechaFormateada;
 };
 
+/**
+ * Escucha en tiempo real un pedido específico por ID
+ */
 export const ReadOrdersForTodayById = (orderId, callback) => {
 	const firestore = getFirestore();
 	const todayDateString = obtenerFechaActual();
@@ -52,8 +60,10 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 	);
 };
 
-// **Modificación: Nueva función para buscar pedidos por número de teléfono y devolver un array**
-export const ReadOrdersForTodayByPhoneNumber = async (phoneNumber) => {
+/**
+ * **Modificación: Nueva función para escuchar pedidos por número de teléfono en tiempo real y devolver un array**
+ */
+export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 	const firestore = getFirestore();
 	const todayDateString = obtenerFechaActual();
 
@@ -63,23 +73,27 @@ export const ReadOrdersForTodayByPhoneNumber = async (phoneNumber) => {
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-	try {
-		const docSnapshot = await getDoc(ordersDocRef);
-		if (docSnapshot.exists()) {
-			const pedidosDelDia = docSnapshot.data()?.pedidos || [];
+	// Escuchar cambios en el documento del día actual
+	return onSnapshot(
+		ordersDocRef,
+		(docSnapshot) => {
+			if (docSnapshot.exists()) {
+				const pedidosDelDia = docSnapshot.data()?.pedidos || [];
 
-			// Filtrar los pedidos por el número de teléfono
-			const pedidosFiltrados = pedidosDelDia.filter(
-				(pedido) => pedido.telefono === phoneNumber
-			);
+				// Filtrar los pedidos por el número de teléfono
+				const pedidosFiltrados = pedidosDelDia.filter(
+					(pedido) => pedido.telefono === phoneNumber
+				);
 
-			return pedidosFiltrados; // Devuelve un array de pedidos
-		} else {
-			// Si el documento no existe, no hay pedidos para el día actual
-			return []; // Devuelve un array vacío
+				callback(pedidosFiltrados); // Devuelve un array de pedidos filtrados
+			} else {
+				// Si el documento no existe, no hay pedidos para el día actual
+				callback([]); // Devuelve un array vacío
+			}
+		},
+		(error) => {
+			console.error("Error al escuchar los pedidos para el día actual:", error);
+			callback([]); // Devuelve un array vacío en caso de error
 		}
-	} catch (error) {
-		console.error("Error al obtener los pedidos para el día actual:", error);
-		return []; // Devuelve un array vacío en caso de error
-	}
+	);
 };

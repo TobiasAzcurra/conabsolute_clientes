@@ -1,3 +1,5 @@
+// Router.jsx
+
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Section from "./components/shopping/section";
 import { RouterMenu } from "./common/RouterMenu";
@@ -17,7 +19,7 @@ import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
-import { ReadOrdersForTodayByPhoneNumber } from "./firebase/getPedido";
+import { ListenOrdersForTodayByPhoneNumber } from "./firebase/getPedido"; // Importar la nueva función
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -64,20 +66,13 @@ const AppRouter = () => {
 	// Función para manejar el evento al presionar Enter
 	const handleKeyDown = async (e) => {
 		if (e.key === "Enter") {
-			// Llamar a la función para buscar el pedido
-			await searchOrderByPhoneNumber(phoneNumber);
-		}
-	};
-
-	// **Modificación: Función para buscar pedidos por número de teléfono y pasar el array al componente Pedido**
-	const searchOrderByPhoneNumber = async (phoneNumber) => {
-		const pedidos = await ReadOrdersForTodayByPhoneNumber(phoneNumber);
-		if (pedidos.length > 0) {
-			console.log("Pedidos encontrados:", pedidos);
-			// Navegar a Pedido, pasando los pedidos como estado
-			navigate(`/pedido`, { state: { pedidos } });
-		} else {
-			alert("No se encontraron pedidos con ese número de teléfono.");
+			// Validar el número de teléfono
+			if (phoneNumber.trim() === "") {
+				alert("Por favor, ingresa un número de teléfono válido.");
+				return;
+			}
+			// Navegar a Pedido, pasando el número de teléfono como estado
+			navigate("/pedido", { state: { phoneNumber } });
 		}
 	};
 

@@ -1,19 +1,19 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import MyTextInput from "./MyTextInput";
-import ArrowBack from "../back";
-import validations from "./validations";
-import handleSubmit from "./handleSubmit";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addLastCart, clearCart } from "../../redux/cart/cartSlice";
-import { useEffect, useState } from "react";
-import { MapDirection } from "./MapDirection";
-import { canjearVoucher } from "../../firebase/validateVoucher";
-import Payment from "../mercadopago/Payment";
-import currencyFormat from "../../helpers/currencyFormat";
-import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
-import { showTimeRestrictionAlert } from "./showTImeRestrictionAlert";
-import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import MyTextInput from './MyTextInput';
+import ArrowBack from '../back';
+import validations from './validations';
+import handleSubmit from './handleSubmit';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addLastCart, clearCart } from '../../redux/cart/cartSlice';
+import { useEffect, useState } from 'react';
+import { MapDirection } from './MapDirection';
+import { canjearVoucher } from '../../firebase/validateVoucher';
+import Payment from '../mercadopago/Payment';
+import currencyFormat from '../../helpers/currencyFormat';
+import { calculateDiscountedTotal } from '../../helpers/currencyFormat';
+import { showTimeRestrictionAlert } from './showTImeRestrictionAlert';
+import { isWithinOrderTimeRange } from '../../helpers/validate-hours';
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
@@ -21,15 +21,15 @@ const FormCustom = ({ cart, total }) => {
   const dispatch = useDispatch();
 
   const formValidations = validations(total + envio);
-  const [mapUrl, setUrl] = useState("");
+  const [mapUrl, setUrl] = useState('');
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
 
   const [discountedTotal, setDiscountedTotal] = useState(total);
 
-  const [couponCodes, setCouponCodes] = useState([""]);
+  const [couponCodes, setCouponCodes] = useState(['']);
   const [descuento, setDescuento] = useState(0);
-  const [voucherStatus, setVoucherStatus] = useState([""]);
+  const [voucherStatus, setVoucherStatus] = useState(['']);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
 
@@ -39,13 +39,9 @@ const FormCustom = ({ cart, total }) => {
 
   // Modifica la función `addCouponField` para permitir agregar un nuevo campo dinámicamente:
   const addCouponField = () => {
-    setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
-    setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo status vacío para el nuevo cupón
+    setCouponCodes([...couponCodes, '']); // Añadir un nuevo campo vacío
+    setVoucherStatus([...voucherStatus, '']); // Añadir un nuevo status vacío para el nuevo cupón
     setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
-    console.log("Added new coupon field. Current coupon codes:", [
-      ...couponCodes,
-      "",
-    ]);
   };
 
   // Modificamos `handleCouponChange` para pasar `updatedCoupons` a `handleVoucherValidation`
@@ -53,40 +49,30 @@ const FormCustom = ({ cart, total }) => {
     const updatedCoupons = [...couponCodes];
     updatedCoupons[index] = value;
     setCouponCodes(updatedCoupons);
-    console.log("Coupon codes after change:", updatedCoupons);
 
     // Ahora llamamos a `handleVoucherValidation` con `updatedCoupons`
     handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
   };
 
   function validarCantidadDeBurgers(cart, numCoupons) {
-    console.log(
-      "Validating quantity of burgers. Number of coupons:",
-      numCoupons,
-    );
     // Contador para las hamburguesas
     let burgerCount = 0;
 
     // Recorre el carrito
     for (const item of cart) {
-      console.log("Item in cart:", item);
       // Verifica si el item es una hamburguesa
-      if (item.category === "burger") {
+      if (item.category === 'burger') {
         burgerCount += item.quantity;
-        console.log("Burger found. Current burger count:", burgerCount);
       }
     }
 
     // Calcula la cantidad mínima de hamburguesas necesarias
     const minBurgersRequired = numCoupons * 2;
-    console.log("Minimum burgers required:", minBurgersRequired);
 
     // Verifica si hay suficientes hamburguesas
     if (burgerCount >= minBurgersRequired) {
-      console.log("Sufficient burgers in cart.");
       return true;
     } else {
-      console.log("Not enough burgers in cart.");
       return false;
     }
   }
@@ -97,15 +83,10 @@ const FormCustom = ({ cart, total }) => {
     index,
     value,
     updatedCoupons,
-    setFieldValue,
+    setFieldValue
   ) => {
-    console.log(`Validating voucher at index ${index}:`, value);
-
     // Iniciar la animación de carga
-    console.log(
-      "Starting validation, setting isValidating to true at index",
-      index,
-    );
+
     setIsValidating((prev) => {
       const updated = [...prev];
       updated[index] = true; // Activar el estado de carga
@@ -114,9 +95,8 @@ const FormCustom = ({ cart, total }) => {
 
     // Primera validación: evitar cupones duplicados
     if (updatedCoupons.indexOf(value) !== index) {
-      console.log("Duplicate coupon detected:", value);
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "Este código ya fue ingresado.";
+      updatedVoucherStatus[index] = 'Este código ya fue ingresado.';
       setVoucherStatus(updatedVoucherStatus);
       setIsValidating((prev) => {
         const updated = [...prev];
@@ -127,13 +107,10 @@ const FormCustom = ({ cart, total }) => {
     }
 
     // Validar que haya suficientes hamburguesas
-    const numCoupons = updatedCoupons.filter((code) => code !== "").length;
+    const numCoupons = updatedCoupons.filter((code) => code !== '').length;
     const hasEnoughBurgers = validarCantidadDeBurgers(cart, numCoupons);
-    console.log("Number of coupons:", numCoupons);
-    console.log("Has enough burgers:", hasEnoughBurgers);
 
     if (!hasEnoughBurgers) {
-      console.log("Not enough burgers for the number of coupons.");
       const updatedVoucherStatus = [...voucherStatus];
       updatedVoucherStatus[index] = `Necesitas al menos ${
         numCoupons * 2
@@ -148,38 +125,33 @@ const FormCustom = ({ cart, total }) => {
     }
 
     try {
-      console.log("Calling canjearVoucher with code:", value);
       // Validar el cupón
       const isValid = await canjearVoucher(value);
-      console.log("Result from canjearVoucher:", isValid);
       const updatedVoucherStatus = [...voucherStatus];
 
       if (isValid) {
-        console.log("Coupon is valid, calculating discounted total.");
         const { newTotal, totalDescuento } = calculateDiscountedTotal(
           cart,
-          numCoupons,
+          numCoupons
         );
-        console.log("New total:", newTotal, "Total discount:", totalDescuento);
+
         setDiscountedTotal(newTotal);
         setDescuento(totalDescuento);
-        updatedVoucherStatus[index] = "¡Código válido!";
-        setFieldValue("efectivoCantidad", "");
-        setFieldValue("mercadopagoCantidad", "");
+        updatedVoucherStatus[index] = '¡Código válido!';
+        setFieldValue('efectivoCantidad', '');
+        setFieldValue('mercadopagoCantidad', '');
       } else {
-        console.log("Coupon is invalid.");
-        updatedVoucherStatus[index] = "Código no válido.";
+        updatedVoucherStatus[index] = 'Código no válido.';
       }
       setVoucherStatus(updatedVoucherStatus);
     } catch (error) {
-      console.error("Error while validating coupon:", error);
+      console.error('Error while validating coupon:', error);
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "Error al validar el cupón.";
+      updatedVoucherStatus[index] = 'Error al validar el cupón.';
       setVoucherStatus(updatedVoucherStatus);
     }
 
     // Desactivar la animación de carga
-    console.log("Validation completed for index", index);
     setIsValidating((prev) => {
       const updated = [...prev];
       updated[index] = false;
@@ -188,11 +160,10 @@ const FormCustom = ({ cart, total }) => {
   };
 
   useEffect(() => {
-    console.log("Total changed, updating discountedTotal to:", total);
     setDiscountedTotal(total);
   }, [total]);
 
-  const [selectedHora, setSelectedHora] = useState("");
+  const [selectedHora, setSelectedHora] = useState('');
 
   const handleChange = (event) => {
     setSelectedHora(event.target.value);
@@ -220,24 +191,24 @@ const FormCustom = ({ cart, total }) => {
       <Formik
         initialValues={{
           subTotal: discountedTotal,
-          phone: "",
-          deliveryMethod: "delivery",
-          references: "",
-          paymentMethod: "efectivo",
-          money: "",
-          address: "",
-          hora: "",
+          phone: '',
+          deliveryMethod: 'delivery',
+          references: '',
+          paymentMethod: 'efectivo',
+          money: '',
+          address: '',
+          hora: '',
           efectivoCantidad: 0,
           mercadopagoCantidad: 0,
-          aclaraciones: "",
+          aclaraciones: '',
         }}
-        validationSchema={formValidations}
+        // validationSchema={formValidations}
         onSubmit={async (values) => {
-          if (values.paymentMethod === "efectivo") {
-            if (!isWithinOrderTimeRange()) {
-              showTimeRestrictionAlert();
-              return;
-            }
+          if (values.paymentMethod === 'efectivo') {
+            // if (!isWithinOrderTimeRange()) {
+            //   showTimeRestrictionAlert();
+            //   return;
+            // }
 
             const orderId = await handleSubmit(
               values,
@@ -245,7 +216,7 @@ const FormCustom = ({ cart, total }) => {
               discountedTotal,
               envio,
               mapUrl,
-              couponCodes,
+              couponCodes
             );
 
             if (orderId) {
@@ -254,7 +225,7 @@ const FormCustom = ({ cart, total }) => {
               dispatch(addLastCart());
             } else {
               // Manejar el error, como mostrar una notificación al usuario
-              console.error("Error al procesar la orden");
+              console.error('Error al procesar la orden');
             }
           }
         }}
@@ -390,7 +361,7 @@ const FormCustom = ({ cart, total }) => {
                           as="select"
                           name="hora"
                           className={`custom-select ${
-                            selectedHora === "" ? "text-gray-400" : "text-black"
+                            selectedHora === '' ? 'text-gray-400' : 'text-black'
                           }`}
                           value={selectedHora}
                           onChange={handleChange}
@@ -460,8 +431,8 @@ const FormCustom = ({ cart, total }) => {
                           name="paymentMethod"
                           className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
                           style={{
-                            WebkitAppearance: "none",
-                            MozAppearance: "none",
+                            WebkitAppearance: 'none',
+                            MozAppearance: 'none',
                           }}
                         >
                           <option value="efectivo">Efectivo</option>
@@ -477,8 +448,8 @@ const FormCustom = ({ cart, total }) => {
                           key={index}
                           className={`flex flex-col w-full transition-all duration-300 ${
                             index !== 0
-                              ? "border-t border-black border-opacity-20"
-                              : ""
+                              ? 'border-t border-black border-opacity-20'
+                              : ''
                           }`}
                         >
                           <div className="flex flex-row gap-2 px-3 items-center">
@@ -502,15 +473,15 @@ const FormCustom = ({ cart, total }) => {
                               type="text"
                               placeholder={
                                 index === 0
-                                  ? "¿Tienes algún cupón?"
-                                  : "¿Tienes otro código?"
+                                  ? '¿Tienes algún cupón?'
+                                  : '¿Tienes otro código?'
                               }
                               value={couponCodes[index]}
                               onChange={(e) => {
                                 handleCouponChange(
                                   index,
                                   e.target.value,
-                                  setFieldValue,
+                                  setFieldValue
                                 );
                               }}
                               className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
@@ -524,7 +495,7 @@ const FormCustom = ({ cart, total }) => {
                               >
                                 <span className="sr-only">Loading...</span>
                               </div>
-                            ) : voucherStatus[index] === "¡Código válido!" ? (
+                            ) : voucherStatus[index] === '¡Código válido!' ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -542,7 +513,7 @@ const FormCustom = ({ cart, total }) => {
 
                           {/* Mensaje de validación */}
                           {voucherStatus[index] &&
-                            voucherStatus[index] !== "¡Código válido!" && (
+                            voucherStatus[index] !== '¡Código válido!' && (
                               <div className="flex flex-row h-10 justify-between px-3 items-start">
                                 <div className="flex flex-row items-center gap-2">
                                   <p className="bg-transparent px-0  text-opacity-100 w-full text-red-main">
@@ -553,7 +524,7 @@ const FormCustom = ({ cart, total }) => {
                             )}
 
                           {/* Lógica para agregar un nuevo campo de cupón */}
-                          {voucherStatus[index] === "¡Código válido!" &&
+                          {voucherStatus[index] === '¡Código válido!' &&
                             index === couponCodes.length - 1 &&
                             addCouponField()}
                         </div>
@@ -586,7 +557,7 @@ const FormCustom = ({ cart, total }) => {
                 </div>
 
                 {/* Botón de envío */}
-                {values.paymentMethod === "mercadopago" ? (
+                {values.paymentMethod === 'mercadopago' ? (
                   <Payment
                     cart={cart}
                     values={values}

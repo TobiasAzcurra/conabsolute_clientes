@@ -57,11 +57,6 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 
 	// useEffect para inicializar los stickers al cargar la página
 	useEffect(() => {
-		console.log(
-			"Container Size en StickerCanvas:",
-			containerWidth,
-			containerHeight
-		);
 		if (containerWidth === 0 || containerHeight === 0) {
 			return;
 		}
@@ -76,12 +71,8 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
 				x,
 				y,
 			});
-			console.log(
-				`Sticker ${index + 1} de tipo ${src} agregado en posición (${x}, ${y})`
-			);
 		});
 
-		console.log("Initial Stickers:", initialStickers);
 		setStickers(initialStickers);
 	}, [containerWidth, containerHeight]);
 

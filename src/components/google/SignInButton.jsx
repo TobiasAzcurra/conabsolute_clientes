@@ -4,39 +4,38 @@ import { setUser } from "../../redux/user/userSlice"; // Importa la acción setU
 import { doc, getDoc, setDoc, getFirestore } from "firebase/firestore";
 
 const SignInButton = () => {
-  const dispatch = useDispatch();
+	const dispatch = useDispatch();
 
-  const handleSignIn = async () => {
-    const user = await signInWithGoogle(); // Llama a la función de autenticación
+	const handleSignIn = async () => {
+		const user = await signInWithGoogle(); // Llama a la función de autenticación
 
-    if (user) {
-      // Verifica si el usuario ya existe en Firestore
-      const firestore = getFirestore();
-      const userDocRef = doc(firestore, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
+		if (user) {
+			// Verifica si el usuario ya existe en Firestore
+			const firestore = getFirestore();
+			const userDocRef = doc(firestore, "users", user.uid);
+			const userDoc = await getDoc(userDocRef);
 
-      if (!userDoc.exists()) {
-        // Si no existe, lo agregamos
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          createdAt: new Date().toISOString(),
-        });
-        console.log("Usuario agregado a Firestore");
-      }
+			if (!userDoc.exists()) {
+				// Si no existe, lo agregamos
+				await setDoc(userDocRef, {
+					uid: user.uid,
+					displayName: user.displayName,
+					email: user.email,
+					photoURL: user.photoURL,
+					createdAt: new Date().toISOString(),
+				});
+			}
 
-      // Despacha el usuario al estado de Redux
-      dispatch(setUser(user));
-    }
-  };
+			// Despacha el usuario al estado de Redux
+			dispatch(setUser(user));
+		}
+	};
 
-  return (
-    <button onClick={handleSignIn} className="btn btn-primary">
-      Iniciar sesión con Google
-    </button>
-  );
+	return (
+		<button onClick={handleSignIn} className="btn btn-primary">
+			Iniciar sesión con Google
+		</button>
+	);
 };
 
 export default SignInButton;
