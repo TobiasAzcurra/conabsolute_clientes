@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom"; // Agregamos useNavigate para redirección
 import logo from "../../assets/anheloTMwhite.png";
+import { clearCart } from "../../redux/cart/cartSlice";
+import { useDispatch } from "react-redux";
 
 export const items = {
   burgers: "burgers",
@@ -13,6 +15,7 @@ const SuccessPage = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { orderId } = useParams();
+  const dispatch = useDispatch();
 
   const [selectedItem, setSelectedItem] = useState("");
   const [locationMenu, setLocationMenu] = useState(true);
@@ -21,6 +24,8 @@ const SuccessPage = () => {
     const pathParts = pathname.split("/");
     const lastPart = pathParts[pathParts.length - 1];
     // Si selecciono PROMOCIONES, que no se actualice el selectedItem
+
+    dispatch(clearCart());
 
     if (selectedItem === "PROMOCIONES") {
       setSelectedItem("PROMOCIONES");
@@ -34,6 +39,8 @@ const SuccessPage = () => {
   // Redirección después de la animación
   useEffect(() => {
     const timer = setTimeout(() => {
+      console.log(orderId);
+
       navigate(`/pedido/${orderId}`);
     }, 2000); // Redirige después de 2 segundos
 

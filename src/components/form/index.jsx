@@ -231,13 +231,13 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
           aclaraciones: "",
         }}
-        validationSchema={formValidations}
+        // validationSchema={formValidations}
         onSubmit={async (values) => {
           if (values.paymentMethod === "efectivo") {
-            if (!isWithinOrderTimeRange()) {
-              showTimeRestrictionAlert();
-              return;
-            }
+            // if (!isWithinOrderTimeRange()) {
+            //   showTimeRestrictionAlert();
+            //   return;
+            // }
 
             const orderId = await handleSubmit(
               values,
@@ -251,7 +251,6 @@ const FormCustom = ({ cart, total }) => {
             if (orderId) {
               // Si el ID es válido, redirigir al usuario a la página de confirmación
               navigate(`/success/${orderId}`);
-              dispatch(clearCart());
               dispatch(addLastCart());
             } else {
               // Manejar el error, como mostrar una notificación al usuario
@@ -568,7 +567,7 @@ const FormCustom = ({ cart, total }) => {
                   <p className="text-2xl font-bold">Resumen</p>
                   <div className="flex flex-row justify-between w-full">
                     <p>Productos</p>
-                    <p>{currencyFormat(discountedTotal)}</p>
+                    <p>{currencyFormat(total)}</p>
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Envío</p>
