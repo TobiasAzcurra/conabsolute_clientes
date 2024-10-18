@@ -1,4 +1,4 @@
-import { getFirestore, doc, onSnapshot, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export const obtenerFechaActual = () => {
 	const fechaActual = new Date();
@@ -52,7 +52,7 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 	);
 };
 
-// Nueva función para buscar pedidos por número de teléfono
+// **Modificación: Nueva función para buscar pedidos por número de teléfono y devolver un array**
 export const ReadOrdersForTodayByPhoneNumber = async (phoneNumber) => {
 	const firestore = getFirestore();
 	const todayDateString = obtenerFechaActual();
@@ -69,17 +69,17 @@ export const ReadOrdersForTodayByPhoneNumber = async (phoneNumber) => {
 			const pedidosDelDia = docSnapshot.data()?.pedidos || [];
 
 			// Filtrar los pedidos por el número de teléfono
-			const pedidoFiltrado = pedidosDelDia.find(
+			const pedidosFiltrados = pedidosDelDia.filter(
 				(pedido) => pedido.telefono === phoneNumber
 			);
 
-			return pedidoFiltrado || null;
+			return pedidosFiltrados; // Devuelve un array de pedidos
 		} else {
 			// Si el documento no existe, no hay pedidos para el día actual
-			return null;
+			return []; // Devuelve un array vacío
 		}
 	} catch (error) {
 		console.error("Error al obtener los pedidos para el día actual:", error);
-		return null;
+		return []; // Devuelve un array vacío en caso de error
 	}
 };

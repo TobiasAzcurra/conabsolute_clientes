@@ -12,10 +12,9 @@ import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
-import { Pedido } from "./pages/pedido/Pedido";
+import Pedido from "./pages/pedido/Pedido"; // Asegúrate de importar correctamente
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
 import { ReadOrdersForTodayByPhoneNumber } from "./firebase/getPedido";
@@ -70,13 +69,15 @@ const AppRouter = () => {
 		}
 	};
 
-	// Función para buscar el pedido por número de teléfono
+	// **Modificación: Función para buscar pedidos por número de teléfono y pasar el array al componente Pedido**
 	const searchOrderByPhoneNumber = async (phoneNumber) => {
-		const pedido = await ReadOrdersForTodayByPhoneNumber(phoneNumber);
-		if (pedido) {
-			navigate(`/pedido/${pedido.id}`);
+		const pedidos = await ReadOrdersForTodayByPhoneNumber(phoneNumber);
+		if (pedidos.length > 0) {
+			console.log("Pedidos encontrados:", pedidos);
+			// Navegar a Pedido, pasando los pedidos como estado
+			navigate(`/pedido`, { state: { pedidos } });
 		} else {
-			alert("No se encontró un pedido con ese número de teléfono.");
+			alert("No se encontraron pedidos con ese número de teléfono.");
 		}
 	};
 
@@ -85,7 +86,7 @@ const AppRouter = () => {
 			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
-					<div className="flex justify-center  w-full">
+					<div className="flex justify-center w-full">
 						<div className="bg-gray-100 md:w-[500px] border border-black border-opacity-20 shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 md:left-auto md:right-auto">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -140,7 +141,6 @@ const AppRouter = () => {
 					path="/menu/papas"
 					element={<Section path={"papas"} products={papasArray} />}
 				/>
-
 				{/* Rutas de detalles */}
 				<Route
 					path="/menu/burgers/:id"
@@ -158,12 +158,13 @@ const AppRouter = () => {
 					path="/menu/papas/:id"
 					element={<DetailCard products={papasArray} type={"papas"} />}
 				/>
-
 				{/* Otras rutas */}
 				<Route path="/carrito" element={<CartItems />} />
 				<Route path="/order" element={<OrderForm />} />
 				<Route path="/success/:orderId" element={<SuccessPage />} />
 				<Route path="/pedido/:orderId" element={<Pedido />} />
+				<Route path="/pedido" element={<Pedido />} />{" "}
+				{/* Nueva ruta para múltiples pedidos */}
 				<Route path="/feedback" element={<Feedback />} />
 				<Route
 					path="*"
@@ -184,6 +185,7 @@ const AppRouter = () => {
 			{totalQuantity > 0 &&
 				pathname !== "/" &&
 				pathname !== "/carrito" &&
+				pathname !== "/pedido" &&
 				!pathname.startsWith("/pedido/") &&
 				!pathname.startsWith("/success") && (
 					<FloatingCart totalQuantity={totalQuantity} cart={cart} />
