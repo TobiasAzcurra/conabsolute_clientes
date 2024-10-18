@@ -106,7 +106,7 @@ const Section = ({ products = [], path }) => {
 						)}
 					</div>
 				) : (
-					<div className="mt-4 mb-4 mr-4 ml-4 grid grid-cols-1 sm:grid-cols-2 gap-4 justify-items-center">
+					<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8 mt-8">
 						{products.length > 0 ? (
 							products.map(({ name, description, price, id, img }, i) => (
 								<Card
