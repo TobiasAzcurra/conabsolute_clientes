@@ -201,6 +201,13 @@ const Pedido = () => {
 									index !== 0 ? "" : "mt-8"
 								} ${index === pedidos.length - 1 ? "pb-16" : ""}`}
 							>
+								{/* Mostrar el título si hay más de un pedido */}
+								{pedidos.length > 1 && (
+									<h2 className="text-2xl w-full text-center font-bold font-coolvetica mb-8">
+										Pedido {index + 1}
+									</h2>
+								)}
+
 								{/* Línea horizontal con animación */}
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
