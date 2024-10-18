@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
-import classNames from "classnames";
-import { functions } from "../../firebase/config";
-import { httpsCallable } from "firebase/functions";
-import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
-import { showTimeRestrictionAlert } from "../form/showTImeRestrictionAlert";
+import React, { useState } from 'react';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+import classNames from 'classnames';
+import { functions } from '../../firebase/config';
+import { httpsCallable } from 'firebase/functions';
+import { isWithinOrderTimeRange } from '../../helpers/validate-hours';
+import { showTimeRestrictionAlert } from '../form/showTImeRestrictionAlert';
 
 // Inicializa Mercado Pago con tu clave pública
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY);
@@ -57,16 +57,16 @@ const Payment = ({
       return;
     }
 
-    if (!isWithinOrderTimeRange()) {
-      showTimeRestrictionAlert();
-      return;
-    }
+    // if (!isWithinOrderTimeRange()) {
+    //   showTimeRestrictionAlert();
+    //   return;
+    // }
 
     setIsLoading(true);
     submitForm();
     try {
       // Llamar a la función de Firebase
-      const createPreference = httpsCallable(functions, "createPreference");
+      const createPreference = httpsCallable(functions, 'createPreference');
       const result = await createPreference({
         values,
         cart,
@@ -79,7 +79,7 @@ const Payment = ({
       // Asumiendo que el resultado contiene el ID de la preferencia
       setPreferenceId(result.data.id);
     } catch (error) {
-      console.error("Error al crear preferencia:", error);
+      console.error('Error al crear preferencia:', error);
     } finally {
       setIsLoading(false);
     }
@@ -102,38 +102,38 @@ const Payment = ({
           disabled={isLoading}
           className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 w-full"
         >
-          {isLoading ? "Cargando..." : "Pedir"}
+          {isLoading ? 'Cargando...' : 'Pedir'}
         </button>
       ) : (
         <div
-          className={classNames("payment-form", {
-            "payment-form--hidden": !isReady,
+          className={classNames('payment-form', {
+            'payment-form--hidden': !isReady,
           })}
         >
           <Wallet
             initialization={{
               preferenceId: preferenceId, // Pasa el preferenceId al Wallet
-              redirectMode: "self",
+              redirectMode: 'self',
             }}
             locale="es-AR"
             customization={{
               texts: {
-                action: "pay",
-                valueProp: "security_safety",
+                action: 'pay',
+                valueProp: 'security_safety',
               },
               visual: {
                 hideValueProp: false,
-                buttonBackground: "default", // Personaliza el botón
-                valuePropColor: "grey",
-                buttonHeight: "48px",
-                borderRadius: "6px",
-                verticalPadding: "16px",
-                horizontalPadding: "0px",
+                buttonBackground: 'default', // Personaliza el botón
+                valuePropColor: 'grey',
+                buttonHeight: '48px',
+                borderRadius: '6px',
+                verticalPadding: '16px',
+                horizontalPadding: '0px',
               },
               checkout: {
                 theme: {
-                  elementsColor: "#4287F5",
-                  headerColor: "#4287F5",
+                  elementsColor: '#4287F5',
+                  headerColor: '#4287F5',
                 },
               },
             }}
