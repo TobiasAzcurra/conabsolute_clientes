@@ -34,7 +34,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
 				to="/carrito"
 				className="bg-red-main w-full items-center flex justify-center md:w-[500px] h-12  px-6  rounded-3xl  "
 			>
-				<p className="text-gray-100 mb-1 text-2xl font-bold text-center">
+				<p className="text-gray-100 mb-1 text-xl font-bold text-center">
 					Ver pedido
 				</p>
 			</Link>
