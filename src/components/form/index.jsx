@@ -231,13 +231,13 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
           aclaraciones: "",
         }}
-        // validationSchema={formValidations}
+        validationSchema={formValidations}
         onSubmit={async (values) => {
           if (values.paymentMethod === "efectivo") {
-            // if (!isWithinOrderTimeRange()) {
-            //   showTimeRestrictionAlert();
-            //   return;
-            // }
+            if (!isWithinOrderTimeRange()) {
+              showTimeRestrictionAlert();
+              return;
+            }
 
             const orderId = await handleSubmit(
               values,

@@ -86,6 +86,7 @@ const handleSubmit = async (
     elaborado: false,
     couponCodes,
     ubicacion: mapUrl,
+    paid: true,
   };
 
   try {
