@@ -305,7 +305,9 @@ const Pedido = () => {
 							pedidos.map((currentOrder, index) => (
 								<div
 									key={currentOrder.id}
-									className="flex items-center flex-col w-full"
+									className={`flex items-center flex-col w-full ${
+										index !== 0 ? "" : "mt-8"
+									}`}
 								>
 									{/* Línea horizontal con animación */}
 									<div className="flex flex-col w-full">
