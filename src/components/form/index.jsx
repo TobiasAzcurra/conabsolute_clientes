@@ -1,5 +1,3 @@
-// src/components/FormCustom.jsx
-
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import MyTextInput from "./MyTextInput";
 import ArrowBack from "../back";
@@ -16,7 +14,6 @@ import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
 import { showTimeRestrictionAlert } from "./showTImeRestrictionAlert";
 import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
-import LoadingPoints from "../../components/LoadingPoints"; // Asegúrate de ajustar la ruta
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
@@ -247,7 +244,6 @@ const FormCustom = ({ cart, total }) => {
 								{/* Sección de aclaraciones */}
 								<div className="flex flex-row justify-between px-3 h-auto items-start border-2 border-black rounded-3xl mt-4">
 									<div className="flex flex-row w-full items-center gap-2">
-										{/* Icono */}
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											viewBox="0 0 24 24"
@@ -494,7 +490,7 @@ const FormCustom = ({ cart, total }) => {
 														{/* Indicador de validación */}
 														{isValidating[index] ? (
 															<div
-																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-gray-100"
+																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
 																role="status"
 															>
 																<span className="sr-only">Loading...</span>
