@@ -165,7 +165,7 @@ const Pedido = () => {
 
 				{/* Mostrar los pedidos una vez que se han cargado los datos */}
 				{!loading && (order || pedidos.length > 0) && (
-					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-8 overflow-y-auto">
+					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
 						{/* Pedido individual */}
 						{order && (
 							<div className="flex items-center flex-col w-full px-4">
@@ -436,6 +436,11 @@ const Pedido = () => {
 											</div>
 										</div>
 									</div>
+
+									{/* Línea horizontal fina y negra, excepto en el último elemento */}
+									{index < pedidos.length - 1 && (
+										<div className="w-full h-px bg-black opacity-20 mt-8"></div>
+									)}
 								</div>
 							))}
 					</div>
