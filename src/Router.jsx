@@ -134,8 +134,8 @@ const AppRouter = () => {
 						{showExplanation && (
 							<div className="bg-black md:w-[500px] shadow-black h-16 flex items-center justify-center absolute z-50 top-[62px] font-coolvetica rounded-lg px-4 left-4 right-4 md:left-auto opacity-80 md:right-auto">
 								<p className="text-center w-full text-xs text-gray-100 font-medium">
-									Ingresa tu número en el siguiente formato: Con el código de
-									área sin espacios ni símbolos. Ej:
+									Ingresa tu número con el código de área sin espacios ni
+									símbolos. Ej:
 									<span className="font-bold opacity-100"> 3585168971</span>
 								</p>
 							</div>
