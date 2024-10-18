@@ -14,6 +14,7 @@ import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
 import { showTimeRestrictionAlert } from "./showTImeRestrictionAlert";
 import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
+import LoadingPoints from "../LoadingPoints";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
