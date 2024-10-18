@@ -9,6 +9,7 @@ import {
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import StickerCanvas from "../../components/StickerCanvas";
+import LoadingPoints from "../../components/LoadingPoints"; // Importa LoadingPoints
 
 const Pedido = () => {
 	const [order, setOrder] = useState(null); // Para un pedido individual
@@ -189,28 +190,28 @@ const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-                    @keyframes loadingBar {
-                        0% {
-                            background-position: -200px 0;
-                        }
-                        100% {
-                            background-position: 200px 0;
-                        }
-                    }
+          @keyframes loadingBar {
+              0% {
+                  background-position: -200px 0;
+              }
+              100% {
+                  background-position: 200px 0;
+              }
+          }
 
-                    .animated-loading {
-                        background: linear-gradient(
-                            to right,
-                            #000 0%,
-                            #000 40%,
-                            #555 100%,
-                            #000 60%,
-                            #000 100%
-                        );
-                        background-size: 400% 100%;
-                        animation: loadingBar 5s linear infinite;
-                    }
-                `}
+          .animated-loading {
+              background: linear-gradient(
+                  to right,
+                  #000 0%,
+                  #000 40%,
+                  #555 100%,
+                  #000 60%,
+                  #000 100%
+              );
+              background-size: 400% 100%;
+              animation: loadingBar 5s linear infinite;
+          }
+        `}
 			</style>
 
 			<StickerCanvas
@@ -329,7 +330,6 @@ const Pedido = () => {
 												className="h-6"
 											>
 												<path
-													fillRule="evenodd"
 													d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
 													clipRule="evenodd"
 												/>
@@ -394,7 +394,13 @@ const Pedido = () => {
 											: "cursor-pointer"
 									} bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
 								>
-									{deleting ? "Cancelando..." : "Cancelar pedido"}
+									{deleting ? (
+										<div className="flex items-center justify-center space-x-2">
+											<LoadingPoints className="h-4 w-4" />{" "}
+										</div>
+									) : (
+										"Cancelar pedido"
+									)}
 								</div>
 
 								{/* Línea horizontal fina y negra, excepto en el último elemento */}

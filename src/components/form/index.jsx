@@ -1,3 +1,5 @@
+// src/components/FormCustom.jsx
+
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import MyTextInput from "./MyTextInput";
 import ArrowBack from "../back";
@@ -14,6 +16,7 @@ import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
 import { showTimeRestrictionAlert } from "./showTImeRestrictionAlert";
 import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
+import LoadingPoints from "../../components/LoadingPoints"; // Asegúrate de ajustar la ruta
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 const FormCustom = ({ cart, total }) => {
@@ -244,6 +247,7 @@ const FormCustom = ({ cart, total }) => {
 								{/* Sección de aclaraciones */}
 								<div className="flex flex-row justify-between px-3 h-auto items-start border-2 border-black rounded-3xl mt-4">
 									<div className="flex flex-row w-full items-center gap-2">
+										{/* Icono */}
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
 											viewBox="0 0 24 24"
@@ -490,7 +494,7 @@ const FormCustom = ({ cart, total }) => {
 														{/* Indicador de validación */}
 														{isValidating[index] ? (
 															<div
-																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
+																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent text-gray-100"
 																role="status"
 															>
 																<span className="sr-only">Loading...</span>
@@ -572,9 +576,15 @@ const FormCustom = ({ cart, total }) => {
 									<button
 										type="submit"
 										disabled={isSubmitting}
-										className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300"
+										className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 ${
+											isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+										}`}
 									>
-										Pedir
+										{isSubmitting ? (
+											<LoadingPoints color="text-gray-100" />
+										) : (
+											"Pedir"
+										)}
 									</button>
 								)}
 							</div>
