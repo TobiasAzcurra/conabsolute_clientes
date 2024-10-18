@@ -110,7 +110,7 @@ const AppRouter = () => {
 								onChange={(e) => setPhoneNumber(e.target.value)}
 								onKeyDown={handleKeyDown}
 								placeholder="Busca tu pedido con tu número de cel"
-								className="text-opacity-60 font-coolvetica text-black bg-transparent outline-none w-full"
+								className="text-opacity-60 text-sm font-coolvetica text-black bg-transparent outline-none w-full"
 							/>
 
 							{/* Ícono de información */}
