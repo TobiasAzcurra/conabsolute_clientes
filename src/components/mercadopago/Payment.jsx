@@ -57,10 +57,10 @@ const Payment = ({
       return;
     }
 
-    if (!isWithinOrderTimeRange()) {
-      showTimeRestrictionAlert();
-      return;
-    }
+    // if (!isWithinOrderTimeRange()) {
+    //   showTimeRestrictionAlert();
+    //   return;
+    // }
 
     setIsLoading(true);
     submitForm();
