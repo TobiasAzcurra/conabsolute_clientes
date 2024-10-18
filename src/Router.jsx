@@ -86,7 +86,7 @@ const AppRouter = () => {
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
-						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 md:left-auto md:right-auto">
+						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4  md:left-auto md:right-auto">
 							{/* Ícono de búsqueda */}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -118,7 +118,7 @@ const AppRouter = () => {
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="currentColor"
-								className="mr-[-10px] h-10 cursor-pointer"
+								className="mr-[-8px] h-8 cursor-pointer"
 								onClick={() => setShowExplanation(!showExplanation)}
 								title="Información sobre el formato del número"
 							>
