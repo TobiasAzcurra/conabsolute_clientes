@@ -81,7 +81,7 @@ const handleSubmit = async (
     aclaraciones: values.aclaraciones || '',
     metodoPago: values.paymentMethod,
     direccion: values.address,
-    telefono: cleanPhoneNumber(), // Convierte a string
+    telefono: cleanPhoneNumber(phone), // Convierte a string
     hora: values.hora || obtenerHoraActual(),
     cerca: false, // Puedes ajustar esto según tus necesidades
     cadete: 'NO ASIGNADO',
