@@ -86,7 +86,7 @@ const AppRouter = () => {
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
-						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 opacity-80 md:left-auto md:right-auto">
+						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 opacity-80 focus-within:opacity-100 transition-opacity duration-300 ease-in-out md:left-auto md:right-auto">
 							{/* Ícono de búsqueda */}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -110,7 +110,7 @@ const AppRouter = () => {
 								onChange={(e) => setPhoneNumber(e.target.value)}
 								onKeyDown={handleKeyDown}
 								placeholder="Busca tu pedido con tu número de cel"
-								className="text-opacity-60  font-coolvetica text-black bg-transparent outline-none w-full"
+								className="text-opacity-60 font-coolvetica text-black bg-transparent outline-none w-full"
 							/>
 
 							{/* Ícono de información */}
@@ -133,7 +133,7 @@ const AppRouter = () => {
 						{/* Explicación del formato, renderizado condicionalmente */}
 						{showExplanation && (
 							<div className="bg-black md:w-[500px] shadow-black h-16 flex items-center justify-center absolute z-50 top-[62px] font-coolvetica rounded-lg px-4 left-4 right-4 md:left-auto opacity-80 md:right-auto">
-								<p className="text-center w-full text-xs  text-gray-100 font-medium">
+								<p className="text-center w-full text-xs text-gray-100 font-medium">
 									Ingresa tu número en el siguiente formato: Con el código de
 									área sin espacios ni símbolos. Ej:
 									<span className="font-bold opacity-100"> 3585168971</span>
