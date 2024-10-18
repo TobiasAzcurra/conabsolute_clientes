@@ -307,7 +307,7 @@ const Pedido = () => {
 									key={currentOrder.id}
 									className={`flex items-center flex-col w-full ${
 										index !== 0 ? "" : "mt-8"
-									}`}
+									} ${index === pedidos.length - 1 ? "pb-16" : ""}`}
 								>
 									{/* Línea horizontal con animación */}
 									<div className="flex flex-col w-full">
