@@ -1,4 +1,4 @@
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
 
 export const obtenerFechaActual = () => {
 	const fechaActual = new Date();
