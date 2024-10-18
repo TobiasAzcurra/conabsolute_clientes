@@ -1,11 +1,15 @@
+// Pedido.jsx
+
 import React, { useRef, useState, useEffect } from "react";
-import { ReadOrdersForTodayById } from "../../firebase/getPedido";
+import {
+	ReadOrdersForTodayById,
+	ListenOrdersForTodayByPhoneNumber,
+} from "../../firebase/getPedido";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import StickerCanvas from "../../components/StickerCanvas";
 
 const Pedido = () => {
-	const [phoneNumber, setPhoneNumber] = useState("");
 	const [order, setOrder] = useState(null); // Para un pedido individual
 	const [pedidos, setPedidos] = useState([]); // Para múltiples pedidos
 	const [loading, setLoading] = useState(false);
@@ -35,10 +39,12 @@ const Pedido = () => {
 	}
 
 	useEffect(() => {
+		let unsubscribe;
+
 		// Manejar el caso de un pedido individual basado en orderId
 		if (orderId) {
 			setLoading(true);
-			ReadOrdersForTodayById(orderId, (pedido) => {
+			unsubscribe = ReadOrdersForTodayById(orderId, (pedido) => {
 				if (pedido && typeof pedido.direccion === "string") {
 					setOrder(pedido);
 				} else {
@@ -49,12 +55,23 @@ const Pedido = () => {
 		}
 
 		// Manejar el caso de múltiples pedidos pasados por estado (búsqueda por teléfono)
-		if (!orderId && location.state && location.state.pedidos) {
-			const { pedidos } = location.state;
-			setPedidos(pedidos);
-			console.log("Pedidos encontrados por número de teléfono:", pedidos);
-			// Puedes añadir más lógica aquí si deseas manejar los pedidos de otra manera
+		if (!orderId && location.state && location.state.phoneNumber) {
+			const { phoneNumber } = location.state;
+			setLoading(true);
+			// Configurar el listener en tiempo real
+			unsubscribe = ListenOrdersForTodayByPhoneNumber(
+				phoneNumber,
+				(pedidosActualizados) => {
+					setPedidos(pedidosActualizados);
+					setLoading(false);
+				}
+			);
 		}
+
+		// Limpiar el listener al desmontar el componente
+		return () => {
+			if (unsubscribe) unsubscribe();
+		};
 	}, [orderId, location.state]);
 
 	const containerRef = useRef(null);
@@ -118,27 +135,27 @@ const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-                  @keyframes loadingBar {
-                    0% {
-                      background-position: -200px 0;
+                    @keyframes loadingBar {
+                        0% {
+                            background-position: -200px 0;
+                        }
+                        100% {
+                            background-position: 200px 0;
+                        }
                     }
-                    100% {
-                      background-position: 200px 0;
-                    }
-                  }
 
-                  .animated-loading {
-                    background: linear-gradient(
-                      to right,
-                      #000 0%,
-                      #000 40%,
-                      #555 100%,
-                      #000 60%,
-                      #000 100%
-                    );
-                    background-size: 400% 100%;
-                    animation: loadingBar 5s linear infinite;
-                  }
+                    .animated-loading {
+                        background: linear-gradient(
+                            to right,
+                            #000 0%,
+                            #000 40%,
+                            #555 100%,
+                            #000 60%,
+                            #000 100%
+                        );
+                        background-size: 400% 100%;
+                        animation: loadingBar 5s linear infinite;
+                    }
                 `}
 			</style>
 
