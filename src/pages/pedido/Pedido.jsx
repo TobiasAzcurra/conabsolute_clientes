@@ -168,7 +168,7 @@ const Pedido = () => {
 					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
 						{/* Pedido individual */}
 						{order && (
-							<div className="flex items-center flex-col w-full px-4">
+							<div className="flex items-center flex-col w-full ">
 								{/* Línea horizontal con animación */}
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
