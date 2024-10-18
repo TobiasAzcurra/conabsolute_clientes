@@ -148,7 +148,7 @@ const Pedido = () => {
 			/>
 			{/* Contenido */}
 			<div className="justify-center my-auto items-center flex flex-col">
-				<div className="flex items-center flex-col">
+				<div className="flex items-center flex-col pt-8">
 					<img src={logo} className="w-1/2" alt="Logo" />
 				</div>
 				{/* Mostrar el spinner mientras se cargan los datos */}
