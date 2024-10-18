@@ -82,7 +82,6 @@ const Pedido = () => {
 			if (containerRef.current) {
 				const width = containerRef.current.offsetWidth;
 				const height = containerRef.current.offsetHeight;
-				console.log("Container Width:", width, "Container Height:", height);
 				setContainerSize({ width, height });
 			}
 		};
@@ -94,8 +93,6 @@ const Pedido = () => {
 		window.addEventListener("resize", updateSize);
 		return () => window.removeEventListener("resize", updateSize);
 	}, []);
-
-	console.log(order); // Registrar el pedido individual en la consola
 
 	// Funciones para determinar las clases de las barras de progreso
 	const getFirstBarClass = (currentOrder) => {
