@@ -133,7 +133,7 @@ const AppRouter = () => {
 						{/* Explicación del formato, renderizado condicionalmente */}
 						{showExplanation && (
 							<div className="bg-black md:w-[500px] shadow-black h-20 flex items-center justify-center absolute z-50 top-16 font-coolvetica rounded-lg px-4 left-4 right-4 md:left-auto md:right-auto">
-								<p className="text-center w-full text-sm text-gray-100 font-medium">
+								<p className="text-center w-full text-xs text-gray-100 font-medium">
 									Ingresa tu número en el siguiente formato: 10 dígitos con el
 									código de área sin espacios ni símbolos.
 									<br />
