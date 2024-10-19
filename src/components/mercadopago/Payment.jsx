@@ -59,7 +59,6 @@ const Payment = ({
 		}
 
 		if (!isWithinOrderTimeRange()) {
-			showTimeRestrictionAlert();
 			return;
 		}
 
