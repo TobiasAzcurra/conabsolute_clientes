@@ -314,13 +314,13 @@ const FormCustom = ({ cart, total }) => {
           // Verificar si es una reserva
           const isReserva = values.hora.trim() !== '';
 
-          //   if (!isWithinOrderTimeRange()) {
-          //     console.log(
-          //       'La hora actual está fuera del rango permitido para pedidos'
-          //     );
-          //     openTimeRestrictedModal(); // Abrir el modal personalizado
-          //     return;
-          //   }
+          if (!isWithinOrderTimeRange()) {
+            console.log(
+              'La hora actual está fuera del rango permitido para pedidos'
+            );
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+            return;
+          }
 
           if (values.paymentMethod === 'efectivo') {
             // Ajustar la hora restando 30 minutos si es una reserva

@@ -31,9 +31,9 @@ const Payment = ({
       return;
     }
 
-    // if (!isWithinOrderTimeRange()) {
-    // 	return;
-    // }
+    if (!isWithinOrderTimeRange()) {
+      return;
+    }
 
     setIsLoading(true);
     submitForm();
