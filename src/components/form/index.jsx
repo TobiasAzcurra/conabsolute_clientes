@@ -257,13 +257,7 @@ const FormCustom = ({ cart, total }) => {
 			console.log("Cupones excedentes eliminados:", newCouponCodes);
 		}
 
-		// Asegurarse de que haya un campo adicional vacío si no se ha alcanzado el máximo
-		if (couponCodes.length < adjustedMaxCoupons) {
-			setCouponCodes([...couponCodes, ""]);
-			setVoucherStatus([...voucherStatus, ""]);
-			setIsValidating([...isValidating, false]);
-			console.log("Añadiendo campo de cupón adicional vacío");
-		}
+		// Removed the part that adds a new coupon field if less than maxCoupons
 	};
 
 	// Función para ajustar la hora restando 30 minutos
@@ -283,7 +277,7 @@ const FormCustom = ({ cart, total }) => {
 
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
-			<style jsx>{`
+			<style>{`
 				.custom-select {
 					appearance: none;
 					-webkit-appearance: none;
