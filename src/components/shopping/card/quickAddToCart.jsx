@@ -15,6 +15,14 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 	const { cart } = useSelector((state) => state.cartState);
 	const location = useLocation();
 
+	// Validar que el producto tenga una categoría
+	if (!product.category) {
+		console.warn(
+			"El producto no tiene una categoría definida. Se usará 'default'.",
+			product
+		);
+	}
+
 	// Definir los toppings efectivos: usar los toppings pasados como prop o los del producto
 	const effectiveToppings =
 		toppings && toppings.length > 0 ? toppings : product.toppings || [];
@@ -49,20 +57,11 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 		quantityRef.current = cartQuantity;
 	}, [cartQuantity]);
 
-	// Logs de depuración
-	useEffect(() => {
-		"Producto:", product;
-		"Toppings efectivos:", effectiveToppings;
-		"CartItem encontrado:", cartItem;
-		"Cantidad en carrito:", cartQuantity;
-	}, [product, effectiveToppings, cartItem, cartQuantity]);
-
 	// Manejar incremento de cantidad
 	const handleIncrement = () => {
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
-			"Cantidad incrementada a:", newQuantity;
 			return newQuantity;
 		});
 	};
@@ -74,7 +73,6 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
-				"Cantidad decrementada a:", newQuantity;
 				return newQuantity;
 			});
 		}
@@ -82,11 +80,9 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 
 	// Iniciar el proceso de agregar al carrito
 	const startAddingProcess = () => {
-		("Iniciando proceso de agregar al carrito");
 		setIsEditing(true);
 		setIsAdding(true);
 		setTimeout(() => {
-			// Mantén o elimina este setTimeout según tus necesidades
 			if (quantityRef.current === 0 && cartItem) {
 				const itemIndex = cart.findIndex(
 					(item) =>
@@ -94,7 +90,6 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						item.category === (product.category || "default") &&
 						compareToppings(item.toppings, effectiveToppings)
 				);
-				"Eliminando ítem del carrito en el índice:", itemIndex;
 				dispatch(removeItem(itemIndex));
 			} else if (quantityRef.current >= 1) {
 				if (cartItem) {
@@ -104,7 +99,6 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						toppings: effectiveToppings,
 						quantity: quantityRef.current,
 					};
-					"Actualizando ítem del carrito con:", updatePayload;
 					dispatch(updateItemQuantity(updatePayload));
 				} else {
 					const newItem = {
@@ -115,7 +109,6 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						quantity: quantityRef.current,
 						category: product.category || "default",
 					};
-					"Agregando nuevo ítem al carrito:", newItem;
 					dispatch(addItem(newItem));
 				}
 			}
@@ -179,9 +172,9 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						className="h-6"
 					>
 						<path
-							fill-rule="evenodd"
+							fillRule="evenodd"
 							d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
-							clip-rule="evenodd"
+							clipRule="evenodd"
 						/>
 					</svg>
 					Agregar

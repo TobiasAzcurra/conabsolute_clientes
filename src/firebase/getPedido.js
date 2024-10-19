@@ -143,8 +143,6 @@ export const deleteOrder = async (orderId) => {
 			await updateDoc(ordersDocRef, {
 				pedidos: arrayRemove(pedidoAEliminar),
 			});
-
-			console.log(`Pedido con ID ${orderId} eliminado exitosamente.`);
 		} else {
 			throw new Error("No existen pedidos para el día actual.");
 		}

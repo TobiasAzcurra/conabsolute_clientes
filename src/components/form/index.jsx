@@ -22,17 +22,12 @@ const FormCustom = ({ cart, total }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	console.log("Inicializando FormCustom");
-	console.log("Carrito inicial:", cart);
-	console.log("Total inicial:", total);
-
 	const formValidations = validations(total + envio);
 	const [mapUrl, setUrl] = useState("");
 	const [validarUbi, setValidarUbi] = useState(false);
 	const [noEncontre, setNoEncontre] = useState(false);
 
 	const [discountedTotal, setDiscountedTotal] = useState(total);
-	console.log("Total con descuento inicial:", discountedTotal);
 
 	const [couponCodes, setCouponCodes] = useState([""]); // Inicializado con un campo vacío
 	const [descuento, setDescuento] = useState(0);
@@ -53,20 +48,16 @@ const FormCustom = ({ cart, total }) => {
 
 	// Función para abrir el modal de restricción de tiempo
 	const openTimeRestrictedModal = () => {
-		console.log("Abriendo modal de restricción de tiempo");
 		setIsTimeRestrictedModalOpen(true);
 	};
 
 	// Función para cerrar el modal de restricción de tiempo
 	const closeTimeRestrictedModal = () => {
-		console.log("Cerrando modal de restricción de tiempo");
 		setIsTimeRestrictedModalOpen(false);
 	};
 
 	// Función para agregar un nuevo campo de cupón dinámicamente
 	const addCouponField = () => {
-		console.log("Agregando un nuevo campo de cupón");
-
 		// Calcular el máximo de cupones permitidos
 		const totalBurgers = getTotalBurgers();
 		const maxCoupons = Math.floor(totalBurgers / 2);
@@ -76,15 +67,11 @@ const FormCustom = ({ cart, total }) => {
 			setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
 			setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
 		} else {
-			console.log(
-				"No se pueden agregar más cupones, se ha alcanzado el máximo permitido."
-			);
 		}
 	};
 
 	// Función para manejar el cambio de un cupón
 	const handleCouponChange = (index, value, setFieldValue) => {
-		console.log(`Cambio en el cupón ${index}: ${value}`); // Log del cambio
 		const updatedCoupons = [...couponCodes];
 		updatedCoupons[index] = value;
 		setCouponCodes(updatedCoupons);
@@ -97,11 +84,7 @@ const FormCustom = ({ cart, total }) => {
 	function validarCantidadDeBurgers(cart, numCoupons) {
 		let burgerCount = 0;
 
-		console.log("Procesando categorías de productos en el carrito:");
 		for (const item of cart) {
-			console.log(
-				`Producto: ${item.name}, Categoría: ${item.category}, Cantidad: ${item.quantity}`
-			);
 			if (item.category === "burgers") {
 				// Cambiado a "burgers"
 				burgerCount += item.quantity;
@@ -109,14 +92,6 @@ const FormCustom = ({ cart, total }) => {
 		}
 
 		const minBurgersRequired = numCoupons * 2;
-		console.log(
-			"Cantidad de hamburguesas en el carrito:",
-			burgerCount,
-			"Requeridas para",
-			numCoupons,
-			"cupones:",
-			minBurgersRequired
-		); // Log de conteo de hamburguesas
 
 		return burgerCount >= minBurgersRequired;
 	}
@@ -128,8 +103,6 @@ const FormCustom = ({ cart, total }) => {
 		updatedCoupons,
 		setFieldValue
 	) => {
-		console.log(`Validando cupón ${index}: ${value}`); // Log al iniciar validación
-
 		// Iniciar la animación de carga
 		setIsValidating((prev) => {
 			const updated = [...prev];
@@ -139,7 +112,6 @@ const FormCustom = ({ cart, total }) => {
 
 		// Primera validación: evitar cupones duplicados
 		if (updatedCoupons.indexOf(value) !== index) {
-			console.log(`Cupón duplicado detectado: ${value} en el índice ${index}`); // Log de duplicado
 			const updatedVoucherStatus = [...voucherStatus];
 			updatedVoucherStatus[index] = "Este código ya fue ingresado.";
 			setVoucherStatus(updatedVoucherStatus);
@@ -158,10 +130,6 @@ const FormCustom = ({ cart, total }) => {
 		const hasEnoughBurgers = validarCantidadDeBurgers(cart, numCoupons);
 
 		if (!hasEnoughBurgers) {
-			console.log(
-				"No hay suficientes hamburguesas para canjear cupones:",
-				numCoupons
-			); // Log de insuficiencia
 			const updatedVoucherStatus = [...voucherStatus];
 			updatedVoucherStatus[index] = `Necesitas al menos ${
 				numCoupons * 2
@@ -178,7 +146,6 @@ const FormCustom = ({ cart, total }) => {
 		try {
 			// Validar el cupón
 			const isValid = await canjearVoucher(value);
-			console.log(`Cupón ${value} válido:`, isValid); // Log de validación
 			const updatedVoucherStatus = [...voucherStatus];
 
 			if (isValid) {
@@ -186,12 +153,7 @@ const FormCustom = ({ cart, total }) => {
 					cart,
 					numCoupons
 				);
-				console.log(
-					"Nuevo total después del descuento:",
-					newTotal,
-					"Descuento aplicado:",
-					totalDescuento
-				); // Log de descuento
+
 				setDiscountedTotal(newTotal);
 				setDescuento(totalDescuento);
 				updatedVoucherStatus[index] = "¡Código válido!";
@@ -199,7 +161,6 @@ const FormCustom = ({ cart, total }) => {
 				setFieldValue("mercadopagoCantidad", "");
 			} else {
 				updatedVoucherStatus[index] = "Código no válido.";
-				console.log(`Cupón no válido: ${value}`); // Log de invalidación
 			}
 			setVoucherStatus(updatedVoucherStatus);
 		} catch (error) {
@@ -219,7 +180,6 @@ const FormCustom = ({ cart, total }) => {
 
 	// Actualizar el total con descuentos cuando cambia el total original
 	useEffect(() => {
-		console.log("Total original ha cambiado:", total);
 		setDiscountedTotal(total);
 	}, [total]);
 
@@ -227,7 +187,6 @@ const FormCustom = ({ cart, total }) => {
 
 	const handleChange = (event) => {
 		setSelectedHora(event.target.value);
-		console.log(`Hora seleccionada: ${event.target.value}`); // Log de selección
 	};
 
 	// Nueva función para obtener la cantidad total de hamburguesas
@@ -239,7 +198,6 @@ const FormCustom = ({ cart, total }) => {
 			}
 			return acc;
 		}, 0);
-		console.log("Total de hamburguesas en el carrito:", totalBurgers); // Log de total hamburguesas
 		return totalBurgers;
 	};
 
@@ -247,15 +205,8 @@ const FormCustom = ({ cart, total }) => {
 	const removeExcessCoupons = (maxCoupons) => {
 		// Asegurarse de que siempre haya al menos un campo de cupón
 		const adjustedMaxCoupons = Math.max(maxCoupons, 1);
-		console.log("Máximos cupones permitidos ajustados:", adjustedMaxCoupons); // Log de maximos ajustados
 
 		if (couponCodes.length > adjustedMaxCoupons) {
-			console.log(
-				"Eliminando campos de cupones excedentes:",
-				couponCodes.length,
-				">",
-				adjustedMaxCoupons
-			); // Log de eliminación
 			const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
 			const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
 			const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
@@ -284,7 +235,6 @@ const FormCustom = ({ cart, total }) => {
 		const adjustedHours = date.getHours().toString().padStart(2, "0");
 		const adjustedMinutes = date.getMinutes().toString().padStart(2, "0");
 		const adjustedTime = `${adjustedHours}:${adjustedMinutes}`;
-		console.log("Hora ajustada:", adjustedTime); // Log de hora ajustada
 		return adjustedTime;
 	};
 
@@ -323,14 +273,10 @@ const FormCustom = ({ cart, total }) => {
 				}}
 				validationSchema={formValidations}
 				onSubmit={async (values) => {
-					console.log("Valores del formulario antes de enviar:", values); // Log para depuración
-
 					// Verificar si es una reserva
 					const isReserva = values.hora.trim() !== "";
-					console.log("¿Es una reserva?:", isReserva); // Log de reserva
 
 					if (!isWithinOrderTimeRange()) {
-						console.log("Fuera del rango de tiempo permitido para pedidos."); // Log de restricción
 						openTimeRestrictedModal(); // Abrir el modal personalizado
 						return;
 					}
@@ -339,12 +285,10 @@ const FormCustom = ({ cart, total }) => {
 					let adjustedHora = values.hora;
 					if (isReserva) {
 						adjustedHora = adjustHora(values.hora);
-						console.log("Hora ajustada para despacho:", adjustedHora); // Log de hora ajustada
 					}
 
 					// Crear un nuevo objeto con la hora ajustada
 					const updatedValues = { ...values, hora: adjustedHora };
-					console.log("Valores actualizados para enviar:", updatedValues); // Log de valores actualizados
 
 					const orderId = await handleSubmit(
 						updatedValues, // Usar los valores actualizados
@@ -354,14 +298,11 @@ const FormCustom = ({ cart, total }) => {
 						mapUrl,
 						couponCodes
 					);
-					console.log("ID de la orden recibida:", orderId); // Log del ID de la orden
 
 					if (orderId) {
 						// Si el ID es válido, redirigir al usuario a la página de confirmación
-						console.log("Orden procesada exitosamente. Redirigiendo...");
 						navigate(`/success/${orderId}`);
 						dispatch(addLastCart());
-						console.log("Último carrito agregado al estado de Redux");
 					} else {
 						// Manejar el error, como mostrar una notificación al usuario
 						console.error("Error al procesar la orden");
@@ -378,9 +319,6 @@ const FormCustom = ({ cart, total }) => {
 				}) => {
 					// Agregar useEffect para revalidar cupones cuando cambia el carrito o los cupones
 					useEffect(() => {
-						console.log(
-							"Revalidando cupones debido a cambios en el carrito o cupones."
-						); // Log de revalidación
 						couponCodes.forEach((code, index) => {
 							if (code.trim() !== "") {
 								handleVoucherValidation(
@@ -397,19 +335,13 @@ const FormCustom = ({ cart, total }) => {
 					useEffect(() => {
 						const totalBurgers = getTotalBurgers();
 						const maxCoupons = Math.floor(totalBurgers / 2);
-						console.log("Máximo de cupones permitidos:", maxCoupons); // Log de max cupones
 
 						// Eliminar cupones excedentes si es necesario
 						removeExcessCoupons(maxCoupons);
 					}, [cart]);
 
 					// Agregar logs para cambios en el carrito si se modifica dentro de este componente
-					useEffect(() => {
-						console.log("Carrito actualizado:", cart);
-						console.log("Total actualizado:", total);
-						console.log("Total con descuento actualizado:", discountedTotal);
-						console.log("Descuento aplicado:", descuento);
-					}, [cart, total, discountedTotal, descuento]);
+					useEffect(() => {}, [cart, total, discountedTotal, descuento]);
 
 					return (
 						<Form>
@@ -617,10 +549,6 @@ const FormCustom = ({ cart, total }) => {
 														MozAppearance: "none",
 													}}
 													onChange={(e) => {
-														console.log(
-															"Método de pago seleccionado:",
-															e.target.value
-														); // Log de método de pago
 														setFieldValue("paymentMethod", e.target.value);
 													}}
 												>
@@ -672,10 +600,6 @@ const FormCustom = ({ cart, total }) => {
 																	e.target.value,
 																	setFieldValue
 																);
-																console.log(
-																	`Entrada de cupón ${index} cambiada a:`,
-																	e.target.value
-																); // Log de cambio de entrada
 															}}
 															className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 														/>

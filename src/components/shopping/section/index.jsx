@@ -46,17 +46,20 @@ const Section = ({ products = [], path }) => {
 									Satisfyers
 								</p>
 								<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8">
-									{satisfyer.map(({ name, description, price, id, img }, i) => (
-										<Card
-											key={i}
-											img={img}
-											name={name}
-											description={description}
-											price={price}
-											path={path}
-											id={id}
-										/>
-									))}
+									{satisfyer.map(
+										({ name, description, category, price, id, img }, i) => (
+											<Card
+												key={i}
+												img={img}
+												name={name}
+												category={category}
+												description={description}
+												price={price}
+												path={path}
+												id={id}
+											/>
+										)
+									)}
 								</div>
 							</div>
 						)}
@@ -67,9 +70,10 @@ const Section = ({ products = [], path }) => {
 								</p>
 								<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8">
 									{originalsBurgers.map(
-										({ name, description, price, id, img }, i) => (
+										({ name, description, price, category, id, img }, i) => (
 											<Card
 												key={i}
+												category={category}
 												img={img}
 												name={name}
 												description={description}
@@ -89,11 +93,12 @@ const Section = ({ products = [], path }) => {
 								</p>
 								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
 									{ourCollection.map(
-										({ name, description, price, id, img }, i) => (
+										({ name, description, price, category, id, img }, i) => (
 											<Card
 												key={id}
 												img={img}
 												name={name}
+												category={category}
 												description={description}
 												price={price}
 												path={path}
@@ -108,17 +113,20 @@ const Section = ({ products = [], path }) => {
 				) : (
 					<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8 mt-10 px-4">
 						{products.length > 0 ? (
-							products.map(({ name, description, price, id, img }, i) => (
-								<Card
-									key={i}
-									img={img}
-									name={name}
-									description={description}
-									price={price}
-									path={path}
-									id={id}
-								/>
-							))
+							products.map(
+								({ name, description, category, price, id, img }, i) => (
+									<Card
+										key={i}
+										category={category}
+										img={img}
+										name={name}
+										description={description}
+										price={price}
+										path={path}
+										id={id}
+									/>
+								)
+							)
 						) : (
 							<span>No hay nada xd</span>
 						)}
