@@ -103,8 +103,8 @@ const FormCustom = ({ cart, total }) => {
 		let burgerCount = 0;
 
 		for (const item of cart) {
-			if (item.category === "burger") {
-				// Cambiado a "burger"
+			if (item.category === "burger" || item.category === "burgers") {
+				// Maneja ambas categorías
 				burgerCount += item.quantity;
 			}
 		}
@@ -228,8 +228,8 @@ const FormCustom = ({ cart, total }) => {
 	// Nueva función para obtener la cantidad total de hamburguesas
 	const getTotalBurgers = () => {
 		const totalBurgers = cart.reduce((acc, item) => {
-			if (item.category === "burger") {
-				// Asegúrate de que la categoría coincida con tu lógica
+			if (item.category === "burger" || item.category === "burgers") {
+				// Maneja ambas categorías
 				return acc + item.quantity;
 			}
 			return acc;
