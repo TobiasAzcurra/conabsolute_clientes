@@ -17,6 +17,7 @@ import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
 import LoadingPoints from "../LoadingPoints";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
+
 const FormCustom = ({ cart, total }) => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
@@ -38,48 +39,42 @@ const FormCustom = ({ cart, total }) => {
 	const [preferenceId, setPreferenceId] = useState(null);
 	const [isLoading, setIsLoading] = useState(false);
 
-	// Modifica la función `addCouponField` para permitir agregar un nuevo campo dinámicamente:
+	// Estados para manejar la validación de cupones
+	const [isValidating, setIsValidating] = useState([false]);
+
+	// Función para agregar un nuevo campo de cupón dinámicamente
 	const addCouponField = () => {
 		setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
-		setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo status vacío para el nuevo cupón
+		setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
 		setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
 	};
 
-	// Modificamos `handleCouponChange` para pasar `updatedCoupons` a `handleVoucherValidation`
+	// Función para manejar el cambio de un cupón
 	const handleCouponChange = (index, value, setFieldValue) => {
 		const updatedCoupons = [...couponCodes];
 		updatedCoupons[index] = value;
 		setCouponCodes(updatedCoupons);
 
-		// Ahora llamamos a `handleVoucherValidation` con `updatedCoupons`
+		// Llamar a la validación del cupón con los cupones actualizados
 		handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
 	};
 
+	// Función para validar la cantidad de hamburguesas necesarias
 	function validarCantidadDeBurgers(cart, numCoupons) {
-		// Contador para las hamburguesas
 		let burgerCount = 0;
 
-		// Recorre el carrito
 		for (const item of cart) {
-			// Verifica si el item es una hamburguesa
 			if (item.category === "burger") {
 				burgerCount += item.quantity;
 			}
 		}
 
-		// Calcula la cantidad mínima de hamburguesas necesarias
 		const minBurgersRequired = numCoupons * 2;
 
-		// Verifica si hay suficientes hamburguesas
-		if (burgerCount >= minBurgersRequired) {
-			return true;
-		} else {
-			return false;
-		}
+		return burgerCount >= minBurgersRequired;
 	}
-	const [isValidating, setIsValidating] = useState([false]); // Nuevo estado para manejar la carga
 
-	// Modificamos la función para que reciba 'updatedCoupons' como parámetro
+	// Función para manejar la validación de un cupón
 	const handleVoucherValidation = async (
 		index,
 		value,
@@ -87,7 +82,6 @@ const FormCustom = ({ cart, total }) => {
 		setFieldValue
 	) => {
 		// Iniciar la animación de carga
-
 		setIsValidating((prev) => {
 			const updated = [...prev];
 			updated[index] = true; // Activar el estado de carga
@@ -108,7 +102,9 @@ const FormCustom = ({ cart, total }) => {
 		}
 
 		// Validar que haya suficientes hamburguesas
-		const numCoupons = updatedCoupons.filter((code) => code !== "").length;
+		const numCoupons = updatedCoupons.filter(
+			(code) => code.trim() !== ""
+		).length;
 		const hasEnoughBurgers = validarCantidadDeBurgers(cart, numCoupons);
 
 		if (!hasEnoughBurgers) {
@@ -160,6 +156,7 @@ const FormCustom = ({ cart, total }) => {
 		});
 	};
 
+	// Actualizar el total con descuentos cuando cambia el total original
 	useEffect(() => {
 		setDiscountedTotal(total);
 	}, [total]);
@@ -239,6 +236,20 @@ const FormCustom = ({ cart, total }) => {
 					submitForm,
 					isValid,
 				}) => {
+					// Agregar useEffect para revalidar cupones cuando cambia el carrito o los cupones
+					useEffect(() => {
+						couponCodes.forEach((code, index) => {
+							if (code.trim() !== "") {
+								handleVoucherValidation(
+									index,
+									code,
+									couponCodes,
+									setFieldValue
+								);
+							}
+						});
+					}, [cart, couponCodes, setFieldValue]);
+
 					return (
 						<Form>
 							<div className="flex flex-col mb-2">
@@ -397,13 +408,14 @@ const FormCustom = ({ cart, total }) => {
 												label="Referencias"
 												name="references"
 												type="text"
-												placeholder="¿Referencias? Ej: Casa de porton negro"
+												placeholder="¿Referencias? Ej: Casa de portón negro"
 												autoComplete="off"
 												className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 											/>
 										</div>
 									</div>
 								</div>
+
 								{/* Método de pago y cupones */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold mb-2">Método de pago</p>
@@ -517,7 +529,7 @@ const FormCustom = ({ cart, total }) => {
 														voucherStatus[index] !== "¡Código válido!" && (
 															<div className="flex flex-row h-10 justify-between px-3 items-start">
 																<div className="flex flex-row items-center gap-2">
-																	<p className="bg-transparent px-0  text-opacity-100 w-full text-red-main">
+																	<p className="bg-transparent px-0 text-opacity-100 w-full text-red-main">
 																		{voucherStatus[index]}
 																	</p>
 																</div>
