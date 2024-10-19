@@ -167,6 +167,29 @@ const FormCustom = ({ cart, total }) => {
 		setSelectedHora(event.target.value);
 	};
 
+	// Nueva función para obtener la cantidad total de hamburguesas
+	const getTotalBurgers = () => {
+		return cart.reduce((acc, item) => {
+			if (item.category === "burger") {
+				return acc + item.quantity;
+			}
+			return acc;
+		}, 0);
+	};
+
+	// Nueva función para manejar la eliminación de cupones excedentes
+	const removeExcessCoupons = (maxCoupons) => {
+		if (couponCodes.length > maxCoupons) {
+			const newCouponCodes = couponCodes.slice(0, maxCoupons);
+			const newVoucherStatus = voucherStatus.slice(0, maxCoupons);
+			const newIsValidating = isValidating.slice(0, maxCoupons);
+
+			setCouponCodes(newCouponCodes);
+			setVoucherStatus(newVoucherStatus);
+			setIsValidating(newIsValidating);
+		}
+	};
+
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style jsx>{`
@@ -249,6 +272,15 @@ const FormCustom = ({ cart, total }) => {
 							}
 						});
 					}, [cart, couponCodes, setFieldValue]);
+
+					// Nuevo useEffect para manejar la cantidad de cupones basada en la cantidad de hamburguesas
+					useEffect(() => {
+						const totalBurgers = getTotalBurgers();
+						const maxCoupons = Math.floor(totalBurgers / 2);
+
+						// Eliminar cupones excedentes si es necesario
+						removeExcessCoupons(maxCoupons);
+					}, [cart]);
 
 					return (
 						<Form>
