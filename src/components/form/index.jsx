@@ -1,3 +1,4 @@
+// src/components/FormCustom.jsx
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import MyTextInput from "./MyTextInput";
 import ArrowBack from "../back";
@@ -12,9 +13,9 @@ import { canjearVoucher } from "../../firebase/validateVoucher";
 import Payment from "../mercadopago/Payment";
 import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
-import { showTimeRestrictionAlert } from "./showTImeRestrictionAlert";
 import { isWithinOrderTimeRange } from "../../helpers/validate-hours";
 import LoadingPoints from "../LoadingPoints";
+import AppleModal from "../AppleModal"; // Importamos el nuevo Modal
 
 const envio = parseInt(import.meta.env.VITE_ENVIO);
 
@@ -41,6 +42,20 @@ const FormCustom = ({ cart, total }) => {
 
 	// Estados para manejar la validación de cupones
 	const [isValidating, setIsValidating] = useState([false]);
+
+	// Estado para controlar el modal de restricción de tiempo
+	const [isTimeRestrictedModalOpen, setIsTimeRestrictedModalOpen] =
+		useState(false);
+
+	// Función para abrir el modal de restricción de tiempo
+	const openTimeRestrictedModal = () => {
+		setIsTimeRestrictedModalOpen(true);
+	};
+
+	// Función para cerrar el modal de restricción de tiempo
+	const closeTimeRestrictedModal = () => {
+		setIsTimeRestrictedModalOpen(false);
+	};
 
 	// Función para agregar un nuevo campo de cupón dinámicamente
 	const addCouponField = () => {
@@ -244,7 +259,7 @@ const FormCustom = ({ cart, total }) => {
 					const isReserva = values.hora.trim() !== "";
 
 					if (!isWithinOrderTimeRange()) {
-						showTimeRestrictionAlert();
+						openTimeRestrictedModal(); // Abrir el modal personalizado
 						return;
 					}
 
@@ -651,7 +666,7 @@ const FormCustom = ({ cart, total }) => {
 									<button
 										type="submit"
 										disabled={isSubmitting}
-										className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 ${
+										className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
 											isSubmitting ? "opacity-50 cursor-not-allowed" : ""
 										}`}
 									>
@@ -667,6 +682,15 @@ const FormCustom = ({ cart, total }) => {
 					);
 				}}
 			</Formik>
+
+			{/* Modal de restricción de tiempo */}
+			<AppleModal
+				isOpen={isTimeRestrictedModalOpen}
+				onClose={closeTimeRestrictedModal}
+				title="Esta cerrado"
+			>
+				<p>Abrimos de jueves a domingo de 20:00 hs a 00:00 hs.</p>
+			</AppleModal>
 		</div>
 	);
 };
