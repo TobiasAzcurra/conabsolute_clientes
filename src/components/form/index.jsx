@@ -662,8 +662,8 @@ const FormCustom = ({ cart, total }) => {
 															type="text"
 															placeholder={
 																index === 0
-																	? "¿Tienes algún cupón?"
-																	: "¿Tienes otro código?"
+																	? "¿Tenes algun cupón?"
+																	: "¿Tenes otro cupón?"
 															}
 															value={couponCodes[index]}
 															onChange={(e) => {
