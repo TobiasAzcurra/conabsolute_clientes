@@ -66,9 +66,20 @@ const FormCustom = ({ cart, total }) => {
 	// Función para agregar un nuevo campo de cupón dinámicamente
 	const addCouponField = () => {
 		console.log("Agregando un nuevo campo de cupón");
-		setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
-		setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
-		setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
+
+		// Calcular el máximo de cupones permitidos
+		const totalBurgers = getTotalBurgers();
+		const maxCoupons = Math.floor(totalBurgers / 2);
+
+		if (couponCodes.length < maxCoupons) {
+			setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
+			setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
+			setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
+		} else {
+			console.log(
+				"No se pueden agregar más cupones, se ha alcanzado el máximo permitido."
+			);
+		}
 	};
 
 	// Función para manejar el cambio de un cupón
@@ -253,6 +264,13 @@ const FormCustom = ({ cart, total }) => {
 			setVoucherStatus(newVoucherStatus);
 			setIsValidating(newIsValidating);
 		}
+
+		// Asegurarse de que haya un campo adicional vacío si no se ha alcanzado el máximo
+		if (couponCodes.length < adjustedMaxCoupons) {
+			setCouponCodes([...couponCodes, ""]);
+			setVoucherStatus([...voucherStatus, ""]);
+			setIsValidating([...isValidating, false]);
+		}
 	};
 
 	// Función para ajustar la hora restando 30 minutos
@@ -378,7 +396,6 @@ const FormCustom = ({ cart, total }) => {
 					// Nuevo useEffect para manejar la cantidad de cupones basada en la cantidad de hamburguesas
 					useEffect(() => {
 						const totalBurgers = getTotalBurgers();
-						console.log("Total de hamburguesas en el carrito:", totalBurgers); // Log de total hamburguesas
 						const maxCoupons = Math.floor(totalBurgers / 2);
 						console.log("Máximo de cupones permitidos:", maxCoupons); // Log de max cupones
 
@@ -702,6 +719,8 @@ const FormCustom = ({ cart, total }) => {
 													{/* Lógica para agregar un nuevo campo de cupón */}
 													{voucherStatus[index] === "¡Código válido!" &&
 														index === couponCodes.length - 1 &&
+														couponCodes.length <
+															Math.floor(getTotalBurgers() / 2) &&
 														addCouponField()}
 												</div>
 											))}
@@ -769,7 +788,7 @@ const FormCustom = ({ cart, total }) => {
 			<AppleModal
 				isOpen={isTimeRestrictedModalOpen}
 				onClose={closeTimeRestrictedModal}
-				title="Esta cerrado"
+				title="Está cerrado"
 			>
 				<p>Abrimos de jueves a domingo de 20:00 hs a 00:00 hs.</p>
 			</AppleModal>
