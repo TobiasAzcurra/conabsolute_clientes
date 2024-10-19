@@ -10,13 +10,12 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints"; // Importa LoadingPoints
-import Swal from "sweetalert2"; // Importar SweetAlert2
+import AppleModal from "../../components/AppleModal"; // Importar AppleModal
 
 const Pedido = () => {
 	const [order, setOrder] = useState(null); // Para un pedido individual
 	const [pedidos, setPedidos] = useState([]); // Para múltiples pedidos
 	const [loading, setLoading] = useState(false);
-	const [deleting, setDeleting] = useState(false); // Estado para la eliminación
 	const navigate = useNavigate();
 	const { orderId } = useParams();
 	const location = useLocation(); // Para acceder al estado pasado en la navegación
@@ -29,6 +28,11 @@ const Pedido = () => {
 	// Estados para mensajes de éxito o error
 	const [message, setMessage] = useState(null);
 	const [error, setError] = useState(null);
+
+	// Estados para el modal
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState(null);
+	const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para controlar la carga en el modal
 
 	// Función para sumar minutos a una hora dada
 	function sumarMinutos(hora, minutosASumar) {
@@ -159,55 +163,46 @@ const Pedido = () => {
 
 	/**
 	 * Función para eliminar un pedido
+	 */
+	const eliminarPedido = async () => {
+		if (!selectedOrderId) return;
+
+		setIsDeleting(true);
+		setMessage(null);
+		setError(null);
+
+		try {
+			await deleteOrder(selectedOrderId);
+			setMessage("Pedido cancelado exitosamente.");
+
+			if (orderId) {
+				// Si es un pedido individual, limpiar el estado
+				setOrder(null);
+			}
+
+			// Si hay múltiples pedidos, eliminar el pedido del estado
+			setPedidosPagados((prevPedidos) =>
+				prevPedidos.filter((pedido) => pedido.id !== selectedOrderId)
+			);
+
+			// Mostrar un mensaje de éxito en el modal o manejarlo de otra forma
+			// Aquí cerramos el modal
+			setIsModalOpen(false);
+		} catch (err) {
+			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
+		} finally {
+			setIsDeleting(false);
+			setSelectedOrderId(null);
+		}
+	};
+
+	/**
+	 * Manejar la apertura del modal de confirmación
 	 * @param {string} orderId - ID del pedido a eliminar
 	 */
-	const eliminarPedido = async (orderId) => {
-		// Mostrar el modal de confirmación de SweetAlert2
-		const result = await Swal.fire({
-			title: "¿Estás seguro?",
-			text: "¿Deseas cancelar este pedido?",
-			icon: "warning",
-			showCancelButton: true,
-			confirmButtonColor: "#3085d6",
-			cancelButtonColor: "#d33",
-			confirmButtonText: "Sí, cancelar",
-			cancelButtonText: "No, mantener",
-		});
-
-		// Si el usuario confirma la eliminación
-		if (result.isConfirmed) {
-			setDeleting(true);
-			setMessage(null);
-			setError(null);
-
-			try {
-				await deleteOrder(orderId);
-				setMessage("Pedido cancelado exitosamente.");
-
-				if (orderId) {
-					// Si es un pedido individual, limpiar el estado
-					setOrder(null);
-				}
-
-				// Si hay múltiples pedidos, eliminar el pedido del estado
-				setPedidos((prevPedidos) =>
-					prevPedidos.filter((pedido) => pedido.id !== orderId)
-				);
-
-				// Mostrar un mensaje de éxito con SweetAlert2
-				await Swal.fire("Cancelado", "Tu pedido ha sido cancelado.", "success");
-			} catch (err) {
-				setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
-				// Mostrar mensaje de error con SweetAlert2
-				Swal.fire(
-					"Error",
-					"Hubo un problema al cancelar el pedido. Inténtalo de nuevo.",
-					"error"
-				);
-			} finally {
-				setDeleting(false);
-			}
-		}
+	const handleCancelClick = (orderId) => {
+		setSelectedOrderId(orderId);
+		setIsModalOpen(true);
 	};
 
 	return (
@@ -218,28 +213,28 @@ const Pedido = () => {
 			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
-              @keyframes loadingBar {
-                  0% {
-                      background-position: -200px 0;
-                  }
-                  100% {
-                      background-position: 200px 0;
-                  }
+          @keyframes loadingBar {
+              0% {
+                  background-position: -200px 0;
               }
+              100% {
+                  background-position: 200px 0;
+              }
+          }
 
-              .animated-loading {
-                  background: linear-gradient(
-                      to right,
-                      #000 0%,
-                      #000 40%,
-                      #555 100%,
-                      #000 60%,
-                      #000 100%
-                  );
-                  background-size: 400% 100%;
-                  animation: loadingBar 5s linear infinite;
-              }
-            `}
+          .animated-loading {
+              background: linear-gradient(
+                  to right,
+                  #000 0%,
+                  #000 40%,
+                  #555 100%,
+                  #000 60%,
+                  #000 100%
+              );
+              background-size: 400% 100%;
+              animation: loadingBar 5s linear infinite;
+          }
+        `}
 			</style>
 
 			<StickerCanvas
@@ -411,14 +406,14 @@ const Pedido = () => {
 								</div>
 
 								<div
-									onClick={() => eliminarPedido(currentOrder.id)} // Llamar a la función de eliminación
+									onClick={() => handleCancelClick(currentOrder.id)} // Llamar a la función para abrir el modal
 									className={`${
-										deleting
+										isDeleting
 											? "opacity-50 cursor-not-allowed"
 											: "cursor-pointer"
-									} bg-gray-300 w-full text-red-main  font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
+									} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
 								>
-									{deleting ? (
+									{isDeleting ? (
 										<div className="flex items-center justify-center space-x-2">
 											<LoadingPoints className="h-4 w-4" />{" "}
 										</div>
@@ -439,12 +434,26 @@ const Pedido = () => {
 				{/* Mostrar mensaje si no hay pedidos */}
 				{!loading && pedidosPagados.length === 0 && (
 					<div className="flex flex-col items-center justify-center mt-4">
-						<p className="text-gray-700 text-">
-							No se encontraron pedidos para hoy.
-						</p>
+						<p className="text-gray-700">No se encontraron pedidos para hoy.</p>
 					</div>
 				)}
 			</div>
+
+			{/* AppleModal para confirmación de eliminación */}
+			<AppleModal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				title="Confirmar Cancelación"
+				twoOptions={true}
+				onConfirm={eliminarPedido}
+				isLoading={isDeleting} // Pasar el estado de carga
+			>
+				<p>¿Estás seguro de que deseas cancelar este pedido?</p>
+				{error && <p className="text-red-600 mt-2">{error}</p>}
+			</AppleModal>
+
+			{/* AppleModal para mensajes de éxito o error */}
+			{/* Opcional: Puedes agregar otro modal para mensajes específicos si lo deseas */}
 		</div>
 	);
 };
