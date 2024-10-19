@@ -190,6 +190,19 @@ const FormCustom = ({ cart, total }) => {
 		}
 	};
 
+	// Función para ajustar la hora restando 30 minutos
+	const adjustHora = (hora) => {
+		const [hours, minutes] = hora.split(":").map(Number);
+		const date = new Date();
+		date.setHours(hours, minutes, 0, 0);
+		date.setMinutes(date.getMinutes() - 30);
+
+		// Formatear la nueva hora en "HH:mm"
+		const adjustedHours = date.getHours().toString().padStart(2, "0");
+		const adjustedMinutes = date.getMinutes().toString().padStart(2, "0");
+		return `${adjustedHours}:${adjustedMinutes}`;
+	};
+
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style jsx>{`
@@ -225,29 +238,42 @@ const FormCustom = ({ cart, total }) => {
 				}}
 				validationSchema={formValidations}
 				onSubmit={async (values) => {
-					if (values.paymentMethod === "efectivo") {
-						if (!isWithinOrderTimeRange()) {
-							showTimeRestrictionAlert();
-							return;
-						}
+					console.log("Valores del formulario antes de enviar:", values); // Log para depuración
 
-						const orderId = await handleSubmit(
-							values,
-							cart,
-							discountedTotal,
-							envio,
-							mapUrl,
-							couponCodes
-						);
+					// Verificar si es una reserva
+					const isReserva = values.hora.trim() !== "";
 
-						if (orderId) {
-							// Si el ID es válido, redirigir al usuario a la página de confirmación
-							navigate(`/success/${orderId}`);
-							dispatch(addLastCart());
-						} else {
-							// Manejar el error, como mostrar una notificación al usuario
-							console.error("Error al procesar la orden");
-						}
+					if (!isWithinOrderTimeRange()) {
+						showTimeRestrictionAlert();
+						return;
+					}
+
+					// Ajustar la hora restando 30 minutos si es una reserva
+					let adjustedHora = values.hora;
+					if (isReserva) {
+						adjustedHora = adjustHora(values.hora);
+						console.log("Hora ajustada para despacho:", adjustedHora); // Log para depuración
+					}
+
+					// Crear un nuevo objeto con la hora ajustada
+					const updatedValues = { ...values, hora: adjustedHora };
+
+					const orderId = await handleSubmit(
+						updatedValues, // Usar los valores actualizados
+						cart,
+						discountedTotal,
+						envio,
+						mapUrl,
+						couponCodes
+					);
+
+					if (orderId) {
+						// Si el ID es válido, redirigir al usuario a la página de confirmación
+						navigate(`/success/${orderId}`);
+						dispatch(addLastCart());
+					} else {
+						// Manejar el error, como mostrar una notificación al usuario
+						console.error("Error al procesar la orden");
 					}
 				}}
 			>
@@ -408,7 +434,10 @@ const FormCustom = ({ cart, total }) => {
 														selectedHora === "" ? "text-gray-400" : "text-black"
 													}`}
 													value={selectedHora}
-													onChange={handleChange}
+													onChange={(e) => {
+														handleChange(e);
+														setFieldValue("hora", e.target.value); // Asegurar que Formik capture el valor
+													}}
 												>
 													<option value="" disabled>
 														¿Quieres reservar para más tarde?
@@ -422,6 +451,11 @@ const FormCustom = ({ cart, total }) => {
 													<option value="23:30">23:30</option>
 													<option value="00:00">00:00</option>
 												</Field>
+												<ErrorMessage
+													name="hora"
+													component="span"
+													className="text-sm text-red-main font-coolvetica font-light mt-1"
+												/>
 											</div>
 										</div>
 
