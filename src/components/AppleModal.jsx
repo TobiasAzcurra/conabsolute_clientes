@@ -42,7 +42,7 @@ const AppleModal = ({
 	if (!isOpen) return null;
 
 	const ratingDescriptions = [
-		"Buscamos mejorar constantemente. Ayudanos evaluandonos:",
+		"Buscamos mejorar constantemente. Danos una calificacion general:",
 		"Muy malo",
 		"Malo",
 		"Regular",
@@ -78,10 +78,13 @@ const AppleModal = ({
 	};
 
 	const FeedbackButtons = () => {
-		const options =
-			currentRating >= 4
-				? ["Tiempo y Temperatura", "Sabor", "Presentacion", "Página", "Otros"]
-				: ["Tiempo y Temperatura", "Sabor", "Presentacion", "Página", "Otros"];
+		const options = [
+			"Tiempo y Temperatura",
+			"Sabor",
+			"Presentacion",
+			"Página",
+			"Otros",
+		];
 
 		return (
 			<div className="mt-6 mb-4">
@@ -94,9 +97,7 @@ const AppleModal = ({
 							key={option}
 							onClick={() => {
 								setFeedback(option);
-								setShowProductRatings(
-									option === "Buen producto" || option === "Mal producto"
-								);
+								setShowProductRatings(true); // Mostrar las calificaciones siempre que se seleccione una opción
 							}}
 							className={`px-4 h-10 rounded-full ${
 								feedback === option
