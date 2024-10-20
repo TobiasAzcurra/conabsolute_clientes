@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import LoadingPoints from "./LoadingPoints";
@@ -14,8 +14,30 @@ const AppleModal = ({
 	isRatingModal,
 	currentRating,
 	setCurrentRating,
+	orderProducts,
 }) => {
 	const [feedback, setFeedback] = useState("");
+	const [showProductRatings, setShowProductRatings] = useState(false);
+	const [productRatings, setProductRatings] = useState({});
+
+	useEffect(() => {
+		if (orderProducts && Array.isArray(orderProducts)) {
+			const initialRatings = {};
+			orderProducts.forEach((product, index) => {
+				initialRatings[index] = 0;
+			});
+			setProductRatings(initialRatings);
+		}
+	}, [orderProducts]);
+
+	useEffect(() => {
+		// Reset states when modal is opened
+		if (isOpen) {
+			setFeedback("");
+			setShowProductRatings(false);
+			setProductRatings({});
+		}
+	}, [isOpen]);
 
 	if (!isOpen) return null;
 
@@ -28,34 +50,29 @@ const AppleModal = ({
 		"Excelente",
 	];
 
-	const StarRating = () => {
+	const StarRating = ({ rating, onRatingChange }) => {
 		return (
-			<div className="mt-4">
-				<p className="text-lg font-bold mb-2 text-center">
-					{ratingDescriptions[currentRating]}
-				</p>
-				<div className="flex justify-center space-x-2">
-					{[1, 2, 3, 4, 5].map((star) => (
-						<svg
-							key={star}
-							xmlns="http://www.w3.org/2000/svg"
-							className={`h-10 w-10 cursor-pointer ${
-								star <= currentRating ? "text-black" : "text-gray-300"
-							}`}
-							fill="currentColor"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							onClick={() => setCurrentRating(star)}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-							/>
-						</svg>
-					))}
-				</div>
+			<div className="flex space-x-1">
+				{[1, 2, 3, 4, 5].map((star) => (
+					<svg
+						key={star}
+						xmlns="http://www.w3.org/2000/svg"
+						className={`h-6 w-6 cursor-pointer ${
+							star <= rating ? "text-black" : "text-gray-300"
+						}`}
+						fill="currentColor"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+						onClick={() => onRatingChange(star)}
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth={2}
+							d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+						/>
+					</svg>
+				))}
 			</div>
 		);
 	};
@@ -67,7 +84,7 @@ const AppleModal = ({
 				: ["Mal tiempo de entrega", "Mal producto", "Otros"];
 
 		return (
-			<div className="mt-14">
+			<div className="mt-6">
 				<p className="text-lg font-bold mb-2 text-center">
 					{currentRating >= 4 ? "¿Qué salió bien?" : "¿Qué salió mal?"}
 				</p>
@@ -75,7 +92,12 @@ const AppleModal = ({
 					{options.map((option) => (
 						<button
 							key={option}
-							onClick={() => setFeedback(option)}
+							onClick={() => {
+								setFeedback(option);
+								setShowProductRatings(
+									option === "Buen producto" || option === "Mal producto"
+								);
+							}}
 							className={`px-4 h-10 rounded-full ${
 								feedback === option
 									? "bg-black text-white"
@@ -90,6 +112,37 @@ const AppleModal = ({
 		);
 	};
 
+	const ProductRatings = () => {
+		if (!showProductRatings || !orderProducts || !Array.isArray(orderProducts))
+			return null;
+
+		return (
+			<div className="mt-6">
+				<p className="text-lg font-bold mb-2 text-center">
+					Califica los productos
+				</p>
+				<div className="space-y-4 max-h-60 overflow-y-auto">
+					{orderProducts.map((product, index) => (
+						<div key={index} className="flex justify-between items-center">
+							<span className="text-black font-coolvetica">
+								{product.burger}
+							</span>
+							<StarRating
+								rating={productRatings[index] || 0}
+								onRatingChange={(rating) =>
+									setProductRatings((prev) => ({
+										...prev,
+										[index]: rating,
+									}))
+								}
+							/>
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	};
+
 	return ReactDOM.createPortal(
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
 			<div className="bg-gray-100 flex flex-col items-center justify-center rounded-3xl shadow-xl w-full max-w-md font-coolvetica pb-4 pt-2 relative">
@@ -98,19 +151,30 @@ const AppleModal = ({
 						{title}
 					</h2>
 				)}
-				<div className="w-full px-4">
+				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
 						<>
-							<StarRating />
+							<div className="mt-4">
+								<p className="text-lg font-bold mb-2 text-center">
+									{ratingDescriptions[currentRating]}
+								</p>
+								<div className="flex justify-center space-x-2">
+									<StarRating
+										rating={currentRating}
+										onRatingChange={setCurrentRating}
+									/>
+								</div>
+							</div>
 							{currentRating > 0 && <FeedbackButtons />}
+							<ProductRatings />
 						</>
 					)}
 				</div>
 
-				<div className="w-full px-4 ">
+				<div className="w-full px-4 mt-6">
 					{twoOptions ? (
-						<div className="flex justify-center gap-2 mt-8">
+						<div className="flex justify-center gap-2">
 							<button
 								onClick={onConfirm}
 								className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold ${
@@ -120,6 +184,7 @@ const AppleModal = ({
 							>
 								{isLoading ? <LoadingPoints className="h-6 w-6" /> : "Sí"}
 							</button>
+
 							<button
 								onClick={onClose}
 								className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer"
@@ -131,12 +196,16 @@ const AppleModal = ({
 						<button
 							onClick={() => {
 								if (isRatingModal) {
-									onConfirm({ rating: currentRating, feedback });
+									onConfirm({
+										rating: currentRating,
+										feedback,
+										productRatings,
+									});
 								} else {
 									onClose();
 								}
 							}}
-							className="mt-8 w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
+							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
 							disabled={
 								isRatingModal && (currentRating === 0 || feedback === "")
 							}
@@ -162,6 +231,7 @@ AppleModal.propTypes = {
 	isRatingModal: PropTypes.bool,
 	currentRating: PropTypes.number,
 	setCurrentRating: PropTypes.func,
+	orderProducts: PropTypes.array,
 };
 
 AppleModal.defaultProps = {
@@ -172,6 +242,7 @@ AppleModal.defaultProps = {
 	isRatingModal: false,
 	currentRating: 0,
 	setCurrentRating: () => {},
+	orderProducts: [],
 };
 
 export default AppleModal;

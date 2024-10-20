@@ -31,6 +31,7 @@ const Pedido = () => {
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 	const [currentRating, setCurrentRating] = useState(0);
 	const [orderRatings, setOrderRatings] = useState({});
+	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 
 	function sumarMinutos(hora, minutosASumar) {
 		if (!hora) return "";
@@ -59,8 +60,10 @@ const Pedido = () => {
 		};
 
 		if (orderId) {
+			console.log("Fetching order by ID:", orderId);
 			setLoading(true);
 			unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
+				console.log("Order fetched by ID:", pedido);
 				if (pedido && typeof pedido.direccion === "string") {
 					setOrder(pedido);
 					setPhoneNumber(pedido.telefono);
@@ -74,16 +77,20 @@ const Pedido = () => {
 
 		if (!orderId && location.state && location.state.phoneNumber) {
 			const { phoneNumber } = location.state;
+			console.log(
+				"Fetching orders by phone number from location state:",
+				phoneNumber
+			);
 			setPhoneNumber(phoneNumber);
 		}
 
 		if (phoneNumber) {
+			console.log("Listening to orders by phone number:", phoneNumber);
 			setLoading(true);
 			unsubscribePhoneNumber = ListenOrdersForTodayByPhoneNumber(
 				phoneNumber,
 				(pedidosActualizados) => {
-					console.log("Pedidos pagados:", pedidosActualizados);
-
+					console.log("Orders fetched by phone number:", pedidosActualizados);
 					const pedidosConPago = pedidosActualizados.filter(
 						(pedido) => pedido.paid === true
 					);
@@ -91,9 +98,11 @@ const Pedido = () => {
 						(pedido) => pedido.paid === false
 					);
 
+					console.log("Paid orders:", pedidosConPago);
+					console.log("Unpaid orders:", pedidosSinPago);
+
 					setPedidosPagados(pedidosConPago);
 					setPedidosNoPagados(pedidosSinPago);
-
 					setLoading(false);
 				}
 			);
@@ -121,35 +130,6 @@ const Pedido = () => {
 		window.addEventListener("resize", updateSize);
 		return () => window.removeEventListener("resize", updateSize);
 	}, []);
-
-	const getFirstBarClass = (currentOrder) => {
-		if (!currentOrder) return "";
-		if (!currentOrder.elaborado) {
-			return "animated-loading";
-		}
-		return "bg-black";
-	};
-
-	const getSecondBarClass = (currentOrder) => {
-		if (!currentOrder) return "";
-		if (currentOrder.elaborado && currentOrder.cadete === "NO ASIGNADO") {
-			return "animated-loading";
-		} else if (
-			currentOrder.elaborado &&
-			currentOrder.cadete !== "NO ASIGNADO"
-		) {
-			return "bg-black";
-		}
-		return "bg-gray-100 border-opacity-20 border-black border-1 border";
-	};
-
-	const getThirdBarClass = (currentOrder) => {
-		if (!currentOrder) return "";
-		if (currentOrder.elaborado && currentOrder.cadete !== "NO ASIGNADO") {
-			return "animated-loading";
-		}
-		return "bg-gray-100 border-opacity-20 border-black border-1 border";
-	};
 
 	const eliminarPedido = async () => {
 		if (!selectedOrderId) return;
@@ -184,27 +164,24 @@ const Pedido = () => {
 		setIsModalOpen(true);
 	};
 
-	// Updated function to handle rating
-	const handleRateOrder = async () => {
-		if (!selectedOrderId || currentRating === 0) return;
+	const handleRateOrder = async ({ rating, feedback, productRatings }) => {
+		console.log("Order Products to rate:", selectedOrderProducts);
+		if (!selectedOrderId) return;
 
 		setMessage(null);
 		setError(null);
 
 		try {
-			// Update the local state instead of calling an API
+			// Here you would typically call an API to save the rating
+			console.log("Rating:", rating);
+			console.log("Feedback:", feedback);
+			console.log("Product Ratings:", productRatings);
+
+			// Update local state
 			setOrderRatings((prevRatings) => ({
 				...prevRatings,
-				[selectedOrderId]: currentRating,
+				[selectedOrderId]: rating,
 			}));
-
-			setPedidosPagados((prevPedidos) =>
-				prevPedidos.map((pedido) =>
-					pedido.id === selectedOrderId
-						? { ...pedido, rating: currentRating }
-						: pedido
-				)
-			);
 
 			setMessage("Gracias por calificar tu pedido.");
 			setIsRatingModalOpen(false);
@@ -216,8 +193,10 @@ const Pedido = () => {
 		}
 	};
 
-	// Function to open rating modal
 	const handleRateClick = (orderId) => {
+		const order = pedidosPagados.find((pedido) => pedido.id === orderId);
+		setSelectedOrderProducts(order.detallePedido || []); // Asumiendo que cada pedido tiene una propiedad 'productos'
+		console.log("Selected order products for rating:", order.detallePedido);
 		setSelectedOrderId(orderId);
 		setIsRatingModalOpen(true);
 	};
@@ -283,29 +262,34 @@ const Pedido = () => {
 									index !== 0 ? "" : "mt-8"
 								} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 							>
-								{pedidosPagados.length > 1 && (
-									<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
-										Pedido {index + 1}
-									</h2>
-								)}
-
+								<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
+									Pedido {index + 1}
+								</h2>
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
 										<div className="w-full flex flex-row gap-2 relative">
 											<div
-												className={`w-1/4 h-2.5 rounded-full ${getFirstBarClass(
-													currentOrder
-												)}`}
+												className={`w-1/4 h-2.5 rounded-full ${
+													currentOrder.elaborado
+														? "bg-black"
+														: "animated-loading"
+												}`}
 											></div>
 											<div
-												className={`w-1/4 h-2.5 rounded-full ${getSecondBarClass(
-													currentOrder
-												)}`}
+												className={`w-1/4 h-2.5 rounded-full ${
+													currentOrder.elaborado &&
+													currentOrder.cadete === "NO ASIGNADO"
+														? "animated-loading"
+														: "bg-black"
+												}`}
 											></div>
 											<div
-												className={`w-1/2 h-2.5 rounded-full ${getThirdBarClass(
-													currentOrder
-												)}`}
+												className={`w-1/2 h-2.5 rounded-full ${
+													currentOrder.elaborado &&
+													currentOrder.cadete !== "NO ASIGNADO"
+														? "animated-loading"
+														: "bg-gray-100 border-opacity-20 border-black border-1 border"
+												}`}
 											></div>
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -339,7 +323,6 @@ const Pedido = () => {
 													clipRule="evenodd"
 												/>
 											</svg>
-
 											<p className="text-black font-coolvetica font-medium">
 												Entrega estimada: {sumarMinutos(currentOrder.hora, 30)}{" "}
 												a {sumarMinutos(currentOrder.hora, 50)}
@@ -353,11 +336,10 @@ const Pedido = () => {
 												className="h-6"
 											>
 												<path
-													d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+													d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.750 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
 													clipRule="evenodd"
 												/>
 											</svg>
-
 											<p className="text-black font-coolvetica font-medium">
 												Envío a cargo de:{" "}
 												{currentOrder.cadete !== "NO ASIGNADO"
@@ -408,7 +390,6 @@ const Pedido = () => {
 										</div>
 									</div>
 								</div>
-
 								<div
 									onClick={() => handleCancelClick(currentOrder.id)}
 									className={`${
@@ -419,14 +400,12 @@ const Pedido = () => {
 								>
 									{isDeleting ? (
 										<div className="flex items-center justify-center space-x-2">
-											<LoadingPoints className="h-4 w-4" />{" "}
+											<LoadingPoints className="h-4 w-4" />
 										</div>
 									) : (
 										"Cancelar pedido"
 									)}
 								</div>
-
-								{/* Updated button for rating */}
 								<div
 									onClick={() => handleRateClick(currentOrder.id)}
 									className="bg-gray-300 w-full text-black font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-4 font-bold cursor-pointer"
@@ -437,7 +416,6 @@ const Pedido = () => {
 										  } estrellas`
 										: "Calificar pedido"}
 								</div>
-
 								{index < pedidosPagados.length - 1 && (
 									<div className="w-full h-px bg-black opacity-20 mt-8"></div>
 								)}
@@ -465,18 +443,23 @@ const Pedido = () => {
 				{error && <p className="text-red-600 mt-2">{error}</p>}
 			</AppleModal>
 
-			{/* Updated AppleModal for rating */}
 			<AppleModal
 				isOpen={isRatingModalOpen}
 				onClose={() => setIsRatingModalOpen(false)}
-				title="Clasificación"
+				title="Calificación"
 				twoOptions={false}
 				onConfirm={handleRateOrder}
 				isRatingModal={true}
 				currentRating={currentRating}
 				setCurrentRating={setCurrentRating}
+				orderProducts={selectedOrderProducts}
 			>
 				{error && <p className="text-red-600 mt-2">{error}</p>}
+				{console.log(
+					"AppleModal props - selectedOrderProducts:",
+					selectedOrderProducts
+				)}
+				{console.log("AppleModal props - currentRating:", currentRating)}
 			</AppleModal>
 		</div>
 	);
