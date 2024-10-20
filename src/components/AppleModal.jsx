@@ -19,6 +19,7 @@ const AppleModal = ({
 	const [feedback, setFeedback] = useState("");
 	const [showProductRatings, setShowProductRatings] = useState(false);
 	const [productRatings, setProductRatings] = useState({});
+	const [customNote, setCustomNote] = useState(""); // Estado para la nota personalizada
 
 	useEffect(() => {
 		if (orderProducts && Array.isArray(orderProducts)) {
@@ -36,13 +37,14 @@ const AppleModal = ({
 			setFeedback("");
 			setShowProductRatings(false);
 			setProductRatings({});
+			setCustomNote(""); // Resetear la nota personalizada
 		}
 	}, [isOpen]);
 
 	if (!isOpen) return null;
 
 	const ratingDescriptions = [
-		"Buscamos mejorar constantemente. Danos una calificacion general:",
+		"Buscamos mejorar constantemente. Ayudanos evaluandonos:",
 		"Muy malo",
 		"Malo",
 		"Regular",
@@ -97,7 +99,10 @@ const AppleModal = ({
 							key={option}
 							onClick={() => {
 								setFeedback(option);
-								setShowProductRatings(true); // Mostrar las calificaciones siempre que se seleccione una opción
+								setShowProductRatings(true); // Mostrar calificaciones de productos
+								if (option !== "Otros") {
+									setCustomNote(""); // Resetear la nota si no es "Otros"
+								}
 							}}
 							className={`px-4 h-10 rounded-full ${
 								feedback === option
@@ -109,6 +114,17 @@ const AppleModal = ({
 						</button>
 					))}
 				</div>
+				{feedback === "Otros" && (
+					<div className="mt-4">
+						<input
+							type="text"
+							value={customNote}
+							onChange={(e) => setCustomNote(e.target.value)}
+							placeholder="Escribi tu nota aca..."
+							className="w-full p-2 bg-gray-100 border-black border-2 rounded-3xl h-10 px-4"
+						/>
+					</div>
+				)}
 			</div>
 		);
 	};
@@ -201,6 +217,7 @@ const AppleModal = ({
 										rating: currentRating,
 										feedback,
 										productRatings,
+										note: customNote, // Incluir la nota personalizada si existe
 									});
 								} else {
 									onClose();
