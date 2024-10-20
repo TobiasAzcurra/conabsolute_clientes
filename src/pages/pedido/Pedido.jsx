@@ -258,7 +258,7 @@ const Pedido = () => {
 						{pedidosPagados.map((currentOrder, index) => (
 							<div
 								key={currentOrder.id}
-								className={`flex items-center flex-col w-full ${
+								className={`flex items-center flex-col  w-full ${
 									index !== 0 ? "" : "mt-8"
 								} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 							>
@@ -268,8 +268,9 @@ const Pedido = () => {
 										Pedido {index + 1}
 									</h2>
 								)}
-
+								{/* Todo sobre el pedido */}
 								<div className="flex flex-col w-full">
+									{/* Barra de progreso */}
 									<div className="mb-10">
 										<div className="w-full flex flex-row gap-2 relative">
 											{/* Primer barra */}
@@ -321,6 +322,7 @@ const Pedido = () => {
 												: "Tu cadete está llegando a Anhelo..."}
 										</p>
 									</div>
+									{/* Info */}
 									<div className="flex flex-col text-left gap-2">
 										<div className="flex flex-row gap-2">
 											<svg
@@ -472,38 +474,40 @@ const Pedido = () => {
 					</div>
 				)}
 
+				{/* Loading */}
 				{!loading && pedidosPagados.length === 0 && (
 					<div className="flex flex-col items-center justify-center mt-4">
 						<p className="text-gray-700">No se encontraron pedidos para hoy.</p>
 					</div>
 				)}
 			</div>
-
-			<AppleModal
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				title="Confirmar Cancelación"
-				twoOptions={true}
-				onConfirm={eliminarPedido}
-				isLoading={isDeleting}
-			>
-				<p>¿Estás seguro de que deseas cancelar este pedido?</p>
-				{error && <p className="text-red-600 mt-2">{error}</p>}
-			</AppleModal>
-
-			<AppleModal
-				isOpen={isRatingModalOpen}
-				onClose={() => setIsRatingModalOpen(false)}
-				title="¡Recibiste tu pedido!"
-				twoOptions={false}
-				onConfirm={handleRateOrder}
-				isRatingModal={true}
-				currentRating={currentRating}
-				setCurrentRating={setCurrentRating}
-				orderProducts={selectedOrderProducts}
-			>
-				{error && <p className="text-red-600 mt-2">{error}</p>}
-			</AppleModal>
+			{/* Modales */}
+			<div className="w-full">
+				<AppleModal
+					isOpen={isModalOpen}
+					onClose={() => setIsModalOpen(false)}
+					title="Confirmar Cancelación"
+					twoOptions={true}
+					onConfirm={eliminarPedido}
+					isLoading={isDeleting}
+				>
+					<p>¿Estás seguro de que deseas cancelar este pedido?</p>
+					{error && <p className="text-red-600 mt-2">{error}</p>}
+				</AppleModal>
+				<AppleModal
+					isOpen={isRatingModalOpen}
+					onClose={() => setIsRatingModalOpen(false)}
+					title="¡Recibiste tu pedido!"
+					twoOptions={false}
+					onConfirm={handleRateOrder}
+					isRatingModal={true}
+					currentRating={currentRating}
+					setCurrentRating={setCurrentRating}
+					orderProducts={selectedOrderProducts}
+				>
+					{error && <p className="text-red-600 mt-2">{error}</p>}
+				</AppleModal>
+			</div>
 		</div>
 	);
 };
