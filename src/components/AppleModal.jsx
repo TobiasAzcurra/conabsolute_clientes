@@ -135,12 +135,12 @@ const AppleModal = ({
 
 		return (
 			<div className="mt-6">
-				<p className="text-lg font-bold mb- text-center">
+				<p className="text-lg font-bold gfdstext-center">
 					Califica los productos
 				</p>
-				<div className="space-y-4 max-h-60 overflow-y-auto">
+				<div className="max-h-60 overflow-y-auto">
 					{orderProducts.map((product, index) => (
-						<div key={index} className="flex justify-between items-center">
+						<div key={index} className="flex h-10 justify-between items-center">
 							<span className="text-black font-coolvetica">
 								{product.burger}
 							</span>
