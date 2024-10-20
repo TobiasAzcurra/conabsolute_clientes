@@ -80,15 +80,15 @@ const AppleModal = ({
 	const FeedbackButtons = () => {
 		const options =
 			currentRating >= 4
-				? ["Buen tiempo de entrega", "Buen producto", "Otros"]
-				: ["Mal tiempo de entrega", "Mal producto", "Otros"];
+				? ["Delivery", "Producto", "Otros"]
+				: ["Delivery", "Producto", "Otros"];
 
 		return (
 			<div className="mt-6">
 				<p className="text-lg font-bold mb-2 text-center">
 					{currentRating >= 4 ? "¿Qué salió bien?" : "¿Qué salió mal?"}
 				</p>
-				<div className="flex flex-col space-y-2">
+				<div className="grid grid-cols-2  gap-2 justify-center items-center">
 					{options.map((option) => (
 						<button
 							key={option}
