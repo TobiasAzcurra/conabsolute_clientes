@@ -268,21 +268,28 @@ const Pedido = () => {
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
 										<div className="w-full flex flex-row gap-2 relative">
+											{/* Primer barra */}
 											<div
 												className={`w-1/4 h-2.5 rounded-full ${
-													currentOrder.elaborado
-														? "bg-black"
-														: "animated-loading"
+													!currentOrder.elaborado
+														? "animated-loading"
+														: "bg-black"
 												}`}
 											></div>
+
+											{/* Segunda barra */}
 											<div
 												className={`w-1/4 h-2.5 rounded-full ${
 													currentOrder.elaborado &&
 													currentOrder.cadete === "NO ASIGNADO"
 														? "animated-loading"
-														: "bg-black"
+														: currentOrder.elaborado
+														? "bg-black"
+														: "bg-gray-100 border-opacity-20 border-black border-1 border"
 												}`}
 											></div>
+
+											{/* Tercer barra */}
 											<div
 												className={`w-1/2 h-2.5 rounded-full ${
 													currentOrder.elaborado &&
@@ -291,6 +298,7 @@ const Pedido = () => {
 														: "bg-gray-100 border-opacity-20 border-black border-1 border"
 												}`}
 											></div>
+
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
 												viewBox="0 0 24 24"
