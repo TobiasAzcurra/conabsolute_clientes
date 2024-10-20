@@ -44,7 +44,7 @@ const AppleModal = ({
 	if (!isOpen) return null;
 
 	const ratingDescriptions = [
-		"Buscamos mejorar constantemente. Ayudanos evaluandonos:",
+		"Buscamos mejorar constantemente. Danos una calificacion general:",
 		"Muy malo",
 		"Malo",
 		"Regular",
@@ -89,9 +89,9 @@ const AppleModal = ({
 		];
 
 		return (
-			<div className="mt-6 mb-4">
+			<div className="mt-6 ">
 				<p className="text-lg font-bold mb-2 text-center">
-					{currentRating >= 4 ? "¿Qué salió bien?" : "¿Qué salió mal?"}
+					{currentRating >= 4 ? "¿Que salió bien?" : "¿Que salió mal?"}
 				</p>
 				<div className="flex justify-center gap-2 flex-wrap">
 					{options.map((option) => (
@@ -135,7 +135,7 @@ const AppleModal = ({
 
 		return (
 			<div className="mt-6">
-				<p className="text-lg font-bold mb-2 text-center">
+				<p className="text-lg font-bold mb- text-center">
 					Califica los productos
 				</p>
 				<div className="space-y-4 max-h-60 overflow-y-auto">
@@ -223,7 +223,7 @@ const AppleModal = ({
 									onClose();
 								}
 							}}
-							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
+							className="w-full h-20 text-2xl mt-6 bg-black text-gray-100 rounded-3xl font-bold"
 							disabled={
 								isRatingModal && (currentRating === 0 || feedback === "")
 							}
