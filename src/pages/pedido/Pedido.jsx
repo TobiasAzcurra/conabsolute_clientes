@@ -469,7 +469,7 @@ const Pedido = () => {
 			<AppleModal
 				isOpen={isRatingModalOpen}
 				onClose={() => setIsRatingModalOpen(false)}
-				title="Calificación"
+				title="Clasificación"
 				twoOptions={false}
 				onConfirm={handleRateOrder}
 				isRatingModal={true}
