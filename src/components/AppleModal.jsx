@@ -42,7 +42,7 @@ const AppleModal = ({
 	if (!isOpen) return null;
 
 	const ratingDescriptions = [
-		"Califica nuestro servicio",
+		"Ayudanos a mejorar. Califica nuestro servicio",
 		"Muy malo",
 		"Malo",
 		"Regular",
@@ -156,7 +156,7 @@ const AppleModal = ({
 					{isRatingModal && (
 						<>
 							<div className="mt-4">
-								<p className="text-lg font-bold mb-2 text-center">
+								<p className="text-lg leading-6 font-bold mb-2 text-center">
 									{ratingDescriptions[currentRating]}
 								</p>
 								<div className="flex justify-center space-x-2">
