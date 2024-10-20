@@ -31,7 +31,7 @@ const AppleModal = ({
 	const StarRating = () => {
 		return (
 			<div className="mt-4">
-				<p className="text-lg text-center font-bold mb-2">
+				<p className="text-lg font-bold mb-2">
 					{ratingDescriptions[currentRating]}
 				</p>
 				<div className="flex justify-center space-x-2">
@@ -67,8 +67,8 @@ const AppleModal = ({
 				: ["Mal tiempo de entrega", "Mal producto", "Otros"];
 
 		return (
-			<div className="mt-14">
-				<p className="text-lg font-bold mb-2 text-center">
+			<div className="mt-4">
+				<p className="text-lg font-bold mb-2">
 					{currentRating >= 4 ? "¿Qué salió bien?" : "¿Qué salió mal?"}
 				</p>
 				<div className="flex flex-col space-y-2">
@@ -76,7 +76,7 @@ const AppleModal = ({
 						<button
 							key={option}
 							onClick={() => setFeedback(option)}
-							className={`px-4 h-10 rounded-full ${
+							className={`px-4 py-2 rounded-full ${
 								feedback === option
 									? "bg-black text-white"
 									: "bg-gray-200 text-black"
