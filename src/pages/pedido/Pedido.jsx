@@ -262,9 +262,13 @@ const Pedido = () => {
 									index !== 0 ? "" : "mt-8"
 								} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 							>
-								<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
-									Pedido {index + 1}
-								</h2>
+								{/* Título "Pedido {número}" solo si hay más de un pedido */}
+								{pedidosPagados.length > 1 && (
+									<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
+										Pedido {index + 1}
+									</h2>
+								)}
+
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
 										<div className="w-full flex flex-row gap-2 relative">
