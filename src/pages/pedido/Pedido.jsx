@@ -1,40 +1,37 @@
-// Pedido.jsx
-
 import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
 	ListenOrdersForTodayByPhoneNumber,
-	deleteOrder, // Importar la función de eliminación
+	deleteOrder,
 } from "../../firebase/getPedido";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import StickerCanvas from "../../components/StickerCanvas";
-import LoadingPoints from "../../components/LoadingPoints"; // Importa LoadingPoints
-import AppleModal from "../../components/AppleModal"; // Importar AppleModal
+import LoadingPoints from "../../components/LoadingPoints";
+import AppleModal from "../../components/AppleModal";
 
 const Pedido = () => {
-	const [order, setOrder] = useState(null); // Para un pedido individual
-	const [pedidos, setPedidos] = useState([]); // Para múltiples pedidos
+	const [order, setOrder] = useState(null);
+	const [pedidos, setPedidos] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
 	const { orderId } = useParams();
-	const location = useLocation(); // Para acceder al estado pasado en la navegación
+	const location = useLocation();
 	const [pedidosPagados, setPedidosPagados] = useState([]);
 	const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
-	// Nuevo estado para controlar la visualización de la dirección completa
 	const [showFullAddress, setShowFullAddress] = useState(false);
-	const [phoneNumber, setPhoneNumber] = useState(""); // Estado para el número de teléfono
-
-	// Estados para mensajes de éxito o error
+	const [phoneNumber, setPhoneNumber] = useState("");
 	const [message, setMessage] = useState(null);
 	const [error, setError] = useState(null);
-
-	// Estados para el modal
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState(null);
-	const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para controlar la carga en el modal
+	const [isDeleting, setIsDeleting] = useState(false);
 
-	// Función para sumar minutos a una hora dada
+	// Updated states for rating functionality
+	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+	const [currentRating, setCurrentRating] = useState(0);
+	const [orderRatings, setOrderRatings] = useState({});
+
 	function sumarMinutos(hora, minutosASumar) {
 		if (!hora) return "";
 		const [horaStr, minutoStr] = hora.split(":");
@@ -56,19 +53,17 @@ const Pedido = () => {
 		let unsubscribeOrder;
 		let unsubscribePhoneNumber;
 
-		// Función para limpiar los listeners
 		const cleanUp = () => {
 			if (unsubscribeOrder) unsubscribeOrder();
 			if (unsubscribePhoneNumber) unsubscribePhoneNumber();
 		};
 
-		// Manejar el caso de un pedido individual basado en orderId
 		if (orderId) {
 			setLoading(true);
 			unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
 				if (pedido && typeof pedido.direccion === "string") {
 					setOrder(pedido);
-					setPhoneNumber(pedido.telefono); // Establecer el número de teléfono
+					setPhoneNumber(pedido.telefono);
 				} else {
 					setOrder(null);
 					setPhoneNumber("");
@@ -77,7 +72,6 @@ const Pedido = () => {
 			});
 		}
 
-		// Manejar el caso de múltiples pedidos pasados por estado (búsqueda por teléfono)
 		if (!orderId && location.state && location.state.phoneNumber) {
 			const { phoneNumber } = location.state;
 			setPhoneNumber(phoneNumber);
@@ -88,7 +82,8 @@ const Pedido = () => {
 			unsubscribePhoneNumber = ListenOrdersForTodayByPhoneNumber(
 				phoneNumber,
 				(pedidosActualizados) => {
-					// Filtrar los pedidos que tienen 'paid' en true y false
+					console.log("Pedidos pagados:", pedidosActualizados);
+
 					const pedidosConPago = pedidosActualizados.filter(
 						(pedido) => pedido.paid === true
 					);
@@ -96,7 +91,6 @@ const Pedido = () => {
 						(pedido) => pedido.paid === false
 					);
 
-					// Actualizar los estados separados para pagados y no pagados
 					setPedidosPagados(pedidosConPago);
 					setPedidosNoPagados(pedidosSinPago);
 
@@ -105,7 +99,6 @@ const Pedido = () => {
 			);
 		}
 
-		// Limpiar los listeners al desmontar el componente o al cambiar dependencies
 		return () => {
 			cleanUp();
 		};
@@ -123,15 +116,12 @@ const Pedido = () => {
 			}
 		};
 
-		// Inicializar el tamaño
 		updateSize();
 
-		// Actualizar el tamaño al cambiar el tamaño de la ventana
 		window.addEventListener("resize", updateSize);
 		return () => window.removeEventListener("resize", updateSize);
 	}, []);
 
-	// Funciones para determinar las clases de las barras de progreso
 	const getFirstBarClass = (currentOrder) => {
 		if (!currentOrder) return "";
 		if (!currentOrder.elaborado) {
@@ -161,9 +151,6 @@ const Pedido = () => {
 		return "bg-gray-100 border-opacity-20 border-black border-1 border";
 	};
 
-	/**
-	 * Función para eliminar un pedido
-	 */
 	const eliminarPedido = async () => {
 		if (!selectedOrderId) return;
 
@@ -176,17 +163,13 @@ const Pedido = () => {
 			setMessage("Pedido cancelado exitosamente.");
 
 			if (orderId) {
-				// Si es un pedido individual, limpiar el estado
 				setOrder(null);
 			}
 
-			// Si hay múltiples pedidos, eliminar el pedido del estado
 			setPedidosPagados((prevPedidos) =>
 				prevPedidos.filter((pedido) => pedido.id !== selectedOrderId)
 			);
 
-			// Mostrar un mensaje de éxito en el modal o manejarlo de otra forma
-			// Aquí cerramos el modal
 			setIsModalOpen(false);
 		} catch (err) {
 			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
@@ -196,21 +179,54 @@ const Pedido = () => {
 		}
 	};
 
-	/**
-	 * Manejar la apertura del modal de confirmación
-	 * @param {string} orderId - ID del pedido a eliminar
-	 */
 	const handleCancelClick = (orderId) => {
 		setSelectedOrderId(orderId);
 		setIsModalOpen(true);
 	};
 
+	// Updated function to handle rating
+	const handleRateOrder = async () => {
+		if (!selectedOrderId || currentRating === 0) return;
+
+		setMessage(null);
+		setError(null);
+
+		try {
+			// Update the local state instead of calling an API
+			setOrderRatings((prevRatings) => ({
+				...prevRatings,
+				[selectedOrderId]: currentRating,
+			}));
+
+			setPedidosPagados((prevPedidos) =>
+				prevPedidos.map((pedido) =>
+					pedido.id === selectedOrderId
+						? { ...pedido, rating: currentRating }
+						: pedido
+				)
+			);
+
+			setMessage("Gracias por calificar tu pedido.");
+			setIsRatingModalOpen(false);
+		} catch (err) {
+			setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
+		} finally {
+			setSelectedOrderId(null);
+			setCurrentRating(0);
+		}
+	};
+
+	// Function to open rating modal
+	const handleRateClick = (orderId) => {
+		setSelectedOrderId(orderId);
+		setIsRatingModalOpen(true);
+	};
+
 	return (
 		<div
-			ref={containerRef} // Asignar la referencia aquí
+			ref={containerRef}
 			className="bg-gray-100 relative flex justify-between flex-col h-screen"
 		>
-			{/* Definición de las animaciones dentro del componente */}
 			<style>
 				{`
           @keyframes loadingBar {
@@ -241,12 +257,10 @@ const Pedido = () => {
 				containerWidth={containerSize.width}
 				containerHeight={containerSize.height}
 			/>
-			{/* Contenido */}
 			<div className="justify-center my-auto items-center flex flex-col">
 				<div className="flex items-center flex-col pt-16">
 					<img src={logo} className="w-1/2" alt="Logo" />
 				</div>
-				{/* Mostrar el spinner mientras se cargan los datos */}
 				{loading && (
 					<div className="flex items-center justify-center">
 						<div
@@ -260,7 +274,6 @@ const Pedido = () => {
 
 				{error && <div className="mt-4 text-red-600 font-medium">{error}</div>}
 
-				{/* Mostrar los pedidos una vez que se han cargado los datos */}
 				{!loading && pedidosPagados.length > 0 && (
 					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
 						{pedidosPagados.map((currentOrder, index) => (
@@ -270,39 +283,30 @@ const Pedido = () => {
 									index !== 0 ? "" : "mt-8"
 								} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 							>
-								{/* Mostrar el título si hay más de un pedido */}
 								{pedidosPagados.length > 1 && (
 									<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
 										Pedido {index + 1}
 									</h2>
 								)}
 
-								{/* Línea horizontal con animación */}
 								<div className="flex flex-col w-full">
 									<div className="mb-10">
 										<div className="w-full flex flex-row gap-2 relative">
-											{/* Primera barra */}
 											<div
 												className={`w-1/4 h-2.5 rounded-full ${getFirstBarClass(
 													currentOrder
 												)}`}
 											></div>
-
-											{/* Segunda barra */}
 											<div
 												className={`w-1/4 h-2.5 rounded-full ${getSecondBarClass(
 													currentOrder
 												)}`}
 											></div>
-
-											{/* Tercera barra */}
 											<div
 												className={`w-1/2 h-2.5 rounded-full ${getThirdBarClass(
 													currentOrder
 												)}`}
 											></div>
-
-											{/* SVG permanece igual */}
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
 												viewBox="0 0 24 24"
@@ -406,7 +410,7 @@ const Pedido = () => {
 								</div>
 
 								<div
-									onClick={() => handleCancelClick(currentOrder.id)} // Llamar a la función para abrir el modal
+									onClick={() => handleCancelClick(currentOrder.id)}
 									className={`${
 										isDeleting
 											? "opacity-50 cursor-not-allowed"
@@ -422,7 +426,18 @@ const Pedido = () => {
 									)}
 								</div>
 
-								{/* Línea horizontal fina y negra, excepto en el último elemento */}
+								{/* Updated button for rating */}
+								<div
+									onClick={() => handleRateClick(currentOrder.id)}
+									className="bg-gray-300 w-full text-black font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-4 font-bold cursor-pointer"
+								>
+									{orderRatings[currentOrder.id]
+										? `Tu calificación: ${
+												orderRatings[currentOrder.id]
+										  } estrellas`
+										: "Calificar pedido"}
+								</div>
+
 								{index < pedidosPagados.length - 1 && (
 									<div className="w-full h-px bg-black opacity-20 mt-8"></div>
 								)}
@@ -431,7 +446,6 @@ const Pedido = () => {
 					</div>
 				)}
 
-				{/* Mostrar mensaje si no hay pedidos */}
 				{!loading && pedidosPagados.length === 0 && (
 					<div className="flex flex-col items-center justify-center mt-4">
 						<p className="text-gray-700">No se encontraron pedidos para hoy.</p>
@@ -439,21 +453,31 @@ const Pedido = () => {
 				)}
 			</div>
 
-			{/* AppleModal para confirmación de eliminación */}
 			<AppleModal
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 				title="Confirmar Cancelación"
 				twoOptions={true}
 				onConfirm={eliminarPedido}
-				isLoading={isDeleting} // Pasar el estado de carga
+				isLoading={isDeleting}
 			>
 				<p>¿Estás seguro de que deseas cancelar este pedido?</p>
 				{error && <p className="text-red-600 mt-2">{error}</p>}
 			</AppleModal>
 
-			{/* AppleModal para mensajes de éxito o error */}
-			{/* Opcional: Puedes agregar otro modal para mensajes específicos si lo deseas */}
+			{/* Updated AppleModal for rating */}
+			<AppleModal
+				isOpen={isRatingModalOpen}
+				onClose={() => setIsRatingModalOpen(false)}
+				title="Calificación"
+				twoOptions={false}
+				onConfirm={handleRateOrder}
+				isRatingModal={true}
+				currentRating={currentRating}
+				setCurrentRating={setCurrentRating}
+			>
+				{error && <p className="text-red-600 mt-2">{error}</p>}
+			</AppleModal>
 		</div>
 	);
 };
