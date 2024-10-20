@@ -42,7 +42,7 @@ const AppleModal = ({
 	if (!isOpen) return null;
 
 	const ratingDescriptions = [
-		"Selecciona una calificación",
+		"Califica nuestro servicio",
 		"Muy malo",
 		"Malo",
 		"Regular",

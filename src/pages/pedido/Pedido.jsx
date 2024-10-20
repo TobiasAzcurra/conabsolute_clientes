@@ -458,7 +458,7 @@ const Pedido = () => {
 			<AppleModal
 				isOpen={isRatingModalOpen}
 				onClose={() => setIsRatingModalOpen(false)}
-				title="Calificación"
+				title="¡Recibiste tu pedido!"
 				twoOptions={false}
 				onConfirm={handleRateOrder}
 				isRatingModal={true}
@@ -467,11 +467,6 @@ const Pedido = () => {
 				orderProducts={selectedOrderProducts}
 			>
 				{error && <p className="text-red-600 mt-2">{error}</p>}
-				{console.log(
-					"AppleModal props - selectedOrderProducts:",
-					selectedOrderProducts
-				)}
-				{console.log("AppleModal props - currentRating:", currentRating)}
 			</AppleModal>
 		</div>
 	);
