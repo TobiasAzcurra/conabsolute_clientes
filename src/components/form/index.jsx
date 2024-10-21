@@ -314,6 +314,12 @@ const FormCustom = ({ cart, total }) => {
           // Verificar si es una reserva
           const isReserva = values.hora.trim() !== '';
 
+          if (isWithinClosedDays()) {
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+
+            return; // No proceder si es lunes, martes o miércoles
+          }
+
           if (!isWithinOrderTimeRange()) {
             console.log(
               'La hora actual está fuera del rango permitido para pedidos'

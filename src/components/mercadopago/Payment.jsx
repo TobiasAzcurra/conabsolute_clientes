@@ -3,7 +3,10 @@ import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import classNames from 'classnames';
 import { functions } from '../../firebase/config';
 import { httpsCallable } from 'firebase/functions';
-import { isWithinOrderTimeRange } from '../../helpers/validate-hours';
+import {
+  isWithinClosedDays,
+  isWithinOrderTimeRange,
+} from '../../helpers/validate-hours';
 import { showTimeRestrictionAlert } from '../form/showTImeRestrictionAlert';
 import LoadingPoints from '../LoadingPoints';
 
@@ -29,6 +32,9 @@ const Payment = ({
     if (!isValid) {
       // Si el formulario no es válido, no ejecutar el proceso de pago
       return;
+    }
+    if (isWithinClosedDays()) {
+      return; // No proceder si es lunes, martes o miércoles
     }
 
     if (!isWithinOrderTimeRange()) {
