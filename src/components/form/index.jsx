@@ -12,7 +12,10 @@ import { canjearVoucher } from '../../firebase/validateVoucher';
 import Payment from '../mercadopago/Payment';
 import currencyFormat from '../../helpers/currencyFormat';
 import { calculateDiscountedTotal } from '../../helpers/currencyFormat';
-import { isWithinOrderTimeRange } from '../../helpers/validate-hours';
+import {
+  isWithinClosedDays,
+  isWithinOrderTimeRange,
+} from '../../helpers/validate-hours';
 import LoadingPoints from '../LoadingPoints';
 import AppleModal from '../AppleModal'; // Importamos el nuevo Modal
 
