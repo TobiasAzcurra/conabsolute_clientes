@@ -11,7 +11,7 @@ const Card = ({
 	path,
 	id,
 	category,
-	loadingStrategy = "eager", // 'eager' | 'lazy'
+	loadingStrategy = "eager",
 	priority = false,
 }) => {
 	const [imageLoaded, setImageLoaded] = useState(false);
@@ -47,7 +47,6 @@ const Card = ({
 		const image = new Image();
 		image.src = `/menu/${img}`;
 
-		// Si es eager loading o priority, establecemos alta prioridad
 		if (loadingStrategy === "eager" || priority) {
 			image.fetchPriority = "high";
 		}
