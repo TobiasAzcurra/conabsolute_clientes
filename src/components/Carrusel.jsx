@@ -79,7 +79,7 @@ const Carrusel = () => {
 	const nextIndex = (currentIndex + 1) % images.length;
 
 	return (
-		<div className="w-full h-[300px] overflow-hidden relative">
+		<div className="w-full h-[300px] bg-black overflow-hidden relative">
 			{/* Imagen actual */}
 			<img
 				src={images[currentIndex]}
