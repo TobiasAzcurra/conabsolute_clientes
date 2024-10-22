@@ -3,7 +3,17 @@ import QuickAddToCart from "./quickAddToCart";
 import currencyFormat from "../../../helpers/currencyFormat";
 import { Link } from "react-router-dom";
 
-const Card = ({ name, description, price, img, path, id, category }) => {
+const Card = ({
+	name,
+	description,
+	price,
+	img,
+	path,
+	id,
+	category,
+	loadingStrategy = "eager", // 'eager' | 'lazy'
+	priority = false,
+}) => {
 	const [imageLoaded, setImageLoaded] = useState(false);
 	const [imageSrc, setImageSrc] = useState(null);
 
@@ -36,14 +46,19 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 	useEffect(() => {
 		const image = new Image();
 		image.src = `/menu/${img}`;
+
+		// Si es eager loading o priority, establecemos alta prioridad
+		if (loadingStrategy === "eager" || priority) {
+			image.fetchPriority = "high";
+		}
+
 		image.onload = () => {
 			setImageSrc(image.src);
-			// Pequeño delay para asegurar que la transición sea visible
 			setTimeout(() => {
 				setImageLoaded(true);
 			}, 50);
 		};
-	}, [img]);
+	}, [img, loadingStrategy, priority]);
 
 	return (
 		<div className="relative flex flex-col items-center border border-black border-opacity-20 bg-gray-100 rounded-3xl transition duration-300 w-full max-w-[400px] text-black z-50">
@@ -55,14 +70,14 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 			<Link to={`/menu/${path}/${id}`} className="w-full">
 				<div className="h-[130px] overflow-hidden rounded-t-3xl w-full bg-gradient-to-b from-gray-100 to-gray-300 relative">
-					{/* Skeleton loader con animación mejorada */}
+					{/* Skeleton loader */}
 					<div
 						className={`absolute inset-0 bg-gray-200 animate-pulse transition-opacity duration-300 ease-in-out ${
 							imageLoaded ? "opacity-0" : "opacity-100"
 						}`}
 					/>
 
-					{/* Imagen con fade-in mejorado */}
+					{/* Imagen con fade-in */}
 					{imageSrc && (
 						<div className="w-full h-full">
 							<img
@@ -74,8 +89,11 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 								style={{ objectPosition: `center ${imgPosition}` }}
 								src={imageSrc}
 								alt={name}
-								loading="lazy"
-								decoding="async"
+								loading={loadingStrategy}
+								decoding={loadingStrategy === "eager" ? "sync" : "async"}
+								fetchPriority={
+									priority || loadingStrategy === "eager" ? "high" : "auto"
+								}
 							/>
 						</div>
 					)}
