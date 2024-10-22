@@ -12,7 +12,10 @@ import { canjearVoucher } from '../../firebase/validateVoucher';
 import Payment from '../mercadopago/Payment';
 import currencyFormat from '../../helpers/currencyFormat';
 import { calculateDiscountedTotal } from '../../helpers/currencyFormat';
-import { isWithinOrderTimeRange } from '../../helpers/validate-hours';
+import {
+  isWithinClosedDays,
+  isWithinOrderTimeRange,
+} from '../../helpers/validate-hours';
 import LoadingPoints from '../LoadingPoints';
 import AppleModal from '../AppleModal'; // Importamos el nuevo Modal
 
@@ -313,6 +316,12 @@ const FormCustom = ({ cart, total }) => {
           console.log('Formulario enviado con valores:', values);
           // Verificar si es una reserva
           const isReserva = values.hora.trim() !== '';
+
+          if (isWithinClosedDays()) {
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+
+            return; // No proceder si es lunes, martes o miércoles
+          }
 
           if (!isWithinOrderTimeRange()) {
             console.log(

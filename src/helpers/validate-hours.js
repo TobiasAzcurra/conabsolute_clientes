@@ -17,6 +17,14 @@ export const isWithinOrderTimeRange = () => {
   return currentTime >= startTime && currentTime <= endTime;
 };
 
+export const isWithinClosedDays = () => {
+  const currentTime = getCurrentTimeInArgentina();
+  const currentDay = currentTime.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
+
+  // Verificamos si es lunes (1), martes (2) o miércoles (3)
+  return currentDay >= 1 && currentDay <= 3;
+};
+
 export const cleanPhoneNumber = (phoneNumber) => {
   // Asegurarse de que phoneNumber es una cadena
   const phoneStr = String(phoneNumber);
