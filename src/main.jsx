@@ -10,6 +10,29 @@ import store from "./redux/index";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 
+// Registro del Service Worker
+const registerServiceWorker = async () => {
+	// Removemos temporalmente la verificación del entorno
+	if ("serviceWorker" in navigator) {
+		try {
+			const registration = await navigator.serviceWorker.register(
+				"/serviceWorker.js",
+				{
+					scope: "/",
+				}
+			);
+			console.log("SW registered:", registration.scope);
+		} catch (error) {
+			console.log("SW registration failed:", error);
+		}
+	}
+};
+
+// Registrar el SW cuando la ventana cargue
+window.addEventListener("load", () => {
+	registerServiceWorker();
+});
+
 const persistor = persistStore(store);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
