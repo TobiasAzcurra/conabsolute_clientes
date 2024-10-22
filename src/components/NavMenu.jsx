@@ -1,4 +1,6 @@
 import Items from "../pages/menu/Items";
+
+import React from "react";
 import box from "../assets/box.png";
 import fries from "../assets/fries.png";
 
