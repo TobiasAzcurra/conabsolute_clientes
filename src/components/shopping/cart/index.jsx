@@ -6,7 +6,7 @@ import {
 	removeItem,
 } from "../../../redux/cart/cartSlice";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Items from "../../../pages/menu/Items";
 import box from "../../../assets/box.png";
 import fries from "../../../assets/fries.png";
@@ -14,11 +14,15 @@ import burgers from "../../../assets/burgers-v1.json";
 import papas from "../../../assets/papas-v1.json";
 import drinks from "../../../assets/drinks-v1.json";
 import CartCard from "./CartCard";
+import arrow from "../../../assets/arrowIcon.png";
 import carrusel from "../../../assets/carrusel3.jpg";
+import logo from "../../../assets/anheloTMwhite.png";
+import { MapDirection } from "../../form/MapDirection";
+import ArrowBack from "../../back";
 import MovingRibbon from "../MovingRibbon";
 import FormCustom from "../../form";
 
-// Preparar los productos con sus categorías
+// Agregar la categoría a cada producto
 const burgersArray = Object.values(burgers).map((product) => ({
 	...product,
 	category: "burgers",
@@ -28,12 +32,12 @@ const papasArray = Object.values(papas).map((product) => ({
 	...product,
 	category: "papas",
 }));
-
 const drinksArray = Object.values(drinks).map((product) => ({
 	...product,
 	category: "bebidas",
 }));
 
+// Concatenar todos los productos en un solo array
 const allProducts = [...papasArray, ...drinksArray, ...burgersArray];
 
 export const items = {
@@ -42,64 +46,54 @@ export const items = {
 	bebidas: "bebidas",
 };
 
-// Función para precargar imágenes
-const preloadImage = (src) => {
-	return new Promise((resolve, reject) => {
-		const img = new Image();
-		img.src = src;
-		img.onload = resolve;
-		img.onerror = reject;
-	});
-};
-
 const CartItems = () => {
 	const { cart, total } = useSelector((state) => state.cartState);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 	const { pathname } = useLocation();
-	const [imagesLoaded, setImagesLoaded] = useState(false);
 
-	const getDefaultImage = (product) => {
-		if (product.category === "burgers") return box;
-		if (product.category === "papas") return fries;
-		if (product.category === "bebidas") return "/menu/coca.png";
-		return "/ruta/a/imagen/default.png";
+	const deleteItem = (i) => {
+		// ... código de Swal.fire para eliminar ítems
+	};
+	const clearAll = () => {
+		// ... código de Swal.fire para vaciar el carrito
 	};
 
-	// Precargar todas las imágenes necesarias
 	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				const imagePromises = cart.map((item) =>
-					preloadImage(item.img ? `/menu/${item.img}` : getDefaultImage(item))
-				);
-
-				// También precargamos las imágenes de los productos sugeridos
-				const suggestedProducts = allProducts
-					.filter(
-						(product) =>
-							!cart.some((cartItem) => cartItem.name === product.name)
-					)
-					.slice(0, 5); // Limitamos a los primeros 5 para optimizar
-
-				const suggestedImagePromises = suggestedProducts.map((product) =>
-					preloadImage(
-						product.img ? `/menu/${product.img}` : getDefaultImage(product)
-					)
-				);
-
-				await Promise.all([...imagePromises, ...suggestedImagePromises]);
-				setImagesLoaded(true);
-			} catch (error) {
-				console.error("Error preloading images:", error);
-				setImagesLoaded(true); // Permitimos que la UI se muestre incluso si hay errores
-			}
-		};
-
-		loadImages();
-	}, [cart]);
-
-	// Rest of your existing code...
+		// Verifica si el carrito está vacío y si estamos en la ruta "/carrito"
+		if (cart.length <= 0 && pathname === "/carrito") {
+			navigate("/menu");
+		}
+	}, [cart, navigate, pathname]);
+	// Desplazar al inicio cuando el componente se monta
+	useEffect(() => {
+		window.scrollTo({
+			top: 0,
+			behavior: "smooth", // Opcional: para un desplazamiento suave
+		});
+	}, []);
+	// Agregar  para mostrar el carrito completo
+	useEffect(() => {}, [cart]);
+	const decrementQuantity = (index, quantity) => {
+		if (quantity > 1) {
+			dispatch(removeOneItem(index));
+		}
+	};
+	const incrementQuantity = (index) => {
+		dispatch(addOneItem(index));
+	};
+	// Función para obtener la imagen predeterminada basada en la categoría
+	const getDefaultImage = (product) => {
+		if (product.category === "burgers") {
+			return box;
+		} else if (product.category === "papas") {
+			return fries;
+		} else if (product.category === "bebidas") {
+			return "/menu/coca.png";
+		} else {
+			return "/ruta/a/imagen/default.png";
+		}
+	};
 
 	return (
 		<div className="flex flex-col font-coolvetica overflow-x-hidden">
@@ -122,14 +116,12 @@ const CartItems = () => {
 								decrementQuantity={decrementQuantity}
 								incrementQuantity={incrementQuantity}
 								deleteItem={deleteItem}
-								isLoaded={imagesLoaded}
 							/>
 						))}
 					</div>
 				</div>
 			</div>
 
-			{/* Productos sugeridos */}
 			<div className="flex justify-center flex-col mt-6 items-start w-full">
 				<p className="text-2xl font-bold mx-auto mb-2">
 					Agrega. Esto no es para tibios.
@@ -162,7 +154,6 @@ const CartItems = () => {
 									name={product.name}
 									handleItemClick={() => {}}
 									isCart
-									priority={index < 5} // Priorizar la carga de las primeras 5 imágenes
 								/>
 							))}
 					</div>
@@ -171,7 +162,30 @@ const CartItems = () => {
 
 			<FormCustom cart={cart} total={total} />
 
-			{/* ... rest of your component ... */}
+			<div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
+				<MovingRibbon angle={0} />
+				<img src={carrusel} className="w-full mt-28 md:hidden" alt="" />
+			</div>
+			<style>
+				{`
+          .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f3f4f6; /* bg-gray-100 */
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #f3f4f6; /* bg-gray-100 */
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+          }
+          .custom-scrollbar {
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
+          }
+        `}
+			</style>
 		</div>
 	);
 };
