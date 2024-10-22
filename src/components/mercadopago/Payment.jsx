@@ -11,7 +11,9 @@ import { showTimeRestrictionAlert } from '../form/showTImeRestrictionAlert';
 import LoadingPoints from '../LoadingPoints';
 
 // Inicializa Mercado Pago con tu clave pública
-initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY);
+initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY, {
+  locale: 'es-AR',
+});
 
 const Payment = ({
   envio,
