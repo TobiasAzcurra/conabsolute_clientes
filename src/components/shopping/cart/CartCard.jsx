@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import currencyFormat from "../../../helpers/currencyFormat";
 import QuickAddToCart from "../card/quickAddToCart";
 
@@ -9,25 +9,29 @@ const CartCard = ({
 	decrementQuantity,
 	incrementQuantity,
 	deleteItem,
-	isLoaded = false,
 }) => {
 	const { name, price, quantity, category, img, toppings } = item;
-	const [imageLoaded, setImageLoaded] = useState(false);
-	const [imageSrc, setImageSrc] = useState(null);
 
+	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
 		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 	};
 
+	// Función para formatear los toppings en una oración
 	const formatToppings = (toppingsArray) => {
 		if (!toppingsArray || toppingsArray.length === 0) return "";
 		const names = toppingsArray.map((topping) => capitalizeWords(topping.name));
-		if (names.length === 1) return names[0];
-		if (names.length === 2) return `${names[0]} y ${names[1]}`;
-		const last = names.pop();
-		return `${names.join(", ")} y ${last}`;
+		if (names.length === 1) {
+			return names[0];
+		} else if (names.length === 2) {
+			return `${names[0]} y ${names[1]}`;
+		} else {
+			const last = names.pop();
+			return `${names.join(", ")} y ${last}`;
+		}
 	};
 
+	// Función para calcular el precio total incluyendo los toppings pagos
 	const calculateTotalPrice = () => {
 		const toppingsTotal = toppings
 			? toppings.reduce((acc, topping) => acc + topping.price, 0)
@@ -35,44 +39,18 @@ const CartCard = ({
 		return price + toppingsTotal;
 	};
 
-	useEffect(() => {
-		const image = new Image();
-		const src = img ? `/menu/${img}` : getDefaultImage(item);
-		image.src = src;
-
-		image.onload = () => {
-			setImageSrc(src);
-			setTimeout(() => {
-				setImageLoaded(true);
-			}, 50);
-		};
-	}, [img, item, getDefaultImage]);
-
 	const totalPrice = calculateTotalPrice();
 
-	return (
-		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px]">
-			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden relative">
-				{/* Skeleton loader */}
-				<div
-					className={`absolute inset-0 bg-gray-200 animate-pulse transition-opacity duration-300 ease-in-out ${
-						imageLoaded ? "opacity-0" : "opacity-100"
-					}`}
-				/>
+	"este es el", item;
 
-				{/* Imagen con fade-in */}
-				{imageSrc && (
-					<img
-						src={imageSrc}
-						alt={name}
-						className={`h-[350px] object-cover transition-opacity duration-500 ${
-							imageLoaded ? "opacity-100" : "opacity-0"
-						}`}
-						loading="eager"
-						decoding="sync"
-						fetchPriority="high"
-					/>
-				)}
+	return (
+		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ">
+			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300  rounded-l-3xl overflow-hidden">
+				<img
+					src={img ? `/menu/${img}` : getDefaultImage(item)}
+					alt={name}
+					className="h-[350px] object-cover"
+				/>
 			</div>
 
 			<div className="flex flex-col w-2/3 justify-center px-4 pt-2 pb-4">
@@ -81,7 +59,9 @@ const CartCard = ({
 						{capitalizeWords(name)}
 					</h3>
 
+					{/* Aclaraciones */}
 					<div className="flex flex-col space-y-1">
+						{/* Mostrar toppings formateados */}
 						{toppings && toppings.length > 0 && (
 							<p className="text-xs mb-4 font-medium">
 								Toppings: {formatToppings(toppings)}.

@@ -1,6 +1,6 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+// Router.jsx
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import Section from "./components/shopping/section";
 import { RouterMenu } from "./common/RouterMenu";
 import Carrusel from "./components/Carrusel";
 import NavMenu from "./components/NavMenu";
@@ -8,29 +8,22 @@ import burgers from "./assets/burgers-v1.json";
 import combos from "./assets/combos.json";
 import papas from "./assets/papas-v1.json";
 import drinks from "./assets/drinks-v1.json";
+import DetailCard from "./components/shopping/detail";
+import CartItems from "./components/shopping/cart";
+import OrderForm from "./pages/order";
+import Footer from "./components/Footer";
+import { useEffect, useState } from "react";
+import Pedido from "./pages/pedido/Pedido"; // Asegúrate de importar correctamente
+import Feedback from "./components/mercadopago/Feedback";
+import { useSelector } from "react-redux";
 import FloatingCart from "./components/shopping/FloatingCart";
+import SuccessPage from "./pages/menu/SuccessPage";
+import { ListenOrdersForTodayByPhoneNumber } from "./firebase/getPedido"; // Importar la nueva función
 
-// Lazy load de componentes
-const Section = lazy(() => import("./components/shopping/section"));
-const DetailCard = lazy(() => import("./components/shopping/detail"));
-const CartItems = lazy(() => import("./components/shopping/cart"));
-const OrderForm = lazy(() => import("./pages/order"));
-const Pedido = lazy(() => import("./pages/pedido/Pedido"));
-const Feedback = lazy(() => import("./components/mercadopago/Feedback"));
-const SuccessPage = lazy(() => import("./pages/menu/SuccessPage"));
-
-// Preparar los arrays de productos
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
 const papasArray = Object.values(papas);
 const drinksArray = Object.values(drinks);
-
-// Componente de loading
-const LoadingFallback = () => (
-	<div className="flex items-center justify-center min-h-[200px]">
-		<div className="animate-pulse bg-gray-200 rounded-lg w-full max-w-md h-32"></div>
-	</div>
-);
 
 const AppRouter = () => {
 	const { pathname } = useLocation();
@@ -39,17 +32,12 @@ const AppRouter = () => {
 	const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const navigate = useNavigate();
+	// Agrega el estado selectedItem
 	const [selectedItem, setSelectedItem] = useState("");
+	// Estado para controlar la visibilidad de la explicación
 	const [showExplanation, setShowExplanation] = useState(false);
 
-	// Función para precargar rutas comunes
-	const prefetchRoute = (route) => {
-		const link = document.createElement("link");
-		link.rel = "prefetch";
-		link.href = route;
-		document.head.appendChild(link);
-	};
-
+	// Función para manejar el clic en un item
 	const handleItemClick = (name) => {
 		setSelectedItem(name);
 	};
@@ -63,39 +51,40 @@ const AppRouter = () => {
 		} else {
 			setPathLocation(lastPart);
 
+			// Actualiza selectedItem basado en la ruta actual
 			if (["burgers", "combos", "bebidas", "papas"].includes(lastPart)) {
 				setSelectedItem(lastPart);
 			}
 		}
-
-		// Prefetch de rutas comunes
-		if (pathname === "/menu") {
-			prefetchRoute("/carrito");
-			prefetchRoute("/menu/burgers");
-		}
 	}, [pathname]);
 
+	// Mostrar Carrusel y NavMenu solo cuando la ruta es /menu o una de sus subrutas, pero no contiene un ID adicional
 	const shouldShowCarruselAndNavMenu =
 		pathname.startsWith("/menu") &&
 		!pathname.match(/\/menu\/(burgers|combos|bebidas|papas)\/.+/);
 
+	// Función para manejar el evento al presionar Enter
 	const handleKeyDown = async (e) => {
 		if (e.key === "Enter") {
+			// Validar el número de teléfono
 			if (phoneNumber.trim() === "") {
 				alert("Por favor, ingresa un número de teléfono válido.");
 				return;
 			}
+			// Navegar a Pedido, pasando el número de teléfono como estado
 			navigate("/pedido", { state: { phoneNumber } });
 		}
 	};
 
 	return (
 		<div className="flex flex-col">
+			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
 						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 opacity-80 focus-within:opacity-100 transition-opacity duration-300 ease-in-out md:left-auto md:right-auto">
+							{/* Ícono de búsqueda */}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
@@ -111,6 +100,7 @@ const AppRouter = () => {
 								/>
 							</svg>
 
+							{/* Input para el número de teléfono */}
 							<input
 								type="text"
 								value={phoneNumber}
@@ -120,6 +110,7 @@ const AppRouter = () => {
 								className="text-opacity-60 font-coolvetica text-black bg-transparent outline-none w-full"
 							/>
 
+							{/* Ícono de información */}
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
@@ -136,6 +127,7 @@ const AppRouter = () => {
 							</svg>
 						</div>
 
+						{/* Explicación del formato, renderizado condicionalmente */}
 						{showExplanation && (
 							<div className="bg-black md:w-[500px] shadow-black h-16 flex items-center justify-center absolute z-50 top-[62px] font-coolvetica rounded-lg px-4 left-4 right-4 md:left-auto opacity-80 md:right-auto">
 								<p className="text-center w-full text-xs text-gray-100 font-medium">
@@ -155,64 +147,66 @@ const AppRouter = () => {
 					</div>
 				</div>
 			)}
+			<Routes>
+				{/* Rutas definidas aquí */}
+				<Route path="/" element={<RouterMenu />} />
+				<Route
+					path="/menu/burgers"
+					element={<Section path={"burgers"} products={burgersArray} />}
+				/>
+				<Route
+					path="/menu/combos"
+					element={<Section path={"combos"} products={combosArray} />}
+				/>
+				<Route
+					path="/menu/bebidas"
+					element={<Section path={"bebidas"} products={drinksArray} />}
+				/>
+				<Route
+					path="/menu/papas"
+					element={<Section path={"papas"} products={papasArray} />}
+				/>
+				{/* Rutas de detalles */}
+				<Route
+					path="/menu/burgers/:id"
+					element={<DetailCard products={burgersArray} type={"burgers"} />}
+				/>
+				<Route
+					path="/menu/combos/:id"
+					element={<DetailCard products={combosArray} type={"combos"} />}
+				/>
+				<Route
+					path="/menu/bebidas/:id"
+					element={<DetailCard products={drinksArray} type={"bebidas"} />}
+				/>
+				<Route
+					path="/menu/papas/:id"
+					element={<DetailCard products={papasArray} type={"papas"} />}
+				/>
+				{/* Otras rutas */}
+				<Route path="/carrito" element={<CartItems />} />
+				<Route path="/order" element={<OrderForm />} />
+				<Route path="/success/:orderId" element={<SuccessPage />} />
+				<Route path="/pedido/:orderId" element={<Pedido />} />
+				<Route path="/pedido" element={<Pedido />} />{" "}
+				{/* Nueva ruta para múltiples pedidos */}
+				<Route path="/feedback" element={<Feedback />} />
+				<Route
+					path="*"
+					element={
+						<div className="flex flex-col">
+							<p className="font-bold text-xs text-center mt-8">
+								¿Te perdiste? Esta no te la esperabas,
+							</p>
+							<p className="font-bold text-xs text-center">
+								elegí arriba alguna burger.
+							</p>
+						</div>
+					}
+				/>
+			</Routes>
 
-			<Suspense fallback={<LoadingFallback />}>
-				<Routes>
-					<Route path="/" element={<RouterMenu />} />
-					<Route
-						path="/menu/burgers"
-						element={<Section path={"burgers"} products={burgersArray} />}
-					/>
-					<Route
-						path="/menu/combos"
-						element={<Section path={"combos"} products={combosArray} />}
-					/>
-					<Route
-						path="/menu/bebidas"
-						element={<Section path={"bebidas"} products={drinksArray} />}
-					/>
-					<Route
-						path="/menu/papas"
-						element={<Section path={"papas"} products={papasArray} />}
-					/>
-					<Route
-						path="/menu/burgers/:id"
-						element={<DetailCard products={burgersArray} type={"burgers"} />}
-					/>
-					<Route
-						path="/menu/combos/:id"
-						element={<DetailCard products={combosArray} type={"combos"} />}
-					/>
-					<Route
-						path="/menu/bebidas/:id"
-						element={<DetailCard products={drinksArray} type={"bebidas"} />}
-					/>
-					<Route
-						path="/menu/papas/:id"
-						element={<DetailCard products={papasArray} type={"papas"} />}
-					/>
-					<Route path="/carrito" element={<CartItems />} />
-					<Route path="/order" element={<OrderForm />} />
-					<Route path="/success/:orderId" element={<SuccessPage />} />
-					<Route path="/pedido/:orderId" element={<Pedido />} />
-					<Route path="/pedido" element={<Pedido />} />
-					<Route path="/feedback" element={<Feedback />} />
-					<Route
-						path="*"
-						element={
-							<div className="flex flex-col">
-								<p className="font-bold text-xs text-center mt-8">
-									¿Te perdiste? Esta no te la esperabas,
-								</p>
-								<p className="font-bold text-xs text-center">
-									elegí arriba alguna burger.
-								</p>
-							</div>
-						}
-					/>
-				</Routes>
-			</Suspense>
-
+			{/* Mostrar el carrito flotante si hay productos en el carrito y no está en rutas excluidas */}
 			{totalQuantity > 0 &&
 				pathname !== "/" &&
 				pathname !== "/carrito" &&
