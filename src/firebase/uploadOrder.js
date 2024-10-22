@@ -4,6 +4,8 @@ import {
   doc,
   runTransaction,
   getDocs,
+  query,
+  where,
 } from 'firebase/firestore';
 import { obtenerFechaActual } from '../helpers/currencyFormat';
 import { v4 as uuidv4 } from 'uuid';
@@ -148,4 +150,30 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
         reject(error);
       });
   });
+};
+
+export const getCadetePhone = async (nombreCadete) => {
+  const firestore = getFirestore();
+
+  // Acceder a la colección 'empleados' en Firestore
+  const empleadosRef = collection(firestore, 'empleados');
+
+  // Crear una consulta para filtrar por categoría 'cadete' y nombre del cadete
+  const q = query(
+    empleadosRef,
+    where('category', '==', 'cadete'),
+    where('name', '==', nombreCadete)
+  );
+
+  // Obtener los documentos que coinciden con la consulta
+  const querySnapshot = await getDocs(q);
+
+  // Si encontramos algún documento, retornamos el número de teléfono
+  if (!querySnapshot.empty) {
+    const empleadoData = querySnapshot.docs[0].data(); // Asumimos que el nombre es único
+    return empleadoData.telefono; // Retornar el número de teléfono del cadete
+  } else {
+    console.log('Cadete no encontrado');
+    return null; // Retornar null si no se encuentra el cadete
+  }
 };
