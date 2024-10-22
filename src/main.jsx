@@ -10,17 +10,40 @@ import store from "./redux/index";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 
+// Función para limpiar SWs antiguos
+const clearServiceWorkers = async () => {
+	if ("serviceWorker" in navigator) {
+		const registrations = await navigator.serviceWorker.getRegistrations();
+		for (let registration of registrations) {
+			await registration.unregister();
+		}
+	}
+};
+
 // Registro del Service Worker
 const registerServiceWorker = async () => {
-	// Removemos temporalmente la verificación del entorno
 	if ("serviceWorker" in navigator) {
 		try {
+			// Primero limpiamos todos los SWs anteriores
+			await clearServiceWorkers();
+
+			// Esperamos un momento antes de registrar el nuevo
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			// Registramos el nuevo SW
 			const registration = await navigator.serviceWorker.register(
 				"/serviceWorker.js",
 				{
 					scope: "/",
+					updateViaCache: "none",
 				}
 			);
+
+			// Forzar la activación inmediata
+			if (registration.waiting) {
+				registration.waiting.postMessage({ type: "SKIP_WAITING" });
+			}
+
 			console.log("SW registered:", registration.scope);
 		} catch (error) {
 			console.log("SW registration failed:", error);
@@ -28,10 +51,20 @@ const registerServiceWorker = async () => {
 	}
 };
 
-// Registrar el SW cuando la ventana cargue
-window.addEventListener("load", () => {
-	registerServiceWorker();
-});
+// Inicialización
+const init = async () => {
+	try {
+		// Primero limpiamos
+		await clearServiceWorkers();
+		// Luego registramos el nuevo
+		await registerServiceWorker();
+	} catch (error) {
+		console.error("Error during initialization:", error);
+	}
+};
+
+// Ejecutar la inicialización cuando la ventana cargue
+window.addEventListener("load", init);
 
 const persistor = persistStore(store);
 
