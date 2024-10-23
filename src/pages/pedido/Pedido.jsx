@@ -41,14 +41,13 @@ const Pedido = () => {
 	const [ratedOrders, setRatedOrders] = useState(new Set());
 	const containerRef = useRef(null);
 
-	// Agregar useEffect para el cronómetro
 	useEffect(() => {
 		console.log("🕒 Iniciando cronómetro...");
 		const timer = setInterval(() => {
 			const newTime = new Date();
 			console.log("⏱️ Actualizando tiempo:", newTime.toLocaleTimeString());
 			setCurrentTime(newTime);
-		}, 60000); // Actualizar cada minuto
+		}, 60000);
 
 		return () => {
 			console.log("🛑 Limpiando cronómetro");
@@ -118,13 +117,12 @@ const Pedido = () => {
 
 		console.log(`⏱️ Minutos de demora: ${diffMinutes.toFixed(2)}`);
 
-		const retrasado = diffMinutes > 40 && !entregado;
+		const retrasado = diffMinutes > 50 && !entregado;
 		console.log(`🚨 Pedido retrasado: ${retrasado}`);
 
 		return retrasado;
 	};
 
-	// Función para obtener el tiempo de demora actual
 	const getDelayTime = (order) => {
 		const { fecha, hora } = order;
 		const orderDateTime = getOrderDateTime(fecha, hora);
@@ -441,7 +439,7 @@ const Pedido = () => {
 	const handleSupportClick = () => {
 		const phoneNumber = "543584306832";
 		const message =
-			"Hola! Mi pedido lleva más de 40 minutos de demora y aún no tiene cadete asignado.";
+			"Hola! Mi pedido lleva más de 50 minutos de demora y aún no tiene cadete asignado.";
 		const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
 			message
 		)}`;
@@ -526,6 +524,7 @@ const Pedido = () => {
 								const delayMinutes = getDelayTime(currentOrder);
 								const showSupportButton =
 									retrasado && currentOrder.cadete === "NO ASIGNADO";
+								const showCancelButton = !currentOrder.elaborado || retrasado;
 
 								return (
 									<div
@@ -672,11 +671,11 @@ const Pedido = () => {
 											</div>
 										</div>
 
-										<div className="w-full">
-											{showSupportButton ? (
+										<div className="w-full mt-12">
+											{showSupportButton && (
 												<div
 													onClick={handleSupportClick}
-													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold cursor-pointer transition-colors duration-300"
+													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl  font-bold cursor-pointer transition-colors duration-300"
 												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
@@ -692,66 +691,66 @@ const Pedido = () => {
 													</svg>
 													Escribir a soporte
 												</div>
-											) : (
-												currentOrder.cadete !== "NO ASIGNADO" && (
-													<div
-														onClick={() =>
-															handleCadeteCall(currentOrder.cadete)
-														}
-														className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold cursor-pointer transition-colors duration-300"
-													>
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															fill="currentColor"
-															className="h-5 mr-2"
-														>
-															<path
-																fillRule="evenodd"
-																d="M15 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0V5.56l-4.72 4.72a.75.75 0 11-1.06-1.06l4.72-4.72h-2.69a.75.75 0 01-.75-.75z"
-																clipRule="evenodd"
-															/>
-															<path
-																fillRule="evenodd"
-																d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
-																clipRule="evenodd"
-															/>
-														</svg>
-														Llamar cadete
-													</div>
-												)
 											)}
 
-											<div
-												onClick={() => handleCancelClick(currentOrder.id)}
-												className={`${
-													isDeleting
-														? "opacity-50 cursor-not-allowed"
-														: "cursor-pointer"
-												} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
-											>
-												{isDeleting ? (
-													<div className="flex items-center justify-center space-x-2">
-														<LoadingPoints className="h-4 w-4" />
-													</div>
-												) : (
-													<div className="bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300">
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															fill="currentColor"
-															className="h-5 mr-2"
-														>
-															<path
-																fillRule="evenodd"
-																d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-																clipRule="evenodd"
-															/>
-														</svg>
-														Cancelar pedido
-													</div>
-												)}
-											</div>
+											{retrasado && currentOrder.cadete !== "NO ASIGNADO" && (
+												<div
+													onClick={() => handleCadeteCall(currentOrder.cadete)}
+													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-5 mr-2"
+													>
+														<path
+															fillRule="evenodd"
+															d="M15 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0V5.56l-4.72 4.72a.75.75 0 11-1.06-1.06l4.72-4.72h-2.69a.75.75 0 01-.75-.75z"
+															clipRule="evenodd"
+														/>
+														<path
+															fillRule="evenodd"
+															d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													Llamar cadete
+												</div>
+											)}
+
+											{showCancelButton && (
+												<div
+													onClick={() => handleCancelClick(currentOrder.id)}
+													className={`${
+														isDeleting
+															? "opacity-50 cursor-not-allowed"
+															: "cursor-pointer"
+													} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
+												>
+													{isDeleting ? (
+														<div className="flex items-center justify-center space-x-2">
+															<LoadingPoints className="h-4 w-4" />
+														</div>
+													) : (
+														<div className="bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300">
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="currentColor"
+																className="h-5 mr-2"
+															>
+																<path
+																	fillRule="evenodd"
+																	d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+																	clipRule="evenodd"
+																/>
+															</svg>
+															Cancelar pedido
+														</div>
+													)}
+												</div>
+											)}
 										</div>
 
 										{index < pedidosPagados.length - 1 && (
