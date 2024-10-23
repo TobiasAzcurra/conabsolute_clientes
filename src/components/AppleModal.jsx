@@ -114,7 +114,7 @@ const AppleModal = ({
 						{title}
 					</h2>
 				)}
-				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
+				<div className="w-full px-4 max-h-[80vh] ">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
 						<div className="mt-8 space-y-2">
