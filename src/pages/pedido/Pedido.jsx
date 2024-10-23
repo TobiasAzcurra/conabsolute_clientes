@@ -1,4 +1,3 @@
-// Pedido.jsx
 import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
@@ -16,9 +15,12 @@ import {
 } from "../../firebase/uploadOrder";
 
 const Pedido = () => {
+	console.log("🔄 Inicializando componente Pedido");
 	const [order, setOrder] = useState(null);
 	const [pedidos, setPedidos] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [hasBeenRated, setHasBeenRated] = useState(false);
+	const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 	const navigate = useNavigate();
 	const { orderId } = useParams();
 	const location = useLocation();
@@ -32,14 +34,21 @@ const Pedido = () => {
 	const [selectedOrderId, setSelectedOrderId] = useState(null);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [currentTime, setCurrentTime] = useState(new Date());
-
-	// Estado para el modal de calificación
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
 	const [ratedOrders, setRatedOrders] = useState(new Set());
 	const containerRef = useRef(null);
+
+	useEffect(() => {
+		console.log("📌 Initial Mount - Props and State:", {
+			orderId,
+			phoneNumber,
+			hasBeenRated,
+			ratedOrders: Array.from(ratedOrders),
+		});
+	}, []);
 
 	useEffect(() => {
 		console.log("🕒 Iniciando cronómetro...");
@@ -141,16 +150,36 @@ const Pedido = () => {
 		return diffMinutes;
 	};
 
+	function sumarMinutos(hora, minutosASumar) {
+		if (!hora) return "";
+		const [horaStr, minutoStr] = hora.split(":");
+		const horas = parseInt(horaStr, 10);
+		const minutos = parseInt(minutoStr, 10);
+
+		const fecha = new Date();
+		fecha.setHours(horas, minutos, 0, 0);
+		fecha.setMinutes(fecha.getMinutes() + minutosASumar);
+
+		const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
+		const nuevosMinutos = fecha.getMinutes().toString().padStart(2, "0");
+
+		return `${nuevasHoras}:${nuevosMinutos}`;
+	}
+
 	const handleRateOrder = async (ratings) => {
-		console.log("📥 Ratings received:", ratings);
+		console.log("📥 Iniciando proceso de calificación");
+		console.log("📊 Ratings recibidos:", ratings);
+
 		if (!selectedOrderId) {
-			console.error("❌ No se ha seleccionado un Order ID para calificar.");
+			console.error("❌ Error: No hay Order ID seleccionado para calificar");
 			return;
 		}
 
-		console.log("🔍 Selected Order ID:", selectedOrderId);
-		console.log("📦 Selected Order Products:", selectedOrderProducts);
-		console.log("📦 Additional Products to Rate:", additionalProducts);
+		console.log("🔍 Datos de calificación:", {
+			selectedOrderId,
+			selectedOrderProducts,
+			additionalProducts,
+		});
 
 		setMessage(null);
 		setError(null);
@@ -216,25 +245,43 @@ const Pedido = () => {
 		}
 	};
 
-	function sumarMinutos(hora, minutosASumar) {
-		if (!hora) return "";
-		const [horaStr, minutoStr] = hora.split(":");
-		const horas = parseInt(horaStr, 10);
-		const minutos = parseInt(minutoStr, 10);
+	const eliminarPedido = async () => {
+		if (!selectedOrderId) return;
 
-		const fecha = new Date();
-		fecha.setHours(horas, minutos, 0, 0);
-		fecha.setMinutes(fecha.getMinutes() + minutosASumar);
+		console.log("🗑️ Eliminando pedido:", selectedOrderId);
+		setIsDeleting(true);
+		setMessage(null);
+		setError(null);
 
-		const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
-		const nuevosMinutos = fecha.getMinutes().toString().padStart(2, "0");
+		try {
+			await deleteOrder(selectedOrderId);
+			console.log("✅ Pedido cancelado exitosamente:", selectedOrderId);
+			setMessage("Pedido cancelado exitosamente.");
 
-		return `${nuevasHoras}:${nuevosMinutos}`;
-	}
+			if (orderId) {
+				setOrder(null);
+				console.log("🧹 Order state cleared.");
+			}
+
+			setPedidosPagados((prevPedidos) =>
+				prevPedidos.filter((pedido) => pedido.id !== selectedOrderId)
+			);
+
+			setIsModalOpen(false);
+		} catch (err) {
+			console.error("❌ Hubo un problema al cancelar el pedido:", err);
+			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
+		} finally {
+			setIsDeleting(false);
+			setSelectedOrderId(null);
+		}
+	};
 
 	useEffect(() => {
 		let unsubscribeOrder;
 		let unsubscribePhoneNumber;
+
+		console.log("🔄 Iniciando efecto de suscripción a pedidos");
 
 		const cleanUp = () => {
 			if (unsubscribeOrder) unsubscribeOrder();
@@ -247,6 +294,16 @@ const Pedido = () => {
 			unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
 				console.log("📦 Order fetched by ID:", pedido);
 				if (pedido && typeof pedido.direccion === "string") {
+					// Verifica si el pedido pasó a entregado y no ha sido calificado
+					if (pedido.entregado && !pedido.rating && !hasBeenRated) {
+						console.log(
+							"🔔 Pedido entregado y listo para calificar:",
+							pedido.id
+						);
+						setSelectedOrderProducts(pedido.detallePedido || []); // Corrección aquí
+						setSelectedOrderId(pedido.id);
+						setIsRatingModalOpen(true);
+					}
 					setOrder(pedido);
 					setPhoneNumber(pedido.telefono);
 					console.log("✅ Order set:", pedido);
@@ -300,8 +357,6 @@ const Pedido = () => {
 		};
 	}, [orderId, location.state, phoneNumber]);
 
-	const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-
 	useEffect(() => {
 		const updateSize = () => {
 			if (containerRef.current) {
@@ -318,38 +373,6 @@ const Pedido = () => {
 		return () => window.removeEventListener("resize", updateSize);
 	}, []);
 
-	const eliminarPedido = async () => {
-		if (!selectedOrderId) return;
-
-		console.log("🗑️ Eliminando pedido:", selectedOrderId);
-		setIsDeleting(true);
-		setMessage(null);
-		setError(null);
-
-		try {
-			await deleteOrder(selectedOrderId);
-			console.log("✅ Pedido cancelado exitosamente:", selectedOrderId);
-			setMessage("Pedido cancelado exitosamente.");
-
-			if (orderId) {
-				setOrder(null);
-				console.log("🧹 Order state cleared.");
-			}
-
-			setPedidosPagados((prevPedidos) =>
-				prevPedidos.filter((pedido) => pedido.id !== selectedOrderId)
-			);
-
-			setIsModalOpen(false);
-		} catch (err) {
-			console.error("❌ Hubo un problema al cancelar el pedido:", err);
-			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
-		} finally {
-			setIsDeleting(false);
-			setSelectedOrderId(null);
-		}
-	};
-
 	const handleCancelClick = (orderId) => {
 		console.log("🛑 Solicitando cancelación para pedido:", orderId);
 		setSelectedOrderId(orderId);
@@ -357,12 +380,15 @@ const Pedido = () => {
 	};
 
 	const handleRateClick = (orderId) => {
+		console.log("⭐ Iniciando proceso de calificación para pedido:", orderId);
+
 		const order = pedidosPagados.find((pedido) => pedido.id === orderId);
 		if (!order) {
-			console.error("Pedido no encontrado:", orderId);
+			console.error("❌ Pedido no encontrado:", orderId);
 			return;
 		}
 
+		console.log("📦 Datos del pedido a calificar:", order);
 		setSelectedOrderProducts(order.detallePedido || []);
 		setSelectedOrderId(orderId);
 
@@ -389,16 +415,26 @@ const Pedido = () => {
 
 		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
 			const nombreLimpio = producto.burger.trim().toLowerCase();
+			console.log("🍔 Verificando producto:", nombreLimpio);
+
 			if (
 				requiredPrefixes.some((prefix) =>
 					nombreLimpio.startsWith(prefix.toLowerCase())
 				)
 			) {
+				console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
 				return true;
 			}
-			return !excludedPrefixes.some((prefix) =>
+
+			const excluded = excludedPrefixes.some((prefix) =>
 				nombreLimpio.startsWith(prefix.toLowerCase())
 			);
+			console.log(
+				excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
+				nombreLimpio
+			);
+
+			return !excluded;
 		});
 
 		if (shouldIncludePapasAnhelo) {
@@ -407,7 +443,13 @@ const Pedido = () => {
 					(producto) =>
 						producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
 				);
+				console.log("🍟 Verificación Papas Anhelo:", {
+					isAlreadyInOrder,
+					currentAdditionalProducts: prevProducts,
+				});
+
 				if (!isAlreadyInOrder && !prevProducts.includes("Papas Anhelo ®")) {
+					console.log("✅ Agregando Papas Anhelo a productos adicionales");
 					return [...prevProducts, "Papas Anhelo ®"];
 				}
 				return prevProducts;
@@ -420,6 +462,7 @@ const Pedido = () => {
 			console.log("📌 No se incluirá 'Papas Anhelo ®' en las calificaciones.");
 		}
 
+		console.log("🎯 Abriendo modal de calificación");
 		setIsRatingModalOpen(true);
 	};
 
@@ -437,22 +480,40 @@ const Pedido = () => {
 	};
 
 	const handleSupportClick = () => {
+		console.log("💬 Iniciando contacto con soporte");
 		const phoneNumber = "543584306832";
 		const message =
 			"Hola! Mi pedido lleva más de 50 minutos de demora y aún no tiene cadete asignado.";
 		const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
 			message
 		)}`;
+		console.log("🔗 Abriendo WhatsApp con:", { phoneNumber, message });
 		window.open(whatsappUrl, "_blank");
 	};
 
 	useEffect(() => {
-		const orderToRate = pedidosPagados.find(
-			(order) => order.tiempoEntregado && !ratedOrders.has(order.id)
-		);
+		console.log("👀 Verificando pedidos para calificación automática:", {
+			totalPedidosPagados: pedidosPagados.length,
+			pedidosYaCalificados: ratedOrders.size,
+			modalAbierto: isRatingModalOpen,
+		});
+
+		const orderToRate = pedidosPagados.find((order) => {
+			const shouldRate = order.tiempoEntregado && !ratedOrders.has(order.id);
+			console.log("🔍 Evaluando pedido:", {
+				id: order.id,
+				tiempoEntregado: order.tiempoEntregado,
+				yaCalificado: ratedOrders.has(order.id),
+				debeCalificar: shouldRate,
+			});
+			return shouldRate;
+		});
 
 		if (orderToRate && !isRatingModalOpen) {
-			console.log("🔔 Pedido encontrado para calificar:", orderToRate.id);
+			console.log(
+				"🎯 Pedido encontrado para calificación automática:",
+				orderToRate.id
+			);
 			handleRateClick(orderToRate.id);
 		}
 	}, [pedidosPagados, ratedOrders, isRatingModalOpen]);
@@ -780,6 +841,18 @@ const Pedido = () => {
 				>
 					<p>¿Estás seguro de que deseas cancelar este pedido?</p>
 					{error && <p className="text-red-600 mt-2">{error}</p>}
+				</AppleModal>
+
+				<AppleModal
+					isOpen={isRatingModalOpen}
+					onClose={() => setIsRatingModalOpen(false)}
+					title="¡Califica tu pedido!"
+					isRatingModal={true}
+					orderProducts={selectedOrderProducts}
+					additionalProducts={additionalProducts}
+					onConfirm={handleRateOrder}
+				>
+					<p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
 				</AppleModal>
 			</div>
 		</div>
