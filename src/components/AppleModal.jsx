@@ -117,7 +117,7 @@ const AppleModal = ({
 				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
-						<div className="mt-4 space-y-2">
+						<div className="mt-8 space-y-2">
 							{/* Secciones de Calificación Generales */}
 							<RatingSection category="tiempo" label="Tiempo" />
 							<RatingSection category="temperatura" label="Temperatura" />
@@ -141,8 +141,10 @@ const AppleModal = ({
 							))}
 
 							{/* Comentario */}
-							<div className="mb-4">
-								<label className="block mb-2 font-bold">Comentario:</label>
+							<div className=" w-full">
+								<p className="flex w-full mb-2 items-center justify-center text-center font-bold">
+									Algun comentario:
+								</p>
 								<textarea
 									value={ratings.comentario}
 									onChange={(e) =>
@@ -151,7 +153,7 @@ const AppleModal = ({
 											comentario: e.target.value,
 										}))
 									}
-									className="w-full p-2 bg-white border-2 border-black rounded-xl"
+									className="w-full px-4 h-10 flex items-center bg-white border-2 border-black rounded-xl"
 									rows={4}
 								/>
 							</div>
@@ -188,7 +190,7 @@ const AppleModal = ({
 									onClose();
 								}
 							}}
-							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
+							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold mt-8"
 							disabled={
 								isRatingModal &&
 								// Verificar que todas las calificaciones estén completas
