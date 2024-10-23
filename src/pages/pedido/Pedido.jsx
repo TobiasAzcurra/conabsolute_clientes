@@ -416,15 +416,26 @@ const Pedido = () => {
 
 	const handleCadeteCall = async (cadete) => {
 		console.log("📞 Intentando llamar al cadete:", cadete);
-		const telefonoCadete = await getCadetePhone(cadete); // Pasar el nombre del cadete desde currentOrder
+		const telefonoCadete = await getCadetePhone(cadete);
 
 		if (telefonoCadete) {
 			console.log("📲 Teléfono del cadete encontrado:", telefonoCadete);
-			window.open(`tel:${telefonoCadete}`, "_self"); // Realizar la llamada si encontramos el teléfono
+			window.open(`tel:${telefonoCadete}`, "_self");
 		} else {
 			console.warn("⚠️ Cadete no encontrado");
-			alert("Cadete no encontrado"); // Mostrar un mensaje si no se encuentra el cadete
+			alert("Cadete no encontrado");
 		}
+	};
+
+	// Función para manejar el click en el botón de soporte
+	const handleSupportClick = () => {
+		const phoneNumber = "543584306832"; // Número formateado para WhatsApp (sin espacios, guiones ni "+")
+		const message =
+			"Hola! Mi pedido lleva más de 40 minutos de demora y aún no tiene cadete asignado.";
+		const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+			message
+		)}`;
+		window.open(whatsappUrl, "_blank");
 	};
 
 	// useEffect para detectar pedidos entregados y mostrar el modal de calificación automáticamente
@@ -437,8 +448,6 @@ const Pedido = () => {
 		if (orderToRate && !isRatingModalOpen) {
 			console.log("🔔 Pedido encontrado para calificar:", orderToRate.id);
 			handleRateClick(orderToRate.id);
-			// No añadimos el pedido a ratedOrders aquí
-			// Lo haremos después de que la calificación se haya enviado
 		}
 	}, [pedidosPagados, ratedOrders, isRatingModalOpen]);
 
@@ -500,36 +509,30 @@ const Pedido = () => {
 				{!loading && pedidosPagados.length > 0 && (
 					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
 						{pedidosPagados
-							// Filtrar pedidos que no han sido entregados o que aún no han sido calificados
 							.filter(
 								(currentOrder) =>
 									!currentOrder.entregado || !ratedOrders.has(currentOrder.id)
 							)
 							.map((currentOrder, index) => {
 								const retrasado = isDelayed(currentOrder);
-								console.log(
-									`📅 Pedido ID: ${currentOrder.id}, Retrasado: ${retrasado}`
-								);
+								const showSupportButton =
+									retrasado && currentOrder.cadete === "NO ASIGNADO";
 
 								return (
 									<div
 										key={currentOrder.id}
-										className={`flex items-center flex-col  w-full ${
+										className={`flex items-center flex-col w-full ${
 											index !== 0 ? "" : "mt-8"
 										} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 									>
-										{/* Título "Pedido {número}" solo si hay más de un pedido */}
 										{pedidosPagados.length > 1 && (
 											<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
 												Pedido {index + 1}
 											</h2>
 										)}
-										{/* Todo sobre el pedido */}
 										<div className="flex flex-col w-full">
-											{/* Barra de progreso */}
 											<div className="mb-10">
 												<div className="w-full flex flex-row gap-2 relative">
-													{/* Primer barra */}
 													<div
 														className={`w-1/4 h-2.5 rounded-full ${
 															!currentOrder.elaborado
@@ -538,7 +541,6 @@ const Pedido = () => {
 														}`}
 													></div>
 
-													{/* Segunda barra */}
 													<div
 														className={`w-1/4 h-2.5 rounded-full ${
 															currentOrder.elaborado &&
@@ -550,7 +552,6 @@ const Pedido = () => {
 														}`}
 													></div>
 
-													{/* Tercer barra */}
 													<div
 														className={`w-1/2 h-2.5 rounded-full ${
 															currentOrder.elaborado &&
@@ -578,7 +579,6 @@ const Pedido = () => {
 														: "Tu cadete está llegando a Anhelo..."}
 												</p>
 											</div>
-											{/* Info */}
 											<div className="flex flex-col text-left gap-2">
 												<div className="flex flex-row gap-2">
 													<svg
@@ -677,14 +677,29 @@ const Pedido = () => {
 														<LoadingPoints className="h-4 w-4" />
 													</div>
 												) : (
-													"Cancelar pedido"
+													<div className="bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300">
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															viewBox="0 0 24 24"
+															fill="currentColor"
+															className="h-5 mr-2"
+														>
+															<path
+																fill-rule="evenodd"
+																d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+																clip-rule="evenodd"
+															/>
+														</svg>
+														Cancelar pedido
+													</div>
 												)}
 											</div>
-											{/* Llamar cadete */}
-											{currentOrder.cadete !== "NO ASIGNADO" && (
+
+											{/* Botón condicional: Llamar cadete o Escribir a soporte */}
+											{showSupportButton ? (
 												<div
-													onClick={() => handleCadeteCall(currentOrder.cadete)} // Función existente
-													className={`bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300`}
+													onClick={handleSupportClick}
+													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300"
 												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
@@ -694,19 +709,42 @@ const Pedido = () => {
 													>
 														<path
 															fillRule="evenodd"
-															d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-4.72 4.72a.75.75 0 1 1-1.06-1.06l4.72-4.72h-2.69a.75.75 0 0 1-.75-.75Z"
-															clipRule="evenodd"
-														/>
-														<path
-															fillRule="evenodd"
-															d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
+															d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z"
 															clipRule="evenodd"
 														/>
 													</svg>
-													{retrasado ? "Llamar cadete" : "Llamar cadete"}
+													Escribir a soporte
 												</div>
+											) : (
+												currentOrder.cadete !== "NO ASIGNADO" && (
+													<div
+														onClick={() =>
+															handleCadeteCall(currentOrder.cadete)
+														}
+														className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300"
+													>
+														<svg
+															xmlns="http://www.w3.org/2000/svg"
+															viewBox="0 0 24 24"
+															fill="currentColor"
+															className="h-5 mr-2"
+														>
+															<path
+																fillRule="evenodd"
+																d="M15 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0V5.56l-4.72 4.72a.75.75 0 11-1.06-1.06l4.72-4.72h-2.69a.75.75 0 01-.75-.75z"
+																clipRule="evenodd"
+															/>
+															<path
+																fillRule="evenodd"
+																d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
+																clipRule="evenodd"
+															/>
+														</svg>
+														Llamar cadete
+													</div>
+												)
 											)}
-											{/* AppleModal dentro del map para cada pedido */}
+
 											<AppleModal
 												isOpen={
 													isRatingModalOpen &&
@@ -718,9 +756,8 @@ const Pedido = () => {
 												onConfirm={handleRateOrder}
 												isRatingModal={true}
 												orderProducts={selectedOrderProducts}
-												additionalProducts={additionalProducts} // Pasar productos adicionales
+												additionalProducts={additionalProducts}
 											>
-												{/* Añadir el mensaje deseado aquí */}
 												<p className="text-black font-bold text-center mb-4">
 													Buscamos mejorar constantemente, danos una
 													calificacion!
@@ -738,14 +775,13 @@ const Pedido = () => {
 					</div>
 				)}
 
-				{/* Loading */}
 				{!loading && pedidosPagados.length === 0 && (
 					<div className="flex flex-col items-center justify-center mt-4">
 						<p className="text-gray-700">No se encontraron pedidos para hoy.</p>
 					</div>
 				)}
 			</div>
-			{/* Modales */}
+
 			<div className="w-full">
 				<AppleModal
 					isOpen={isModalOpen}
