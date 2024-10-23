@@ -12,45 +12,33 @@ const AppleModal = ({
 	onConfirm,
 	isLoading,
 	isRatingModal,
-	currentRating,
-	setCurrentRating,
 	orderProducts,
 }) => {
-	const [feedback, setFeedback] = useState("");
-	const [showProductRatings, setShowProductRatings] = useState(false);
-	const [productRatings, setProductRatings] = useState({});
-	const [customNote, setCustomNote] = useState(""); // Estado para la nota personalizada
+	const [ratings, setRatings] = useState({
+		tiempo: 0,
+		temperatura: 0,
+		presentacion: 0,
+		pagina: 0,
+		burgers: 0,
+		papas: 0,
+		comentario: "",
+	});
 
 	useEffect(() => {
-		if (orderProducts && Array.isArray(orderProducts)) {
-			const initialRatings = {};
-			orderProducts.forEach((product, index) => {
-				initialRatings[index] = 0;
-			});
-			setProductRatings(initialRatings);
-		}
-	}, [orderProducts]);
-
-	useEffect(() => {
-		// Reset states when modal is opened
 		if (isOpen) {
-			setFeedback("");
-			setShowProductRatings(false);
-			setProductRatings({});
-			setCustomNote(""); // Resetear la nota personalizada
+			setRatings({
+				tiempo: 0,
+				temperatura: 0,
+				presentacion: 0,
+				pagina: 0,
+				burgers: 0,
+				papas: 0,
+				comentario: "",
+			});
 		}
 	}, [isOpen]);
 
 	if (!isOpen) return null;
-
-	const ratingDescriptions = [
-		"Buscamos mejorar constantemente. Danos una calificacion general:",
-		"Muy malo",
-		"Malo",
-		"Regular",
-		"Bueno",
-		"Excelente",
-	];
 
 	const StarRating = ({ rating, onRatingChange }) => {
 		return (
@@ -79,86 +67,17 @@ const AppleModal = ({
 		);
 	};
 
-	const FeedbackButtons = () => {
-		const options = [
-			"Tiempo y Temperatura",
-			"Sabor",
-			"Presentacion",
-			"Página",
-			"Otros",
-		];
-
-		return (
-			<div className="mt-6 ">
-				<p className="text-lg font-bold mb-2 text-center">
-					{currentRating >= 4 ? "¿Que salió bien?" : "¿Que salió mal?"}
-				</p>
-				<div className="flex justify-center gap-2 flex-wrap">
-					{options.map((option) => (
-						<button
-							key={option}
-							onClick={() => {
-								setFeedback(option);
-								setShowProductRatings(true); // Mostrar calificaciones de productos
-								if (option !== "Otros") {
-									setCustomNote(""); // Resetear la nota si no es "Otros"
-								}
-							}}
-							className={`px-4 h-10 rounded-full ${
-								feedback === option
-									? "bg-black text-white"
-									: "bg-gray-200 text-black"
-							}`}
-						>
-							{option}
-						</button>
-					))}
-				</div>
-				{feedback === "Otros" && (
-					<div className="mt-4">
-						<input
-							type="text"
-							value={customNote}
-							onChange={(e) => setCustomNote(e.target.value)}
-							placeholder="Escribi tu nota aca..."
-							className="w-full p-2 bg-gray-100 border-black border-2 rounded-3xl h-10 px-4"
-						/>
-					</div>
-				)}
-			</div>
-		);
-	};
-
-	const ProductRatings = () => {
-		if (!showProductRatings || !orderProducts || !Array.isArray(orderProducts))
-			return null;
-
-		return (
-			<div className="mt-6">
-				<p className="text-lg font-bold gfdstext-center">
-					Califica los productos
-				</p>
-				<div className="max-h-60 overflow-y-auto">
-					{orderProducts.map((product, index) => (
-						<div key={index} className="flex h-10 justify-between items-center">
-							<span className="text-black font-coolvetica">
-								{product.burger}
-							</span>
-							<StarRating
-								rating={productRatings[index] || 0}
-								onRatingChange={(rating) =>
-									setProductRatings((prev) => ({
-										...prev,
-										[index]: rating,
-									}))
-								}
-							/>
-						</div>
-					))}
-				</div>
-			</div>
-		);
-	};
+	const RatingSection = ({ category, label }) => (
+		<div className="mb-4">
+			<label className="block mb-2 font-bold">{label}:</label>
+			<StarRating
+				rating={ratings[category]}
+				onRatingChange={(value) =>
+					setRatings((prev) => ({ ...prev, [category]: value }))
+				}
+			/>
+		</div>
+	);
 
 	return ReactDOM.createPortal(
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
@@ -171,21 +90,29 @@ const AppleModal = ({
 				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
-						<>
-							<div className="mt-4">
-								<p className="text-lg leading-6 font-bold mb-2 text-center">
-									{ratingDescriptions[currentRating]}
-								</p>
-								<div className="flex justify-center space-x-2">
-									<StarRating
-										rating={currentRating}
-										onRatingChange={setCurrentRating}
-									/>
-								</div>
+						<div className="mt-4 space-y-4">
+							<RatingSection category="tiempo" label="Tiempo" />
+							<RatingSection category="temperatura" label="Temperatura" />
+							<RatingSection category="presentacion" label="Presentación" />
+							<RatingSection category="pagina" label="Página" />
+							<RatingSection category="burgers" label="Burgers" />
+							<RatingSection category="papas" label="Papas" />
+
+							<div className="mb-4">
+								<label className="block mb-2 font-bold">Comentario:</label>
+								<textarea
+									value={ratings.comentario}
+									onChange={(e) =>
+										setRatings((prev) => ({
+											...prev,
+											comentario: e.target.value,
+										}))
+									}
+									className="w-full p-2 bg-white border-2 border-black rounded-xl"
+									rows={4}
+								/>
 							</div>
-							{currentRating > 0 && <FeedbackButtons />}
-							<ProductRatings />
-						</>
+						</div>
 					)}
 				</div>
 
@@ -213,19 +140,17 @@ const AppleModal = ({
 						<button
 							onClick={() => {
 								if (isRatingModal) {
-									onConfirm({
-										rating: currentRating,
-										feedback,
-										productRatings,
-										note: customNote, // Incluir la nota personalizada si existe
-									});
+									onConfirm(ratings);
 								} else {
 									onClose();
 								}
 							}}
-							className="w-full h-20 text-2xl mt-6 bg-black text-gray-100 rounded-3xl font-bold"
+							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
 							disabled={
-								isRatingModal && (currentRating === 0 || feedback === "")
+								isRatingModal &&
+								Object.entries(ratings)
+									.filter(([key]) => key !== "comentario")
+									.some(([_, value]) => value === 0)
 							}
 						>
 							{isRatingModal ? "Enviar" : "Entendido"}
@@ -247,8 +172,6 @@ AppleModal.propTypes = {
 	onConfirm: PropTypes.func,
 	isLoading: PropTypes.bool,
 	isRatingModal: PropTypes.bool,
-	currentRating: PropTypes.number,
-	setCurrentRating: PropTypes.func,
 	orderProducts: PropTypes.array,
 };
 
@@ -258,8 +181,6 @@ AppleModal.defaultProps = {
 	onConfirm: () => {},
 	isLoading: false,
 	isRatingModal: false,
-	currentRating: 0,
-	setCurrentRating: () => {},
 	orderProducts: [],
 };
 
