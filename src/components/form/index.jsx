@@ -89,7 +89,6 @@ const FormCustom = ({ cart, total }) => {
 		}
 	};
 
-	// Función para manejar el cambio de un cupón
 	const handleCouponChange = (index, value, setFieldValue) => {
 		console.log(`Cambio en el cupón índice ${index}: ${value}`);
 		const updatedCoupons = [...couponCodes];
@@ -97,8 +96,26 @@ const FormCustom = ({ cart, total }) => {
 		setCouponCodes(updatedCoupons);
 		console.log("Cupones actualizados:", updatedCoupons);
 
-		// Llamar a la validación del cupón con los cupones actualizados
-		handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
+		const updatedVoucherStatus = [...voucherStatus];
+
+		if (value.length < 5) {
+			// Mostrar mensaje de error indicando que deben ser al menos 5 dígitos
+			updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
+			setVoucherStatus(updatedVoucherStatus);
+		} else if (value.length === 5) {
+			// Limpiar cualquier mensaje de error previo
+			updatedVoucherStatus[index] = "";
+			setVoucherStatus(updatedVoucherStatus);
+
+			// Validar el cupón cuando tiene exactamente 5 caracteres
+			handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
+			// No establecemos updatedVoucherStatus aquí para evitar sobrescribir el resultado de la validación
+		} else {
+			// Mostrar mensaje de error si el código es mayor a 5 caracteres
+			updatedVoucherStatus[index] =
+				"El código debe tener exactamente 5 caracteres.";
+			setVoucherStatus(updatedVoucherStatus);
+		}
 	};
 
 	// Función para validar la cantidad de hamburguesas necesarias
@@ -374,13 +391,12 @@ const FormCustom = ({ cart, total }) => {
 					submitForm,
 					isValid,
 				}) => {
-					// Agregar useEffect para revalidar cupones cuando cambia el carrito o los cupones
 					useEffect(() => {
 						console.log(
 							"Revalidando cupones debido a cambios en el carrito o en los cupones"
 						);
 						couponCodes.forEach((code, index) => {
-							if (code.trim() !== "") {
+							if (code.trim().length === 5) {
 								handleVoucherValidation(
 									index,
 									code,
@@ -388,6 +404,7 @@ const FormCustom = ({ cart, total }) => {
 									setFieldValue
 								);
 							}
+							// No limpiar el estado de validación aquí
 						});
 					}, [cart, couponCodes, setFieldValue]);
 
