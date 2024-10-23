@@ -41,6 +41,88 @@ const Pedido = () => {
 	// Estado para rastrear pedidos ya calificados
 	const [ratedOrders, setRatedOrders] = useState(new Set());
 
+	// Definir containerRef utilizando useRef
+	const containerRef = useRef(null);
+
+	// Función para convertir una cadena "DD/MM/YYYY" y "HH:MM" en un objeto Date
+	const getOrderDateTime = (fechaStr, horaStr) => {
+		// Validar formato de 'fechaStr' y 'horaStr'
+		const fechaValida = /^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr);
+		const horaValida = /^\d{2}:\d{2}$/.test(horaStr);
+
+		if (!fechaValida || !horaValida) {
+			console.warn(
+				`⚠️ Formato inválido para 'fecha' o 'hora': Fecha - ${fechaStr}, Hora - ${horaStr}`
+			);
+			return null;
+		}
+
+		// Separar día, mes y año
+		const [dia, mes, anio] = fechaStr.split("/").map(Number);
+		const [horas, minutos] = horaStr.split(":").map(Number);
+
+		// Crear el objeto Date (mes - 1 porque los meses en JavaScript van de 0 a 11)
+		const orderDateTime = new Date(anio, mes - 1, dia, horas, minutos, 0, 0);
+
+		// Verificar si la fecha es válida
+		if (isNaN(orderDateTime)) {
+			console.warn(
+				`⚠️ Objeto Date inválido creado con: Fecha - ${fechaStr}, Hora - ${horaStr}`
+			);
+			return null;
+		}
+
+		return orderDateTime;
+	};
+
+	// Función para determinar si un pedido está retrasado más de 40 minutos
+	const isDelayed = (order) => {
+		const { fecha, hora } = order;
+		let { entregado } = order;
+
+		// Log de las propiedades relevantes del pedido
+		console.log(`📦 Verificando Pedido ID: ${order.id}`);
+		console.log(`   Fecha: ${fecha}`);
+		console.log(`   Hora: ${hora}`);
+		console.log(`   Entregado: ${entregado}`);
+
+		// Asignar valor predeterminado si 'entregado' es undefined
+		if (entregado === undefined) {
+			entregado = false; // O el valor que consideres apropiado
+			console.warn(
+				`⚠️ Pedido ID: ${order.id} no tiene 'entregado' definido. Asignando valor predeterminado: false.`
+			);
+		}
+
+		// Verificar que las propiedades existen
+		if (!fecha || !hora) {
+			console.warn(`⚠️ Pedido ID: ${order.id} carece de 'fecha' o 'hora'.`);
+			return false;
+		}
+
+		// Convertir 'fecha' y 'hora' a objeto Date
+		const orderDateTime = getOrderDateTime(fecha, hora);
+		if (!orderDateTime || isNaN(orderDateTime)) {
+			console.warn(
+				`⚠️ Pedido ID: ${order.id} tiene 'fecha' u 'hora' inválidas.`
+			);
+			return false;
+		}
+
+		const currentTime = new Date();
+		const diffMs = currentTime - orderDateTime;
+		const diffMinutes = diffMs / (1000 * 60);
+
+		// Log de la demora calculada
+		console.log(`   Demora calculada: ${diffMinutes.toFixed(2)} minutos`);
+
+		// Determinar si está retrasado
+		const retrasado = diffMinutes > 40 && !entregado;
+		console.log(`   Retrasado: ${retrasado}`);
+
+		return retrasado;
+	};
+
 	const handleRateOrder = async (ratings) => {
 		console.log("📥 Ratings received:", ratings);
 		if (!selectedOrderId) {
@@ -127,8 +209,7 @@ const Pedido = () => {
 		const minutos = parseInt(minutoStr, 10);
 
 		const fecha = new Date();
-		fecha.setHours(horas);
-		fecha.setMinutes(minutos);
+		fecha.setHours(horas, minutos, 0, 0);
 		fecha.setMinutes(fecha.getMinutes() + minutosASumar);
 
 		const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
@@ -205,7 +286,6 @@ const Pedido = () => {
 		};
 	}, [orderId, location.state, phoneNumber]);
 
-	const containerRef = useRef(null);
 	const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
 	useEffect(() => {
@@ -369,28 +449,28 @@ const Pedido = () => {
 		>
 			<style>
 				{`
-              @keyframes loadingBar {
-                  0% {
-                      background-position: -200px 0;
+                  @keyframes loadingBar {
+                      0% {
+                          background-position: -200px 0;
+                      }
+                      100% {
+                          background-position: 200px 0;
+                      }
                   }
-                  100% {
-                      background-position: 200px 0;
-                  }
-              }
 
-              .animated-loading {
-                  background: linear-gradient(
-                      to right,
-                      #000 0%,
-                      #000 40%,
-                      #555 100%,
-                      #000 60%,
-                      #000 100%
-                  );
-                  background-size: 400% 100%;
-                  animation: loadingBar 5s linear infinite;
-              }
-            `}
+                  .animated-loading {
+                      background: linear-gradient(
+                          to right,
+                          #000 0%,
+                          #000 40%,
+                          #555 100%,
+                          #000 60%,
+                          #000 100%
+                      );
+                      background-size: 400% 100%;
+                      animation: loadingBar 5s linear infinite;
+                  }
+                `}
 			</style>
 
 			<StickerCanvas
@@ -425,258 +505,236 @@ const Pedido = () => {
 								(currentOrder) =>
 									!currentOrder.entregado || !ratedOrders.has(currentOrder.id)
 							)
-							.map((currentOrder, index) => (
-								<div
-									key={currentOrder.id}
-									className={`flex items-center flex-col  w-full ${
-										index !== 0 ? "" : "mt-8"
-									} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
-								>
-									{/* Título "Pedido {número}" solo si hay más de un pedido */}
-									{pedidosPagados.length > 1 && (
-										<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
-											Pedido {index + 1}
-										</h2>
-									)}
-									{/* Todo sobre el pedido */}
-									<div className="flex flex-col w-full">
-										{/* Barra de progreso */}
-										<div className="mb-10">
-											<div className="w-full flex flex-row gap-2 relative">
-												{/* Primer barra */}
-												<div
-													className={`w-1/4 h-2.5 rounded-full ${
-														!currentOrder.elaborado
-															? "animated-loading"
-															: "bg-black"
-													}`}
-												></div>
+							.map((currentOrder, index) => {
+								const retrasado = isDelayed(currentOrder);
+								console.log(
+									`📅 Pedido ID: ${currentOrder.id}, Retrasado: ${retrasado}`
+								);
 
-												{/* Segunda barra */}
-												<div
-													className={`w-1/4 h-2.5 rounded-full ${
-														currentOrder.elaborado &&
-														currentOrder.cadete === "NO ASIGNADO"
-															? "animated-loading"
-															: currentOrder.elaborado
-															? "bg-black"
-															: "bg-gray-100 border-opacity-20 border-black border-1 border"
-													}`}
-												></div>
+								return (
+									<div
+										key={currentOrder.id}
+										className={`flex items-center flex-col  w-full ${
+											index !== 0 ? "" : "mt-8"
+										} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
+									>
+										{/* Título "Pedido {número}" solo si hay más de un pedido */}
+										{pedidosPagados.length > 1 && (
+											<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
+												Pedido {index + 1}
+											</h2>
+										)}
+										{/* Todo sobre el pedido */}
+										<div className="flex flex-col w-full">
+											{/* Barra de progreso */}
+											<div className="mb-10">
+												<div className="w-full flex flex-row gap-2 relative">
+													{/* Primer barra */}
+													<div
+														className={`w-1/4 h-2.5 rounded-full ${
+															!currentOrder.elaborado
+																? "animated-loading"
+																: "bg-black"
+														}`}
+													></div>
 
-												{/* Tercer barra */}
-												<div
-													className={`w-1/2 h-2.5 rounded-full ${
-														currentOrder.elaborado &&
-														currentOrder.cadete !== "NO ASIGNADO"
-															? "animated-loading"
-															: "bg-gray-100 border-opacity-20 border-black border-1 border"
-													}`}
-												></div>
+													{/* Segunda barra */}
+													<div
+														className={`w-1/4 h-2.5 rounded-full ${
+															currentOrder.elaborado &&
+															currentOrder.cadete === "NO ASIGNADO"
+																? "animated-loading"
+																: currentOrder.elaborado
+																? "bg-black"
+																: "bg-gray-100 border-opacity-20 border-black border-1 border"
+														}`}
+													></div>
 
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6 absolute right-2 bottom-4"
-												>
-													<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-													<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-												</svg>
-											</div>
-											<p className="text-black font-coolvetica font-bold text-left mt-2">
-												{!currentOrder.elaborado
-													? "Anhelo está preparando tu pedido..."
-													: currentOrder.cadete !== "NO ASIGNADO"
-													? "En camino... Atención, te va a llamar tu cadete."
-													: "Tu cadete está llegando a Anhelo..."}
-											</p>
-										</div>
-										{/* Info */}
-										<div className="flex flex-col text-left gap-2">
-											<div className="flex flex-row gap-2">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6"
-												>
-													<path
-														fillRule="evenodd"
-														d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-														clipRule="evenodd"
-													/>
-												</svg>
-												<p className="text-black font-coolvetica font-medium">
-													Entrega estimada:{" "}
-													{sumarMinutos(currentOrder.hora, 30)} a{" "}
-													{sumarMinutos(currentOrder.hora, 50)}
-												</p>
-											</div>
-											<div className="flex flex-row gap-2">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6"
-												>
-													<path
-														d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-														clipRule="evenodd"
-													/>
-												</svg>
-												<p className="text-black font-coolvetica font-medium">
-													Envío a cargo de:{" "}
-													{currentOrder.cadete !== "NO ASIGNADO"
-														? currentOrder.cadete.charAt(0).toUpperCase() +
-														  currentOrder.cadete.slice(1).toLowerCase()
-														: "Aún sin asignar."}
-												</p>
-											</div>
-											<div className="flex flex-row gap-2">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6"
-												>
-													<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-													<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-												</svg>
-												<p
-													className="text-black font-coolvetica font-medium cursor-pointer"
-													onClick={() => setShowFullAddress(!showFullAddress)}
-												>
-													Destino:{" "}
-													{showFullAddress
-														? currentOrder.direccion || "No disponible"
-														: (currentOrder.direccion?.split(",")[0].trim() ||
-																"No disponible") + "..."}
-												</p>
-											</div>
-											<div className="flex flex-row gap-2">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6"
-												>
-													<path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-													<path
-														fillRule="evenodd"
-														d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-														clipRule="evenodd"
-													/>
-													<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-												</svg>
-												<p className="text-black font-coolvetica font-medium">
-													Total: ${currentOrder.total || "0.00"}
-												</p>
-											</div>
-										</div>
-									</div>
-									{/* Botones */}
-									<div className="w-full">
-										{/* Cancelar pedido */}
-										<div
-											onClick={() => handleCancelClick(currentOrder.id)}
-											className={`${
-												isDeleting
-													? "opacity-50 cursor-not-allowed"
-													: "cursor-pointer"
-											} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
-										>
-											{isDeleting ? (
-												<div className="flex items-center justify-center space-x-2">
-													<LoadingPoints className="h-4 w-4" />
+													{/* Tercer barra */}
+													<div
+														className={`w-1/2 h-2.5 rounded-full ${
+															currentOrder.elaborado &&
+															currentOrder.cadete !== "NO ASIGNADO"
+																? "animated-loading"
+																: "bg-gray-100 border-opacity-20 border-black border-1 border"
+														}`}
+													></div>
+
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-6 absolute right-2 bottom-4"
+													>
+														<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+														<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+													</svg>
 												</div>
-											) : (
-												"Cancelar pedido"
+												<p className="text-black font-coolvetica font-bold text-left mt-2">
+													{!currentOrder.elaborado
+														? "Anhelo está preparando tu pedido..."
+														: currentOrder.cadete !== "NO ASIGNADO"
+														? "En camino... Atención, te va a llamar tu cadete."
+														: "Tu cadete está llegando a Anhelo..."}
+												</p>
+											</div>
+											{/* Info */}
+											<div className="flex flex-col text-left gap-2">
+												<div className="flex flex-row gap-2">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-6"
+													>
+														<path
+															fillRule="evenodd"
+															d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													<p className="text-black font-coolvetica font-medium">
+														Entrega estimada:{" "}
+														{sumarMinutos(currentOrder.hora, 30)} a{" "}
+														{sumarMinutos(currentOrder.hora, 50)}
+													</p>
+												</div>
+												<div className="flex flex-row gap-2">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-6"
+													>
+														<path
+															d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													<p className="text-black font-coolvetica font-medium">
+														Envío a cargo de:{" "}
+														{currentOrder.cadete !== "NO ASIGNADO"
+															? currentOrder.cadete.charAt(0).toUpperCase() +
+															  currentOrder.cadete.slice(1).toLowerCase()
+															: "Aún sin asignar."}
+													</p>
+												</div>
+												<div className="flex flex-row gap-2">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-6"
+													>
+														<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+														<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+													</svg>
+													<p
+														className="text-black font-coolvetica font-medium cursor-pointer"
+														onClick={() => setShowFullAddress(!showFullAddress)}
+													>
+														Destino:{" "}
+														{showFullAddress
+															? currentOrder.direccion || "No disponible"
+															: (currentOrder.direccion?.split(",")[0].trim() ||
+																	"No disponible") + "..."}
+													</p>
+												</div>
+												<div className="flex flex-row gap-2">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-6"
+													>
+														<path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+														<path
+															fillRule="evenodd"
+															d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
+															clipRule="evenodd"
+														/>
+														<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
+													</svg>
+													<p className="text-black font-coolvetica font-medium">
+														Total: ${currentOrder.total || "0.00"}
+													</p>
+												</div>
+											</div>
+										</div>
+										{/* Botones */}
+										<div className="w-full">
+											{/* Cancelar pedido */}
+											<div
+												onClick={() => handleCancelClick(currentOrder.id)}
+												className={`${
+													isDeleting
+														? "opacity-50 cursor-not-allowed"
+														: "cursor-pointer"
+												} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold`}
+											>
+												{isDeleting ? (
+													<div className="flex items-center justify-center space-x-2">
+														<LoadingPoints className="h-4 w-4" />
+													</div>
+												) : (
+													"Cancelar pedido"
+												)}
+											</div>
+											{/* Llamar cadete */}
+											{currentOrder.cadete !== "NO ASIGNADO" && (
+												<div
+													onClick={() => handleCadeteCall(currentOrder.cadete)} // Función existente
+													className={`bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300`}
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
+														fill="currentColor"
+														className="h-5 mr-2"
+													>
+														<path
+															fillRule="evenodd"
+															d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-4.72 4.72a.75.75 0 1 1-1.06-1.06l4.72-4.72h-2.69a.75.75 0 0 1-.75-.75Z"
+															clipRule="evenodd"
+														/>
+														<path
+															fillRule="evenodd"
+															d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
+															clipRule="evenodd"
+														/>
+													</svg>
+													{retrasado ? "Llamar cadete" : "Llamar cadete"}
+												</div>
+											)}
+											{/* AppleModal dentro del map para cada pedido */}
+											<AppleModal
+												isOpen={
+													isRatingModalOpen &&
+													selectedOrderId === currentOrder.id
+												}
+												onClose={() => setIsRatingModalOpen(false)}
+												title="¡Recibiste tu pedido!"
+												twoOptions={false}
+												onConfirm={handleRateOrder}
+												isRatingModal={true}
+												orderProducts={selectedOrderProducts}
+												additionalProducts={additionalProducts} // Pasar productos adicionales
+											>
+												{/* Añadir el mensaje deseado aquí */}
+												<p className="text-black font-bold text-center mb-4">
+													Buscamos mejorar constantemente, danos una
+													calificacion!
+												</p>
+												{error && <p className="text-red-600 mt-2">{error}</p>}
+											</AppleModal>
+
+											{index < pedidosPagados.length - 1 && (
+												<div className="w-full h-px bg-black opacity-20 mt-8"></div>
 											)}
 										</div>
-										{/* Llamar cadete */}
-										{currentOrder.cadete !== "NO ASIGNADO" && (
-											<div
-												onClick={() => handleCadeteCall(currentOrder.cadete)} // Cambiar a la funcionalidad de llamada
-												className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer"
-											>
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-5 mr-2"
-												>
-													<path
-														fillRule="evenodd"
-														d="M15 3.75a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0V5.56l-4.72 4.72a.75.75 0 1 1-1.06-1.06l4.72-4.72h-2.69a.75.75 0 0 1-.75-.75Z"
-														clipRule="evenodd"
-													/>
-													<path
-														fillRule="evenodd"
-														d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
-														clipRule="evenodd"
-													/>
-												</svg>
-												Llamar cadete
-											</div>
-										)}
-										{/* Calificar pedido (Eliminado) */}
-										{/* <div
-                                            onClick={() => handleRateClick(currentOrder.id)}
-                                            className="bg-gray-300 w-full text-black font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-4 font-bold cursor-pointer"
-                                        >
-                                            {orderRatings[currentOrder.id]
-                                                ? `Tu calificación: ${
-                                                      // Mostrar calificación promedio o específica
-                                                      // Por simplicidad, mostrar una calificación general
-                                                      Object.keys(orderRatings[currentOrder.id])
-                                                          .filter(
-                                                              (key) =>
-                                                                  key !== "tiempo" &&
-                                                                  key !== "temperatura" &&
-                                                                  key !== "presentacion" &&
-                                                                  key !== "pagina" &&
-                                                                  key !== "comentario"
-                                                          )
-                                                          .map((key) => orderRatings[currentOrder.id][key])
-                                                          .reduce((a, b) => a + b, 0) /
-                                                      Object.keys(orderRatings[currentOrder.id]).filter(
-                                                          (key) =>
-                                                              key !== "tiempo" &&
-                                                              key !== "temperatura" &&
-                                                              key !== "presentacion" &&
-                                                              key !== "pagina" &&
-                                                              key !== "comentario"
-                                                      ).length
-                                                  } estrellas`
-                                                : "Calificar pedido"}
-                                        </div> */}
-										{/* AppleModal dentro del map para cada pedido */}
-										<AppleModal
-											isOpen={
-												isRatingModalOpen && selectedOrderId === currentOrder.id
-											}
-											onClose={() => setIsRatingModalOpen(false)}
-											title="¡Recibiste tu pedido!"
-											twoOptions={false}
-											onConfirm={handleRateOrder}
-											isRatingModal={true}
-											orderProducts={selectedOrderProducts}
-											additionalProducts={additionalProducts} // Pasar productos adicionales
-										>
-											{/* Añadir el mensaje deseado aquí */}
-											<p className="text-black font-bold text-center mb-4">
-												Buscamos mejorar constantemente, danos una calificacion!
-											</p>
-											{error && <p className="text-red-600 mt-2">{error}</p>}
-										</AppleModal>
-
-										{index < pedidosPagados.length - 1 && (
-											<div className="w-full h-px bg-black opacity-20 mt-8"></div>
-										)}
 									</div>
-								</div>
-							))}
+								);
+							})}
 					</div>
 				)}
 
