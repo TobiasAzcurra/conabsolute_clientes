@@ -258,20 +258,70 @@ const Pedido = () => {
 
 	const handleRateClick = (orderId) => {
 		const order = pedidosPagados.find((pedido) => pedido.id === orderId);
-		setSelectedOrderProducts(order.detallePedido || []); // Asumiendo que cada pedido tiene una propiedad 'detallePedido'
-		console.log("⭐ Selected order products for rating:", order.detallePedido);
+		if (!order) {
+			console.error("Pedido no encontrado:", orderId);
+			return;
+		}
+
+		setSelectedOrderProducts(order.detallePedido || []);
 		setSelectedOrderId(orderId);
 
-		// Determinar si se debe incluir "Papas Anhelo ®" en las calificaciones
-		const incluyePapasAnhelo = order.detallePedido.some(
-			(producto) => !producto.burger.startsWith("Satisfyer")
-		);
+		// Definir los prefijos excluyentes y requeridos
+		const excludedPrefixes = [
+			"Satisfyer",
+			"Coca",
+			"Fanta",
+			"Sprite",
+			"Papas Con",
+			"Pote",
+		];
+		const requiredPrefixes = [
+			"simple",
+			"doble",
+			"triple",
+			"cuadruple",
+			"crispy",
+			"anhelo",
+			"bcn",
+			"bbq",
+			"mario",
+			"easter",
+		];
 
-		if (incluyePapasAnhelo) {
-			setAdditionalProducts(["Papas Anhelo ®"]);
+		// Determinar si se debe incluir "Papas Anhelo ®"
+		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
+			const nombreLimpio = producto.burger.trim().toLowerCase();
+			// Verificar si empieza con algún prefijo requerido
+			if (
+				requiredPrefixes.some((prefix) =>
+					nombreLimpio.startsWith(prefix.toLowerCase())
+				)
+			) {
+				return true;
+			}
+			// Si no, verificar si no empieza con ningún prefijo excluyente
+			return !excludedPrefixes.some((prefix) =>
+				nombreLimpio.startsWith(prefix.toLowerCase())
+			);
+		});
+
+		if (shouldIncludePapasAnhelo) {
+			setAdditionalProducts((prevProducts) => {
+				// Evitar duplicados y comprobar si "Papas Anhelo ®" ya está en orderProducts
+				const isAlreadyInOrder = order.detallePedido.some(
+					(producto) =>
+						producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
+				);
+				if (!isAlreadyInOrder && !prevProducts.includes("Papas Anhelo ®")) {
+					return [...prevProducts, "Papas Anhelo ®"];
+				}
+				return prevProducts;
+			});
 			console.log("📌 Se incluirá 'Papas Anhelo ®' en las calificaciones.");
 		} else {
-			setAdditionalProducts([]);
+			setAdditionalProducts((prevProducts) =>
+				prevProducts.filter((product) => product !== "Papas Anhelo ®")
+			);
 			console.log("📌 No se incluirá 'Papas Anhelo ®' en las calificaciones.");
 		}
 
@@ -298,28 +348,28 @@ const Pedido = () => {
 		>
 			<style>
 				{`
-          @keyframes loadingBar {
-              0% {
-                  background-position: -200px 0;
+              @keyframes loadingBar {
+                  0% {
+                      background-position: -200px 0;
+                  }
+                  100% {
+                      background-position: 200px 0;
+                  }
               }
-              100% {
-                  background-position: 200px 0;
-              }
-          }
 
-          .animated-loading {
-              background: linear-gradient(
-                  to right,
-                  #000 0%,
-                  #000 40%,
-                  #555 100%,
-                  #000 60%,
-                  #000 100%
-              );
-              background-size: 400% 100%;
-              animation: loadingBar 5s linear infinite;
-          }
-        `}
+              .animated-loading {
+                  background: linear-gradient(
+                      to right,
+                      #000 0%,
+                      #000 40%,
+                      #555 100%,
+                      #000 60%,
+                      #000 100%
+                  );
+                  background-size: 400% 100%;
+                  animation: loadingBar 5s linear infinite;
+              }
+            `}
 			</style>
 
 			<StickerCanvas
