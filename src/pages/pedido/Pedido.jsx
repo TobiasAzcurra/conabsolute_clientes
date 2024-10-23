@@ -636,6 +636,10 @@ const Pedido = () => {
 										orderProducts={selectedOrderProducts}
 										additionalProducts={additionalProducts} // Pasar productos adicionales
 									>
+										{/* Añadir el mensaje deseado aquí */}
+										<p className="text-black font-bold text-center mb-4">
+											Buscamos mejorar constantemente, danos una calificacion!
+										</p>
 										{error && <p className="text-red-600 mt-2">{error}</p>}
 									</AppleModal>
 
