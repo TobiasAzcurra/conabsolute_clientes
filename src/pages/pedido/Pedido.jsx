@@ -38,7 +38,6 @@ const Pedido = () => {
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
-	const [ratedOrders, setRatedOrders] = useState(new Set());
 	const containerRef = useRef(null);
 
 	useEffect(() => {
@@ -46,7 +45,6 @@ const Pedido = () => {
 			orderId,
 			phoneNumber,
 			hasBeenRated,
-			ratedOrders: Array.from(ratedOrders),
 		});
 	}, []);
 
@@ -227,12 +225,14 @@ const Pedido = () => {
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
 			console.log("✅ Calificación actualizada exitosamente.");
 
-			setOrderRatings((prevRatings) => ({
-				...prevRatings,
-				[selectedOrderId]: ratings,
-			}));
-
-			setRatedOrders((prev) => new Set(prev).add(selectedOrderId));
+			// Actualiza el pedido en el estado local para reflejar la nueva calificación
+			setPedidosPagados((prevPedidos) =>
+				prevPedidos.map((pedido) =>
+					pedido.id === selectedOrderId
+						? { ...pedido, rating: ratings }
+						: pedido
+				)
+			);
 
 			setMessage("¡Gracias por calificar tu pedido!");
 			setIsRatingModalOpen(false);
@@ -300,7 +300,7 @@ const Pedido = () => {
 							"🔔 Pedido entregado y listo para calificar:",
 							pedido.id
 						);
-						setSelectedOrderProducts(pedido.detallePedido || []); // Corrección aquí
+						setSelectedOrderProducts(pedido.detallePedido || []);
 						setSelectedOrderId(pedido.id);
 						setIsRatingModalOpen(true);
 					}
@@ -494,16 +494,15 @@ const Pedido = () => {
 	useEffect(() => {
 		console.log("👀 Verificando pedidos para calificación automática:", {
 			totalPedidosPagados: pedidosPagados.length,
-			pedidosYaCalificados: ratedOrders.size,
 			modalAbierto: isRatingModalOpen,
 		});
 
 		const orderToRate = pedidosPagados.find((order) => {
-			const shouldRate = order.tiempoEntregado && !ratedOrders.has(order.id);
+			const shouldRate = order.tiempoEntregado && !order.rating;
 			console.log("🔍 Evaluando pedido:", {
 				id: order.id,
 				tiempoEntregado: order.tiempoEntregado,
-				yaCalificado: ratedOrders.has(order.id),
+				tieneRating: !!order.rating,
 				debeCalificar: shouldRate,
 			});
 			return shouldRate;
@@ -516,7 +515,7 @@ const Pedido = () => {
 			);
 			handleRateClick(orderToRate.id);
 		}
-	}, [pedidosPagados, ratedOrders, isRatingModalOpen]);
+	}, [pedidosPagados, isRatingModalOpen]);
 
 	return (
 		<div
@@ -578,7 +577,7 @@ const Pedido = () => {
 						{pedidosPagados
 							.filter(
 								(currentOrder) =>
-									!currentOrder.entregado || !ratedOrders.has(currentOrder.id)
+									!currentOrder.entregado || !currentOrder.rating
 							)
 							.map((currentOrder, index) => {
 								const retrasado = isDelayed(currentOrder);
