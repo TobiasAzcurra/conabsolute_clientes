@@ -68,8 +68,8 @@ const AppleModal = ({
 	};
 
 	const RatingSection = ({ category, label }) => (
-		<div className="mb-4">
-			<label className="block mb-2 font-bold">{label}:</label>
+		<div className=" flex flex-row gap-2 items-center justify-center">
+			<label className="block  font-bold">{label}:</label>
 			<StarRating
 				rating={ratings[category]}
 				onRatingChange={(value) =>
