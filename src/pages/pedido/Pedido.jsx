@@ -36,6 +36,7 @@ const Pedido = () => {
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
+	const [additionalProducts, setAdditionalProducts] = useState([]); // Nuevas
 
 	const handleRateOrder = async (ratings) => {
 		console.log("📥 Ratings received:", ratings);
@@ -46,6 +47,7 @@ const Pedido = () => {
 
 		console.log("🔍 Selected Order ID:", selectedOrderId);
 		console.log("📦 Selected Order Products:", selectedOrderProducts);
+		console.log("📦 Additional Products to Rate:", additionalProducts);
 
 		setMessage(null);
 		setError(null);
@@ -108,6 +110,7 @@ const Pedido = () => {
 			setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
 		} finally {
 			setSelectedOrderId(null);
+			setAdditionalProducts([]); // Limpiar productos adicionales
 		}
 	};
 
@@ -258,6 +261,20 @@ const Pedido = () => {
 		setSelectedOrderProducts(order.detallePedido || []); // Asumiendo que cada pedido tiene una propiedad 'detallePedido'
 		console.log("⭐ Selected order products for rating:", order.detallePedido);
 		setSelectedOrderId(orderId);
+
+		// Determinar si se debe incluir "Papas Anhelo ®" en las calificaciones
+		const incluyePapasAnhelo = order.detallePedido.some(
+			(producto) => !producto.burger.startsWith("Satisfyer")
+		);
+
+		if (incluyePapasAnhelo) {
+			setAdditionalProducts(["Papas Anhelo ®"]);
+			console.log("📌 Se incluirá 'Papas Anhelo ®' en las calificaciones.");
+		} else {
+			setAdditionalProducts([]);
+			console.log("📌 No se incluirá 'Papas Anhelo ®' en las calificaciones.");
+		}
+
 		setIsRatingModalOpen(true);
 	};
 
@@ -532,8 +549,28 @@ const Pedido = () => {
 									>
 										{orderRatings[currentOrder.id]
 											? `Tu calificación: ${
-													orderRatings[currentOrder.id].burgers
-											  } estrellas` // Ajusta según lo que quieras mostrar
+													// Mostrar calificación promedio o específica
+													// Por simplicidad, mostrar una calificación general
+													Object.keys(orderRatings[currentOrder.id])
+														.filter(
+															(key) =>
+																key !== "tiempo" &&
+																key !== "temperatura" &&
+																key !== "presentacion" &&
+																key !== "pagina" &&
+																key !== "comentario"
+														)
+														.map((key) => orderRatings[currentOrder.id][key])
+														.reduce((a, b) => a + b, 0) /
+													Object.keys(orderRatings[currentOrder.id]).filter(
+														(key) =>
+															key !== "tiempo" &&
+															key !== "temperatura" &&
+															key !== "presentacion" &&
+															key !== "pagina" &&
+															key !== "comentario"
+													).length
+											  } estrellas`
 											: "Calificar pedido"}
 									</div>
 									{/* AppleModal dentro del map para cada pedido */}
@@ -547,6 +584,7 @@ const Pedido = () => {
 										onConfirm={handleRateOrder}
 										isRatingModal={true}
 										orderProducts={selectedOrderProducts}
+										additionalProducts={additionalProducts} // Pasar productos adicionales
 									>
 										{error && <p className="text-red-600 mt-2">{error}</p>}
 									</AppleModal>

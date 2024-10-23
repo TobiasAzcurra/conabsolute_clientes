@@ -14,6 +14,7 @@ const AppleModal = ({
 	isLoading,
 	isRatingModal,
 	orderProducts, // Array de productos en el pedido
+	additionalProducts, // Array de productos adicionales a calificar
 }) => {
 	const [ratings, setRatings] = useState({
 		tiempo: 0,
@@ -25,11 +26,20 @@ const AppleModal = ({
 
 	useEffect(() => {
 		if (isOpen) {
-			// Inicializar las calificaciones para cada producto
-			const initialProductRatings = orderProducts.reduce((acc, product) => {
+			// Inicializar las calificaciones para cada producto del pedido
+			const initialOrderRatings = orderProducts.reduce((acc, product) => {
 				acc[product.burger] = 0; // Usamos el nombre del producto como clave
 				return acc;
 			}, {});
+
+			// Inicializar las calificaciones para productos adicionales
+			const initialAdditionalRatings = additionalProducts.reduce(
+				(acc, product) => {
+					acc[product] = 0; // Usamos el nombre del producto como clave
+					return acc;
+				},
+				{}
+			);
 
 			setRatings({
 				tiempo: 0,
@@ -37,10 +47,11 @@ const AppleModal = ({
 				presentacion: 0,
 				pagina: 0,
 				comentario: "",
-				...initialProductRatings,
+				...initialOrderRatings,
+				...initialAdditionalRatings,
 			});
 		}
-	}, [isOpen, orderProducts]);
+	}, [isOpen, orderProducts, additionalProducts]);
 
 	if (!isOpen) return null;
 
@@ -113,11 +124,19 @@ const AppleModal = ({
 							<RatingSection category="presentacion" label="Presentación" />
 							<RatingSection category="pagina" label="Página" />
 
-							{/* Secciones de Calificación por Producto */}
+							{/* Secciones de Calificación por Producto del Pedido */}
 							{orderProducts.map((product, index) => (
 								<ProductRatingSection
 									key={index}
 									productName={product.burger}
+								/>
+							))}
+
+							{/* Secciones de Calificación para Productos Adicionales */}
+							{additionalProducts.map((product, index) => (
+								<ProductRatingSection
+									key={`additional-${index}`}
+									productName={product}
 								/>
 							))}
 
@@ -172,8 +191,10 @@ const AppleModal = ({
 							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
 							disabled={
 								isRatingModal &&
-								// Verificar que todas las calificaciones de productos estén completas
-								orderProducts.some((product) => ratings[product.burger] === 0)
+								// Verificar que todas las calificaciones estén completas
+								Object.entries(ratings)
+									.filter(([key]) => key !== "comentario")
+									.some(([_, value]) => value === 0)
 							}
 						>
 							{isRatingModal ? "Enviar" : "Entendido"}
@@ -196,6 +217,7 @@ AppleModal.propTypes = {
 	isLoading: PropTypes.bool,
 	isRatingModal: PropTypes.bool,
 	orderProducts: PropTypes.array,
+	additionalProducts: PropTypes.array,
 };
 
 AppleModal.defaultProps = {
@@ -205,6 +227,7 @@ AppleModal.defaultProps = {
 	isLoading: false,
 	isRatingModal: false,
 	orderProducts: [],
+	additionalProducts: [],
 };
 
 export default AppleModal;
