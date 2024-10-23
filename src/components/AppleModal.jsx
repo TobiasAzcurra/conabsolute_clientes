@@ -83,8 +83,8 @@ const AppleModal = ({
 	};
 
 	const RatingSection = ({ label, category }) => (
-		<div className="flex flex-col gap-2">
-			<label className="block font-bold">{label}:</label>
+		<div className="flex flex-row justify-center items-center gap-2">
+			<label className="font-bold">{label}:</label>
 			<StarRating
 				rating={ratings[category]}
 				onRatingChange={(value) =>
@@ -95,7 +95,7 @@ const AppleModal = ({
 	);
 
 	const ProductRatingSection = ({ productName }) => (
-		<div className="flex flex-col gap-2">
+		<div className="flex flex-row justify-center items-center gap-2">
 			<label className="block font-bold">{productName}:</label>
 			<StarRating
 				rating={ratings[productName]}
@@ -117,7 +117,7 @@ const AppleModal = ({
 				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
-						<div className="mt-4 space-y-4">
+						<div className="mt-4 space-y-2">
 							{/* Secciones de Calificación Generales */}
 							<RatingSection category="tiempo" label="Tiempo" />
 							<RatingSection category="temperatura" label="Temperatura" />
