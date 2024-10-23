@@ -31,96 +31,116 @@ const Pedido = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedOrderId, setSelectedOrderId] = useState(null);
 	const [isDeleting, setIsDeleting] = useState(false);
+	const [currentTime, setCurrentTime] = useState(new Date());
 
 	// Estado para el modal de calificación
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
-	const [additionalProducts, setAdditionalProducts] = useState([]); // Nuevas
-
-	// Estado para rastrear pedidos ya calificados
+	const [additionalProducts, setAdditionalProducts] = useState([]);
 	const [ratedOrders, setRatedOrders] = useState(new Set());
-
-	// Definir containerRef utilizando useRef
 	const containerRef = useRef(null);
 
-	// Función para convertir una cadena "DD/MM/YYYY" y "HH:MM" en un objeto Date
+	// Agregar useEffect para el cronómetro
+	useEffect(() => {
+		console.log("🕒 Iniciando cronómetro...");
+		const timer = setInterval(() => {
+			const newTime = new Date();
+			console.log("⏱️ Actualizando tiempo:", newTime.toLocaleTimeString());
+			setCurrentTime(newTime);
+		}, 60000); // Actualizar cada minuto
+
+		return () => {
+			console.log("🛑 Limpiando cronómetro");
+			clearInterval(timer);
+		};
+	}, []);
+
 	const getOrderDateTime = (fechaStr, horaStr) => {
-		// Validar formato de 'fechaStr' y 'horaStr'
+		if (!fechaStr || !horaStr) {
+			console.log("⚠️ Fecha u hora faltante:", { fechaStr, horaStr });
+			return null;
+		}
+
 		const fechaValida = /^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr);
 		const horaValida = /^\d{2}:\d{2}$/.test(horaStr);
 
 		if (!fechaValida || !horaValida) {
 			console.warn(
-				`⚠️ Formato inválido para 'fecha' o 'hora': Fecha - ${fechaStr}, Hora - ${horaStr}`
+				`⚠️ Formato inválido: Fecha - ${fechaStr}, Hora - ${horaStr}`
 			);
 			return null;
 		}
 
-		// Separar día, mes y año
 		const [dia, mes, anio] = fechaStr.split("/").map(Number);
 		const [horas, minutos] = horaStr.split(":").map(Number);
 
-		// Crear el objeto Date (mes - 1 porque los meses en JavaScript van de 0 a 11)
 		const orderDateTime = new Date(anio, mes - 1, dia, horas, minutos, 0, 0);
 
-		// Verificar si la fecha es válida
 		if (isNaN(orderDateTime)) {
-			console.warn(
-				`⚠️ Objeto Date inválido creado con: Fecha - ${fechaStr}, Hora - ${horaStr}`
-			);
+			console.warn(`⚠️ Fecha inválida: Fecha - ${fechaStr}, Hora - ${horaStr}`);
 			return null;
 		}
 
+		console.log("📅 Fecha del pedido creada:", orderDateTime.toLocaleString());
 		return orderDateTime;
 	};
 
-	// Función para determinar si un pedido está retrasado más de 40 minutos
 	const isDelayed = (order) => {
 		const { fecha, hora } = order;
 		let { entregado } = order;
 
-		// Log de las propiedades relevantes del pedido
-		console.log(`📦 Verificando Pedido ID: ${order.id}`);
-		console.log(`   Fecha: ${fecha}`);
-		console.log(`   Hora: ${hora}`);
-		console.log(`   Entregado: ${entregado}`);
+		console.log("🔍 Verificando demora para pedido:", order.id);
+		console.log("📅 Fecha pedido:", fecha);
+		console.log("🕒 Hora pedido:", hora);
+		console.log("✅ Entregado:", entregado);
 
-		// Asignar valor predeterminado si 'entregado' es undefined
-		if (entregado === undefined) {
-			entregado = false; // O el valor que consideres apropiado
-			console.warn(
-				`⚠️ Pedido ID: ${order.id} no tiene 'entregado' definido. Asignando valor predeterminado: false.`
-			);
-		}
-
-		// Verificar que las propiedades existen
 		if (!fecha || !hora) {
-			console.warn(`⚠️ Pedido ID: ${order.id} carece de 'fecha' o 'hora'.`);
+			console.warn(`⚠️ Pedido ${order.id}: falta fecha u hora`);
 			return false;
 		}
 
-		// Convertir 'fecha' y 'hora' a objeto Date
-		const orderDateTime = getOrderDateTime(fecha, hora);
-		if (!orderDateTime || isNaN(orderDateTime)) {
+		if (entregado === undefined) {
+			entregado = false;
 			console.warn(
-				`⚠️ Pedido ID: ${order.id} tiene 'fecha' u 'hora' inválidas.`
+				`⚠️ Pedido ${order.id}: entregado undefined, asignando false`
 			);
+		}
+
+		const orderDateTime = getOrderDateTime(fecha, hora);
+		if (!orderDateTime) {
+			console.warn(`⚠️ Pedido ${order.id}: fecha/hora inválida`);
 			return false;
 		}
 
-		const currentTime = new Date();
 		const diffMs = currentTime - orderDateTime;
 		const diffMinutes = diffMs / (1000 * 60);
 
-		// Log de la demora calculada
-		console.log(`   Demora calculada: ${diffMinutes.toFixed(2)} minutos`);
+		console.log(`⏱️ Minutos de demora: ${diffMinutes.toFixed(2)}`);
 
-		// Determinar si está retrasado
 		const retrasado = diffMinutes > 40 && !entregado;
-		console.log(`   Retrasado: ${retrasado}`);
+		console.log(`🚨 Pedido retrasado: ${retrasado}`);
 
 		return retrasado;
+	};
+
+	// Función para obtener el tiempo de demora actual
+	const getDelayTime = (order) => {
+		const { fecha, hora } = order;
+		const orderDateTime = getOrderDateTime(fecha, hora);
+
+		if (!orderDateTime) {
+			console.log(
+				"⚠️ No se pudo calcular el tiempo de demora - fecha/hora inválida"
+			);
+			return null;
+		}
+
+		const diffMs = currentTime - orderDateTime;
+		const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+		console.log(`⏱️ Tiempo de demora calculado: ${diffMinutes} minutos`);
+		return diffMinutes;
 	};
 
 	const handleRateOrder = async (ratings) => {
@@ -144,7 +164,6 @@ const Pedido = () => {
 				presentacion,
 				pagina,
 				comentario,
-				// Las calificaciones de los productos se almacenan dinámicamente
 				...productRatings
 			} = ratings;
 
@@ -157,7 +176,6 @@ const Pedido = () => {
 				productRatings,
 			});
 
-			// Obtener el pedido seleccionado de pedidosPagados
 			const currentOrder = pedidosPagados.find(
 				(order) => order.id === selectedOrderId
 			);
@@ -182,13 +200,11 @@ const Pedido = () => {
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
 			console.log("✅ Calificación actualizada exitosamente.");
 
-			// Actualizar el estado local
 			setOrderRatings((prevRatings) => ({
 				...prevRatings,
-				[selectedOrderId]: ratings, // Guarda el objeto completo
+				[selectedOrderId]: ratings,
 			}));
 
-			// Añadir el pedido a ratedOrders después de calificar
 			setRatedOrders((prev) => new Set(prev).add(selectedOrderId));
 
 			setMessage("¡Gracias por calificar tu pedido!");
@@ -198,7 +214,7 @@ const Pedido = () => {
 			setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
 		} finally {
 			setSelectedOrderId(null);
-			setAdditionalProducts([]); // Limpiar productos adicionales
+			setAdditionalProducts([]);
 		}
 	};
 
@@ -352,7 +368,6 @@ const Pedido = () => {
 		setSelectedOrderProducts(order.detallePedido || []);
 		setSelectedOrderId(orderId);
 
-		// Definir los prefijos excluyentes y requeridos
 		const excludedPrefixes = [
 			"Satisfyer",
 			"Coca",
@@ -374,10 +389,8 @@ const Pedido = () => {
 			"easter",
 		];
 
-		// Determinar si se debe incluir "Papas Anhelo ®"
 		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
 			const nombreLimpio = producto.burger.trim().toLowerCase();
-			// Verificar si empieza con algún prefijo requerido
 			if (
 				requiredPrefixes.some((prefix) =>
 					nombreLimpio.startsWith(prefix.toLowerCase())
@@ -385,7 +398,6 @@ const Pedido = () => {
 			) {
 				return true;
 			}
-			// Si no, verificar si no empieza con ningún prefijo excluyente
 			return !excludedPrefixes.some((prefix) =>
 				nombreLimpio.startsWith(prefix.toLowerCase())
 			);
@@ -393,7 +405,6 @@ const Pedido = () => {
 
 		if (shouldIncludePapasAnhelo) {
 			setAdditionalProducts((prevProducts) => {
-				// Evitar duplicados y comprobar si "Papas Anhelo ®" ya está en orderProducts
 				const isAlreadyInOrder = order.detallePedido.some(
 					(producto) =>
 						producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
@@ -427,9 +438,8 @@ const Pedido = () => {
 		}
 	};
 
-	// Función para manejar el click en el botón de soporte
 	const handleSupportClick = () => {
-		const phoneNumber = "543584306832"; // Número formateado para WhatsApp (sin espacios, guiones ni "+")
+		const phoneNumber = "543584306832";
 		const message =
 			"Hola! Mi pedido lleva más de 40 minutos de demora y aún no tiene cadete asignado.";
 		const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
@@ -438,9 +448,7 @@ const Pedido = () => {
 		window.open(whatsappUrl, "_blank");
 	};
 
-	// useEffect para detectar pedidos entregados y mostrar el modal de calificación automáticamente
 	useEffect(() => {
-		// Encontrar el primer pedido con tiempoEntregado y no calificado
 		const orderToRate = pedidosPagados.find(
 			(order) => order.tiempoEntregado && !ratedOrders.has(order.id)
 		);
@@ -515,6 +523,7 @@ const Pedido = () => {
 							)
 							.map((currentOrder, index) => {
 								const retrasado = isDelayed(currentOrder);
+								const delayMinutes = getDelayTime(currentOrder);
 								const showSupportButton =
 									retrasado && currentOrder.cadete === "NO ASIGNADO";
 
@@ -579,6 +588,7 @@ const Pedido = () => {
 														: "Tu cadete está llegando a Anhelo..."}
 												</p>
 											</div>
+
 											<div className="flex flex-col text-left gap-2">
 												<div className="flex flex-row gap-2">
 													<svg
@@ -650,7 +660,7 @@ const Pedido = () => {
 														<path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
 														<path
 															fillRule="evenodd"
-															d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
+															d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 17.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
 															clipRule="evenodd"
 														/>
 														<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
@@ -661,13 +671,12 @@ const Pedido = () => {
 												</div>
 											</div>
 										</div>
-										{/* Botones */}
+
 										<div className="w-full">
-											{/* Botón condicional: Llamar cadete o Escribir a soporte */}
 											{showSupportButton ? (
 												<div
 													onClick={handleSupportClick}
-													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12  font-bold cursor-pointer transition-colors duration-300"
+													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold cursor-pointer transition-colors duration-300"
 												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
@@ -689,7 +698,7 @@ const Pedido = () => {
 														onClick={() =>
 															handleCadeteCall(currentOrder.cadete)
 														}
-														className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12  font-bold cursor-pointer transition-colors duration-300"
+														className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-12 font-bold cursor-pointer transition-colors duration-300"
 													>
 														<svg
 															xmlns="http://www.w3.org/2000/svg"
@@ -712,7 +721,7 @@ const Pedido = () => {
 													</div>
 												)
 											)}
-											{/* Cancelar pedido */}
+
 											<div
 												onClick={() => handleCancelClick(currentOrder.id)}
 												className={`${
@@ -734,40 +743,20 @@ const Pedido = () => {
 															className="h-5 mr-2"
 														>
 															<path
-																fill-rule="evenodd"
+																fillRule="evenodd"
 																d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-																clip-rule="evenodd"
+																clipRule="evenodd"
 															/>
 														</svg>
 														Cancelar pedido
 													</div>
 												)}
 											</div>
-
-											<AppleModal
-												isOpen={
-													isRatingModalOpen &&
-													selectedOrderId === currentOrder.id
-												}
-												onClose={() => setIsRatingModalOpen(false)}
-												title="¡Recibiste tu pedido!"
-												twoOptions={false}
-												onConfirm={handleRateOrder}
-												isRatingModal={true}
-												orderProducts={selectedOrderProducts}
-												additionalProducts={additionalProducts}
-											>
-												<p className="text-black font-bold text-center mb-4">
-													Buscamos mejorar constantemente, danos una
-													calificacion!
-												</p>
-												{error && <p className="text-red-600 mt-2">{error}</p>}
-											</AppleModal>
-
-											{index < pedidosPagados.length - 1 && (
-												<div className="w-full h-px bg-black opacity-20 mt-8"></div>
-											)}
 										</div>
+
+										{index < pedidosPagados.length - 1 && (
+											<div className="w-full h-px bg-black opacity-20 mt-8"></div>
+										)}
 									</div>
 								);
 							})}
