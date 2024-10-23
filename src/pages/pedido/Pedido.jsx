@@ -56,18 +56,18 @@ const Pedido = () => {
 				temperatura,
 				presentacion,
 				pagina,
-				burgers,
-				papas,
 				comentario,
+				// Las calificaciones de los productos se almacenan dinámicamente
+				...productRatings
 			} = ratings;
+
 			console.log("📝 Desglose de calificaciones:", {
 				tiempo,
 				temperatura,
 				presentacion,
 				pagina,
-				burgers,
-				papas,
 				comentario,
+				productRatings,
 			});
 
 			// Obtener el pedido seleccionado de pedidosPagados
@@ -98,7 +98,7 @@ const Pedido = () => {
 			// Actualizar el estado local
 			setOrderRatings((prevRatings) => ({
 				...prevRatings,
-				[selectedOrderId]: ratings, // Puedes optar por guardar el objeto completo o un resumen
+				[selectedOrderId]: ratings, // Guarda el objeto completo
 			}));
 
 			setMessage("¡Gracias por calificar tu pedido!");
@@ -580,7 +580,6 @@ const Pedido = () => {
 					<p>¿Estás seguro de que deseas cancelar este pedido?</p>
 					{error && <p className="text-red-600 mt-2">{error}</p>}
 				</AppleModal>
-				{/* AppleModal para Calificación ya está dentro del map */}
 			</div>
 		</div>
 	);

@@ -97,8 +97,7 @@ export const ReadData = async () => {
 //   temperatura: number,
 //   presentacion: number,
 //   pagina: number,
-//   burgers: number,
-//   papas: number,
+//   [productoNombre: string]: number, // Calificaciones por producto
 //   comentario?: string, // Comentario opcional
 // }
 
@@ -132,12 +131,7 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 					return {
 						...pedido,
 						rating: {
-							tiempo: rating.tiempo,
-							temperatura: rating.temperatura,
-							presentacion: rating.presentacion,
-							pagina: rating.pagina,
-							burgers: rating.burgers,
-							papas: rating.papas,
+							...rating, // Incluye tanto las calificaciones generales como las de productos
 							comentario: rating.comentario || "", // Comentario opcional
 						},
 					};

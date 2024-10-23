@@ -1,3 +1,4 @@
+// AppleModal.jsx
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
@@ -12,31 +13,34 @@ const AppleModal = ({
 	onConfirm,
 	isLoading,
 	isRatingModal,
-	orderProducts,
+	orderProducts, // Array de productos en el pedido
 }) => {
 	const [ratings, setRatings] = useState({
 		tiempo: 0,
 		temperatura: 0,
 		presentacion: 0,
 		pagina: 0,
-		burgers: 0,
-		papas: 0,
 		comentario: "",
 	});
 
 	useEffect(() => {
 		if (isOpen) {
+			// Inicializar las calificaciones para cada producto
+			const initialProductRatings = orderProducts.reduce((acc, product) => {
+				acc[product.burger] = 0; // Usamos el nombre del producto como clave
+				return acc;
+			}, {});
+
 			setRatings({
 				tiempo: 0,
 				temperatura: 0,
 				presentacion: 0,
 				pagina: 0,
-				burgers: 0,
-				papas: 0,
 				comentario: "",
+				...initialProductRatings,
 			});
 		}
-	}, [isOpen]);
+	}, [isOpen, orderProducts]);
 
 	if (!isOpen) return null;
 
@@ -67,13 +71,25 @@ const AppleModal = ({
 		);
 	};
 
-	const RatingSection = ({ category, label }) => (
-		<div className=" flex flex-row gap-2 items-center justify-center">
-			<label className="block  font-bold">{label}:</label>
+	const RatingSection = ({ label, category }) => (
+		<div className="flex flex-col gap-2">
+			<label className="block font-bold">{label}:</label>
 			<StarRating
 				rating={ratings[category]}
 				onRatingChange={(value) =>
 					setRatings((prev) => ({ ...prev, [category]: value }))
+				}
+			/>
+		</div>
+	);
+
+	const ProductRatingSection = ({ productName }) => (
+		<div className="flex flex-col gap-2">
+			<label className="block font-bold">{productName}:</label>
+			<StarRating
+				rating={ratings[productName]}
+				onRatingChange={(value) =>
+					setRatings((prev) => ({ ...prev, [productName]: value }))
 				}
 			/>
 		</div>
@@ -91,13 +107,21 @@ const AppleModal = ({
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
 						<div className="mt-4 space-y-4">
+							{/* Secciones de Calificación Generales */}
 							<RatingSection category="tiempo" label="Tiempo" />
 							<RatingSection category="temperatura" label="Temperatura" />
 							<RatingSection category="presentacion" label="Presentación" />
 							<RatingSection category="pagina" label="Página" />
-							<RatingSection category="burgers" label="Burgers" />
-							<RatingSection category="papas" label="Papas" />
 
+							{/* Secciones de Calificación por Producto */}
+							{orderProducts.map((product, index) => (
+								<ProductRatingSection
+									key={index}
+									productName={product.burger}
+								/>
+							))}
+
+							{/* Comentario */}
 							<div className="mb-4">
 								<label className="block mb-2 font-bold">Comentario:</label>
 								<textarea
@@ -148,9 +172,8 @@ const AppleModal = ({
 							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold"
 							disabled={
 								isRatingModal &&
-								Object.entries(ratings)
-									.filter(([key]) => key !== "comentario")
-									.some(([_, value]) => value === 0)
+								// Verificar que todas las calificaciones de productos estén completas
+								orderProducts.some((product) => ratings[product.burger] === 0)
 							}
 						>
 							{isRatingModal ? "Enviar" : "Entendido"}
