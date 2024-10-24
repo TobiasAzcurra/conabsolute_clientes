@@ -88,8 +88,24 @@ const FormCustom = ({ cart, total }) => {
 	// Función para procesar el pedido
 	const processPedido = async (values, isReserva) => {
 		let adjustedHora = values.hora;
+
+		// Si es una reserva, ajusta la hora restando 30 minutos
 		if (isReserva) {
 			adjustedHora = adjustHora(values.hora);
+		}
+
+		// Si estamos en alta demanda, ajusta la hora sumando los minutos de demora
+		if (altaDemanda?.isHighDemand && pendingValues) {
+			const delayMinutes = altaDemanda.delayMinutes || 0;
+			const currentTime = new Date();
+			currentTime.setMinutes(currentTime.getMinutes() + delayMinutes);
+
+			const adjustedHours = currentTime.getHours().toString().padStart(2, "0");
+			const adjustedMinutes = currentTime
+				.getMinutes()
+				.toString()
+				.padStart(2, "0");
+			adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
 		}
 
 		const updatedValues = { ...values, hora: adjustedHora };
@@ -132,6 +148,7 @@ const FormCustom = ({ cart, total }) => {
 			setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
 			setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
 		} else {
+			// Opcional: Mostrar un mensaje o manejar el caso cuando se alcanza el máximo de cupones
 		}
 	};
 
@@ -171,6 +188,7 @@ const FormCustom = ({ cart, total }) => {
 		const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
 		const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
 		const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
+		// Asegúrate de actualizar los estados correspondientes si es necesario
 	};
 
 	useEffect(() => {
@@ -197,6 +215,7 @@ const FormCustom = ({ cart, total }) => {
 			setDescuento(newDescuento);
 			setDiscountedTotal(total - newDescuento);
 		} else {
+			// Opcional: Manejar el caso cuando no hay cupones inválidos
 		}
 	}, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
 
@@ -353,22 +372,22 @@ const FormCustom = ({ cart, total }) => {
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style>{`
-				.custom-select {
-					appearance: none;
-					-webkit-appearance: none;
-					-moz-appearance: none;
-					background: transparent;
-					padding: 0;
-					width: 100%;
-					height: 40px;
-					border: none;
-					outline: none;
-					font-size: 16px;
-				}
-				.custom-select::placeholder {
-					color: rgba(0, 0, 0, 0.5);
-				}
-			`}</style>
+                .custom-select {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    background: transparent;
+                    padding: 0;
+                    width: 100%;
+                    height: 40px;
+                    border: none;
+                    outline: none;
+                    font-size: 16px;
+                }
+                .custom-select::placeholder {
+                    color: rgba(0, 0, 0, 0.5);
+                }
+            `}</style>
 			<Formik
 				initialValues={{
 					subTotal: discountedTotal,
@@ -385,16 +404,20 @@ const FormCustom = ({ cart, total }) => {
 				}}
 				validationSchema={formValidations}
 				onSubmit={async (values) => {
-					// Verificar alta demanda antes de otras validaciones
-					if (altaDemanda?.isHighDemand) {
+					// Determinar si el pedido es una reserva
+					const isReserva = values.hora.trim() !== "";
+
+					// Solo verificar alta demanda si NO es una reserva
+					if (!isReserva && altaDemanda?.isHighDemand) {
 						setPendingValues(values);
 						setShowHighDemandModal(true);
 						return;
 					}
 
-					// Verificar si es una reserva
-					const isReserva = values.hora.trim() !== "";
+					// Verificar si es una reserva y proceder sin el modal de alta demanda
+					// (Opcional: Puedes manejar alguna lógica adicional aquí si es necesario)
 
+					// Verificar restricciones de horario antes de procesar el pedido
 					if (isWithinClosedDays()) {
 						openTimeRestrictedModal(); // Abrir el modal personalizado
 						return; // No proceder si es lunes, martes o miércoles
@@ -410,6 +433,9 @@ const FormCustom = ({ cart, total }) => {
 
 					if (values.paymentMethod === "efectivo") {
 						await processPedido(values, isReserva);
+					} else if (values.paymentMethod === "mercadopago") {
+						// Manejar el pago con Mercado Pago aquí si es necesario
+						// Por ejemplo, podrías llamar a un método para procesar el pago
 					}
 				}}
 			>
