@@ -171,7 +171,8 @@ const AppleModal = ({
 								}`}
 								disabled={isLoading}
 							>
-								{isLoading ? <LoadingPoints className="h-6 w-6" /> : "Sí"}
+								<LoadingPoints color="text-gray-100" />
+								{isLoading ? <LoadingPoints /> : "Sí"}
 							</button>
 
 							<button
