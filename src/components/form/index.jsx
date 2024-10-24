@@ -101,10 +101,26 @@ const FormCustom = ({ cart, total }) => {
       setVoucherStatus(updatedVoucherStatus);
     }
   };
+
+  // Nueva función para manejar la eliminación de cupones excedentes
+  const removeExcessCoupons = (maxCoupons) => {
+    // Asegurarse de que siempre haya al menos un campo de cupón
+    const adjustedMaxCoupons = Math.max(maxCoupons, 1);
+
+    const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
+    const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
+    const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
+
+    // Removed the part that adds a new coupon field if less than maxCoupons
+  };
+
   useEffect(() => {
     let hasInvalidVoucher = false;
     let invalidCount = 0;
     // Recorre el voucherStatus
+
+    console.log(voucherStatus);
+    console.log(couponCodes);
     voucherStatus.forEach((v, index) => {
       // Si el voucher no es "¡Código válido!" o está vacío, es inválido
       if (v !== '¡Código válido!') {
@@ -123,7 +139,7 @@ const FormCustom = ({ cart, total }) => {
       setDiscountedTotal(total - newDescuento);
     } else {
     }
-  }, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total]);
+  }, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
 
   // Función para validar la cantidad de hamburguesas necesarias
   function validarCantidadDeBurgers(cart, numCoupons) {
@@ -261,24 +277,6 @@ const FormCustom = ({ cart, total }) => {
     return totalBurgers;
   };
 
-  // Nueva función para manejar la eliminación de cupones excedentes
-  const removeExcessCoupons = (maxCoupons) => {
-    // Asegurarse de que siempre haya al menos un campo de cupón
-    const adjustedMaxCoupons = Math.max(maxCoupons, 1);
-
-    if (couponCodes.length > adjustedMaxCoupons) {
-      const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
-      const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
-      const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
-
-      setCouponCodes(newCouponCodes);
-      setVoucherStatus(newVoucherStatus);
-      setIsValidating(newIsValidating);
-    }
-
-    // Removed the part that adds a new coupon field if less than maxCoupons
-  };
-
   // Función para ajustar la hora restando 30 minutos
   const adjustHora = (hora) => {
     const [hours, minutes] = hora.split(':').map(Number);
@@ -402,11 +400,11 @@ const FormCustom = ({ cart, total }) => {
 
           // Nuevo useEffect para manejar la cantidad de cupones basada en la cantidad de hamburguesas
           useEffect(() => {
-            const totalBurgers = getTotalBurgers();
-            const maxCoupons = Math.floor(totalBurgers / 2);
-
-            // Eliminar cupones excedentes si es necesario
-            removeExcessCoupons(maxCoupons);
+            setCouponCodes(['']);
+            setVoucherStatus(['']);
+            setIsValidating([false]);
+            setDescuento(0);
+            setDescuentoForOneUnit(0);
           }, [cart]);
 
           // Agregar logs para cambios en el carrito si se modifica dentro de este componente
