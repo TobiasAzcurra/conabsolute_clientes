@@ -36,6 +36,7 @@ const Pedido = () => {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+	const [isRatingLoading, setIsRatingLoading] = useState(false); // Nuevo estado para cargar
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
@@ -183,6 +184,7 @@ const Pedido = () => {
 
 		setMessage(null);
 		setError(null);
+		setIsRatingLoading(true); // Iniciar estado de carga
 
 		try {
 			const {
@@ -242,6 +244,7 @@ const Pedido = () => {
 			console.error("❌ Error al enviar la calificación:", err);
 			setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
 		} finally {
+			setIsRatingLoading(false); // Finalizar estado de carga
 			setSelectedOrderId(null);
 			setAdditionalProducts([]);
 		}
@@ -851,9 +854,11 @@ const Pedido = () => {
 					onClose={() => setIsRatingModalOpen(false)}
 					title="¡Califica tu pedido!"
 					isRatingModal={true}
+					color="text-gray-100"
 					orderProducts={selectedOrderProducts}
 					additionalProducts={additionalProducts}
 					onConfirm={handleRateOrder}
+					isLoading={isRatingLoading} // Pasar el estado de carga
 				>
 					<p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
 				</AppleModal>

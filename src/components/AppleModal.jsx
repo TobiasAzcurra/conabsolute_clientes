@@ -114,7 +114,7 @@ const AppleModal = ({
 						{title}
 					</h2>
 				)}
-				<div className="w-full px-4 max-h-[80vh] ">
+				<div className="w-full px-4 max-h-[80vh] overflow-y-auto">
 					<div className="text-black mt-2 text-center">{children}</div>
 					{isRatingModal && (
 						<div className="mt-8 space-y-2">
@@ -141,9 +141,9 @@ const AppleModal = ({
 							))}
 
 							{/* Comentario */}
-							<div className=" w-full">
+							<div className="w-full">
 								<p className="flex w-full mb-2 items-center justify-center text-center font-bold">
-									Algun comentario:
+									¿Algún comentario?
 								</p>
 								<textarea
 									value={ratings.comentario}
@@ -190,7 +190,7 @@ const AppleModal = ({
 									onClose();
 								}
 							}}
-							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold mt-8"
+							className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold mt-8 flex items-center justify-center"
 							disabled={
 								isRatingModal &&
 								// Verificar que todas las calificaciones estén completas
@@ -199,7 +199,15 @@ const AppleModal = ({
 									.some(([_, value]) => value === 0)
 							}
 						>
-							{isRatingModal ? "Enviar" : "Entendido"}
+							{isRatingModal ? (
+								isLoading ? (
+									<LoadingPoints className="h-6 w-6" />
+								) : (
+									"Enviar"
+								)
+							) : (
+								"Entendido"
+							)}
 						</button>
 					)}
 				</div>
