@@ -260,8 +260,11 @@ const Pedido = () => {
 
 		try {
 			await deleteOrder(selectedOrderId);
-			console.log("✅ Pedido cancelado exitosamente:", selectedOrderId);
-			setMessage("Pedido cancelado exitosamente.");
+			console.log(
+				"✅ El pedido seleccionado fue cancelado exitosamente:",
+				selectedOrderId
+			);
+			setMessage("El pedido seleccionado fue cancelado exitosamente.");
 
 			if (orderId) {
 				setOrder(null);
