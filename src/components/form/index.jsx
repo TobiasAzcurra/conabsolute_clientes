@@ -34,6 +34,7 @@ const FormCustom = ({ cart, total }) => {
 
   const [couponCodes, setCouponCodes] = useState(['']); // Inicializado con un campo vacío
   const [descuento, setDescuento] = useState(0);
+  const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
   const [voucherStatus, setVoucherStatus] = useState(['']);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
@@ -102,20 +103,24 @@ const FormCustom = ({ cart, total }) => {
   };
   useEffect(() => {
     let hasInvalidVoucher = false;
-
+    let invalidCount = 0;
     // Recorre el voucherStatus
     voucherStatus.forEach((v, index) => {
       // Si el voucher no es "¡Código válido!" o está vacío, es inválido
-      if (v !== '¡Código válido!' && v !== '') {
+      if (v !== '¡Código válido!') {
         hasInvalidVoucher = true;
       } else {
+        invalidCount++;
+        return;
       }
     });
-
     // Si algún cupón no es válido, quitar el descuento
     if (hasInvalidVoucher && descuento !== 0) {
-      setDescuento(0);
-      setDiscountedTotal(total);
+      console.log('descuentoForOneUnit', descuentoForOneUnit);
+      const newDescuento = descuentoForOneUnit * invalidCount;
+      console.log('NUEVO DESCUENTO', newDescuento);
+      setDescuento(newDescuento);
+      setDiscountedTotal(total - newDescuento);
     } else {
     }
   }, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total]);
@@ -193,6 +198,9 @@ const FormCustom = ({ cart, total }) => {
           numCoupons
         );
 
+        if (descuentoForOneUnit === 0) {
+          setDescuentoForOneUnit(totalDescuento);
+        }
         setDiscountedTotal(newTotal);
         setDescuento(totalDescuento); // Establece el descuento total si hay cupones válidos
         updatedVoucherStatus[index] = '¡Código válido!';
@@ -377,8 +385,10 @@ const FormCustom = ({ cart, total }) => {
         }) => {
           useEffect(() => {
             couponCodes.forEach((code, index) => {
-              if (code.trim().length === 5) {
-                console.log('first');
+              if (
+                code.trim().length === 5 &&
+                voucherStatus[index] !== '¡Código válido!'
+              ) {
                 handleVoucherValidation(
                   index,
                   code,
