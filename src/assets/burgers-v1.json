@@ -1,119 +1,128 @@
 [
-	{
-		"name": "Simple Chessburger",
-		"description": "Smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 5900,
-		"id": "TIS213231",
-		"type": "originals",
-		"img": "simple.png",
-		"category": "burger"
-	},
-	{
-		"name": "Doble Cheeseburger",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 7190,
-		"id": "TASD4444",
-		"type": "originals",
-		"img": "doble.png",
-		"category": "burger"
-	},
-	{
-		"name": "Triple Cheeseburger",
-		"description": "Triple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8470,
-		"id": "ASD134212",
-		"type": "originals",
-		"img": "triple.png",
-		"category": "burger"
-	},
-	{
-		"name": "Cuadruple Cheeseburger",
-		"description": "Cuadruple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 9750,
-		"id": "GFDYH3245",
-		"type": "originals",
-		"img": "cuadruple.png",
-		"category": "burger"
-	},
-	{
-		"name": "Crispy BCN",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla crispy, bacon y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8130,
-		"id": "35135ASFA",
-		"type": "our",
-		"img": "crispy.png",
-		"category": "burger"
-	},
-	{
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"name": "ANHELO Classic",
-		"price": 8410,
-		"id": "JUYTTR32",
-		"type": "our",
-		"img": "classic.png",
-		"category": "burger"
-	},
-	{
-		"name": "BCN Cheeseburger",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8120,
-		"id": "SADA231424",
-		"type": "our",
-		"img": "baconCheeseburger.png",
-		"category": "burger"
-	},
-	{
-		"name": "BBQ BCN Cheeseburger",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, cebolla caramelizada y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8130,
-		"id": "GERCV45",
-		"type": "our",
-		"img": "bbqBcnCheeseburger.png",
-		"category": "burger"
-	},
-	{
-		"name": "Easter Egg",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8420,
-		"id": "154525FAS",
-		"type": "our",
-		"img": "easterEgg.png",
-		"category": "burger"
-	},
-	{
-		"name": "Mario Inspired",
-		"description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla caramelizada y salsa de champiñones envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 8200,
-		"id": "151A2A5ASFAS",
-		"type": "our",
-		"img": "marioInspired.png",
-		"category": "burger"
-	},
-	{
-		"name": "Satisfyer Easter Egg",
-		"description": "Smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 3220,
-		"id": "151ASaFAS",
-		"type": "satisfyer",
-		"img": "satisfyerEasterEgg.png",
-		"category": "burger"
-	},
-	{
-		"name": "Satisfyer BCN Cheeseburger",
-		"description": "Smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 3000,
-		"id": "151A5ASzFAS",
-		"type": "satisfyer",
-		"img": "satisfyerBcnCheeseburger.png",
-		"category": "burger"
-	},
-	{
-		"name": "Satisfyer ANHELO Classic",
-		"description": "Smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 3200,
-		"id": "151AcSFAS",
-		"type": "satisfyer",
-		"img": "satisfyerClassic.png",
-		"category": "burger"
-	}
+  {
+    "name": "Simple Chessburger",
+    "description": "Smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 6870,
+    "id": "TIS213231",
+    "type": "originals",
+    "img": "simple.png",
+    "category": "burger"
+  },
+  {
+    "name": "Doble Cheeseburger",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 8370,
+    "id": "TASD4444",
+    "type": "originals",
+    "img": "doble.png",
+    "category": "burger"
+  },
+  {
+    "name": "Triple Cheeseburger",
+    "description": "Triple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9860,
+    "id": "ASD134212",
+    "type": "originals",
+    "img": "triple.png",
+    "category": "burger"
+  },
+  {
+    "name": "Cuadruple Cheeseburger",
+    "description": "Cuadruple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 11360,
+    "id": "GFDYH3245",
+    "type": "originals",
+    "img": "cuadruple.png",
+    "category": "burger"
+  },
+  {
+    "name": "Crispy BCN",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla crispy, bacon y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9470,
+    "id": "35135ASFA",
+    "type": "our",
+    "img": "crispy.png",
+    "category": "burger"
+  },
+  {
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "name": "ANHELO Classic",
+    "price": 9790,
+    "id": "JUYTTR32",
+    "type": "our",
+    "img": "classic.png",
+    "category": "burger"
+  },
+  {
+    "name": "BCN Cheeseburger",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9460,
+    "id": "SADA231424",
+    "type": "our",
+    "img": "baconCheeseburger.png",
+    "category": "burger"
+  },
+  {
+    "name": "BBQ BCN Cheeseburger",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, cebolla caramelizada y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9470,
+    "id": "GERCV45",
+    "type": "our",
+    "img": "bbqBcnCheeseburger.png",
+    "category": "burger"
+  },
+  {
+    "name": "Easter Egg",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9800,
+    "id": "154525FAS",
+    "type": "our",
+    "img": "easterEgg.png",
+    "category": "burger"
+  },
+  {
+    "name": "Mario Inspired",
+    "description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla caramelizada y salsa de champiñones envuelto en un delicioso pan de papa. Incluye porción de papas.",
+    "price": 9550,
+    "id": "151A2A5ASFAS",
+    "type": "our",
+    "img": "marioInspired.png",
+    "category": "burger"
+  },
+  {
+    "name": "Satisfyer Easter Egg",
+    "description": "Smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
+    "price": 3750,
+    "id": "151ASaFAS",
+    "type": "satisfyer",
+    "img": "satisfyerEasterEgg.png",
+    "category": "burger"
+  },
+  {
+    "name": "Satisfyer BCN Cheeseburger",
+    "description": "Smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
+    "price": 3500,
+    "id": "151A5ASzFAS",
+    "type": "satisfyer",
+    "img": "satisfyerBcnCheeseburger.png",
+    "category": "burger"
+  },
+  {
+    "name": "Satisfyer ANHELO Classic",
+    "description": "Smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
+    "price": 3720,
+    "id": "151AcSFAS",
+    "type": "satisfyer",
+    "img": "satisfyerClassic.png",
+    "category": "burger"
+  },
+  {
+    "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa Incluye dos porciones de papas.",
+    "img": "promo2x1bcn.png",
+    "id": "PROMO2X1BCN",
+    "name": "2x1 BCN Cheeseburger",
+    "price": 9460,
+    "type": "promo",
+    "category": "burger"
+  }
 ]

@@ -3,6 +3,7 @@ import {
   ReadMateriales,
   UploadOrder,
 } from '../../firebase/uploadOrder';
+import { canjearVoucherPedir } from '../../firebase/validateVoucher';
 import {
   calcularCostoHamburguesa,
   extractCoordinates,
@@ -34,6 +35,14 @@ const handleSubmit = async (
   }));
 
   const phone = String(values.phone) || '';
+
+  const validacionCupones = await Promise.all(
+    couponCodes.map(async (cupon) => {
+      return await canjearVoucherPedir(cupon); // canjearVoucher devuelve true o false
+    })
+  );
+
+  console.log(validacionCupones);
 
   const orderDetail = {
     envio,
