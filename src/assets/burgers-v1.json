@@ -115,5 +115,14 @@
     "type": "satisfyer",
     "img": "satisfyerClassic.png",
     "category": "burger"
+  },
+  {
+    "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa Incluye dos porciones de papas.",
+    "img": "promo2x1bcn.png",
+    "id": "PROMO2X1BCN",
+    "name": "2x1 BCN Cheeseburger",
+    "price": 9460,
+    "type": "promo",
+    "category": "burger"
   }
 ]
