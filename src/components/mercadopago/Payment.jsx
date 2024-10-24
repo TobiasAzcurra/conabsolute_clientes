@@ -110,8 +110,8 @@ const Payment = ({
 								hideValueProp: false,
 								buttonBackground: "default", // Personaliza el botón
 								valuePropColor: "grey",
-								buttonHeight: "48px",
-								borderRadius: "6px",
+								buttonHeight: "80px",
+								borderRadius: "24px",
 								verticalPadding: "16px",
 								horizontalPadding: "0px",
 							},
