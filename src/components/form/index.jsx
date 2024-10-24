@@ -329,19 +329,19 @@ const FormCustom = ({ cart, total }) => {
           // Verificar si es una reserva
           const isReserva = values.hora.trim() !== '';
 
-          // if (isWithinClosedDays()) {
-          //   openTimeRestrictedModal(); // Abrir el modal personalizado
+          if (isWithinClosedDays()) {
+            openTimeRestrictedModal(); // Abrir el modal personalizado
 
-          //   return; // No proceder si es lunes, martes o miércoles
-          // }
+            return; // No proceder si es lunes, martes o miércoles
+          }
 
-          // if (!isWithinOrderTimeRange()) {
-          //   console.log(
-          //     'La hora actual está fuera del rango permitido para pedidos'
-          //   );
-          //   openTimeRestrictedModal(); // Abrir el modal personalizado
-          //   return;
-          // }
+          if (!isWithinOrderTimeRange()) {
+            console.log(
+              'La hora actual está fuera del rango permitido para pedidos'
+            );
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+            return;
+          }
 
           if (values.paymentMethod === 'efectivo') {
             // Ajustar la hora restando 30 minutos si es una reserva
