@@ -71,6 +71,7 @@ const AppRouter = () => {
 				alert("Por favor, ingresa un número de teléfono válido.");
 				return;
 			}
+
 			// Navegar a Pedido, pasando el número de teléfono como estado
 			navigate("/pedido", { state: { phoneNumber } });
 		}
@@ -104,7 +105,9 @@ const AppRouter = () => {
 							<input
 								type="text"
 								value={phoneNumber}
-								onChange={(e) => setPhoneNumber(e.target.value)}
+								onChange={(e) => {
+									setPhoneNumber(e.target.value);
+								}}
 								onKeyDown={handleKeyDown}
 								placeholder="Busca tu pedido con tu número de cel"
 								className="text-opacity-60 font-coolvetica text-black bg-transparent outline-none w-full"
@@ -116,7 +119,9 @@ const AppRouter = () => {
 								viewBox="0 0 24 24"
 								fill="currentColor"
 								className="mr-[-8px] h-8 cursor-pointer"
-								onClick={() => setShowExplanation(!showExplanation)}
+								onClick={() => {
+									setShowExplanation(!showExplanation);
+								}}
 								title="Información sobre el formato del número"
 							>
 								<path

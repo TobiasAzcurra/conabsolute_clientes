@@ -1,3 +1,4 @@
+// Pedido.jsx
 import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
@@ -45,6 +46,7 @@ const Pedido = () => {
 			orderId,
 			phoneNumber,
 			hasBeenRated,
+			locationState: location.state, // Log para verificar el estado recibido
 		});
 	}, []);
 
@@ -363,7 +365,7 @@ const Pedido = () => {
 				const width = containerRef.current.offsetWidth;
 				const height = containerRef.current.offsetHeight;
 				setContainerSize({ width, height });
-				console.log("📏 Container size updated:", { width, height });
+				console.log("📏 Container size updated:", { width, height }); // Log al actualizar el tamaño del contenedor
 			}
 		};
 
@@ -580,6 +582,7 @@ const Pedido = () => {
 									!currentOrder.entregado || !currentOrder.rating
 							)
 							.map((currentOrder, index) => {
+								console.log("🔄 Renderizando pedido:", currentOrder.id); // Log al renderizar cada pedido
 								const retrasado = isDelayed(currentOrder);
 								const delayMinutes = getDelayTime(currentOrder);
 								const showSupportButton =
@@ -676,6 +679,7 @@ const Pedido = () => {
 														className="h-6"
 													>
 														<path
+															fillRule="evenodd"
 															d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
 															clipRule="evenodd"
 														/>
