@@ -201,7 +201,7 @@ const AppleModal = ({
 						>
 							{isRatingModal ? (
 								isLoading ? (
-									<LoadingPoints color="text-gray-100" className="h-6 w-6" />
+									<LoadingPoints color="text-gray-100" />
 								) : (
 									"Enviar"
 								)
