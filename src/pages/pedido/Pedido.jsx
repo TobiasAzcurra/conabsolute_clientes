@@ -854,7 +854,6 @@ const Pedido = () => {
 					onClose={() => setIsRatingModalOpen(false)}
 					title="¡Califica tu pedido!"
 					isRatingModal={true}
-					color="text-gray-100"
 					orderProducts={selectedOrderProducts}
 					additionalProducts={additionalProducts}
 					onConfirm={handleRateOrder}
