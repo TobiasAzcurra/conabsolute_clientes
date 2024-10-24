@@ -529,28 +529,28 @@ const Pedido = () => {
 		>
 			<style>
 				{`
-                  @keyframes loadingBar {
-                      0% {
-                          background-position: -200px 0;
-                      }
-                      100% {
-                          background-position: 200px 0;
-                      }
-                  }
+          @keyframes loadingBar {
+              0% {
+                  background-position: -200px 0;
+              }
+              100% {
+                  background-position: 200px 0;
+              }
+          }
 
-                  .animated-loading {
-                      background: linear-gradient(
-                          to right,
-                          #000 0%,
-                          #000 40%,
-                          #555 100%,
-                          #000 60%,
-                          #000 100%
-                      );
-                      background-size: 400% 100%;
-                      animation: loadingBar 5s linear infinite;
-                  }
-                `}
+          .animated-loading {
+              background: linear-gradient(
+                  to right,
+                  #000 0%,
+                  #000 40%,
+                  #555 100%,
+                  #000 60%,
+                  #000 100%
+              );
+              background-size: 400% 100%;
+              animation: loadingBar 5s linear infinite;
+          }
+        `}
 			</style>
 
 			<StickerCanvas
@@ -590,20 +590,27 @@ const Pedido = () => {
 								const delayMinutes = getDelayTime(currentOrder);
 								const showSupportButton =
 									retrasado && currentOrder.cadete === "NO ASIGNADO";
+								const showCadeteCallButton =
+									retrasado && currentOrder.cadete !== "NO ASIGNADO";
 								const showCancelButton = !currentOrder.elaborado || retrasado;
+
+								// Nueva variable para determinar si hay al menos un botón
+								const hasButtons =
+									showSupportButton || showCadeteCallButton || showCancelButton;
 
 								return (
 									<div
 										key={currentOrder.id}
 										className={`flex items-center flex-col w-full ${
 											index !== 0 ? "mt-4" : ""
-										} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
+										} ${index === pedidosPagados.length - 1 ? "pb-6" : ""}`}
 									>
 										{pedidosPagados.length > 1 && (
 											<h2 className="text-2xl w-full text-left font-bold font-coolvetica mb-10">
 												Pedido {index + 1}
 											</h2>
 										)}
+										{/* info */}
 										<div className="flex flex-col w-full">
 											<div className="mb-10">
 												<div className="w-full flex flex-row gap-2 relative">
@@ -737,12 +744,12 @@ const Pedido = () => {
 												</div>
 											</div>
 										</div>
-
-										<div className="w-full mt-12">
+										{/* botones */}
+										<div className={`w-full ${hasButtons ? "mt-12" : ""}`}>
 											{showSupportButton && (
 												<div
 													onClick={handleSupportClick}
-													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl  font-bold cursor-pointer transition-colors duration-300"
+													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
 												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
@@ -760,7 +767,7 @@ const Pedido = () => {
 												</div>
 											)}
 
-											{retrasado && currentOrder.cadete !== "NO ASIGNADO" && (
+											{showCadeteCallButton && (
 												<div
 													onClick={() => handleCadeteCall(currentOrder.cadete)}
 													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
@@ -800,7 +807,7 @@ const Pedido = () => {
 															<LoadingPoints className="h-4 w-4" />
 														</div>
 													) : (
-														<div className="bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold cursor-pointer transition-colors duration-300">
+														<div className="flex items-center">
 															<svg
 																xmlns="http://www.w3.org/2000/svg"
 																viewBox="0 0 24 24"
