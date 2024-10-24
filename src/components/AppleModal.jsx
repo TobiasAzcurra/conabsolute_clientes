@@ -167,12 +167,11 @@ const AppleModal = ({
 							<button
 								onClick={onConfirm}
 								className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold ${
-									isLoading ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+									isLoading ? "cursor-not-allowed " : "cursor-pointer"
 								}`}
 								disabled={isLoading}
 							>
-								<LoadingPoints color="text-gray-100" />
-								{isLoading ? <LoadingPoints /> : "Sí"}
+								{isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
 							</button>
 
 							<button
