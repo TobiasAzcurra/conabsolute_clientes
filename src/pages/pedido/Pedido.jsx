@@ -575,7 +575,7 @@ const Pedido = () => {
 				)}
 
 				{!loading && pedidosPagados.length > 0 && (
-					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-16 overflow-y-auto">
+					<div className="flex items-center flex-col w-full px-4 mt-8 space-y-4 overflow-y-auto">
 						{pedidosPagados
 							.filter(
 								(currentOrder) =>
@@ -593,7 +593,7 @@ const Pedido = () => {
 									<div
 										key={currentOrder.id}
 										className={`flex items-center flex-col w-full ${
-											index !== 0 ? "" : "mt-8"
+											index !== 0 ? "mt-4" : ""
 										} ${index === pedidosPagados.length - 1 ? "pb-16" : ""}`}
 									>
 										{pedidosPagados.length > 1 && (
