@@ -7,13 +7,26 @@ import {
   isWithinClosedDays,
   isWithinOrderTimeRange,
 } from '../../helpers/validate-hours';
-import { showTimeRestrictionAlert } from '../form/showTImeRestrictionAlert';
 import LoadingPoints from '../LoadingPoints';
+import AppleModal from '../AppleModal';
 
 // Inicializa Mercado Pago con tu clave pública
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY, {
   locale: 'es-AR',
 });
+
+const adjustHora = (hora) => {
+  const [hours, minutes] = hora.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  date.setMinutes(date.getMinutes() - 30);
+
+  // Formatear la nueva hora en "HH:mm"
+  const adjustedHours = date.getHours().toString().padStart(2, '0');
+  const adjustedMinutes = date.getMinutes().toString().padStart(2, '0');
+  const adjustedTime = `${adjustedHours}:${adjustedMinutes}`;
+  return adjustedTime;
+};
 
 const Payment = ({
   envio,
@@ -24,17 +37,23 @@ const Payment = ({
   couponCodes,
   submitForm,
   isValid,
+  setPendingValues,
+  altaDemanda,
+  pendingValues,
 }) => {
   const [preferenceId, setPreferenceId] = useState(null); // Estado para almacenar el preferenceId
   const [isLoading, setIsLoading] = useState(false); // Estado para el loading del botón
   const [isReady, setIsReady] = useState(false); // Estado para saber si el Wallet está listo
+  const [showHighDemandModal, setShowHighDemandModal] = useState(false);
+  const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
 
   // Crear preferencia al hacer clic en pagar
-  const handlePayClick = async () => {
+  const handlePayClick = async (isReserva) => {
     if (!isValid) {
       // Si el formulario no es válido, no ejecutar el proceso de pago
       return;
     }
+
     if (isWithinClosedDays()) {
       return; // No proceder si es lunes, martes o miércoles
     }
@@ -46,10 +65,38 @@ const Payment = ({
     setIsLoading(true);
     submitForm();
     try {
+      let adjustedHora = values.hora;
+
+      // Si es una reserva, ajusta la hora restando 30 minutos
+      if (isReserva) {
+        adjustedHora = adjustHora(values.hora);
+      }
+
+      // Si estamos en alta demanda, ajusta la hora sumando los minutos de demora
+      if (altaDemanda?.isHighDemand && pendingValues) {
+        const delayMinutes = altaDemanda.delayMinutes || 0;
+        const currentTime = new Date();
+        currentTime.setMinutes(currentTime.getMinutes() + delayMinutes);
+
+        const adjustedHours = currentTime
+          .getHours()
+          .toString()
+          .padStart(2, '0');
+        const adjustedMinutes = currentTime
+          .getMinutes()
+          .toString()
+          .padStart(2, '0');
+        adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
+      }
+
+      const updatedValues = { ...values, hora: adjustedHora };
+
+      console.log(updatedValues);
+
       // Llamar a la función de Firebase
       const createPreference = httpsCallable(functions, 'createPreference');
       const result = await createPreference({
-        values,
+        updatedValues,
         cart,
         discountedTotal,
         envio,
@@ -83,7 +130,17 @@ const Payment = ({
     <div>
       {!preferenceId ? (
         <button
-          onClick={handlePayClick}
+          onClick={async () => {
+            const isReserva = values.hora.trim() !== '';
+
+            if (!isReserva && altaDemanda?.isHighDemand) {
+              setPendingValues(values);
+              setShowHighDemandModal(true);
+              return;
+            } else {
+              await handlePayClick(isReserva);
+            }
+          }}
           disabled={isLoading}
           className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 w-full"
         >
@@ -126,6 +183,28 @@ const Payment = ({
           />
         </div>
       )}
+      <AppleModal
+        isOpen={showHighDemandModal}
+        onClose={() => setShowHighDemandModal(false)}
+        title="Alta Demanda"
+        twoOptions={true}
+        isLoading={isModalConfirmLoading}
+        onConfirm={async () => {
+          setIsModalConfirmLoading(true);
+          if (pendingValues) {
+            const isReserva = pendingValues.hora.trim() !== '';
+
+            await handlePayClick(isReserva); // Activa el pago cuando se confirma "Sí" en el modal
+          }
+          setIsModalConfirmLoading(false);
+          setShowHighDemandModal(false);
+        }}
+      >
+        <p>
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
+          {altaDemanda?.delayMinutes} minutos, ¿lo esperas?
+        </p>
+      </AppleModal>
     </div>
   );
 };
