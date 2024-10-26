@@ -127,7 +127,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 
 	return (
-		<div className="group relative flex flex-col items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
+		<div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
 			<div className="absolute right-3.5 top-2.5 z-40">
 				<QuickAddToCart
