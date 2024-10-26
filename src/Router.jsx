@@ -1,7 +1,8 @@
 // Router.jsx
+
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Section from "./components/shopping/section";
-import { RouterMenu } from "./common/RouterMenu";
+import RouterMenu from "./common/RouterMenu";
 import Carrusel from "./components/Carrusel";
 import NavMenu from "./components/NavMenu";
 import burgers from "./assets/burgers-v1.json";
@@ -12,13 +13,15 @@ import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import Footer from "./components/Footer";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Pedido from "./pages/pedido/Pedido"; // Asegúrate de importar correctamente
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
 import { ListenOrdersForTodayByPhoneNumber } from "./firebase/getPedido"; // Importar la nueva función
+import AppleModal from "./components/AppleModal";
+import { updateRatingForOrder } from "./firebase/uploadOrder";
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -36,6 +39,16 @@ const AppRouter = () => {
 	const [selectedItem, setSelectedItem] = useState("");
 	// Estado para controlar la visibilidad de la explicación
 	const [showExplanation, setShowExplanation] = useState(false);
+
+	// Estados para la calificación
+	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+	const [selectedOrderId, setSelectedOrderId] = useState(null);
+	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
+	const [additionalProducts, setAdditionalProducts] = useState([]);
+	const [isRatingLoading, setIsRatingLoading] = useState(false);
+
+	// Estado para controlar si la animación ha terminado
+	const [animationCompleted, setAnimationCompleted] = useState(false);
 
 	// Función para manejar el clic en un item
 	const handleItemClick = (name) => {
@@ -74,6 +87,63 @@ const AppRouter = () => {
 
 			// Navegar a Pedido, pasando el número de teléfono como estado
 			navigate("/pedido", { state: { phoneNumber } });
+		}
+	};
+
+	// Verificar si hay una calificación pendiente en el localStorage
+	useEffect(() => {
+		// Verifica si hay una calificación pendiente en el localStorage
+		const pendingRating = localStorage.getItem("pendingRating");
+		if (pendingRating) {
+			const {
+				selectedOrderId,
+				selectedOrderProducts,
+				additionalProducts,
+				fecha,
+			} = JSON.parse(pendingRating);
+			setSelectedOrderId(selectedOrderId);
+			setSelectedOrderProducts(selectedOrderProducts);
+			setAdditionalProducts(additionalProducts);
+
+			if (pathname === "/" && !animationCompleted) {
+				// Esperar a que la animación termine
+				// No mostramos el modal todavía
+			} else {
+				setIsRatingModalOpen(true);
+			}
+		}
+	}, [pathname, animationCompleted]);
+
+	const handleRateOrder = async (ratings) => {
+		if (!selectedOrderId) {
+			console.error("No hay Order ID seleccionado para calificar");
+			return;
+		}
+
+		setIsRatingLoading(true);
+
+		try {
+			const pendingRating = JSON.parse(localStorage.getItem("pendingRating"));
+			const fecha = pendingRating.fecha;
+
+			if (!fecha) {
+				console.error("La fecha del pedido no está definida en localStorage.");
+				throw new Error("Fecha del pedido no disponible.");
+			}
+
+			await updateRatingForOrder(fecha, selectedOrderId, ratings);
+
+			// Elimina la calificación pendiente del localStorage
+			localStorage.removeItem("pendingRating");
+
+			setIsRatingModalOpen(false);
+		} catch (err) {
+			console.error("Error al enviar la calificación:", err);
+		} finally {
+			setIsRatingLoading(false);
+			setSelectedOrderId(null);
+			setAdditionalProducts([]);
+			setSelectedOrderProducts([]);
 		}
 	};
 
@@ -154,7 +224,12 @@ const AppRouter = () => {
 			)}
 			<Routes>
 				{/* Rutas definidas aquí */}
-				<Route path="/" element={<RouterMenu />} />
+				<Route
+					path="/"
+					element={
+						<RouterMenu onAnimationEnd={() => setAnimationCompleted(true)} />
+					}
+				/>
 				<Route
 					path="/menu/burgers"
 					element={<Section path={"burgers"} products={burgersArray} />}
@@ -220,6 +295,20 @@ const AppRouter = () => {
 				!pathname.startsWith("/success") && (
 					<FloatingCart totalQuantity={totalQuantity} cart={cart} />
 				)}
+
+			{/* Modal para calificar el pedido anterior */}
+			<AppleModal
+				isOpen={isRatingModalOpen}
+				onClose={() => setIsRatingModalOpen(false)}
+				title="¡Califica tu pedido anterior!"
+				isRatingModal={true}
+				orderProducts={selectedOrderProducts}
+				additionalProducts={additionalProducts}
+				onConfirm={handleRateOrder}
+				isLoading={isRatingLoading}
+			>
+				<p>¡Nos gustaría conocer tu opinión sobre tu último pedido!</p>
+			</AppleModal>
 		</div>
 	);
 };

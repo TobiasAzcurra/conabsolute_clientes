@@ -1,3 +1,5 @@
+// MenuPage.jsx
+
 import React, { useEffect, useState } from "react";
 import logo from "../../assets/anheloTMwhite.png";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -10,7 +12,7 @@ export const items = {
 	bebidas: "bebidas",
 };
 
-const MenuPage = () => {
+const MenuPage = ({ onAnimationEnd }) => {
 	const { pathname } = useLocation();
 	const navigate = useNavigate();
 
@@ -52,10 +54,13 @@ const MenuPage = () => {
 			const timer = setTimeout(() => {
 				setIsSecondAnimation(false);
 				navigate("/menu/burgers"); // Redirige a /menu/burgers después de que termine la segunda animación
+				if (onAnimationEnd) {
+					onAnimationEnd(); // Notificar al Router que la animación ha terminado
+				}
 			}, 4000); // Duración de la segunda animación en milisegundos
 			return () => clearTimeout(timer);
 		}
-	}, [isFirstAnimation, isSecondAnimation, navigate]);
+	}, [isFirstAnimation, isSecondAnimation, navigate, onAnimationEnd]);
 
 	// Inyecta estilos en el encabezado del documento
 	useEffect(() => {

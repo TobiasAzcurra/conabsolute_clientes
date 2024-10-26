@@ -229,6 +229,9 @@ const Pedido = () => {
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
 			console.log("✅ Calificación actualizada exitosamente.");
 
+			// Elimina la calificación pendiente del localStorage
+			localStorage.removeItem("pendingRating");
+
 			// Actualiza el pedido en el estado local para reflejar la nueva calificación
 			setPedidosPagados((prevPedidos) =>
 				prevPedidos.map((pedido) =>
@@ -311,6 +314,15 @@ const Pedido = () => {
 						setSelectedOrderProducts(pedido.detallePedido || []);
 						setSelectedOrderId(pedido.id);
 						setIsRatingModalOpen(true);
+
+						// Almacena los datos necesarios en localStorage
+						const ratingData = {
+							selectedOrderId: pedido.id,
+							selectedOrderProducts: pedido.detallePedido || [],
+							additionalProducts: [],
+							fecha: pedido.fecha,
+						};
+						localStorage.setItem("pendingRating", JSON.stringify(ratingData));
 					}
 					setOrder(pedido);
 					setPhoneNumber(pedido.telefono);
@@ -472,6 +484,15 @@ const Pedido = () => {
 
 		console.log("🎯 Abriendo modal de calificación");
 		setIsRatingModalOpen(true);
+
+		// Almacena los datos necesarios en localStorage
+		const ratingData = {
+			selectedOrderId: order.id,
+			selectedOrderProducts: order.detallePedido || [],
+			additionalProducts,
+			fecha: order.fecha,
+		};
+		localStorage.setItem("pendingRating", JSON.stringify(ratingData));
 	};
 
 	const handleCadeteCall = async (cadete) => {
@@ -532,28 +553,28 @@ const Pedido = () => {
 		>
 			<style>
 				{`
-          @keyframes loadingBar {
-              0% {
-                  background-position: -200px 0;
-              }
-              100% {
-                  background-position: 200px 0;
-              }
-          }
+            @keyframes loadingBar {
+                0% {
+                    background-position: -200px 0;
+                }
+                100% {
+                    background-position: 200px 0;
+                }
+            }
 
-          .animated-loading {
-              background: linear-gradient(
-                  to right,
-                  #000 0%,
-                  #000 40%,
-                  #555 100%,
-                  #000 60%,
-                  #000 100%
-              );
-              background-size: 400% 100%;
-              animation: loadingBar 5s linear infinite;
-          }
-        `}
+            .animated-loading {
+                background: linear-gradient(
+                    to right,
+                    #000 0%,
+                    #000 40%,
+                    #555 100%,
+                    #000 60%,
+                    #000 100%
+                );
+                background-size: 400% 100%;
+                animation: loadingBar 5s linear infinite;
+            }
+          `}
 			</style>
 
 			<StickerCanvas
