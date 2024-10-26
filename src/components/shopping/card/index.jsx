@@ -127,7 +127,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 	const [isLoaded, setIsLoaded] = useState(false);
 
 	return (
-		<div className="group relative flex flex-col items-center border border-black border-opacity-30 bg-gray-100 rounded-3xl transition duration-300 w-full max-w-[400px] text-black z-50 ">
+		<div className="group relative flex flex-col items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
 			<div className="absolute right-3.5 top-2.5 z-40">
 				<QuickAddToCart
@@ -177,7 +177,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 								{/* <span className="text-xs text-gray-600 ml-2">
 									({reviews} reviews)
 								</span> */}
-								<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 rounded-md">
+								<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 font-bold rounded-md">
 									{score.toFixed(1)}
 								</div>
 							</div>
