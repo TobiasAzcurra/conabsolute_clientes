@@ -2,9 +2,11 @@
 
 import {
 	getFirestore,
+	collection,
+	getDocs,
 	doc,
-	onSnapshot,
 	getDoc,
+	onSnapshot,
 	updateDoc,
 	arrayRemove,
 } from "firebase/firestore";
@@ -26,6 +28,63 @@ export const obtenerFechaActual = () => {
 };
 
 /**
+ * Función para obtener un pedido específico por ID y fecha
+ * @param {string} orderId - ID del pedido a obtener
+ * @param {string} fecha - Fecha del pedido en formato "DD/MM/AAAA"
+ * @returns {Promise<Object|null>} Pedido encontrado o null si no existe
+ */
+export const getOrderById = async (orderId, fecha) => {
+	const firestore = getFirestore();
+	let day, month, year;
+
+	if (fecha) {
+		[day, month, year] = fecha.split("/");
+	} else {
+		console.error("❌ Fecha no proporcionada para obtener el pedido por ID.");
+		return null;
+	}
+
+	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
+
+	console.log(
+		`🔍 Buscando el pedido ID ${orderId} en la fecha ${day}/${month}/${year}`
+	);
+
+	try {
+		const docSnapshot = await getDoc(ordersDocRef);
+		if (docSnapshot.exists()) {
+			const pedidosDelDia = docSnapshot.data()?.pedidos || [];
+
+			// Buscar el pedido por ID
+			const pedidoEncontrado = pedidosDelDia.find(
+				(pedido) => pedido.id === orderId
+			);
+
+			if (pedidoEncontrado) {
+				console.log(
+					`✅ Pedido encontrado en ${day}/${month}/${year}:`,
+					pedidoEncontrado
+				);
+				return pedidoEncontrado;
+			} else {
+				console.warn(
+					`⚠️ Pedido con ID ${orderId} no encontrado en pedidos del día.`
+				);
+				return null;
+			}
+		} else {
+			console.warn(
+				`⚠️ No existen pedidos para la fecha ${day}/${month}/${year}.`
+			);
+			return null;
+		}
+	} catch (error) {
+		console.error("❌ Error al obtener el pedido:", error);
+		throw error;
+	}
+};
+
+/**
  * Escucha en tiempo real un pedido específico por ID
  * @param {string} orderId - ID del pedido a escuchar
  * @param {function} callback - Función de devolución de llamada que recibe el pedido
@@ -40,6 +99,10 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
+
+	console.log(
+		`📡 Escuchando cambios en el pedido ID ${orderId} para la fecha ${day}/${month}/${year}`
+	);
 
 	// Escuchar cambios en el documento del día actual
 	return onSnapshot(
@@ -56,17 +119,27 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 
 				// Llamar a la función de devolución de llamada con el pedido filtrado, si se encuentra
 				if (pedidoFiltrado) {
+					console.log("📦 Pedido actualizado recibido:", pedidoFiltrado);
 					callback(pedidoFiltrado);
 				} else {
+					console.warn(
+						`⚠️ Pedido con ID ${orderId} no encontrado en los pedidos del día.`
+					);
 					callback(null); // Si no se encuentra el pedido, devolver null
 				}
 			} else {
 				// Si el documento no existe, no hay pedidos para el día actual
+				console.warn(
+					`⚠️ No existen pedidos para la fecha ${day}/${month}/${year}.`
+				);
 				callback(null); // Llamar a la función de devolución de llamada con null
 			}
 		},
 		(error) => {
-			console.error("Error al obtener los pedidos para el día actual:", error);
+			console.error(
+				"❌ Error al obtener los pedidos para el día actual:",
+				error
+			);
 		}
 	);
 };
@@ -87,6 +160,10 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
+	console.log(
+		`📡 Escuchando pedidos para el número de teléfono ${phoneNumber} en la fecha ${day}/${month}/${year}`
+	);
+
 	// Escuchar cambios en el documento del día actual
 	return onSnapshot(
 		ordersDocRef,
@@ -99,14 +176,25 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 					(pedido) => pedido.telefono === phoneNumber
 				);
 
+				console.log(
+					`📦 Pedidos filtrados para el número ${phoneNumber}:`,
+					pedidosFiltrados
+				);
+
 				callback(pedidosFiltrados); // Devuelve un array de pedidos filtrados
 			} else {
 				// Si el documento no existe, no hay pedidos para el día actual
+				console.warn(
+					`⚠️ No existen pedidos para la fecha ${day}/${month}/${year}.`
+				);
 				callback([]); // Devuelve un array vacío
 			}
 		},
 		(error) => {
-			console.error("Error al escuchar los pedidos para el día actual:", error);
+			console.error(
+				"❌ Error al escuchar los pedidos para el día actual:",
+				error
+			);
 			callback([]); // Devuelve un array vacío en caso de error
 		}
 	);
@@ -125,6 +213,10 @@ export const deleteOrder = async (orderId) => {
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
+	console.log(
+		`🗑️ Iniciando eliminación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`
+	);
+
 	try {
 		// Obtener el documento actual
 		const docSnapshot = await getDoc(ordersDocRef);
@@ -136,18 +228,20 @@ export const deleteOrder = async (orderId) => {
 				(pedido) => pedido.id === orderId
 			);
 			if (!pedidoAEliminar) {
-				throw new Error("Pedido no encontrado.");
+				throw new Error("Pedido no encontrado en los pedidos del día.");
 			}
 
 			// Utilizar arrayRemove para eliminar el pedido
 			await updateDoc(ordersDocRef, {
 				pedidos: arrayRemove(pedidoAEliminar),
 			});
+
+			console.log(`✅ Pedido ID ${orderId} eliminado exitosamente.`);
 		} else {
 			throw new Error("No existen pedidos para el día actual.");
 		}
 	} catch (error) {
-		console.error("Error al eliminar el pedido:", error);
+		console.error("❌ Error al eliminar el pedido:", error);
 		throw error; // Propagar el error para que pueda ser manejado en el frontend
 	}
 };

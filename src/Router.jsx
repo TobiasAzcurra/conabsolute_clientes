@@ -1,4 +1,4 @@
-// Router.jsx
+// AppRouter.jsx
 
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Section from "./components/shopping/section";
@@ -21,6 +21,7 @@ import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
 import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
+import { getOrderById } from "./firebase/getPedido"; // Importamos la función getOrderById
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -46,6 +47,9 @@ const AppRouter = () => {
 
 	// Estado para controlar si la animación ha terminado
 	const [animationCompleted, setAnimationCompleted] = useState(false);
+
+	// Estado para almacenar el pedido pendiente
+	const [pendingOrder, setPendingOrder] = useState(null);
 
 	const handleItemClick = (name) => {
 		setSelectedItem(name);
@@ -83,60 +87,117 @@ const AppRouter = () => {
 		}
 	};
 
-	// Verificar si hay una calificación pendiente en el localStorage
 	useEffect(() => {
-		// Verifica si hay una calificación pendiente en el localStorage
-		const pendingRating = localStorage.getItem("pendingRating");
-		if (pendingRating) {
-			const {
-				selectedOrderId,
-				selectedOrderProducts,
-				additionalProducts,
-				fecha,
-			} = JSON.parse(pendingRating);
-			setSelectedOrderId(selectedOrderId);
-			setSelectedOrderProducts(selectedOrderProducts);
-			setAdditionalProducts(additionalProducts);
+		console.log(
+			"🔍 Verificando si hay una calificación pendiente en localStorage."
+		);
 
-			if (pathname === "/" && !animationCompleted) {
-				// Esperar a que la animación termine
-				// No mostramos el modal todavía
+		const checkPendingRating = async () => {
+			// Verifica si hay una calificación pendiente en el localStorage
+			const pendingRating = localStorage.getItem("pendingRating");
+			if (pendingRating) {
+				const {
+					selectedOrderId,
+					selectedOrderProducts,
+					additionalProducts,
+					fecha,
+				} = JSON.parse(pendingRating);
+				setSelectedOrderId(selectedOrderId);
+				setSelectedOrderProducts(selectedOrderProducts);
+				setAdditionalProducts(additionalProducts);
+
+				console.log(
+					`📦 Calificación pendiente encontrada para el pedido ID ${selectedOrderId}.`
+				);
+
+				if (!fecha) {
+					console.error("❌ Fecha no encontrada en la calificación pendiente.");
+					return;
+				}
+
+				try {
+					// Fetch the order from Firebase using the date
+					console.log(
+						`🔄 Obteniendo el pedido ID ${selectedOrderId} para la fecha ${fecha}`
+					);
+					const order = await getOrderById(selectedOrderId, fecha);
+					if (order) {
+						console.log("📥 Pedido obtenido desde Firebase:", order);
+
+						// Check if 'entregado' prop exists
+						if (order.entregado) {
+							console.log(
+								`✅ El pedido ID ${selectedOrderId} ha sido entregado. Mostrando modal de calificación.`
+							);
+							// Order has been delivered, show the rating modal
+							setPendingOrder(order);
+							setIsRatingModalOpen(true);
+						} else {
+							// Order has not been delivered, do not show the modal
+							console.log(
+								`⚠️ El pedido ID ${selectedOrderId} aún no ha sido entregado. No se mostrará el modal de calificación.`
+							);
+							// Opcional: puedes eliminar la calificación pendiente del localStorage
+							// localStorage.removeItem("pendingRating");
+						}
+					} else {
+						console.warn(`⚠️ Pedido con ID ${selectedOrderId} no encontrado.`);
+						// Opcional: eliminar la calificación pendiente del localStorage
+						// localStorage.removeItem("pendingRating");
+					}
+				} catch (error) {
+					console.error("❌ Error al obtener el pedido:", error);
+				}
 			} else {
-				setIsRatingModalOpen(true);
+				console.log("ℹ️ No hay calificaciones pendientes en localStorage.");
 			}
+		};
+
+		// Solo ejecutamos la verificación si la animación ha terminado o si no estamos en la página inicial
+		if (pathname !== "/" || animationCompleted) {
+			checkPendingRating();
 		}
 	}, [pathname, animationCompleted]);
 
 	const handleRateOrder = async (ratings) => {
 		if (!selectedOrderId) {
-			console.error("No hay Order ID seleccionado para calificar");
+			console.error("❌ No hay Order ID seleccionado para calificar");
 			return;
 		}
 
 		setIsRatingLoading(true);
 
 		try {
-			const pendingRating = JSON.parse(localStorage.getItem("pendingRating"));
-			const fecha = pendingRating.fecha;
+			// Use the fetched order's date
+			const fecha = pendingOrder.fecha;
 
 			if (!fecha) {
-				console.error("La fecha del pedido no está definida en localStorage.");
+				console.error("❌ La fecha del pedido no está definida.");
 				throw new Error("Fecha del pedido no disponible.");
 			}
+
+			console.log("📝 Enviando calificación para el pedido:", {
+				fecha,
+				selectedOrderId,
+				ratings,
+			});
 
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
 
 			// Elimina la calificación pendiente del localStorage
 			localStorage.removeItem("pendingRating");
 
+			console.log("✅ Calificación enviada exitosamente.");
+
 			setIsRatingModalOpen(false);
 		} catch (err) {
-			console.error("Error al enviar la calificación:", err);
+			console.error("❌ Error al enviar la calificación:", err);
 		} finally {
 			setIsRatingLoading(false);
 			setSelectedOrderId(null);
 			setAdditionalProducts([]);
 			setSelectedOrderProducts([]);
+			setPendingOrder(null);
 		}
 	};
 
@@ -294,7 +355,7 @@ const AppRouter = () => {
 				onClose={() => setIsRatingModalOpen(false)}
 				title="¡Califica tu pedido anterior!"
 				isRatingModal={true}
-				orderProducts={selectedOrderProducts}
+				orderProducts={pendingOrder ? pendingOrder.detallePedido : []}
 				additionalProducts={additionalProducts}
 				onConfirm={handleRateOrder}
 				isLoading={isRatingLoading}
