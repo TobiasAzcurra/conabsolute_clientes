@@ -53,6 +53,9 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 		"Easter Egg": { score: 4.5, reviews: 16 },
 		"Mario Inspired": { score: 4.2, reviews: 4 },
 		"2x1 BCN Cheeseburger": { score: 4.7, reviews: 20 },
+		"Papas Anhelo ®": { score: 4.1, reviews: 20 },
+		"Papas con Cheddar ®": { score: 4.1, reviews: 20 },
+		"Pote Cheddar": { score: 4.1, reviews: 20 },
 		// Agrega más productos y puntuaciones aquí si es necesario
 	};
 
