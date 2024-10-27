@@ -40,6 +40,7 @@ const Pedido = () => {
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
 	const containerRef = useRef(null);
+	const [modalAdditionalProducts, setModalAdditionalProducts] = useState([]);
 
 	useEffect(() => {
 		console.log("📌 Initial Mount - Props and State:", {
@@ -286,6 +287,73 @@ const Pedido = () => {
 		}
 	};
 
+	const computeAdditionalProducts = (order) => {
+		const excludedPrefixes = [
+			"Satisfyer",
+			"Coca",
+			"Fanta",
+			"Sprite",
+			"Papas Con",
+			"Pote",
+		];
+		const requiredPrefixes = [
+			"simple",
+			"doble",
+			"triple",
+			"cuadruple",
+			"crispy",
+			"anhelo",
+			"bcn",
+			"bbq",
+			"mario",
+			"easter",
+			"2x1",
+		];
+
+		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
+			const nombreLimpio = producto.burger.trim().toLowerCase();
+			console.log("🍔 Verificando producto:", nombreLimpio);
+
+			if (
+				requiredPrefixes.some((prefix) =>
+					nombreLimpio.startsWith(prefix.toLowerCase())
+				)
+			) {
+				console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
+				return true;
+			}
+
+			const excluded = excludedPrefixes.some((prefix) =>
+				nombreLimpio.startsWith(prefix.toLowerCase())
+			);
+			console.log(
+				excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
+				nombreLimpio
+			);
+
+			return !excluded;
+		});
+
+		const computedAdditionalProducts = [];
+
+		if (shouldIncludePapasAnhelo) {
+			const isAlreadyInOrder = order.detallePedido.some(
+				(producto) =>
+					producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
+			);
+			console.log("🍟 Verificación Papas Anhelo:", {
+				isAlreadyInOrder,
+			});
+
+			if (!isAlreadyInOrder) {
+				console.log("✅ Agregando Papas Anhelo a productos adicionales");
+				computedAdditionalProducts.push("Papas Anhelo ®");
+			}
+		}
+
+		return computedAdditionalProducts;
+	};
+
 	useEffect(() => {
 		let unsubscribeOrder;
 		let unsubscribePhoneNumber;
@@ -310,6 +378,13 @@ const Pedido = () => {
 						);
 						setSelectedOrderProducts(pedido.detallePedido || []);
 						setSelectedOrderId(pedido.id);
+
+						// Compute additionalProducts
+						const computedAdditionalProducts =
+							computeAdditionalProducts(pedido);
+						setAdditionalProducts(computedAdditionalProducts);
+
+						// Open the rating modal
 						setIsRatingModalOpen(true);
 					}
 					setOrder(pedido);
@@ -385,102 +460,6 @@ const Pedido = () => {
 		console.log("🛑 Solicitando cancelación para pedido:", orderId);
 		setSelectedOrderId(orderId);
 		setIsModalOpen(true);
-	};
-
-	const handleRateClick = (orderId) => {
-		console.log("⭐ Iniciando proceso de calificación para pedido:", orderId);
-
-		const order = pedidosPagados.find((pedido) => pedido.id === orderId);
-		if (!order) {
-			console.error("❌ Pedido no encontrado:", orderId);
-			return;
-		}
-
-		console.log("📦 Datos del pedido a calificar:", order);
-		setSelectedOrderProducts(order.detallePedido || []);
-		setSelectedOrderId(orderId);
-
-		const excludedPrefixes = [
-			"Satisfyer",
-			"Coca",
-			"Fanta",
-			"Sprite",
-			"Papas Con",
-			"Pote",
-		];
-		const requiredPrefixes = [
-			"simple",
-			"doble",
-			"triple",
-			"cuadruple",
-			"crispy",
-			"anhelo",
-			"bcn",
-			"bbq",
-			"mario",
-			"easter",
-		];
-
-		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
-			const nombreLimpio = producto.burger.trim().toLowerCase();
-			console.log("🍔 Verificando producto:", nombreLimpio);
-
-			if (
-				requiredPrefixes.some((prefix) =>
-					nombreLimpio.startsWith(prefix.toLowerCase())
-				)
-			) {
-				console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
-				return true;
-			}
-
-			const excluded = excludedPrefixes.some((prefix) =>
-				nombreLimpio.startsWith(prefix.toLowerCase())
-			);
-			console.log(
-				excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
-				nombreLimpio
-			);
-
-			return !excluded;
-		});
-
-		if (shouldIncludePapasAnhelo) {
-			setAdditionalProducts((prevProducts) => {
-				const isAlreadyInOrder = order.detallePedido.some(
-					(producto) =>
-						producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
-				);
-				console.log("🍟 Verificación Papas Anhelo:", {
-					isAlreadyInOrder,
-					currentAdditionalProducts: prevProducts,
-				});
-
-				if (!isAlreadyInOrder && !prevProducts.includes("Papas Anhelo ®")) {
-					console.log("✅ Agregando Papas Anhelo a productos adicionales");
-					return [...prevProducts, "Papas Anhelo ®"];
-				}
-				return prevProducts;
-			});
-			console.log("📌 Se incluirá 'Papas Anhelo ®' en las calificaciones.");
-		} else {
-			setAdditionalProducts((prevProducts) =>
-				prevProducts.filter((product) => product !== "Papas Anhelo ®")
-			);
-			console.log("📌 No se incluirá 'Papas Anhelo ®' en las calificaciones.");
-		}
-
-		console.log("🎯 Abriendo modal de calificación");
-		setIsRatingModalOpen(true);
-
-		// Almacena los datos necesarios en localStorage
-		const ratingData = {
-			selectedOrderId: order.id,
-			selectedOrderProducts: order.detallePedido || [],
-			additionalProducts,
-			fecha: order.fecha,
-		};
-		localStorage.setItem("pendingRating", JSON.stringify(ratingData));
 	};
 
 	const handleCadeteCall = async (cadete) => {
@@ -882,14 +861,13 @@ const Pedido = () => {
 					<p>¿Estás seguro de que deseas cancelar este pedido?</p>
 					{error && <p className="text-red-600 mt-2">{error}</p>}
 				</AppleModal>
-
 				<AppleModal
 					isOpen={isRatingModalOpen}
 					onClose={() => setIsRatingModalOpen(false)}
 					title="¡Califica tu pedido!"
 					isRatingModal={true}
 					orderProducts={selectedOrderProducts}
-					additionalProducts={additionalProducts}
+					additionalProducts={additionalProducts} // Pass computed additionalProducts here
 					onConfirm={handleRateOrder}
 					isLoading={isRatingLoading}
 				>

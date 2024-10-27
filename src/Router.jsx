@@ -87,24 +87,85 @@ const AppRouter = () => {
 		}
 	};
 
+	const computeAdditionalProducts = (order) => {
+		const excludedPrefixes = [
+			"Satisfyer",
+			"Coca",
+			"Fanta",
+			"Sprite",
+			"Papas Con",
+			"Pote",
+		];
+		const requiredPrefixes = [
+			"simple",
+			"doble",
+			"triple",
+			"cuadruple",
+			"crispy",
+			"anhelo",
+			"bcn",
+			"bbq",
+			"mario",
+			"easter",
+			"2x1",
+		];
+
+		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
+			const nombreLimpio = producto.burger.trim().toLowerCase();
+			console.log("🍔 Verificando producto:", nombreLimpio);
+
+			if (
+				requiredPrefixes.some((prefix) =>
+					nombreLimpio.startsWith(prefix.toLowerCase())
+				)
+			) {
+				console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
+				return true;
+			}
+
+			const excluded = excludedPrefixes.some((prefix) =>
+				nombreLimpio.startsWith(prefix.toLowerCase())
+			);
+			console.log(
+				excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
+				nombreLimpio
+			);
+
+			return !excluded;
+		});
+
+		const computedAdditionalProducts = [];
+
+		if (shouldIncludePapasAnhelo) {
+			const isAlreadyInOrder = order.detallePedido.some(
+				(producto) =>
+					producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
+			);
+			console.log("🍟 Verificación Papas Anhelo:", {
+				isAlreadyInOrder,
+			});
+
+			if (!isAlreadyInOrder) {
+				console.log("✅ Agregando Papas Anhelo a productos adicionales");
+				computedAdditionalProducts.push("Papas Anhelo ®");
+			}
+		}
+
+		return computedAdditionalProducts;
+	};
+
 	useEffect(() => {
 		console.log(
 			"🔍 Verificando si hay una calificación pendiente en localStorage."
 		);
 
 		const checkPendingRating = async () => {
-			// Verifica si hay una calificación pendiente en el localStorage
 			const pendingRating = localStorage.getItem("pendingRating");
 			if (pendingRating) {
-				const {
-					selectedOrderId,
-					selectedOrderProducts,
-					additionalProducts,
-					fecha,
-				} = JSON.parse(pendingRating);
+				const { selectedOrderId, selectedOrderProducts, fecha } =
+					JSON.parse(pendingRating);
 				setSelectedOrderId(selectedOrderId);
 				setSelectedOrderProducts(selectedOrderProducts);
-				setAdditionalProducts(additionalProducts);
 
 				console.log(
 					`📦 Calificación pendiente encontrada para el pedido ID ${selectedOrderId}.`
@@ -116,7 +177,6 @@ const AppRouter = () => {
 				}
 
 				try {
-					// Fetch the order from Firebase using the date
 					console.log(
 						`🔄 Obteniendo el pedido ID ${selectedOrderId} para la fecha ${fecha}`
 					);
@@ -124,26 +184,20 @@ const AppRouter = () => {
 					if (order) {
 						console.log("📥 Pedido obtenido desde Firebase:", order);
 
-						// Check if 'entregado' prop exists
-						if (order.entregado) {
-							console.log(
-								`✅ El pedido ID ${selectedOrderId} ha sido entregado. Mostrando modal de calificación.`
-							);
-							// Order has been delivered, show the rating modal
-							setPendingOrder(order);
-							setIsRatingModalOpen(true);
-						} else {
-							// Order has not been delivered, do not show the modal
-							console.log(
-								`⚠️ El pedido ID ${selectedOrderId} aún no ha sido entregado. No se mostrará el modal de calificación.`
-							);
-							// Opcional: puedes eliminar la calificación pendiente del localStorage
-							// localStorage.removeItem("pendingRating");
-						}
+						// Recompute additionalProducts
+						const computedAdditionalProducts = computeAdditionalProducts(order);
+						setAdditionalProducts(computedAdditionalProducts);
+
+						console.log(
+							"📥 Productos adicionales:",
+							computedAdditionalProducts
+						);
+
+						// Set the pending order and open the modal
+						setPendingOrder(order);
+						setIsRatingModalOpen(true);
 					} else {
 						console.warn(`⚠️ Pedido con ID ${selectedOrderId} no encontrado.`);
-						// Opcional: eliminar la calificación pendiente del localStorage
-						// localStorage.removeItem("pendingRating");
 					}
 				} catch (error) {
 					console.error("❌ Error al obtener el pedido:", error);
@@ -153,7 +207,6 @@ const AppRouter = () => {
 			}
 		};
 
-		// Solo ejecutamos la verificación si la animación ha terminado o si no estamos en la página inicial
 		if (pathname !== "/" || animationCompleted) {
 			checkPendingRating();
 		}
@@ -356,7 +409,7 @@ const AppRouter = () => {
 				title="¡Califica tu pedido anterior!"
 				isRatingModal={true}
 				orderProducts={pendingOrder ? pendingOrder.detallePedido : []}
-				additionalProducts={additionalProducts}
+				additionalProducts={additionalProducts} // This now has the correct data
 				onConfirm={handleRateOrder}
 				isLoading={isRatingLoading}
 			>
