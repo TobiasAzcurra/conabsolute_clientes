@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import QuickAddToCart from "./quickAddToCart";
 import currencyFormat from "../../../helpers/currencyFormat";
 import { Link } from "react-router-dom";
@@ -35,6 +35,9 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 			"Easter Egg": "70%",
 			"Mario Inspired": "45%",
 			"2x1 BCN Cheeseburger": "85%",
+			"Papas Anhelo ®": "50%",
+			"Papas con Cheddar ®": "50%",
+			"Pote Cheddar": "50%",
 			// Agrega más productos y porcentajes aquí si es necesario
 		};
 
@@ -120,8 +123,11 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 		return stars;
 	};
 
+	// Estado para manejar la carga de la imagen
+	const [isLoaded, setIsLoaded] = useState(false);
+
 	return (
-		<div className="relative flex flex-col items-center border border-black border-opacity-30 bg-gray-100 rounded-3xl transition duration-300 w-full max-w-[400px] text-black z-50">
+		<div className="group relative flex flex-col items-center border border-black border-opacity-30 bg-gray-100 rounded-3xl transition duration-300 w-full max-w-[400px] text-black z-50 ">
 			{/* Botón QuickAddToCart fuera del Link para evitar la redirección */}
 			<div className="absolute right-3.5 top-2.5 z-40">
 				<QuickAddToCart
@@ -131,20 +137,31 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 			{/* Contenido de la tarjeta que redirige */}
 			<Link to={`/menu/${path}/${id}`} className="w-full">
-				<div className="h-[160px] overflow-hidden rounded-t-3xl w-full bg-gradient-to-b from-gray-100 to-gray-300 relative">
+				<div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
+					{/* Placeholder de carga */}
+					{!isLoaded && (
+						<div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse">
+							<span className="text-gray-400 text-sm">Cargando...</span>
+						</div>
+					)}
+					{/* Fondo con gradient overlay */}
+					<div className="absolute inset-0 bg-gradient-to-t from-gray-300 via-transparent to-transparent opacity-50"></div>
 					<img
-						className="object-cover w-full h-full"
+						className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
+							isLoaded ? "opacity-100" : "opacity-0"
+						}`}
 						style={{ objectPosition: `center ${imgPosition}` }}
 						src={`/menu/${img}`}
-						alt={img}
+						alt={name}
+						onLoad={() => setIsLoaded(true)}
 					/>
 				</div>
 
-				<div className="flex px-4 flex-col  justify-between leading-normal font-coolvetica text-left ">
+				<div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
 					<h5 className="mt-4 text-2xl w-full text-left font-bold ">
 						{capitalizeWords(name)}
 					</h5>
-					<p className=" text-left text-xs text-opacity-30 text-black">
+					<p className="text-left text-xs text-opacity-30 text-black">
 						{description}
 					</p>
 					<div className="flex w-full mt-4 items-left justify-between mb-6">
