@@ -136,7 +136,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 					<p className=" text-left text-xs text-opacity-30 text-black">
 						{description}
 					</p>
-					<div className="flex w-full mt-4 items-center justify-between mb-6">
+					<div className="flex w-full mt-4 items-left justify-between mb-6">
 						<span className="font-bold text-4xl text-black ">
 							{currencyFormat(price)}
 						</span>
