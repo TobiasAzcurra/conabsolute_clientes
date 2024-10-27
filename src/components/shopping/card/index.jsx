@@ -141,11 +141,13 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 							{currencyFormat(price)}
 						</span>
 						<div className="flex items-center gap-2 ">
-							<div className="flex items-center">{renderStars(score)}</div>
+							<div className="flex items-center mb-0.5 ">
+								{renderStars(score)}
+							</div>
 							{/* <span className="text-xs text-gray-600 ml-2">
                 ({reviews} reviews)
               </span> */}
-							<div className="text-xs bg-red-main text-gray-100 h-6 flex items-center text-center justify-center w-8 rounded-md">
+							<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 rounded-md">
 								{score.toFixed(1)}
 							</div>
 						</div>
