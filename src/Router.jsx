@@ -14,12 +14,11 @@ import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import Footer from "./components/Footer";
 import React, { useEffect, useState } from "react";
-import Pedido from "./pages/pedido/Pedido"; // Asegúrate de importar correctamente
+import Pedido from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
-import { ListenOrdersForTodayByPhoneNumber } from "./firebase/getPedido"; // Importar la nueva función
 import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 
@@ -35,9 +34,7 @@ const AppRouter = () => {
 	const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 	const [phoneNumber, setPhoneNumber] = useState("");
 	const navigate = useNavigate();
-	// Agrega el estado selectedItem
 	const [selectedItem, setSelectedItem] = useState("");
-	// Estado para controlar la visibilidad de la explicación
 	const [showExplanation, setShowExplanation] = useState(false);
 
 	// Estados para la calificación
@@ -50,7 +47,6 @@ const AppRouter = () => {
 	// Estado para controlar si la animación ha terminado
 	const [animationCompleted, setAnimationCompleted] = useState(false);
 
-	// Función para manejar el clic en un item
 	const handleItemClick = (name) => {
 		setSelectedItem(name);
 	};
@@ -64,7 +60,6 @@ const AppRouter = () => {
 		} else {
 			setPathLocation(lastPart);
 
-			// Actualiza selectedItem basado en la ruta actual
 			if (["burgers", "combos", "bebidas", "papas"].includes(lastPart)) {
 				setSelectedItem(lastPart);
 			}
@@ -79,13 +74,11 @@ const AppRouter = () => {
 	// Función para manejar el evento al presionar Enter
 	const handleKeyDown = async (e) => {
 		if (e.key === "Enter") {
-			// Validar el número de teléfono
 			if (phoneNumber.trim() === "") {
 				alert("Por favor, ingresa un número de teléfono válido.");
 				return;
 			}
 
-			// Navegar a Pedido, pasando el número de teléfono como estado
 			navigate("/pedido", { state: { phoneNumber } });
 		}
 	};
@@ -268,8 +261,7 @@ const AppRouter = () => {
 				<Route path="/order" element={<OrderForm />} />
 				<Route path="/success/:orderId" element={<SuccessPage />} />
 				<Route path="/pedido/:orderId" element={<Pedido />} />
-				<Route path="/pedido" element={<Pedido />} />{" "}
-				{/* Nueva ruta para múltiples pedidos */}
+				<Route path="/pedido" element={<Pedido />} />
 				<Route path="/feedback" element={<Feedback />} />
 				<Route
 					path="*"

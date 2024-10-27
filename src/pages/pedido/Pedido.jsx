@@ -1,4 +1,3 @@
-// Pedido.jsx
 import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
@@ -36,7 +35,7 @@ const Pedido = () => {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [currentTime, setCurrentTime] = useState(new Date());
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
-	const [isRatingLoading, setIsRatingLoading] = useState(false); // Nuevo estado para cargar
+	const [isRatingLoading, setIsRatingLoading] = useState(false);
 	const [orderRatings, setOrderRatings] = useState({});
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
@@ -47,7 +46,7 @@ const Pedido = () => {
 			orderId,
 			phoneNumber,
 			hasBeenRated,
-			locationState: location.state, // Log para verificar el estado recibido
+			locationState: location.state,
 		});
 	}, []);
 
@@ -184,7 +183,7 @@ const Pedido = () => {
 
 		setMessage(null);
 		setError(null);
-		setIsRatingLoading(true); // Iniciar estado de carga
+		setIsRatingLoading(true);
 
 		try {
 			const {
@@ -232,7 +231,6 @@ const Pedido = () => {
 			// Elimina la calificación pendiente del localStorage
 			localStorage.removeItem("pendingRating");
 
-			// Actualiza el pedido en el estado local para reflejar la nueva calificación
 			setPedidosPagados((prevPedidos) =>
 				prevPedidos.map((pedido) =>
 					pedido.id === selectedOrderId
@@ -247,7 +245,7 @@ const Pedido = () => {
 			console.error("❌ Error al enviar la calificación:", err);
 			setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
 		} finally {
-			setIsRatingLoading(false); // Finalizar estado de carga
+			setIsRatingLoading(false);
 			setSelectedOrderId(null);
 			setAdditionalProducts([]);
 		}
@@ -305,7 +303,6 @@ const Pedido = () => {
 			unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
 				console.log("📦 Order fetched by ID:", pedido);
 				if (pedido && typeof pedido.direccion === "string") {
-					// Verifica si el pedido pasó a entregado y no ha sido calificado
 					if (pedido.entregado && !pedido.rating && !hasBeenRated) {
 						console.log(
 							"🔔 Pedido entregado y listo para calificar:",
@@ -314,15 +311,6 @@ const Pedido = () => {
 						setSelectedOrderProducts(pedido.detallePedido || []);
 						setSelectedOrderId(pedido.id);
 						setIsRatingModalOpen(true);
-
-						// Almacena los datos necesarios en localStorage
-						const ratingData = {
-							selectedOrderId: pedido.id,
-							selectedOrderProducts: pedido.detallePedido || [],
-							additionalProducts: [],
-							fecha: pedido.fecha,
-						};
-						localStorage.setItem("pendingRating", JSON.stringify(ratingData));
 					}
 					setOrder(pedido);
 					setPhoneNumber(pedido.telefono);
@@ -383,7 +371,7 @@ const Pedido = () => {
 				const width = containerRef.current.offsetWidth;
 				const height = containerRef.current.offsetHeight;
 				setContainerSize({ width, height });
-				console.log("📏 Container size updated:", { width, height }); // Log al actualizar el tamaño del contenedor
+				console.log("📏 Container size updated:", { width, height });
 			}
 		};
 
@@ -521,30 +509,43 @@ const Pedido = () => {
 	};
 
 	useEffect(() => {
-		console.log("👀 Verificando pedidos para calificación automática:", {
-			totalPedidosPagados: pedidosPagados.length,
-			modalAbierto: isRatingModalOpen,
-		});
+		console.log(
+			"🔍 Verificando pedidos para calificación al entrar al componente."
+		);
 
-		const orderToRate = pedidosPagados.find((order) => {
-			const shouldRate = order.tiempoEntregado && !order.rating;
-			console.log("🔍 Evaluando pedido:", {
-				id: order.id,
-				tiempoEntregado: order.tiempoEntregado,
-				tieneRating: !!order.rating,
-				debeCalificar: shouldRate,
+		// Verifica si ya existe una calificación pendiente en localStorage
+		const pendingRating = localStorage.getItem("pendingRating");
+
+		// Si no hay una calificación pendiente, procedemos a buscar pedidos que necesiten calificación
+		if (!pendingRating) {
+			const orderToRate = pedidosPagados.find((order) => {
+				const shouldRate = !order.rating;
+				console.log("🔍 Evaluando pedido para calificación:", {
+					id: order.id,
+					paid: order.paid,
+					tieneRating: !!order.rating,
+					debeCalificar: shouldRate,
+				});
+				return shouldRate;
 			});
-			return shouldRate;
-		});
 
-		if (orderToRate && !isRatingModalOpen) {
-			console.log(
-				"🎯 Pedido encontrado para calificación automática:",
-				orderToRate.id
-			);
-			handleRateClick(orderToRate.id);
+			if (orderToRate) {
+				console.log(
+					"📥 Almacenando datos de calificación en localStorage para el pedido:",
+					orderToRate.id
+				);
+				const ratingData = {
+					selectedOrderId: orderToRate.id,
+					selectedOrderProducts: orderToRate.detallePedido || [],
+					additionalProducts: [],
+					fecha: orderToRate.fecha,
+				};
+				localStorage.setItem("pendingRating", JSON.stringify(ratingData));
+			}
+		} else {
+			console.log("📦 Ya existe una calificación pendiente en localStorage.");
 		}
-	}, [pedidosPagados, isRatingModalOpen]);
+	}, [pedidosPagados]);
 
 	return (
 		<div
@@ -553,28 +554,28 @@ const Pedido = () => {
 		>
 			<style>
 				{`
-            @keyframes loadingBar {
-                0% {
-                    background-position: -200px 0;
-                }
-                100% {
-                    background-position: 200px 0;
-                }
-            }
+          @keyframes loadingBar {
+              0% {
+                  background-position: -200px 0;
+              }
+              100% {
+                  background-position: 200px 0;
+              }
+          }
 
-            .animated-loading {
-                background: linear-gradient(
-                    to right,
-                    #000 0%,
-                    #000 40%,
-                    #555 100%,
-                    #000 60%,
-                    #000 100%
-                );
-                background-size: 400% 100%;
-                animation: loadingBar 5s linear infinite;
-            }
-          `}
+          .animated-loading {
+              background: linear-gradient(
+                  to right,
+                  #000 0%,
+                  #000 40%,
+                  #555 100%,
+                  #000 60%,
+                  #000 100%
+              );
+              background-size: 400% 100%;
+              animation: loadingBar 5s linear infinite;
+          }
+        `}
 			</style>
 
 			<StickerCanvas
@@ -611,7 +612,7 @@ const Pedido = () => {
 									!currentOrder.entregado || !currentOrder.rating
 							)
 							.map((currentOrder, index) => {
-								console.log("🔄 Renderizando pedido:", currentOrder.id); // Log al renderizar cada pedido
+								console.log("🔄 Renderizando pedido:", currentOrder.id);
 								const retrasado = isDelayed(currentOrder);
 								const delayMinutes = getDelayTime(currentOrder);
 								const showSupportButton =
@@ -890,7 +891,7 @@ const Pedido = () => {
 					orderProducts={selectedOrderProducts}
 					additionalProducts={additionalProducts}
 					onConfirm={handleRateOrder}
-					isLoading={isRatingLoading} // Pasar el estado de carga
+					isLoading={isRatingLoading}
 				>
 					<p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
 				</AppleModal>
