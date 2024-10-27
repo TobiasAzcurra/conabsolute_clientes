@@ -39,20 +39,20 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 
 	// Datos de puntuación falsos (puedes reemplazar esto con datos reales más tarde)
 	const fakeRatings = {
-		"Satisfyer Easter Egg": { score: 4.5, reviews: 15 },
-		"Satisfyer BCN Cheeseburger": { score: 3, reviews: 8 },
-		"Satisfyer ANHELO Classic": { score: 5, reviews: 22 },
-		"Simple Chessburger": { score: 2.5, reviews: 5 },
-		"Doble Cheeseburger": { score: 4, reviews: 12 },
-		"Triple Cheeseburger": { score: 3.5, reviews: 9 },
+		"Satisfyer Easter Egg": { score: 4.3, reviews: 15 },
+		"Satisfyer BCN Cheeseburger": { score: 4.7, reviews: 8 },
+		"Satisfyer ANHELO Classic": { score: 4.1, reviews: 22 },
+		"Simple Chessburger": { score: 4.5, reviews: 5 },
+		"Doble Cheeseburger": { score: 4.9, reviews: 12 },
+		"Triple Cheeseburger": { score: 4.0, reviews: 9 },
 		"Cuadruple Cheeseburger": { score: 4.2, reviews: 14 },
-		"Crispy BCN": { score: 3.8, reviews: 11 },
-		"ANHELO Classic": { score: 4.9, reviews: 18 },
-		"BCN Cheeseburger": { score: 4.1, reviews: 10 },
-		"BBQ BCN Cheeseburger": { score: 3.7, reviews: 7 },
-		"Easter Egg": { score: 4.6, reviews: 16 },
-		"Mario Inspired": { score: 2.8, reviews: 4 },
-		"2x1 BCN Cheeseburger": { score: 5, reviews: 20 },
+		"Crispy BCN": { score: 4.6, reviews: 11 },
+		"ANHELO Classic": { score: 4.1, reviews: 18 },
+		"BCN Cheeseburger": { score: 4.7, reviews: 10 },
+		"BBQ BCN Cheeseburger": { score: 4.6, reviews: 7 },
+		"Easter Egg": { score: 4.5, reviews: 16 },
+		"Mario Inspired": { score: 4.2, reviews: 4 },
+		"2x1 BCN Cheeseburger": { score: 4.7, reviews: 20 },
 		// Agrega más productos y puntuaciones aquí si es necesario
 	};
 
