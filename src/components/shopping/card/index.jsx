@@ -5,6 +5,14 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Card = ({ name, description, price, img, path, id, category }) => {
+	// Lista de nombres de productos para los cuales no se mostrará la calificación
+	const excludedNames = [
+		"Coca-Cola (310 ml.)",
+		"Fanta de naranja (310 ml.)",
+		"Sprite (310 ml.)",
+		// Puedes agregar más nombres aquí si es necesario
+	];
+
 	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
 		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -132,7 +140,7 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 					/>
 				</div>
 
-				<div className="flex px-4 flex-col items-center justify-between leading-normal font-coolvetica text-center">
+				<div className="flex px-4 flex-col  justify-between leading-normal font-coolvetica text-left ">
 					<h5 className="mt-4 text-2xl w-full text-left font-bold ">
 						{capitalizeWords(name)}
 					</h5>
@@ -143,17 +151,20 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 						<span className="font-bold text-4xl text-black ">
 							{currencyFormat(price)}
 						</span>
-						<div className="flex items-center gap-2 ">
-							<div className="flex items-center mb-0.5 ">
-								{renderStars(score)}
+						{/* Condicional para mostrar la calificación solo si el nombre NO está en excludedNames */}
+						{!excludedNames.includes(name) && (
+							<div className="flex items-center gap-2 ">
+								<div className="flex items-center mb-0.5 ">
+									{renderStars(score)}
+								</div>
+								{/* <span className="text-xs text-gray-600 ml-2">
+									({reviews} reviews)
+								</span> */}
+								<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 rounded-md">
+									{score.toFixed(1)}
+								</div>
 							</div>
-							{/* <span className="text-xs text-gray-600 ml-2">
-                ({reviews} reviews)
-              </span> */}
-							<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 rounded-md">
-								{score.toFixed(1)}
-							</div>
-						</div>
+						)}
 					</div>
 				</div>
 			</Link>
