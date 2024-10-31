@@ -39,29 +39,29 @@ const Section = ({ products = [], path }) => {
       <div ref={containerRef}>
         {items.burgers === path ? (
           <div className="mt-8 mb-4 mr-4 ml-4">
-            {/* {promo.length > 0 && (
-							<div className="section">
-								<p className="relative font-bold text-5xl text-center  mb-8 mt-10 text-black font-coolvetica z-50">
-									Promos
-								</p>
-								<div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center ">
-									{promo.map(
-										({ name, description, price, id, img, category }, i) => (
-											<Card
-												key={i}
-												img={img}
-												name={name}
-												description={description}
-												price={price}
-												category={category}
-												path={path}
-												id={id}
-											/>
-										)
-									)}
-								</div>
-							</div>
-						)} */}
+            {promo.length > 0 && (
+              <div className="section">
+                <p className="relative font-bold text-5xl text-center  mb-8 mt-10 text-black font-coolvetica z-50">
+                  Promos
+                </p>
+                <div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center ">
+                  {promo.map(
+                    ({ name, description, price, id, img, category }, i) => (
+                      <Card
+                        key={i}
+                        img={img}
+                        name={name}
+                        description={description}
+                        price={price}
+                        category={category}
+                        path={path}
+                        id={id}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            )}
 
             {satisfyer.length > 0 && (
               <div className="section">
