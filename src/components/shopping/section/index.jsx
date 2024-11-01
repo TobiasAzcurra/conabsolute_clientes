@@ -39,7 +39,7 @@ const Section = ({ products = [], path }) => {
       <div ref={containerRef}>
         {items.burgers === path ? (
           <div className="mt-8 mb-4 mr-4 ml-4">
-            {promo.length > 0 && (
+            {/* {promo.length > 0 && (
               <div className="section">
                 <p className="relative font-bold text-5xl text-center  mb-8 mt-10 text-black font-coolvetica z-50">
                   Promos
@@ -61,7 +61,7 @@ const Section = ({ products = [], path }) => {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
 
             {satisfyer.length > 0 && (
               <div className="section">
