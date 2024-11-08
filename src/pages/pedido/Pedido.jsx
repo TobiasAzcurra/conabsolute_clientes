@@ -409,15 +409,9 @@ const Pedido = () => {
 		}
 
 		if (phoneNumber) {
-			console.log("🔔 Listening to orders by phone number:", phoneNumber);
-			setLoading(true);
 			unsubscribePhoneNumber = ListenOrdersForTodayByPhoneNumber(
 				phoneNumber,
 				(pedidosActualizados) => {
-					console.log(
-						"📦 Orders fetched by phone number:",
-						pedidosActualizados
-					);
 					const pedidosConPago = pedidosActualizados.filter(
 						(pedido) => pedido.paid === true
 					);
@@ -425,8 +419,27 @@ const Pedido = () => {
 						(pedido) => pedido.paid === false
 					);
 
-					console.log("💰 Paid orders:", pedidosConPago);
-					console.log("💸 Unpaid orders:", pedidosSinPago);
+					// Verificar si hay algún pedido recién entregado que necesite calificación
+					const pedidoParaCalificar = pedidosConPago.find(
+						(pedido) => pedido.entregado && !pedido.rating && !hasBeenRated
+					);
+
+					if (pedidoParaCalificar) {
+						console.log(
+							"🔔 Pedido entregado y listo para calificar:",
+							pedidoParaCalificar.id
+						);
+						setSelectedOrderProducts(pedidoParaCalificar.detallePedido || []);
+						setSelectedOrderId(pedidoParaCalificar.id);
+
+						// Compute additionalProducts
+						const computedAdditionalProducts =
+							computeAdditionalProducts(pedidoParaCalificar);
+						setAdditionalProducts(computedAdditionalProducts);
+
+						// Open the rating modal
+						setIsRatingModalOpen(true);
+					}
 
 					setPedidosPagados(pedidosConPago);
 					setPedidosNoPagados(pedidosSinPago);
@@ -492,16 +505,16 @@ const Pedido = () => {
 			"🔍 Verificando pedidos para calificación al entrar al componente."
 		);
 
-		// Verifica si ya existe una calificación pendiente en localStorage
+		// Verifica si ya existe una calificación pendiente
 		const pendingRating = localStorage.getItem("pendingRating");
 
-		// Si no hay una calificación pendiente, procedemos a buscar pedidos que necesiten calificación
+		// Si NO hay calificación pendiente, busca pedidos que necesiten ser calificados
 		if (!pendingRating) {
 			const orderToRate = pedidosPagados.find((order) => {
-				const shouldRate = !order.rating;
+				const shouldRate = order.entregado && !order.rating; // Agregamos verificación de entregado
 				console.log("🔍 Evaluando pedido para calificación:", {
 					id: order.id,
-					paid: order.paid,
+					entregado: order.entregado,
 					tieneRating: !!order.rating,
 					debeCalificar: shouldRate,
 				});
@@ -516,13 +529,26 @@ const Pedido = () => {
 				const ratingData = {
 					selectedOrderId: orderToRate.id,
 					selectedOrderProducts: orderToRate.detallePedido || [],
-					additionalProducts: [],
+					additionalProducts: computeAdditionalProducts(orderToRate),
 					fecha: orderToRate.fecha,
 				};
 				localStorage.setItem("pendingRating", JSON.stringify(ratingData));
 			}
 		} else {
 			console.log("📦 Ya existe una calificación pendiente en localStorage.");
+
+			// Verificamos que el pedido pendiente de calificar esté realmente entregado
+			const { selectedOrderId, fecha } = JSON.parse(pendingRating);
+			const currentOrder = pedidosPagados.find(
+				(order) => order.id === selectedOrderId
+			);
+
+			if (currentOrder && !currentOrder.entregado) {
+				console.log(
+					"🚫 Eliminando calificación pendiente porque el pedido aún no está entregado"
+				);
+				localStorage.removeItem("pendingRating");
+			}
 		}
 	}, [pedidosPagados]);
 
