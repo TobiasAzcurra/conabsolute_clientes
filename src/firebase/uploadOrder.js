@@ -1,95 +1,96 @@
 // uploadOrder.js
 import {
-	getFirestore,
-	collection,
-	doc,
-	runTransaction,
-	getDocs,
-	query,
-	where,
-} from "firebase/firestore";
-import { obtenerFechaActual } from "../helpers/currencyFormat";
-import { v4 as uuidv4 } from "uuid";
+  getFirestore,
+  collection,
+  doc,
+  runTransaction,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
+import { obtenerFechaActual } from '../helpers/currencyFormat';
+import { v4 as uuidv4 } from 'uuid';
+import { cleanPhoneNumber } from '../helpers/validate-hours';
 
 export const UploadOrder = async (orderDetail) => {
-	const firestore = getFirestore();
-	const pedidoId = uuidv4();
-	const fechaFormateada = obtenerFechaActual();
-	const [dia, mes, anio] = fechaFormateada.split("/");
-	const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
-	const pedidoDocRef = doc(pedidosCollectionRef, dia);
+  const firestore = getFirestore();
+  const pedidoId = uuidv4();
+  const fechaFormateada = obtenerFechaActual();
+  const [dia, mes, anio] = fechaFormateada.split('/');
+  const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+  const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
-	try {
-		await runTransaction(firestore, async (transaction) => {
-			const docSnapshot = await transaction.get(pedidoDocRef);
-			const existingData = docSnapshot.exists() ? docSnapshot.data() : {};
-			const pedidosDelDia = existingData.pedidos || [];
-			pedidosDelDia.push({ ...orderDetail, id: pedidoId, cerca: false });
-			transaction.set(pedidoDocRef, {
-				...existingData,
-				pedidos: pedidosDelDia,
-			});
-		});
-		console.log("✅ Pedido subido exitosamente con ID:", pedidoId);
-		return pedidoId;
-	} catch (error) {
-		console.error("❌ Error al subir el pedido:", error);
-		throw error;
-	}
+  try {
+    await runTransaction(firestore, async (transaction) => {
+      const docSnapshot = await transaction.get(pedidoDocRef);
+      const existingData = docSnapshot.exists() ? docSnapshot.data() : {};
+      const pedidosDelDia = existingData.pedidos || [];
+      pedidosDelDia.push({ ...orderDetail, id: pedidoId, cerca: false });
+      transaction.set(pedidoDocRef, {
+        ...existingData,
+        pedidos: pedidosDelDia,
+      });
+    });
+    console.log('✅ Pedido subido exitosamente con ID:', pedidoId);
+    return pedidoId;
+  } catch (error) {
+    console.error('❌ Error al subir el pedido:', error);
+    throw error;
+  }
 };
 
 export const ReadMateriales = async () => {
-	const firestore = getFirestore();
+  const firestore = getFirestore();
 
-	const collections = ["materiales"];
+  const collections = ['materiales'];
 
-	const fetchedData = await Promise.all(
-		collections.map(async (collectionName) => {
-			const collectionRef = collection(firestore, collectionName);
-			const snapshot = await getDocs(collectionRef);
+  const fetchedData = await Promise.all(
+    collections.map(async (collectionName) => {
+      const collectionRef = collection(firestore, collectionName);
+      const snapshot = await getDocs(collectionRef);
 
-			return snapshot.docs.map((doc) => {
-				const data = doc.data(); // Datos del documento de Firestore
-				// Convertir los datos a un objeto ProductoMaterial
-				const productoMaterial = {
-					id: doc.id,
-					nombre: data.nombre,
-					categoria: data.categoria,
-					costo: data.costo,
-					unit: data.unit,
-					unidadPorPrecio: data.unidadPorPrecio,
-					stock: data.stock,
-				};
-				return productoMaterial;
-			});
-		})
-	);
+      return snapshot.docs.map((doc) => {
+        const data = doc.data(); // Datos del documento de Firestore
+        // Convertir los datos a un objeto ProductoMaterial
+        const productoMaterial = {
+          id: doc.id,
+          nombre: data.nombre,
+          categoria: data.categoria,
+          costo: data.costo,
+          unit: data.unit,
+          unidadPorPrecio: data.unidadPorPrecio,
+          stock: data.stock,
+        };
+        return productoMaterial;
+      });
+    })
+  );
 
-	// Hacer un flatten de fetchedData y devolver los datos como un arreglo de ProductoMaterial[]
-	return fetchedData.flat();
+  // Hacer un flatten de fetchedData y devolver los datos como un arreglo de ProductoMaterial[]
+  return fetchedData.flat();
 };
 
 export const ReadData = async () => {
-	const firestore = getFirestore();
+  const firestore = getFirestore();
 
-	const collections = ["burgers", "drinks", "fries", "toppings"];
+  const collections = ['burgers', 'drinks', 'fries', 'toppings'];
 
-	const fetchedData = await Promise.all(
-		collections.map(async (collectionName) => {
-			const collectionRef = collection(firestore, collectionName);
-			const snapshot = await getDocs(collectionRef);
+  const fetchedData = await Promise.all(
+    collections.map(async (collectionName) => {
+      const collectionRef = collection(firestore, collectionName);
+      const snapshot = await getDocs(collectionRef);
 
-			const dataWithIds = snapshot.docs.map((doc) => ({
-				id: doc.id,
-				data: doc.data(),
-				collectionName: collectionName,
-			}));
+      const dataWithIds = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        data: doc.data(),
+        collectionName: collectionName,
+      }));
 
-			return dataWithIds;
-		})
-	);
+      return dataWithIds;
+    })
+  );
 
-	return fetchedData.flat();
+  return fetchedData.flat();
 };
 
 // rating : {
@@ -102,93 +103,132 @@ export const ReadData = async () => {
 // }
 
 export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
-	const firestore = getFirestore();
+  const firestore = getFirestore();
 
-	return new Promise((resolve, reject) => {
-		const [dia, mes, anio] = fechaPedido.split("/");
-		const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
-		const pedidoDocRef = doc(pedidosCollectionRef, dia);
+  return new Promise((resolve, reject) => {
+    const [dia, mes, anio] = fechaPedido.split('/');
+    const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+    const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
-		console.log("🔄 updateRatingForOrder llamado con:", {
-			fechaPedido,
-			pedidoId,
-			rating,
-		});
+    console.log('🔄 updateRatingForOrder llamado con:', {
+      fechaPedido,
+      pedidoId,
+      rating,
+    });
 
-		runTransaction(firestore, async (transaction) => {
-			const pedidoDocSnapshot = await transaction.get(pedidoDocRef);
-			if (!pedidoDocSnapshot.exists()) {
-				console.error("❌ El pedido no existe para la fecha especificada.");
-				throw new Error("El pedido no existe para la fecha especificada.");
-			}
+    runTransaction(firestore, async (transaction) => {
+      const pedidoDocSnapshot = await transaction.get(pedidoDocRef);
+      if (!pedidoDocSnapshot.exists()) {
+        console.error('❌ El pedido no existe para la fecha especificada.');
+        throw new Error('El pedido no existe para la fecha especificada.');
+      }
 
-			const existingData = pedidoDocSnapshot.data();
-			const pedidosDelDia = existingData.pedidos || [];
+      const existingData = pedidoDocSnapshot.data();
+      const pedidosDelDia = existingData.pedidos || [];
 
-			const pedidosActualizados = pedidosDelDia.map((pedido) => {
-				if (pedido.id === pedidoId) {
-					// Actualizamos el pedido con el nuevo rating
-					return {
-						...pedido,
-						rating: {
-							...rating, // Incluye tanto las calificaciones generales como las de productos
-							comentario: rating.comentario || "", // Comentario opcional
-						},
-					};
-				} else {
-					return pedido;
-				}
-			});
+      const pedidosActualizados = pedidosDelDia.map((pedido) => {
+        if (pedido.id === pedidoId) {
+          // Actualizamos el pedido con el nuevo rating
+          return {
+            ...pedido,
+            rating: {
+              ...rating, // Incluye tanto las calificaciones generales como las de productos
+              comentario: rating.comentario || '', // Comentario opcional
+            },
+          };
+        } else {
+          return pedido;
+        }
+      });
 
-			transaction.set(pedidoDocRef, {
-				...existingData,
-				pedidos: pedidosActualizados,
-			});
-			console.log("✅ Pedido actualizado con la calificación:", pedidoId);
-		})
-			.then(() => {
-				console.log(
-					"✅ Transacción completada exitosamente para el pedido:",
-					pedidoId
-				);
-				resolve();
-			})
-			.catch((error) => {
-				console.error(
-					"❌ Error actualizando el rating para el pedido:",
-					pedidoId,
-					error
-				);
-				reject(error);
-			});
-	});
+      transaction.set(pedidoDocRef, {
+        ...existingData,
+        pedidos: pedidosActualizados,
+      });
+      console.log('✅ Pedido actualizado con la calificación:', pedidoId);
+    })
+      .then(() => {
+        console.log(
+          '✅ Transacción completada exitosamente para el pedido:',
+          pedidoId
+        );
+        resolve();
+      })
+      .catch((error) => {
+        console.error(
+          '❌ Error actualizando el rating para el pedido:',
+          pedidoId,
+          error
+        );
+        reject(error);
+      });
+  });
 };
 
 export const getCadetePhone = async (nombreCadete) => {
-	const firestore = getFirestore();
+  const firestore = getFirestore();
 
-	// Acceder a la colección 'empleados' en Firestore
-	const empleadosRef = collection(firestore, "empleados");
+  // Acceder a la colección 'empleados' en Firestore
+  const empleadosRef = collection(firestore, 'empleados');
 
-	// Crear una consulta para filtrar por categoría 'cadete' y nombre del cadete
-	const q = query(
-		empleadosRef,
-		where("category", "==", "cadete"),
-		where("name", "==", nombreCadete)
-	);
+  // Crear una consulta para filtrar por categoría 'cadete' y nombre del cadete
+  const q = query(
+    empleadosRef,
+    where('category', '==', 'cadete'),
+    where('name', '==', nombreCadete)
+  );
 
-	console.log("🔍 Buscando cadete con nombre:", nombreCadete);
+  console.log('🔍 Buscando cadete con nombre:', nombreCadete);
 
-	// Obtener los documentos que coinciden con la consulta
-	const querySnapshot = await getDocs(q);
+  // Obtener los documentos que coinciden con la consulta
+  const querySnapshot = await getDocs(q);
 
-	// Si encontramos algún documento, retornamos el número de teléfono
-	if (!querySnapshot.empty) {
-		const empleadoData = querySnapshot.docs[0].data(); // Asumimos que el nombre es único
-		console.log("📱 Teléfono del cadete encontrado:", empleadoData.telefono);
-		return empleadoData.telefono; // Retornar el número de teléfono del cadete
-	} else {
-		console.warn("⚠️ Cadete no encontrado");
-		return null; // Retornar null si no se encuentra el cadete
-	}
+  // Si encontramos algún documento, retornamos el número de teléfono
+  if (!querySnapshot.empty) {
+    const empleadoData = querySnapshot.docs[0].data(); // Asumimos que el nombre es único
+    console.log('📱 Teléfono del cadete encontrado:', empleadoData.telefono);
+    return empleadoData.telefono; // Retornar el número de teléfono del cadete
+  } else {
+    console.warn('⚠️ Cadete no encontrado');
+    return null; // Retornar null si no se encuentra el cadete
+  }
+};
+
+export const addTelefonoFirebase = async (phoneNumber, fecha) => {
+  const cleanPhone = cleanPhoneNumber(phoneNumber);
+  const firestore = getFirestore();
+  const collectionRef = collection(firestore, 'telefonos');
+  const q = query(collectionRef, where('telefono', '==', cleanPhone));
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
+    // El número de teléfono no existe en la base de datos, entonces lo agregamos
+    try {
+      const docRef = await addDoc(collectionRef, {
+        telefono: cleanPhone,
+        fecha: fecha,
+        lastOrder: fecha, // Nueva fecha como último pedido al agregar
+      });
+      console.log(
+        `Se agregó el número de teléfono ${cleanPhone} a Firebase con el ID: ${docRef.id}. Fecha: ${fecha}`
+      );
+    } catch (e) {
+      console.error('Error al agregar el número de teléfono a Firebase:', e);
+    }
+  } else {
+    // El número de teléfono ya existe en la base de datos, actualizamos el campo lastOrder
+    querySnapshot.forEach(async (documento) => {
+      try {
+        const docRef = doc(firestore, 'telefonos', documento.id);
+        await updateDoc(docRef, {
+          lastOrder: fecha, // Actualiza con la nueva fecha del último pedido
+        });
+        console.log(
+          `El número de teléfono ${cleanPhone} ya existe en la base de datos. Actualizado lastOrder a: ${fecha}`
+        );
+      } catch (e) {
+        console.error('Error al actualizar el campo lastOrder en Firebase:', e);
+      }
+    });
+  }
 };

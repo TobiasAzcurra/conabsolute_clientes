@@ -1,4 +1,5 @@
 import {
+  addTelefonoFirebase,
   ReadData,
   ReadMateriales,
   UploadOrder,
@@ -104,6 +105,8 @@ const handleSubmit = async (
 
   try {
     const orderId = await UploadOrder(orderDetail); // Captura el ID de la orden
+
+    await addTelefonoFirebase(phone, obtenerFechaActual());
 
     return orderId; // Retorna el ID de la orden
   } catch (error) {
