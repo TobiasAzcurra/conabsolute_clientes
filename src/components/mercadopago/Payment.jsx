@@ -62,6 +62,10 @@ const Payment = ({
       return;
     }
 
+    if (true) {
+      return;
+    }
+
     setIsLoading(true);
     submitForm();
     try {

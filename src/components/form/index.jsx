@@ -431,6 +431,10 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
+          if (true) {
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+          }
+
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
           } else if (values.paymentMethod === 'mercadopago') {
@@ -811,21 +815,20 @@ const FormCustom = ({ cart, total }) => {
                 </div>
 
                 {/* Botón de envío */}
-                {values.paymentMethod === 'mercadopago' ? (
-                  <Payment
-                    cart={cart}
-                    values={values}
-                    discountedTotal={discountedTotal}
-                    envio={envio}
-                    mapUrl={mapUrl}
-                    couponCodes={couponCodes}
-                    submitForm={submitForm}
-                    setPendingValues={setPendingValues}
-                    altaDemanda={altaDemanda}
-                    isValid={isValid} // Pasamos isValid al componente Payment
-                    pendingValues={pendingValues}
-                  />
-                ) : (
+                {values.paymentMethod === 'mercadopago' ? // <Payment
+                //   cart={cart}
+                //   values={values}
+                //   discountedTotal={discountedTotal}
+                //   envio={envio}
+                //   mapUrl={mapUrl}
+                //   couponCodes={couponCodes}
+                //   submitForm={submitForm}
+                //   setPendingValues={setPendingValues}
+                //   altaDemanda={altaDemanda}
+                //   isValid={isValid} // Pasamos isValid al componente Payment
+                //   pendingValues={pendingValues}
+                // />
+                null : (
                   <button
                     type="submit"
                     disabled={isSubmitting}

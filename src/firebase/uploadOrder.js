@@ -7,6 +7,7 @@ import {
   getDocs,
   query,
   where,
+  updateDoc,
 } from 'firebase/firestore';
 import { obtenerFechaActual } from '../helpers/currencyFormat';
 import { v4 as uuidv4 } from 'uuid';
