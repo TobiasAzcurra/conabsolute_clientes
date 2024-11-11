@@ -18,7 +18,11 @@ const Card = ({ name, description, price, img, path, id, category }) => {
 				snapshot.docs.forEach((doc) => {
 					const burgerData = doc.data();
 					if (burgerData.name === name) {
-						setRating(burgerData.rating || 0);
+						// Si el rating es menor a 4, establecer 4 o 4.1
+						const actualRating = burgerData.rating || 0;
+						const adjustedRating =
+							actualRating < 4 ? (Math.random() > 0.5 ? 4 : 4.1) : actualRating;
+						setRating(adjustedRating);
 					}
 				});
 			} catch (error) {
