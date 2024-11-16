@@ -431,6 +431,10 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
+          // if (true) {
+          //   return;
+          // }
+
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
           } else if (values.paymentMethod === 'mercadopago') {
