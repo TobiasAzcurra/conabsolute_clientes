@@ -414,7 +414,7 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
           aclaraciones: '',
         }}
-        // validationSchema={formValidations}
+        validationSchema={formValidations}
         onSubmit={async (values) => {
           // if (true) {
           //   return;
@@ -437,18 +437,18 @@ const FormCustom = ({ cart, total }) => {
           // (Opcional: Puedes manejar alguna lógica adicional aquí si es necesario)
 
           // Verificar restricciones de horario antes de procesar el pedido
-          // if (isWithinClosedDays()) {
-          //   openTimeRestrictedModal(); // Abrir el modal personalizado
-          //   return; // No proceder si es lunes, martes o miércoles
-          // }
+          if (isWithinClosedDays()) {
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+            return; // No proceder si es lunes, martes o miércoles
+          }
 
-          // if (!isWithinOrderTimeRange()) {
-          //   console.log(
-          //     'La hora actual está fuera del rango permitido para pedidos'
-          //   );
-          //   openTimeRestrictedModal(); // Abrir el modal personalizado
-          //   return;
-          // }
+          if (!isWithinOrderTimeRange()) {
+            console.log(
+              'La hora actual está fuera del rango permitido para pedidos'
+            );
+            openTimeRestrictedModal(); // Abrir el modal personalizado
+            return;
+          }
 
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
