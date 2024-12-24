@@ -3,7 +3,7 @@ import { ErrorMessage, Field, Form, Formik } from 'formik';
 import MyTextInput from './MyTextInput';
 import validations from './validations';
 import handleSubmit from './handleSubmit';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addLastCart } from '../../redux/cart/cartSlice';
 import { useEffect, useState } from 'react';
@@ -56,6 +56,9 @@ const FormCustom = ({ cart, total }) => {
 
   // Estado para controlar el modal de restricción de tiempo
   const [isTimeRestrictedModalOpen, setIsTimeRestrictedModalOpen] =
+    useState(false);
+
+  const [isCloseRestrictedModalOpen, setIsCloseRestrictedModalOpen] =
     useState(false);
 
   // Escucha de alta demanda
@@ -135,6 +138,15 @@ const FormCustom = ({ cart, total }) => {
   // Función para cerrar el modal de restricción de tiempo
   const closeTimeRestrictedModal = () => {
     setIsTimeRestrictedModalOpen(false);
+  };
+
+  // Función para abrir el modal de restricción de tiempo
+  const openCloseModal = () => {
+    setIsCloseRestrictedModalOpen(true);
+  };
+
+  const closeCloseRestrictedModal = () => {
+    setIsCloseRestrictedModalOpen(false);
   };
 
   // Función para agregar un nuevo campo de cupón dinámicamente
@@ -402,9 +414,16 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
           aclaraciones: '',
         }}
-        validationSchema={formValidations}
+        // validationSchema={formValidations}
         onSubmit={async (values) => {
+          // if (true) {
+          //   return;
+          // }
           // Determinar si el pedido es una reserva
+          if (!altaDemanda?.open) {
+            openCloseModal(); // Abrir el modal personalizado
+            return; // No proceder si es lunes, martes o miércoles
+          }
           const isReserva = values.hora.trim() !== '';
 
           // Solo verificar alta demanda si NO es una reserva
@@ -418,20 +437,16 @@ const FormCustom = ({ cart, total }) => {
           // (Opcional: Puedes manejar alguna lógica adicional aquí si es necesario)
 
           // Verificar restricciones de horario antes de procesar el pedido
-          if (isWithinClosedDays()) {
-            openTimeRestrictedModal(); // Abrir el modal personalizado
-            return; // No proceder si es lunes, martes o miércoles
-          }
+          // if (isWithinClosedDays()) {
+          //   openTimeRestrictedModal(); // Abrir el modal personalizado
+          //   return; // No proceder si es lunes, martes o miércoles
+          // }
 
-          if (!isWithinOrderTimeRange()) {
-            console.log(
-              'La hora actual está fuera del rango permitido para pedidos'
-            );
-            openTimeRestrictedModal(); // Abrir el modal personalizado
-            return;
-          }
-
-          // if (true) {
+          // if (!isWithinOrderTimeRange()) {
+          //   console.log(
+          //     'La hora actual está fuera del rango permitido para pedidos'
+          //   );
+          //   openTimeRestrictedModal(); // Abrir el modal personalizado
           //   return;
           // }
 
@@ -485,6 +500,31 @@ const FormCustom = ({ cart, total }) => {
           return (
             <Form>
               <div className="flex flex-col mb-2">
+                {/* Botones para seleccionar método de envío */}
+                <div className="flex flex-row gap-4 mb-4">
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-lg ${
+                      values.deliveryMethod === 'delivery'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                    onClick={() => setFieldValue('deliveryMethod', 'delivery')}
+                  >
+                    Delivery
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-lg ${
+                      values.deliveryMethod === 'takeaway'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                    onClick={() => setFieldValue('deliveryMethod', 'takeaway')}
+                  >
+                    Takeaway
+                  </button>
+                </div>
                 {/* Sección de aclaraciones */}
                 <div className="flex flex-row justify-between px-3 h-auto items-start border-2 border-black rounded-3xl mt-4">
                   <div className="flex flex-row w-full items-center gap-2">
@@ -507,154 +547,155 @@ const FormCustom = ({ cart, total }) => {
                     />
                   </div>
                 </div>
+                {/* Campo para el número de teléfono */}
+                <div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
+                  <div className="flex flex-row items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-6"
+                    >
+                      <path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
+                      <path
+                        fillRule="evenodd"
+                        d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
 
-                {/* Datos para la entrega */}
-                <div className="flex justify-center flex-col mt-3.5 items-center">
-                  <p className="text-2xl font-bold mb-2">
-                    Datos para la entrega
-                  </p>
-                  <div className="w-full items-center rounded-3xl border-2 border-black">
-                    <MapDirection
-                      setUrl={setUrl}
-                      setValidarUbi={setValidarUbi}
-                      setNoEncontre={setNoEncontre}
-                      setFieldValue={setFieldValue}
-                    />
-
-                    <ErrorMessage
-                      name="address"
-                      component="span"
-                      className="text-sm text-red-main font-coolvetica font-light"
-                    />
-
-                    {noEncontre && (
-                      <div className="flex flex-row justify-between px-3 h-10 items-center border-t border-black border-opacity-20">
-                        <div className="flex flex-row gap-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="h-6"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <MyTextInput
-                            name="address"
-                            type="text"
-                            placeholder="Tu dirección"
-                            className="bg-white text-opacity-20 text-black outline-none px-2"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Campo para el número de teléfono */}
-                    <div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
-                      <div className="flex flex-row items-center gap-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-6"
-                        >
-                          <path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-
-                        <div className="flex flex-col w-full">
-                          <MyTextInput
-                            name="phone"
-                            type="text"
-                            placeholder="Tu número de teléfono"
-                            autoComplete="phone"
-                            className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-                          />
-                          <ErrorMessage
-                            name="phone"
-                            component="span"
-                            className="text-sm text-red-main font-coolvetica font-light mt-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Campo para reservar hora */}
-                    <div className="flex flex-row justify-between px-3 h-auto items-start border border-black border-opacity-20">
-                      <div className="flex flex-row items-center gap-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-6"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <Field
-                          as="select"
-                          name="hora"
-                          className={`custom-select ${
-                            selectedHora === '' ? 'text-gray-400' : 'text-black'
-                          }`}
-                          value={selectedHora}
-                          onChange={(e) => {
-                            handleChange(e);
-                            setFieldValue('hora', e.target.value); // Asegurar que Formik capture el valor
-                          }}
-                        >
-                          <option value="" disabled>
-                            ¿Quieres reservar para más tarde?
-                          </option>
-                          <option value="20:30">20:30</option>
-                          <option value="21:00">21:00</option>
-                          <option value="21:30">21:30</option>
-                          <option value="22:00">22:00</option>
-                          <option value="22:30">22:30</option>
-                          <option value="23:00">23:00</option>
-                          <option value="23:30">23:30</option>
-                          <option value="00:00">00:00</option>
-                        </Field>
-                        <ErrorMessage
-                          name="hora"
-                          component="span"
-                          className="text-sm text-red-main font-coolvetica font-light mt-1"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Campo para referencias */}
-                    <div className="flex flex-row gap-2 pl-3 h-10 items-center">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="h-6"
-                      >
-                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
-                      </svg>
-
+                    <div className="flex flex-col w-full">
                       <MyTextInput
-                        label="Referencias"
-                        name="references"
+                        name="phone"
                         type="text"
-                        placeholder="¿Referencias? Ej: Casa de portón negro"
-                        autoComplete="off"
+                        placeholder="Tu número de teléfono"
+                        autoComplete="phone"
                         className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                      />
+                      <ErrorMessage
+                        name="phone"
+                        component="span"
+                        className="text-sm text-red-main font-coolvetica font-light mt-1"
                       />
                     </div>
                   </div>
                 </div>
+
+                {/* Campo para reservar hora */}
+                <div className="flex flex-row justify-between px-3 h-auto items-start border border-black border-opacity-20">
+                  <div className="flex flex-row items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-6"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <Field
+                      as="select"
+                      name="hora"
+                      className={`custom-select ${
+                        selectedHora === '' ? 'text-gray-400' : 'text-black'
+                      }`}
+                      value={selectedHora}
+                      onChange={(e) => {
+                        handleChange(e);
+                        setFieldValue('hora', e.target.value); // Asegurar que Formik capture el valor
+                      }}
+                    >
+                      <option value="" disabled>
+                        ¿Quieres reservar para más tarde?
+                      </option>
+                      <option value="20:30">20:30</option>
+                      <option value="21:00">21:00</option>
+                      <option value="21:30">21:30</option>
+                      <option value="22:00">22:00</option>
+                      <option value="22:30">22:30</option>
+                      <option value="23:00">23:00</option>
+                      <option value="23:30">23:30</option>
+                      <option value="00:00">00:00</option>
+                    </Field>
+                    <ErrorMessage
+                      name="hora"
+                      component="span"
+                      className="text-sm text-red-main font-coolvetica font-light mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Datos para la entrega */}
+                {values.deliveryMethod === 'delivery' && (
+                  <div className="flex justify-center flex-col mt-3.5 items-center">
+                    <p className="text-2xl font-bold mb-2">
+                      Datos para la entrega
+                    </p>
+                    <div className="w-full items-center rounded-3xl border-2 border-black">
+                      <MapDirection
+                        setUrl={setUrl}
+                        setValidarUbi={setValidarUbi}
+                        setNoEncontre={setNoEncontre}
+                        setFieldValue={setFieldValue}
+                      />
+
+                      <ErrorMessage
+                        name="address"
+                        component="span"
+                        className="text-sm text-red-main font-coolvetica font-light"
+                      />
+
+                      {noEncontre && (
+                        <div className="flex flex-row justify-between px-3 h-10 items-center border-t border-black border-opacity-20">
+                          <div className="flex flex-row gap-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="h-6"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <MyTextInput
+                              name="address"
+                              type="text"
+                              placeholder="Tu dirección"
+                              className="bg-white text-opacity-20 text-black outline-none px-2"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Campo para referencias */}
+                      <div className="flex flex-row gap-2 pl-3 h-10 items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="h-6"
+                        >
+                          <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                        </svg>
+
+                        <MyTextInput
+                          label="Referencias"
+                          name="references"
+                          type="text"
+                          placeholder="¿Referencias? Ej: Casa de portón negro"
+                          autoComplete="off"
+                          className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Método de pago y cupones */}
                 <div className="flex justify-center flex-col mt-6 items-center">
@@ -800,7 +841,11 @@ const FormCustom = ({ cart, total }) => {
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Envío</p>
-                    <p>{currencyFormat(envio)}</p>
+                    <p>
+                      {values.deliveryMethod === 'delivery'
+                        ? currencyFormat(envio)
+                        : currencyFormat(0)}
+                    </p>
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Descuentos</p>
@@ -809,7 +854,9 @@ const FormCustom = ({ cart, total }) => {
                   <div className="flex flex-row justify-between w-full">
                     <p className="font-bold">Total</p>
                     <p className="font-bold">
-                      {currencyFormat(discountedTotal + envio)}
+                      {values.deliveryMethod === 'delivery'
+                        ? currencyFormat(discountedTotal + envio)
+                        : currencyFormat(discountedTotal)}
                     </p>
                   </div>
                 </div>
@@ -856,6 +903,18 @@ const FormCustom = ({ cart, total }) => {
         title="Está cerrado"
       >
         <p>Abrimos de jueves a domingo de 20:00 hs a 00:00 hs.</p>
+      </AppleModal>
+
+      <AppleModal
+        isOpen={isCloseRestrictedModalOpen}
+        onClose={closeCloseRestrictedModal}
+        title="Está cerrado"
+      >
+        <p>NOS QUEDAMOS SIN STOCK</p>
+        <br />
+        <p>
+          Guarda captura de pantalla y tenes 2x1 para canjear la proxima vez
+        </p>
       </AppleModal>
       {/* Modal de alta demanda */}
       <AppleModal

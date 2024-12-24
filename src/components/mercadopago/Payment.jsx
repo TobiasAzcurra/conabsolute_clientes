@@ -49,6 +49,10 @@ const Payment = ({
 
   // Crear preferencia al hacer clic en pagar
   const handlePayClick = async (isReserva) => {
+    if (!altaDemanda?.open) {
+      return; // No proceder si es lunes, martes o miércoles
+    }
+
     if (!isValid) {
       // Si el formulario no es válido, no ejecutar el proceso de pago
       return;

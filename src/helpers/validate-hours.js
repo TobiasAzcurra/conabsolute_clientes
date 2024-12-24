@@ -12,7 +12,7 @@ export const isWithinOrderTimeRange = () => {
   startTime.setHours(20, 0, 0, 0);
 
   const endTime = new Date(currentTime); // 23:50 hs
-  endTime.setHours(23, 50, 0, 0);
+  endTime.setHours(23, 30, 0, 0);
 
   return currentTime >= startTime && currentTime <= endTime;
 };
@@ -22,7 +22,7 @@ export const isWithinClosedDays = () => {
   const currentDay = currentTime.getDay(); // 0 = domingo, 1 = lunes, ..., 6 = sábado
 
   // Verificamos si es lunes (1), martes (2) o miércoles (3)
-  return currentDay >= 1 && currentDay <= 3;
+  return currentDay >= 1 && currentDay <= 2;
 };
 
 export const cleanPhoneNumber = (phoneNumber) => {

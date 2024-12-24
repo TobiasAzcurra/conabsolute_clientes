@@ -46,7 +46,7 @@ const handleSubmit = async (
   console.log(validacionCupones);
 
   const orderDetail = {
-    envio,
+    envio: values.deliveryMethod === 'delivery' ? envio : 0,
     detallePedido: cart.map((item) => {
       const quantity = item.quantity !== undefined ? item.quantity : 0;
 
@@ -86,7 +86,7 @@ const handleSubmit = async (
       };
     }),
     subTotal: values.subTotal,
-    total: discountedTotal + envio,
+    total: discountedTotal + (values.deliveryMethod === 'delivery' ? envio : 0),
     fecha: obtenerFechaActual(), // Asegúrate de que esta función devuelva la fecha en el formato deseado
     aclaraciones: values.aclaraciones || '',
     metodoPago: values.paymentMethod,
@@ -101,6 +101,7 @@ const handleSubmit = async (
     couponCodes,
     ubicacion: mapUrl,
     paid: true,
+    deliveryMethod: values.deliveryMethod,
   };
 
   try {
