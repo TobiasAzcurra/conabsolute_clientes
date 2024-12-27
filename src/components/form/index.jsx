@@ -501,7 +501,7 @@ const FormCustom = ({ cart, total }) => {
 						<Form>
 							<div className="flex flex-col mb-2">
 								{/* Botones para seleccionar método de envío */}
-								<div className="flex flex-row gap-4 mb-4">
+								<div className="flex flex-row gap-2 mb-4">
 									<button
 										type="button"
 										className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${
@@ -544,7 +544,7 @@ const FormCustom = ({ cart, total }) => {
 												clip-rule="evenodd"
 											/>
 										</svg>
-										Takeaway
+										Retiro
 									</button>
 								</div>
 								{/* Sección de aclaraciones */}
