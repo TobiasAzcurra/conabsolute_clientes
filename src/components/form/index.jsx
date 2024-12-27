@@ -557,7 +557,7 @@ const FormCustom = ({ cart, total }) => {
 											</button>
 											<button
 												type="button"
-												className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
+												className={`h-20 flex-1 flex-col font-bold items-center flex justify-center   rounded-lg ${
 													values.deliveryMethod === "takeaway"
 														? "bg-black text-gray-100"
 														: "bg-gray-300 text-black"
@@ -566,8 +566,15 @@ const FormCustom = ({ cart, total }) => {
 													setFieldValue("deliveryMethod", "takeaway")
 												}
 											>
-												<img src={isologo} className="h-6" alt="" />
-												Retiro
+												<div className="flex flex-row items-center gap-2">
+													<img
+														src={isologo}
+														className="h-4 brightness-0"
+														alt=""
+													/>
+													<p className="font-bold text-">Retiro</p>
+												</div>
+												<p className="font-light text-xs">Aun no disponible</p>
 											</button>
 										</div>
 										<div className="w-full items-center rounded-3xl border-2 border-black">
