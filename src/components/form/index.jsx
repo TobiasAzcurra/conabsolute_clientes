@@ -527,7 +527,7 @@ const FormCustom = ({ cart, total }) => {
 										type="button"
 										className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
 											values.deliveryMethod === "takeaway"
-												? "bg-blue-500 text-white"
+												? "bg-black text-gray-100"
 												: "bg-gray-300 text-black"
 										}`}
 										onClick={() => setFieldValue("deliveryMethod", "takeaway")}
