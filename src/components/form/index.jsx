@@ -552,7 +552,7 @@ const FormCustom = ({ cart, total }) => {
 														fill="currentColor"
 													/>
 												</svg>
-												Delivery
+												Envienmelo
 											</button>
 											<button
 												type="button"
@@ -577,7 +577,7 @@ const FormCustom = ({ cart, total }) => {
 														clip-rule="evenodd"
 													/>
 												</svg>
-												Retiro
+												Retiro por local
 											</button>
 										</div>
 										<div className="w-full items-center rounded-3xl border-2 border-black">
