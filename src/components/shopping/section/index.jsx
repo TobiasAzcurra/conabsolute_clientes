@@ -23,6 +23,15 @@ const Section = ({ products = [], path }) => {
   //     "category": "burger"
   //   },
 
+  // {
+  //   "description": "2 Triples smash burger de nuestro blend de carnes, cheddar,  envuelto en un delicioso pan de papa Incluye dos porciones de papas.",
+  //   "img": "promo2x1bcn.png",
+  //   "id": "PROMO2X1BCN",
+  //   "name": "2x1 Triple Cheeseburger",
+  //   "price": 10360,
+  //   "type": "promo",
+  //   "category": "burger"
+  // }
   if (items.burgers === path) {
     promo = products.filter((product) => product.type.includes('promo'));
     originalsBurgers = products.filter((product) =>

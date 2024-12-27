@@ -910,10 +910,10 @@ const FormCustom = ({ cart, total }) => {
         onClose={closeCloseRestrictedModal}
         title="Está cerrado"
       >
-        <p>NOS QUEDAMOS SIN STOCK</p>
-        <br />
         <p>
-          Guarda captura de pantalla y tenes 2x1 para canjear la proxima vez
+          FELIZ NAVIDAD 🎁 Ayer regalamos 2.000 burgers en la Jirafa, déjennos
+          descansar, nos vemos mañana ❤️‍🔥 PD: Saca captura de esto, vale por 2x1
+          😎
         </p>
       </AppleModal>
       {/* Modal de alta demanda */}
