@@ -565,6 +565,7 @@ const FormCustom = ({ cart, total }) => {
 												onClick={() =>
 													setFieldValue("deliveryMethod", "takeaway")
 												}
+												disabled
 											>
 												<div className="flex flex-row items-center gap-2">
 													<img
