@@ -65,7 +65,8 @@ export const MapDirection = ({
 				className="w-full"
 				style={{
 					height: "25vh",
-					borderRadius: "24px", // Equivalente a rounded-3xl
+					borderTopLeftRadius: "24px",
+					borderTopRightRadius: "24px",
 					overflow: "hidden", // Para asegurar que el contenido respete los bordes
 					maskImage: "radial-gradient(circle, white, black)", // Para ajustar el canvas interno
 				}}
