@@ -579,67 +579,79 @@ const FormCustom = ({ cart, total }) => {
 											<p className="font-light text-xs">por Buenos Aires 618</p>
 										</button>
 									</div>
-									<div className="w-full items-center rounded-3xl border-2 border-black">
-										<MapDirection
-											setUrl={setUrl}
-											setValidarUbi={setValidarUbi}
-											setNoEncontre={setNoEncontre}
-											setFieldValue={setFieldValue}
-										/>
+									<div
+										className={`w-full items-center rounded-3xl border-2 border-black transition-all duration-300`}
+									>
+										{values.deliveryMethod === "delivery" && (
+											<>
+												<MapDirection
+													setUrl={setUrl}
+													setValidarUbi={setValidarUbi}
+													setNoEncontre={setNoEncontre}
+													setFieldValue={setFieldValue}
+												/>
 
-										<ErrorMessage
-											name="address"
-											component="span"
-											className="text-sm text-red-main font-coolvetica font-light"
-										/>
+												<ErrorMessage
+													name="address"
+													component="span"
+													className="text-sm text-red-main font-coolvetica font-light"
+												/>
 
-										{noEncontre && (
-											<div className="flex flex-row  justify-between px-3 h-10 items-center ">
-												<div className="flex flex-row gap-2">
+												{noEncontre && (
+													<div className="flex flex-row justify-between px-3 h-10 items-center">
+														<div className="flex flex-row gap-2">
+															<svg
+																xmlns="http://www.w3.org/2000/svg"
+																viewBox="0 0 24 24"
+																fill="currentColor"
+																className="h-6"
+															>
+																<path
+																	fillRule="evenodd"
+																	d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+																	clipRule="evenodd"
+																/>
+															</svg>
+															<MyTextInput
+																name="address"
+																type="text"
+																placeholder="Tu dirección"
+																className="bg-white text-opacity-20 text-black outline-none px-2"
+															/>
+														</div>
+													</div>
+												)}
+
+												{/* Campo para referencias */}
+												<div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
 														viewBox="0 0 24 24"
 														fill="currentColor"
 														className="h-6"
 													>
-														<path
-															fillRule="evenodd"
-															d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-															clipRule="evenodd"
-														/>
+														<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
 													</svg>
+
 													<MyTextInput
-														name="address"
+														label="Referencias"
+														name="references"
 														type="text"
-														placeholder="Tu dirección"
-														className="bg-white text-opacity-20 text-black outline-none px-2"
+														placeholder="¿Referencias? Ej: Casa de portón negro"
+														autoComplete="off"
+														className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 													/>
 												</div>
-											</div>
+											</>
 										)}
-
-										{/* Campo para referencias */}
-										<div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 24 24"
-												fill="currentColor"
-												className="h-6"
-											>
-												<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
-											</svg>
-
-											<MyTextInput
-												label="Referencias"
-												name="references"
-												type="text"
-												placeholder="¿Referencias? Ej: Casa de portón negro"
-												autoComplete="off"
-												className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-											/>
-										</div>
 										{/* Campo para el número de teléfono */}
-										<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
+										<div
+											className={`flex flex-row justify-between px-3 h-auto items-start ${
+												values.deliveryMethod === "delivery"
+													? "border-t border-black border-opacity-20"
+													: ""
+											}`}
+										>
 											<div className="flex flex-row items-center gap-2">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
