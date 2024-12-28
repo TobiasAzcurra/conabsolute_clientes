@@ -438,18 +438,18 @@ const FormCustom = ({ cart, total }) => {
 					// (Opcional: Puedes manejar alguna lógica adicional aquí si es necesario)
 
 					// Verificar restricciones de horario antes de procesar el pedido
-					// if (isWithinClosedDays()) {
-					// 	openTimeRestrictedModal(); // Abrir el modal personalizado
-					// 	return; // No proceder si es lunes, martes o miércoles
-					// }
+					if (isWithinClosedDays()) {
+						openTimeRestrictedModal(); // Abrir el modal personalizado
+						return; // No proceder si es lunes, martes o miércoles
+					}
 
-					// if (!isWithinOrderTimeRange()) {
-					// 	console.log(
-					// 		"La hora actual está fuera del rango permitido para pedidos"
-					// 	);
-					// 	openTimeRestrictedModal(); // Abrir el modal personalizado
-					// 	return;
-					// }
+					if (!isWithinOrderTimeRange()) {
+						console.log(
+							"La hora actual está fuera del rango permitido para pedidos"
+						);
+						openTimeRestrictedModal(); // Abrir el modal personalizado
+						return;
+					}
 
 					if (values.paymentMethod === "efectivo") {
 						await processPedido(values, isReserva);
@@ -565,7 +565,6 @@ const FormCustom = ({ cart, total }) => {
 												onClick={() =>
 													setFieldValue("deliveryMethod", "takeaway")
 												}
-												disabled
 											>
 												<div className="flex flex-row items-center gap-2">
 													<img
@@ -937,9 +936,8 @@ const FormCustom = ({ cart, total }) => {
 				title="Está cerrado"
 			>
 				<p>
-					FELIZ NAVIDAD 🎁 Ayer regalamos 2.000 burgers en la Jirafa, déjennos
-					descansar, nos vemos mañana ❤️‍🔥 PD: Saca captura de esto, vale por 2x1
-					😎
+					FELIZ NAVIDAD 🎁 Se vendieron mas de 500 burgers wtff ❤️‍🔥 PD: Saca
+					captura de esto, vale por 2x1 😎
 				</p>
 			</AppleModal>
 			{/* Modal de alta demanda */}
