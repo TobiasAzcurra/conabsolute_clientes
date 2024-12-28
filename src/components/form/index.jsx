@@ -523,205 +523,203 @@ const FormCustom = ({ cart, total }) => {
 										/>
 									</div>
 								</div>
-
 								{/* Datos para la entrega */}
-								{values.deliveryMethod === "delivery" && (
-									<div className="flex justify-center flex-col mt-7 items-center">
-										<p className="text-2xl font-bold mb-2">
-											Datos para la entrega
-										</p>
-										{/* Botones para seleccionar método de envío */}
-										<div className="flex flex-row w-full gap-2 mb-4">
-											<button
-												type="button"
-												className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${
-													values.deliveryMethod === "delivery"
-														? "bg-black text-gray-100"
-														: "bg-gray-300 text-black"
-												}`}
-												onClick={() =>
-													setFieldValue("deliveryMethod", "delivery")
-												}
+								<div className="flex justify-center flex-col mt-7 items-center">
+									<p className="text-2xl font-bold mb-2">
+										Datos para la entrega
+									</p>
+									{/* Botones para seleccionar método de envío */}
+									<div className="flex flex-row w-full gap-2 mb-4">
+										<button
+											type="button"
+											className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${
+												values.deliveryMethod === "delivery"
+													? "bg-black text-gray-100"
+													: "bg-gray-300 text-black"
+											}`}
+											onClick={() =>
+												setFieldValue("deliveryMethod", "delivery")
+											}
+										>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 500 500"
+												className="h-8"
 											>
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 500 500"
-													className="h-8"
-												>
-													<path
-														d="M76.849,210.531C34.406,210.531,0,244.937,0,287.388c0,42.438,34.406,76.847,76.849,76.847 c30.989,0,57.635-18.387,69.789-44.819l18.258,14.078c0,0,134.168,0.958,141.538-3.206c0,0-16.65-45.469,4.484-64.688 c2.225-2.024,5.021-4.332,8.096-6.777c-3.543,8.829-5.534,18.45-5.534,28.558c0,42.446,34.403,76.846,76.846,76.846 c42.443,0,76.843-34.415,76.843-76.846c0-42.451-34.408-76.849-76.843-76.849c-0.697,0-1.362,0.088-2.056,0.102 c5.551-3.603,9.093-5.865,9.093-5.865l-5.763-5.127c0,0,16.651-3.837,12.816-12.167c-3.848-8.33-44.19-58.28-44.19-58.28 s7.146-15.373-7.634-26.261l-7.098,15.371c0,0-18.093-12.489-25.295-10.084c-7.205,2.398-18.005,3.603-21.379,8.884l-3.358,3.124 c0,0-0.95,5.528,4.561,13.693c0,0,55.482,17.05,58.119,29.537c0,0,3.848,7.933-12.728,9.844l-3.354,4.328l-8.896,0.479 l-16.082-36.748c0,0-15.381,4.082-23.299,10.323l1.201,6.24c0,0-64.599-43.943-125.362,21.137c0,0-44.909,12.966-76.37-26.897 c0,0-0.479-12.968-76.367-10.565l5.286,5.524c0,0-5.286,0.479-7.444,3.841c-2.158,3.358,1.2,6.961,18.494,6.961 c0,0,39.153,44.668,69.17,42.032l42.743,20.656l18.975,32.42c0,0,0.034,2.785,0.23,7.045c-4.404,0.938-9.341,1.979-14.579,3.09 C139.605,232.602,110.832,210.531,76.849,210.531z M390.325,234.081c29.395,0,53.299,23.912,53.299,53.299 c0,29.39-23.912,53.294-53.299,53.294c-29.394,0-53.294-23.912-53.294-53.294C337.031,257.993,360.932,234.081,390.325,234.081z M76.849,340.683c-29.387,0-53.299-23.913-53.299-53.295c0-29.395,23.912-53.299,53.299-53.299 c22.592,0,41.896,14.154,49.636,34.039c-28.26,6.011-56.31,11.99-56.31,11.99l3.619,19.933l55.339-2.444 C124.365,322.116,102.745,340.683,76.849,340.683z M169.152,295.835c1.571,5.334,3.619,9.574,6.312,11.394l-24.696,0.966 c1.058-3.783,1.857-7.666,2.338-11.662L169.152,295.835z"
+												<path
+													d="M76.849,210.531C34.406,210.531,0,244.937,0,287.388c0,42.438,34.406,76.847,76.849,76.847 c30.989,0,57.635-18.387,69.789-44.819l18.258,14.078c0,0,134.168,0.958,141.538-3.206c0,0-16.65-45.469,4.484-64.688 c2.225-2.024,5.021-4.332,8.096-6.777c-3.543,8.829-5.534,18.45-5.534,28.558c0,42.446,34.403,76.846,76.846,76.846 c42.443,0,76.843-34.415,76.843-76.846c0-42.451-34.408-76.849-76.843-76.849c-0.697,0-1.362,0.088-2.056,0.102 c5.551-3.603,9.093-5.865,9.093-5.865l-5.763-5.127c0,0,16.651-3.837,12.816-12.167c-3.848-8.33-44.19-58.28-44.19-58.28 s7.146-15.373-7.634-26.261l-7.098,15.371c0,0-18.093-12.489-25.295-10.084c-7.205,2.398-18.005,3.603-21.379,8.884l-3.358,3.124 c0,0-0.95,5.528,4.561,13.693c0,0,55.482,17.05,58.119,29.537c0,0,3.848,7.933-12.728,9.844l-3.354,4.328l-8.896,0.479 l-16.082-36.748c0,0-15.381,4.082-23.299,10.323l1.201,6.24c0,0-64.599-43.943-125.362,21.137c0,0-44.909,12.966-76.37-26.897 c0,0-0.479-12.968-76.367-10.565l5.286,5.524c0,0-5.286,0.479-7.444,3.841c-2.158,3.358,1.2,6.961,18.494,6.961 c0,0,39.153,44.668,69.17,42.032l42.743,20.656l18.975,32.42c0,0,0.034,2.785,0.23,7.045c-4.404,0.938-9.341,1.979-14.579,3.09 C139.605,232.602,110.832,210.531,76.849,210.531z M390.325,234.081c29.395,0,53.299,23.912,53.299,53.299 c0,29.39-23.912,53.294-53.299,53.294c-29.394,0-53.294-23.912-53.294-53.294C337.031,257.993,360.932,234.081,390.325,234.081z M76.849,340.683c-29.387,0-53.299-23.913-53.299-53.295c0-29.395,23.912-53.299,53.299-53.299 c22.592,0,41.896,14.154,49.636,34.039c-28.26,6.011-56.31,11.99-56.31,11.99l3.619,19.933l55.339-2.444 C124.365,322.116,102.745,340.683,76.849,340.683z M169.152,295.835c1.571,5.334,3.619,9.574,6.312,11.394l-24.696,0.966 c1.058-3.783,1.857-7.666,2.338-11.662L169.152,295.835z"
+													fill="currentColor"
+												/>
+											</svg>
+											Delivery
+										</button>
+										<button
+											type="button"
+											className={`h-20 flex-1 flex-col font-bold items-center flex justify-center   rounded-lg ${
+												values.deliveryMethod === "takeaway"
+													? "bg-black text-gray-100"
+													: "bg-gray-300 text-black"
+											}`}
+											onClick={() =>
+												setFieldValue("deliveryMethod", "takeaway")
+											}
+										>
+											<div className="flex flex-row items-center gap-2">
+												<img
+													src={isologo}
+													className={`h-4 ${
+														values.deliveryMethod === "takeaway"
+															? "invert brightness-0"
+															: "brightness-0"
+													}`}
+													alt=""
+												/>
+												<p className="font-bold text-">Retiro</p>
+											</div>
+											<p className="font-light text-xs">Buenos Aires 618</p>
+										</button>
+									</div>
+									<div className="w-full items-center rounded-3xl border-2 border-black">
+										<MapDirection
+											setUrl={setUrl}
+											setValidarUbi={setValidarUbi}
+											setNoEncontre={setNoEncontre}
+											setFieldValue={setFieldValue}
+										/>
+
+										<ErrorMessage
+											name="address"
+											component="span"
+											className="text-sm text-red-main font-coolvetica font-light"
+										/>
+
+										{noEncontre && (
+											<div className="flex flex-row  justify-between px-3 h-10 items-center ">
+												<div className="flex flex-row gap-2">
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														viewBox="0 0 24 24"
 														fill="currentColor"
-													/>
-												</svg>
-												Delivery
-											</button>
-											<button
-												type="button"
-												className={`h-20 flex-1 flex-col font-bold items-center flex justify-center   rounded-lg ${
-													values.deliveryMethod === "takeaway"
-														? "bg-black text-gray-100"
-														: "bg-gray-300 text-black"
-												}`}
-												onClick={() =>
-													setFieldValue("deliveryMethod", "takeaway")
-												}
-											>
-												<div className="flex flex-row items-center gap-2">
-													<img
-														src={isologo}
-														className="h-4 brightness-0"
-														alt=""
-													/>
-													<p className="font-bold text-">Retiro</p>
-												</div>
-												<p className="font-light text-xs">Aun no disponible</p>
-											</button>
-										</div>
-										<div className="w-full items-center rounded-3xl border-2 border-black">
-											<MapDirection
-												setUrl={setUrl}
-												setValidarUbi={setValidarUbi}
-												setNoEncontre={setNoEncontre}
-												setFieldValue={setFieldValue}
-											/>
-
-											<ErrorMessage
-												name="address"
-												component="span"
-												className="text-sm text-red-main font-coolvetica font-light"
-											/>
-
-											{noEncontre && (
-												<div className="flex flex-row  justify-between px-3 h-10 items-center ">
-													<div className="flex flex-row gap-2">
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															fill="currentColor"
-															className="h-6"
-														>
-															<path
-																fillRule="evenodd"
-																d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
-																clipRule="evenodd"
-															/>
-														</svg>
-														<MyTextInput
-															name="address"
-															type="text"
-															placeholder="Tu dirección"
-															className="bg-white text-opacity-20 text-black outline-none px-2"
+														className="h-6"
+													>
+														<path
+															fillRule="evenodd"
+															d="m11.54 22.351.07.04.028.016a.76.76 0 0 0 .723 0l.028-.015.071-.041a16.975 16.975 0 0 0 1.144-.742 19.58 19.58 0 0 0 2.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 0 0-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 0 0 2.682 2.282 16.975 16.975 0 0 0 1.145.742ZM12 13.5a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+															clipRule="evenodd"
 														/>
-													</div>
+													</svg>
+													<MyTextInput
+														name="address"
+														type="text"
+														placeholder="Tu dirección"
+														className="bg-white text-opacity-20 text-black outline-none px-2"
+													/>
 												</div>
-											)}
+											</div>
+										)}
 
-											{/* Campo para referencias */}
-											<div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
+										{/* Campo para referencias */}
+										<div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												className="h-6"
+											>
+												<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+											</svg>
+
+											<MyTextInput
+												label="Referencias"
+												name="references"
+												type="text"
+												placeholder="¿Referencias? Ej: Casa de portón negro"
+												autoComplete="off"
+												className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+											/>
+										</div>
+										{/* Campo para el número de teléfono */}
+										<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
+											<div className="flex flex-row items-center gap-2">
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													viewBox="0 0 24 24"
 													fill="currentColor"
 													className="h-6"
 												>
-													<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+													<path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
+													<path
+														fillRule="evenodd"
+														d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
+														clipRule="evenodd"
+													/>
 												</svg>
 
-												<MyTextInput
-													label="Referencias"
-													name="references"
-													type="text"
-													placeholder="¿Referencias? Ej: Casa de portón negro"
-													autoComplete="off"
-													className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-												/>
-											</div>
-											{/* Campo para el número de teléfono */}
-											<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
-												<div className="flex flex-row items-center gap-2">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														viewBox="0 0 24 24"
-														fill="currentColor"
-														className="h-6"
-													>
-														<path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
-														<path
-															fillRule="evenodd"
-															d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
-															clipRule="evenodd"
-														/>
-													</svg>
-
-													<div className="flex flex-col w-full">
-														<MyTextInput
-															name="phone"
-															type="text"
-															placeholder="Tu número de teléfono"
-															autoComplete="phone"
-															className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-														/>
-														<ErrorMessage
-															name="phone"
-															component="span"
-															className="text-sm text-red-main font-coolvetica font-light mt-1"
-														/>
-													</div>
-												</div>
-											</div>
-
-											{/* Campo para reservar hora */}
-											<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
-												<div className="flex flex-row items-center gap-2">
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														viewBox="0 0 24 24"
-														fill="currentColor"
-														className="h-6"
-													>
-														<path
-															fillRule="evenodd"
-															d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-															clipRule="evenodd"
-														/>
-													</svg>
-													<Field
-														as="select"
-														name="hora"
-														className={`custom-select ${
-															selectedHora === ""
-																? "text-gray-400"
-																: "text-black"
-														}`}
-														value={selectedHora}
-														onChange={(e) => {
-															handleChange(e);
-															setFieldValue("hora", e.target.value); // Asegurar que Formik capture el valor
-														}}
-													>
-														<option value="" disabled>
-															¿Quieres reservar para más tarde?
-														</option>
-														<option value="20:30">20:30</option>
-														<option value="21:00">21:00</option>
-														<option value="21:30">21:30</option>
-														<option value="22:00">22:00</option>
-														<option value="22:30">22:30</option>
-														<option value="23:00">23:00</option>
-														<option value="23:30">23:30</option>
-														<option value="00:00">00:00</option>
-													</Field>
+												<div className="flex flex-col w-full">
+													<MyTextInput
+														name="phone"
+														type="text"
+														placeholder="Tu número de teléfono"
+														autoComplete="phone"
+														className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+													/>
 													<ErrorMessage
-														name="hora"
+														name="phone"
 														component="span"
 														className="text-sm text-red-main font-coolvetica font-light mt-1"
 													/>
 												</div>
 											</div>
 										</div>
-									</div>
-								)}
 
+										{/* Campo para reservar hora */}
+										<div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
+											<div className="flex flex-row items-center gap-2">
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 24 24"
+													fill="currentColor"
+													className="h-6"
+												>
+													<path
+														fillRule="evenodd"
+														d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+														clipRule="evenodd"
+													/>
+												</svg>
+												<Field
+													as="select"
+													name="hora"
+													className={`custom-select ${
+														selectedHora === "" ? "text-gray-400" : "text-black"
+													}`}
+													value={selectedHora}
+													onChange={(e) => {
+														handleChange(e);
+														setFieldValue("hora", e.target.value); // Asegurar que Formik capture el valor
+													}}
+												>
+													<option value="" disabled>
+														¿Quieres reservar para más tarde?
+													</option>
+													<option value="20:30">20:30</option>
+													<option value="21:00">21:00</option>
+													<option value="21:30">21:30</option>
+													<option value="22:00">22:00</option>
+													<option value="22:30">22:30</option>
+													<option value="23:00">23:00</option>
+													<option value="23:30">23:30</option>
+													<option value="00:00">00:00</option>
+												</Field>
+												<ErrorMessage
+													name="hora"
+													component="span"
+													className="text-sm text-red-main font-coolvetica font-light mt-1"
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
 								{/* Método de pago y cupones */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold mb-2">Método de pago</p>
@@ -856,7 +854,6 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 									</div>
 								</div>
-
 								{/* Resumen */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold">Resumen</p>
@@ -885,7 +882,6 @@ const FormCustom = ({ cart, total }) => {
 										</p>
 									</div>
 								</div>
-
 								{/* Botón de envío */}
 								{values.paymentMethod === "mercadopago" ? (
 									<Payment
