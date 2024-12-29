@@ -14,10 +14,8 @@ const UpdatedPedidoSection = ({
 	isDeleting,
 	handleCancelClick,
 }) => {
-	// Estado para controlar la visibilidad de las secciones
 	const [isModifyOrderExpanded, setIsModifyOrderExpanded] = useState(false);
 
-	// Preparar los arrays de productos
 	const burgersArray = Object.values(burgers).map((product) => ({
 		...product,
 		category: "burger",
@@ -46,19 +44,16 @@ const UpdatedPedidoSection = ({
 		return "/ruta/a/imagen/default.png";
 	};
 
-	// Función para obtener la imagen del producto basada en su nombre
 	const getProductImage = (productName) => {
 		const product = allProducts.find((p) => p.name === productName);
 		return product?.img || null;
 	};
 
-	// Función para obtener la categoría del producto basada en su nombre
 	const getProductCategory = (productName) => {
 		const product = allProducts.find((p) => p.name === productName);
 		return product?.category || "burger";
 	};
 
-	// Función para convertir los items del pedido al formato esperado por CartCard
 	const mapOrderItemToCartFormat = (orderItem) => {
 		const category = getProductCategory(orderItem.burger);
 		const img = getProductImage(orderItem.burger);
@@ -85,12 +80,10 @@ const UpdatedPedidoSection = ({
 		}
 	}, [currentOrder]);
 
-	// Funciones dummy para mantener la interfaz de CartCard
 	const decrementQuantity = () => {};
 	const incrementQuantity = () => {};
 	const deleteItem = () => {};
 
-	// Manejador para expandir/contraer la sección de modificación de pedido
 	const toggleModifyOrder = () => {
 		setIsModifyOrderExpanded(!isModifyOrderExpanded);
 	};
@@ -99,10 +92,10 @@ const UpdatedPedidoSection = ({
 		<div className="flex flex-col font-coolvetica w-full">
 			{/* Pregunta */}
 			<div
-				className="w-full mt-2   flex-col flex cursor-pointer"
+				className="w-full mt-2 flex-col flex cursor-pointer"
 				onClick={toggleModifyOrder}
 			>
-				<div className="flex flex-row   gap-2">
+				<div className="flex flex-row gap-2">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
@@ -112,8 +105,8 @@ const UpdatedPedidoSection = ({
 						<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
 						<path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
 					</svg>
-					<div className="flex flex-col  ">
-						<p className="font-bold  text-left">
+					<div className="flex flex-col">
+						<p className="font-bold text-left">
 							Podes agregar productos a tu pedido!
 							<br /> Por logistica:
 							<br /> Cuando se cocine esta opcion desaparece y
@@ -122,20 +115,20 @@ const UpdatedPedidoSection = ({
 					</div>
 				</div>
 			</div>
-			<div className="w-full justify-center  flex">
+
+			<div className="w-full justify-center flex">
 				<img
 					src={arrow}
-					className={`h-2 w-1.5 mt-4  transition-transform duration-300 ${
-						isModifyOrderExpanded ? "-rotate-90" : "rotate-90"
+					className={`h-2 w-1.5 mt-4 transform ${
+						isModifyOrderExpanded ? "-rotate-90" : "arrow-bounce"
 					}`}
 					alt=""
 				/>
 			</div>
 
-			{/* Detalle del pedido y Agregar más items - Solo visible cuando isModifyOrderExpanded es true */}
+			{/* Expanded content */}
 			{isModifyOrderExpanded && (
 				<>
-					{/* Detalle del pedido */}
 					<div
 						className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
 						style={{
@@ -161,7 +154,6 @@ const UpdatedPedidoSection = ({
 						</div>
 					</div>
 
-					{/* Agrega mas items al pedido */}
 					<div className="flex justify-center flex-col mt-6 items-start w-full">
 						<p className="text-xl font-bold text-center mx-auto mb-4">
 							Enorgullese a Anhelo. Agrega algo:
@@ -200,7 +192,7 @@ const UpdatedPedidoSection = ({
 											isCart={false}
 											price={product.price}
 											isPedidoComponente={true}
-											currentOrder={currentOrder} // Add this prop
+											currentOrder={currentOrder}
 										/>
 									))}
 							</div>
@@ -211,23 +203,36 @@ const UpdatedPedidoSection = ({
 
 			<style>
 				{`
-					.custom-scrollbar::-webkit-scrollbar {
-						height: 8px;
-					}
-					.custom-scrollbar::-webkit-scrollbar-track {
-						background: #f3f4f6;
-					}
-					.custom-scrollbar::-webkit-scrollbar-thumb {
-						background: #f3f4f6;
-						border-radius: 10px;
-						border: 2px solid transparent;
-						background-clip: padding-box;
-					}
-					.custom-scrollbar {
-						scrollbar-width: thin;
-						scrollbar-color: #f3f4f6 #f3f4f6;
-					}
-				`}
+                    @keyframes bounce {
+                        0%, 100% {
+                            transform: translateY(0) rotate(90deg);
+                        }
+                        50% {
+                            transform: translateY(3px) rotate(90deg);
+                        }
+                    }
+
+                    .arrow-bounce {
+                        animation: bounce 1.5s ease-in-out infinite;
+                    }
+
+                    .custom-scrollbar::-webkit-scrollbar {
+                        height: 8px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                        background: #f3f4f6;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background: #f3f4f6;
+                        border-radius: 10px;
+                        border: 2px solid transparent;
+                        background-clip: padding-box;
+                    }
+                    .custom-scrollbar {
+                        scrollbar-width: thin;
+                        scrollbar-color: #f3f4f6 #f3f4f6;
+                    }
+                `}
 			</style>
 		</div>
 	);
