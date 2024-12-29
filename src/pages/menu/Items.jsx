@@ -48,7 +48,7 @@ const Items = ({
 			</div>
 			<div
 				className={`font-coolvetica text-center ${
-					isCarrito
+					isCarrito || pedidoComponente
 						? "flex flex-col items-center justify-between h-[93px]"
 						: "h-[50px]"
 				}`}
@@ -65,11 +65,20 @@ const Items = ({
 						/>
 					</div>
 				)}
+				{pedidoComponente && selectedItem && (
+					<div className="pb-3">
+						<QuickAddToCart
+							product={selectedItem}
+							animateFromCenter={true}
+							pedidoComponente={pedidoComponente}
+						/>
+					</div>
+				)}
 			</div>
 		</>
 	);
 
-	if (isCarrito) {
+	if (isCarrito || pedidoComponente) {
 		// Cuando estás en /carrito, renderizamos un <div> en lugar de un <Link>
 		return <div className={className}>{content}</div>;
 	} else {
