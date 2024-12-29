@@ -735,9 +735,15 @@ const Pedido = () => {
 														/>
 													</svg>
 													<p className="text-black font-coolvetica font-medium">
-														Entrega estimada:{" "}
-														{sumarMinutos(currentOrder.hora, 30)} a{" "}
-														{sumarMinutos(currentOrder.hora, 50)}
+														{currentOrder.direccion === ""
+															? `Retirar entre ${sumarMinutos(
+																	currentOrder.hora,
+																	15
+															  )} y ${sumarMinutos(currentOrder.hora, 25)}`
+															: `Entrega estimada: ${sumarMinutos(
+																	currentOrder.hora,
+																	30
+															  )} a ${sumarMinutos(currentOrder.hora, 50)}`}
 													</p>
 												</div>
 
