@@ -6,7 +6,7 @@ const Items = ({
 	img,
 	name,
 	handleItemClick,
-	pedidoComponente = false,
+	isPedidoComponente = false,
 }) => {
 	// Importamos useLocation para obtener la ruta actual
 	const location = useLocation();
@@ -27,7 +27,7 @@ const Items = ({
 		: "border border-black border-opacity-20";
 
 	const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
-		isCarrito || pedidoComponente ? "w-[110px]" : "w-full max-w-[200px]"
+		isCarrito || isPedidoComponente ? "w-[110px]" : "w-full max-w-[200px]"
 	}`;
 
 	// Ajustamos la fuente de la imagen solo si estamos en /carrito
@@ -48,7 +48,7 @@ const Items = ({
 			</div>
 			<div
 				className={`font-coolvetica text-center ${
-					isCarrito || pedidoComponente
+					isCarrito || isPedidoComponente
 						? "flex flex-col items-center justify-between h-[93px]"
 						: "h-[50px]"
 				}`}
@@ -61,16 +61,16 @@ const Items = ({
 						<QuickAddToCart
 							product={selectedItem}
 							animateFromCenter={true}
-							pedidoComponente={pedidoComponente}
+							isPedidoComponente={isPedidoComponente}
 						/>
 					</div>
 				)}
-				{pedidoComponente && selectedItem && (
+				{isPedidoComponente && selectedItem && (
 					<div className="pb-3">
 						<QuickAddToCart
 							product={selectedItem}
 							animateFromCenter={true}
-							pedidoComponente={pedidoComponente}
+							isPedidoComponente={isPedidoComponente}
 						/>
 					</div>
 				)}
@@ -78,7 +78,7 @@ const Items = ({
 		</>
 	);
 
-	if (isCarrito || pedidoComponente) {
+	if (isCarrito || isPedidoComponente) {
 		// Cuando estás en /carrito, renderizamos un <div> en lugar de un <Link>
 		return <div className={className}>{content}</div>;
 	} else {

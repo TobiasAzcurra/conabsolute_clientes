@@ -15,7 +15,7 @@ const QuickAddToCart = ({
 	isOrderItem = false,
 	onOrderQuantityChange = null,
 	initialOrderQuantity = null,
-	pedidoComponente = false,
+	isPedidoComponente = false,
 }) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
