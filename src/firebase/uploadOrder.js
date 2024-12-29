@@ -7,6 +7,7 @@ import {
 	query,
 	where,
 	updateDoc,
+	addDoc,
 } from "firebase/firestore";
 import { obtenerFechaActual } from "../helpers/currencyFormat";
 import { v4 as uuidv4 } from "uuid";
@@ -35,6 +36,100 @@ export const UploadOrder = async (orderDetail) => {
 		return pedidoId;
 	} catch (error) {
 		console.error("❌ Error al subir el pedido:", error);
+		throw error;
+	}
+};
+
+export const addProductToOrder = async (orderId, product, quantity) => {
+	const firestore = getFirestore();
+	const fechaActual = obtenerFechaActual();
+	const [dia, mes, anio] = fechaActual.split("/");
+
+	console.log("🔍 Iniciando addProductToOrder con:", {
+		orderId,
+		product,
+		quantity,
+		fecha: fechaActual,
+	});
+
+	const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+	const pedidoDocRef = doc(pedidosCollectionRef, dia);
+
+	try {
+		await runTransaction(firestore, async (transaction) => {
+			console.log("📝 Iniciando transacción");
+
+			const docSnapshot = await transaction.get(pedidoDocRef);
+			if (!docSnapshot.exists()) {
+				console.error("❌ Documento no encontrado para la fecha:", fechaActual);
+				throw new Error("El pedido no existe para la fecha especificada.");
+			}
+
+			const existingData = docSnapshot.data();
+			console.log("📄 Datos existentes:", existingData);
+
+			const pedidosDelDia = existingData.pedidos || [];
+			const pedidoIndex = pedidosDelDia.findIndex(
+				(pedido) => pedido.id === orderId
+			);
+
+			console.log("🔎 Buscando pedido con ID:", orderId);
+			console.log("📍 Índice encontrado:", pedidoIndex);
+
+			if (pedidoIndex === -1) {
+				console.error("❌ Pedido no encontrado con ID:", orderId);
+				throw new Error("Pedido no encontrado");
+			}
+
+			const pedido = pedidosDelDia[pedidoIndex];
+			console.log("🧾 Pedido encontrado:", pedido);
+
+			// Crear nuevo item para el pedido
+			const newOrderItem = {
+				burger: product.name,
+				priceBurger: product.price,
+				quantity: quantity,
+				toppings: product.toppings || [],
+				subTotal: product.price * quantity,
+				costoBurger: product.costoBurger || 0, // Asegúrate de incluir esto si es necesario
+			};
+
+			console.log("🆕 Nuevo item a agregar:", newOrderItem);
+
+			// Agregar el nuevo item al detallePedido
+			pedido.detallePedido.push(newOrderItem);
+
+			// Recalcular totales del pedido
+			pedido.subTotal = pedido.detallePedido.reduce(
+				(sum, item) => sum + item.subTotal,
+				0
+			);
+			pedido.total = pedido.subTotal + (pedido.envio || 0);
+
+			console.log("💰 Nuevos totales:", {
+				subTotal: pedido.subTotal,
+				total: pedido.total,
+			});
+
+			// Actualizar el pedido en el array
+			pedidosDelDia[pedidoIndex] = pedido;
+
+			// Actualizar el documento
+			const updateData = {
+				...existingData,
+				pedidos: pedidosDelDia,
+			};
+
+			console.log("📤 Datos a actualizar:", updateData);
+
+			transaction.set(pedidoDocRef, updateData);
+			console.log("✅ Transacción completada");
+		});
+
+		console.log("✅ Producto agregado al pedido exitosamente");
+		return true;
+	} catch (error) {
+		console.error("❌ Error al agregar producto al pedido:", error);
 		throw error;
 	}
 };

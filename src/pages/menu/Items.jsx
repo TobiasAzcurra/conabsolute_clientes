@@ -5,6 +5,7 @@ const Items = ({
 	selectedItem,
 	img,
 	name,
+	currentOrder,
 	handleItemClick,
 	isPedidoComponente = false,
 }) => {
@@ -58,11 +59,7 @@ const Items = ({
 				</h5>
 				{isCarrito && selectedItem && (
 					<div className="pb-3">
-						<QuickAddToCart
-							product={selectedItem}
-							animateFromCenter={true}
-							isPedidoComponente={isPedidoComponente}
-						/>
+						<QuickAddToCart product={selectedItem} animateFromCenter={true} />
 					</div>
 				)}
 				{isPedidoComponente && selectedItem && (
@@ -71,6 +68,7 @@ const Items = ({
 							product={selectedItem}
 							animateFromCenter={true}
 							isPedidoComponente={isPedidoComponente}
+							currentOrder={currentOrder}
 						/>
 					</div>
 				)}

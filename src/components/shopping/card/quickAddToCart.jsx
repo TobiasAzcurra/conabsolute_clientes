@@ -7,6 +7,7 @@ import {
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { addProductToOrder } from "../../../firebase/uploadOrder";
 
 const QuickAddToCart = ({
 	product,
@@ -16,12 +17,12 @@ const QuickAddToCart = ({
 	onOrderQuantityChange = null,
 	initialOrderQuantity = null,
 	isPedidoComponente = false,
+	currentOrder = null,
 }) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
 	const location = useLocation();
 
-	// Validar que el producto tenga una categoría
 	if (!product.category) {
 		console.warn(
 			"El producto no tiene una categoría definida. Se usará 'default'.",
@@ -29,11 +30,9 @@ const QuickAddToCart = ({
 		);
 	}
 
-	// Definir los toppings efectivos
 	const effectiveToppings =
 		toppings && toppings.length > 0 ? toppings : product.toppings || [];
 
-	// Función auxiliar para comparar toppings
 	const compareToppings = (toppings1, toppings2) => {
 		if (!toppings1 || !toppings2) return false;
 		if (toppings1.length !== toppings2.length) return false;
@@ -42,7 +41,6 @@ const QuickAddToCart = ({
 		return JSON.stringify(sorted1) === JSON.stringify(sorted2);
 	};
 
-	// Encontrar el ítem en el carrito que coincide con el producto y toppings
 	const cartItem = !isOrderItem
 		? cart.find(
 				(item) =>
@@ -52,7 +50,6 @@ const QuickAddToCart = ({
 		  )
 		: null;
 
-	// Usar la cantidad inicial del pedido si es un item de pedido, si no usar la cantidad del carrito
 	const initialQuantity = isOrderItem
 		? initialOrderQuantity || product.quantity
 		: cartItem
@@ -65,7 +62,6 @@ const QuickAddToCart = ({
 	const quantityRef = useRef(quantity);
 	const pendingUpdateRef = useRef(null);
 
-	// Actualizar el estado local cuando el carrito o la cantidad inicial cambian
 	useEffect(() => {
 		if (isOrderItem) {
 			setQuantity(initialOrderQuantity || product.quantity);
@@ -76,7 +72,6 @@ const QuickAddToCart = ({
 		}
 	}, [cartItem, initialOrderQuantity, isOrderItem, product.quantity]);
 
-	// Limpiar timeout al desmontar
 	useEffect(() => {
 		return () => {
 			if (pendingUpdateRef.current) {
@@ -85,7 +80,6 @@ const QuickAddToCart = ({
 		};
 	}, []);
 
-	// Manejar incremento de cantidad
 	const handleIncrement = () => {
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
@@ -94,7 +88,6 @@ const QuickAddToCart = ({
 		});
 	};
 
-	// Manejar decremento de cantidad
 	const handleDecrement = () => {
 		if (quantity > 0) {
 			setQuantity((prevQuantity) => {
@@ -105,61 +98,98 @@ const QuickAddToCart = ({
 		}
 	};
 
-	// Iniciar el proceso de agregar al carrito
 	const startAddingProcess = () => {
+		console.log("🔵 Iniciando startAddingProcess");
+		console.log("📦 Props recibidos:", {
+			isPedidoComponente,
+			currentOrder,
+			product,
+			quantity: quantityRef.current,
+		});
+
 		setIsEditing(true);
 		setIsAdding(true);
 
-		// Limpiar cualquier actualización pendiente
 		if (pendingUpdateRef.current) {
 			clearTimeout(pendingUpdateRef.current);
 		}
 
-		pendingUpdateRef.current = setTimeout(() => {
-			if (!isOrderItem) {
-				// Lógica original del carrito
-				if (quantityRef.current === 0 && cartItem) {
-					const itemIndex = cart.findIndex(
-						(item) =>
-							item.name === product.name &&
-							item.category === (product.category || "default") &&
-							compareToppings(item.toppings, effectiveToppings)
-					);
-					dispatch(removeItem(itemIndex));
-				} else if (quantityRef.current >= 1) {
-					if (cartItem) {
-						const updatePayload = {
-							name: product.name,
-							category: product.category || "default",
-							toppings: effectiveToppings,
-							quantity: quantityRef.current,
-						};
-						dispatch(updateItemQuantity(updatePayload));
-					} else {
-						const newItem = {
-							name: product.name,
-							price: product.price,
-							img: product.img,
-							toppings: effectiveToppings,
-							quantity: quantityRef.current,
-							category: product.category || "default",
-						};
-						dispatch(addItem(newItem));
-					}
-				}
-			} else if (onOrderQuantityChange) {
-				// Solo actualizar Firestore cuando la animación termine
-				onOrderQuantityChange(quantityRef.current);
-			}
+		pendingUpdateRef.current = setTimeout(async () => {
+			try {
+				if (isPedidoComponente && currentOrder?.id) {
+					console.log("🎯 Detectado modo pedido componente");
+					console.log("🔑 ID del pedido:", currentOrder.id);
+					console.log("📝 Producto a agregar:", {
+						...product,
+						toppings: effectiveToppings,
+					});
+					console.log("🔢 Cantidad:", quantityRef.current);
 
-			setIsAdding(false);
-			setTimeout(() => {
-				setIsEditing(false);
-			}, 300);
+					// Agregar al pedido existente
+					await addProductToOrder(
+						currentOrder.id,
+						{
+							...product,
+							toppings: effectiveToppings,
+						},
+						quantityRef.current
+					);
+
+					console.log("✅ Producto agregado exitosamente al pedido");
+
+					// Actualizar UI si es necesario
+					if (onOrderQuantityChange) {
+						console.log("🔄 Actualizando UI");
+						onOrderQuantityChange(quantityRef.current);
+					}
+				} else if (!isOrderItem) {
+					console.log("🛒 Procesando lógica del carrito normal");
+					// Lógica original del carrito
+					if (quantityRef.current === 0 && cartItem) {
+						const itemIndex = cart.findIndex(
+							(item) =>
+								item.name === product.name &&
+								item.category === (product.category || "default") &&
+								compareToppings(item.toppings, effectiveToppings)
+						);
+						dispatch(removeItem(itemIndex));
+					} else if (quantityRef.current >= 1) {
+						if (cartItem) {
+							const updatePayload = {
+								name: product.name,
+								category: product.category || "default",
+								toppings: effectiveToppings,
+								quantity: quantityRef.current,
+							};
+							dispatch(updateItemQuantity(updatePayload));
+						} else {
+							const newItem = {
+								name: product.name,
+								price: product.price,
+								img: product.img,
+								toppings: effectiveToppings,
+								quantity: quantityRef.current,
+								category: product.category || "default",
+							};
+							dispatch(addItem(newItem));
+						}
+					}
+				} else if (onOrderQuantityChange) {
+					console.log("🔄 Ejecutando onOrderQuantityChange");
+					onOrderQuantityChange(quantityRef.current);
+				}
+			} catch (error) {
+				console.error("❌ Error en startAddingProcess:", error);
+			} finally {
+				console.log("🏁 Finalizando proceso de agregar");
+				setIsAdding(false);
+				setTimeout(() => {
+					setIsEditing(false);
+				}, 300);
+			}
 		}, 2000);
 	};
 
-	// Determinar la página actual para animaciones
 	const isCarritoPage = location.pathname === "/carrito";
 	const shouldAnimateBothSides =
 		/^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(location.pathname) ||

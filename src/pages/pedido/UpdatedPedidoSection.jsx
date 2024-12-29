@@ -192,11 +192,12 @@ const UpdatedPedidoSection = ({
 											}
 											name={product.name}
 											handleItemClick={() => {
-												console.log("🛍️ Producto seleccionado:", product);
+												console.log("🛍️ Selected product:", product);
 											}}
 											isCart={false}
 											price={product.price}
 											isPedidoComponente={true}
+											currentOrder={currentOrder} // Add this prop
 										/>
 									))}
 							</div>
