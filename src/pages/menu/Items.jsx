@@ -1,7 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
 
-const Items = ({ selectedItem, img, name, handleItemClick }) => {
+const Items = ({
+	selectedItem,
+	img,
+	name,
+	handleItemClick,
+	pedidoComponente = false,
+}) => {
 	// Importamos useLocation para obtener la ruta actual
 	const location = useLocation();
 
@@ -21,7 +27,7 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 		: "border border-black border-opacity-20";
 
 	const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
-		isCarrito ? "w-[110px]" : "w-full max-w-[200px]"
+		isCarrito || pedidoComponente ? "w-[110px]" : "w-full max-w-[200px]"
 	}`;
 
 	// Ajustamos la fuente de la imagen solo si estamos en /carrito
@@ -52,7 +58,11 @@ const Items = ({ selectedItem, img, name, handleItemClick }) => {
 				</h5>
 				{isCarrito && selectedItem && (
 					<div className="pb-3">
-						<QuickAddToCart product={selectedItem} animateFromCenter={true} />
+						<QuickAddToCart
+							product={selectedItem}
+							animateFromCenter={true}
+							pedidoComponente={pedidoComponente}
+						/>
 					</div>
 				)}
 			</div>
