@@ -6,7 +6,7 @@ import handleSubmit from "./handleSubmit";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addLastCart } from "../../redux/cart/cartSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { MapDirection } from "./MapDirection";
 import { canjearVoucher } from "../../firebase/validateVoucher";
 import Payment from "../mercadopago/Payment";
@@ -382,6 +382,75 @@ const FormCustom = ({ cart, total }) => {
 		return adjustedTime;
 	};
 
+	// Function to get available time slots
+	const getAvailableTimeSlots = () => {
+		const now = new Date();
+		const currentHour = now.getHours();
+		const currentMinute = now.getMinutes();
+
+		// Define all possible time slots
+		const allTimeSlots = [
+			"20:30",
+			"21:00",
+			"21:30",
+			"22:00",
+			"22:30",
+			"23:00",
+			"23:30",
+			"00:00",
+		];
+
+		// Calculate the next 30-minute slot
+		// First, round up to the next 30 minutes
+		const nextSlotMinutes =
+			Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
+		const nextSlotHour = Math.floor(nextSlotMinutes / 60);
+		const nextSlotMinute = nextSlotMinutes % 60;
+
+		// Filter time slots
+		return allTimeSlots.filter((timeSlot) => {
+			let [slotHour, slotMinute] = timeSlot.split(":").map(Number);
+
+			// Handle midnight (00:00) special case
+			if (slotHour === 0) slotHour = 24;
+
+			// Convert both times to minutes for comparison
+			const slotTimeInMinutes = slotHour * 60 + slotMinute;
+			const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
+
+			return slotTimeInMinutes >= nextValidTimeInMinutes;
+		});
+	};
+
+	// TimeSelector component
+	const TimeSelector = ({ selectedHora, handleChange, setFieldValue }) => {
+		const availableTimeSlots = useMemo(getAvailableTimeSlots, []);
+
+		return (
+			<Field
+				as="select"
+				name="hora"
+				className={`custom-select ${
+					selectedHora === "" ? "text-gray-400" : "text-black"
+				}`}
+				value={selectedHora}
+				onChange={(e) => {
+					handleChange(e);
+					setFieldValue("hora", e.target.value);
+				}}
+			>
+				<option value="" disabled>
+					¿Quieres reservar para más tarde?
+				</option>
+				{availableTimeSlots.map((timeSlot) => (
+					<option key={timeSlot} value={timeSlot}>
+						{timeSlot}
+					</option>
+				))}
+			</Field>
+		);
+	};
+
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style>{`
@@ -699,30 +768,11 @@ const FormCustom = ({ cart, total }) => {
 														clipRule="evenodd"
 													/>
 												</svg>
-												<Field
-													as="select"
-													name="hora"
-													className={`custom-select ${
-														selectedHora === "" ? "text-gray-400" : "text-black"
-													}`}
-													value={selectedHora}
-													onChange={(e) => {
-														handleChange(e);
-														setFieldValue("hora", e.target.value); // Asegurar que Formik capture el valor
-													}}
-												>
-													<option value="" disabled>
-														¿Quieres reservar para más tarde?
-													</option>
-													<option value="20:30">20:30</option>
-													<option value="21:00">21:00</option>
-													<option value="21:30">21:30</option>
-													<option value="22:00">22:00</option>
-													<option value="22:30">22:30</option>
-													<option value="23:00">23:00</option>
-													<option value="23:30">23:30</option>
-													<option value="00:00">00:00</option>
-												</Field>
+												<TimeSelector
+													selectedHora={selectedHora}
+													handleChange={handleChange}
+													setFieldValue={setFieldValue}
+												/>
 												<ErrorMessage
 													name="hora"
 													component="span"
