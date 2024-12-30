@@ -7,6 +7,7 @@ import drinks from "../../assets/drinks-v1.json";
 import box from "../../assets/box.png";
 import fries from "../../assets/fries.png";
 import arrow from "../../assets/arrowIcon.png";
+import { handleConfirmChanges } from "../../firebase/uploadOrder";
 
 const UpdatedPedidoSection = ({
 	currentOrder,
@@ -15,6 +16,7 @@ const UpdatedPedidoSection = ({
 	handleCancelClick,
 }) => {
 	const [isModifyOrderExpanded, setIsModifyOrderExpanded] = useState(false);
+	const [isConfirming, setIsConfirming] = useState(false);
 
 	const burgersArray = Object.values(burgers).map((product) => ({
 		...product,
@@ -67,7 +69,7 @@ const UpdatedPedidoSection = ({
 			img: img,
 			costoBurger: orderItem.costoBurger,
 			subTotal: orderItem.subTotal,
-			extra: orderItem.extra, // Agregamos la propiedad extra aquí
+			extra: orderItem.extra,
 		};
 	};
 
@@ -89,23 +91,26 @@ const UpdatedPedidoSection = ({
 		setIsModifyOrderExpanded(!isModifyOrderExpanded);
 	};
 
+	const onConfirmChanges = async () => {
+		setIsConfirming(true);
+		try {
+			await handleConfirmChanges(currentOrder.id);
+			console.log("✅ Cambios confirmados exitosamente");
+		} catch (error) {
+			console.error("❌ Error al confirmar los cambios:", error);
+		} finally {
+			setIsConfirming(false);
+		}
+	};
+
 	return (
-		<div className="flex flex-col justify-center  items-center font-coolvetica w-full">
+		<div className="flex flex-col justify-center items-center font-coolvetica w-full">
 			{/* Pregunta */}
 			<div
-				className="w-full mt-11 flex-col  px-4 flex cursor-pointer"
+				className="w-full mt-11 flex-col px-4 flex cursor-pointer"
 				onClick={toggleModifyOrder}
 			>
 				<div className="flex flex-col justify-center items-center">
-					{/* <svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 24 24"
-						fill="currentColor"
-						className="h-6 "
-					>
-						<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-						<path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-					</svg> */}
 					<p className="font-bold text-2xl text-center">
 						¡Podes agregar productos!
 						<br />
@@ -120,7 +125,7 @@ const UpdatedPedidoSection = ({
 
 			<img
 				src={arrow}
-				className={`h-2 w-1.5  transform ${
+				className={`h-2 w-1.5 transform ${
 					isModifyOrderExpanded ? "-rotate-90" : "arrow-bounce"
 				}`}
 				alt=""
@@ -204,38 +209,66 @@ const UpdatedPedidoSection = ({
 				</>
 			)}
 
+			{/* Confirm Changes Button */}
+			{currentOrder?.onEditByUser && (
+				<div className="w-full px-4 mt-8">
+					<div
+						onClick={onConfirmChanges}
+						className={`bg-green-500 w-full text-white font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300 hover:bg-green-600  ${
+							isConfirming ? "opacity-50 cursor-not-allowed" : ""
+						}`}
+					>
+						<div className="flex gap-2 items-center">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 24 24"
+								fill="currentColor"
+								className="h-6"
+							>
+								<path
+									fill-rule="evenodd"
+									d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+							Confirmar cambios
+						</div>
+					</div>
+				</div>
+			)}
+
 			<style>
 				{`
-                    @keyframes bounce {
-                        0%, 100% {
-                            transform: translateY(0) rotate(90deg);
-                        }
-                        50% {
-                            transform: translateY(3px) rotate(90deg);
-                        }
-                    }
+					@keyframes bounce {
+						0%, 100% {
+							transform: translateY(0) rotate(90deg);
+						}
+						50% {
+							transform: translateY(3px) rotate(90deg);
+						}
+					}
 
-                    .arrow-bounce {
-                        animation: bounce 1.5s ease-in-out infinite;
-                    }
+					.arrow-bounce {
+						animation: bounce 1.5s ease-in-out infinite;
+					}
 
-                    .custom-scrollbar::-webkit-scrollbar {
-                        height: 8px;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-track {
-                        background: #f3f4f6;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                        background: #f3f4f6;
-                        border-radius: 10px;
-                        border: 2px solid transparent;
-                        background-clip: padding-box;
-                    }
-                    .custom-scrollbar {
-                        scrollbar-width: thin;
-                        scrollbar-color: #f3f4f6 #f3f4f6;
-                    }
-                `}
+					.custom-scrollbar::-webkit-scrollbar {
+						height: 8px;
+					}
+					.custom-scrollbar::-webkit-scrollbar-track {
+						background: #f3f4f6;
+					}
+					.custom-scrollbar::-webkit-scrollbar-thumb {
+						background: #f3f4f6;
+						border-radius: 10px;
+						border: 2px solid transparent;
+						background-clip: padding-box;
+					}
+					.custom-scrollbar {
+						scrollbar-width: thin;
+						scrollbar-color: #f3f4f6 #f3f4f6;
+					}
+				`}
 			</style>
 		</div>
 	);
