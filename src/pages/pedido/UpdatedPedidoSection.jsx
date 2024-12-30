@@ -160,12 +160,46 @@ const UpdatedPedidoSection = ({
 								/>
 							))}
 						</div>
+						{/* Confirm Changes Button */}
+						{currentOrder?.onEditByUser && (
+							<div className="w-full px-4 mt-8">
+								<div
+									onClick={onConfirmChanges}
+									className={`bg-green-500 w-full text-white font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300 hover:bg-green-600  ${
+										isConfirming ? "opacity-50 cursor-not-allowed" : ""
+									}`}
+								>
+									<div className="flex gap-2 items-center">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 24 24"
+											fill="currentColor"
+											className="h-6"
+										>
+											<path
+												fill-rule="evenodd"
+												d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+												clip-rule="evenodd"
+											/>
+										</svg>
+										Confirmar pedido
+									</div>
+								</div>
+							</div>
+						)}
 					</div>
 
 					<div className="flex justify-center flex-col mt-6 items-start w-full">
-						<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
-							Enorgullese a Anhelo. Agrega algo:
-						</p>
+						{currentOrder?.onEditByUser ? (
+							<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
+								¿Algo más? Jajaj
+							</p>
+						) : (
+							<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
+								Enorgullece a Anhelo. Agrega algo:
+							</p>
+						)}
+
 						<div
 							className="flex gap-2 pl-4 pr-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
 							style={{
@@ -207,34 +241,6 @@ const UpdatedPedidoSection = ({
 						</div>
 					</div>
 				</>
-			)}
-
-			{/* Confirm Changes Button */}
-			{currentOrder?.onEditByUser && (
-				<div className="w-full px-4 mt-8">
-					<div
-						onClick={onConfirmChanges}
-						className={`bg-green-500 w-full text-white font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300 hover:bg-green-600  ${
-							isConfirming ? "opacity-50 cursor-not-allowed" : ""
-						}`}
-					>
-						<div className="flex gap-2 items-center">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								className="h-6"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-							Confirmar cambios
-						</div>
-					</div>
-				</div>
 			)}
 
 			<style>
