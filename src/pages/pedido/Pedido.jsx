@@ -768,11 +768,11 @@ const Pedido = () => {
 															/>
 														</svg>
 														<p className="text-black font-coolvetica font-medium">
-															Envío a cargo de:{" "}
+															Envio a cargo de:{" "}
 															{currentOrder.cadete !== "NO ASIGNADO"
 																? currentOrder.cadete.charAt(0).toUpperCase() +
 																  currentOrder.cadete.slice(1).toLowerCase()
-																: "Aún sin asignar"}
+																: "Aun sin asignar"}
 														</p>
 													</div>
 												)}
