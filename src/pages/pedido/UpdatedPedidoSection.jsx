@@ -108,9 +108,9 @@ const UpdatedPedidoSection = ({
 					<div className="flex flex-col">
 						<p className="font-bold text-left">
 							Podes agregar productos a tu pedido!
-							<br /> Por logistica:
-							<br /> Cuando se cocine esta opcion desaparece y
-							<br /> las modificaciones tienen limitaciones
+							<br /> Por logistica las modificaciones son limitadas y cuando se
+							cocine esta opcion desaparece!
+							<br />
 						</p>
 					</div>
 				</div>
