@@ -114,63 +114,67 @@ const QuickAddToCart = ({
 
 		pendingUpdateRef.current = setTimeout(async () => {
 			try {
-				// Validación de cantidad antes de proceder
-				if (quantityRef.current <= 0) {
-					console.log("❌ Cannot add product with quantity 0 or less");
-					setIsAdding(false);
-					setTimeout(() => setIsEditing(false), 300);
-					return;
-				}
-
 				if (isPedidoComponente && currentOrder?.id) {
-					// Fetch materials and products data for cost calculation
-					const materialesData = await ReadMateriales();
-					const productsData = await ReadData();
+					// Si el producto ya existe en el pedido, usamos updateOrderItemQuantity
+					if (product.orderIndex !== undefined) {
+						await updateOrderItemQuantity(
+							currentOrder.id,
+							obtenerFechaActual(),
+							product.orderIndex,
+							quantityRef.current
+						);
+					} else {
+						// Si es un producto nuevo, usamos addProductToOrder
+						if (quantityRef.current > 0) {
+							// Fetch materials and products data for cost calculation
+							const materialesData = await ReadMateriales();
+							const productsData = await ReadData();
 
-					// Find the product data
-					const productData = productsData.find(
-						(p) => p.data.name === product.name
-					)?.data;
+							// Find the product data
+							const productData = productsData.find(
+								(p) => p.data.name === product.name
+							)?.data;
 
-					// Calculate the cost using the existing helper function
-					const costoBurger = productData
-						? calcularCostoHamburguesa(materialesData, productData.ingredients)
-						: 0;
+							// Calculate the cost using the existing helper function
+							const costoBurger = productData
+								? calcularCostoHamburguesa(
+										materialesData,
+										productData.ingredients
+								  )
+								: 0;
 
-					// Calculate toppings cost
-					let costoToppings = 0;
-					if (effectiveToppings.length > 0) {
-						effectiveToppings.forEach((topping) => {
-							const materialTopping = materialesData.find(
-								(material) =>
-									material.nombre.toLowerCase() === topping.name.toLowerCase()
-							);
-							if (materialTopping) {
-								costoToppings += materialTopping.costo;
+							// Calculate toppings cost
+							let costoToppings = 0;
+							if (effectiveToppings.length > 0) {
+								effectiveToppings.forEach((topping) => {
+									const materialTopping = materialesData.find(
+										(material) =>
+											material.nombre.toLowerCase() ===
+											topping.name.toLowerCase()
+									);
+									if (materialTopping) {
+										costoToppings += materialTopping.costo;
+									}
+								});
 							}
-						});
+
+							// Prepare the product with costs
+							const productWithCosts = {
+								...product,
+								toppings: effectiveToppings,
+								costoBurger:
+									(costoBurger + costoToppings) * quantityRef.current,
+							};
+
+							await addProductToOrder(
+								currentOrder.id,
+								productWithCosts,
+								quantityRef.current
+							);
+						}
 					}
-
-					// Prepare the product with costs
-					const productWithCosts = {
-						...product,
-						toppings: effectiveToppings,
-						costoBurger: (costoBurger + costoToppings) * quantityRef.current,
-					};
-
-					// Add to existing order
-					await addProductToOrder(
-						currentOrder.id,
-						productWithCosts,
-						quantityRef.current
-					);
-
-					console.log(
-						"✅ Product added successfully with costs:",
-						productWithCosts
-					);
 				} else if (!isOrderItem) {
-					// Original cart logic
+					// Lógica original del carrito
 					if (quantityRef.current === 0) {
 						if (cartItem) {
 							const itemIndex = cart.findIndex(
@@ -214,7 +218,6 @@ const QuickAddToCart = ({
 			}
 		}, 2000);
 	};
-
 	const isCarritoPage = location.pathname === "/carrito";
 	const shouldAnimateBothSides =
 		/^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(location.pathname) ||
