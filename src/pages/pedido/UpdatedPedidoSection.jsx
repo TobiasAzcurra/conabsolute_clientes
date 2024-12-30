@@ -1,8 +1,11 @@
 import React, { useEffect } from "react";
 import Items from "../../pages/menu/Items";
+import CartCard from "../../components/shopping/cart/CartCard";
 import burgers from "../../assets/burgers-v1.json";
 import papas from "../../assets/papas-v1.json";
 import drinks from "../../assets/drinks-v1.json";
+import box from "../../assets/box.png";
+import fries from "../../assets/fries.png";
 
 const UpdatedPedidoSection = ({
 	currentOrder,
@@ -26,35 +29,62 @@ const UpdatedPedidoSection = ({
 		category: "drinks",
 	}));
 
-	// Concatenar todos los productos
 	const allProducts = [...burgersArray, ...papasArray, ...drinksArray];
 
-	// Function to get default image based on category
 	const getDefaultImage = (product) => {
 		if (product.category === "burger") {
-			return "/path/to/box.png";
+			return box;
 		} else if (product.category === "papas") {
-			return "/path/to/fries.png";
+			return fries;
 		} else if (product.category === "drinks") {
 			return "/menu/coca.png";
 		}
-		return "/path/to/default.png";
+		return "/ruta/a/imagen/default.png";
+	};
+
+	// Función para obtener la imagen del producto basada en su nombre
+	const getProductImage = (productName) => {
+		const product = allProducts.find((p) => p.name === productName);
+		return product?.img || null;
+	};
+
+	// Función para obtener la categoría del producto basada en su nombre
+	const getProductCategory = (productName) => {
+		const product = allProducts.find((p) => p.name === productName);
+		return product?.category || "burger";
+	};
+
+	// Función para convertir los items del pedido al formato esperado por CartCard
+	const mapOrderItemToCartFormat = (orderItem) => {
+		const category = getProductCategory(orderItem.burger);
+		const img = getProductImage(orderItem.burger);
+
+		return {
+			name: orderItem.burger,
+			price: orderItem.priceBurger,
+			quantity: orderItem.quantity,
+			toppings: orderItem.toppings || [],
+			category: category,
+			img: img,
+			costoBurger: orderItem.costoBurger,
+			subTotal: orderItem.subTotal,
+		};
 	};
 
 	useEffect(() => {
-		console.log("🔄 Detalles del pedido actual:", currentOrder?.detallePedido);
-		console.log("💰 Total del pedido:", currentOrder?.total);
-		console.log("📦 Productos disponibles:", allProducts);
-		console.log(
-			"🔄 Productos en el pedido:",
-			allProducts.filter(
-				(product) =>
-					!currentOrder?.detallePedido?.some(
-						(item) => item.burger === product.name
-					)
-			)
-		);
+		console.log("Detalle del pedido:", currentOrder?.detallePedido);
+		if (currentOrder?.detallePedido) {
+			const mappedItems = currentOrder.detallePedido.map(
+				mapOrderItemToCartFormat
+			);
+			console.log("Items mapeados:", mappedItems);
+		}
 	}, [currentOrder]);
+
+	// Funciones dummy para mantener la interfaz de CartCard
+	const decrementQuantity = () => {};
+	const incrementQuantity = () => {};
+	const deleteItem = () => {};
 
 	return (
 		<div className="flex flex-col font-coolvetica w-full">
@@ -68,45 +98,25 @@ const UpdatedPedidoSection = ({
 						WebkitOverflowScrolling: "touch",
 					}}
 				>
-					{currentOrder?.detallePedido?.length > 0 ? (
-						currentOrder.detallePedido.map((item, index) => (
-							<div
+					<div className="flex flex-col md:flex-row gap-2 md:w-max">
+						{currentOrder?.detallePedido?.map((item, index) => (
+							<CartCard
 								key={index}
-								className="flex flex-col bg-white rounded-lg p-4 shadow-md min-w-[280px]"
-							>
-								<div className="flex items-center justify-between mb-2">
-									<h3 className="font-bold text-lg">{item.burger}</h3>
-								</div>
-								<div className="flex items-center justify-between mt-2">
-									<div className="flex items-center space-x-2">
-										<span className="font-medium">
-											Cantidad: {item.quantity}
-										</span>
-									</div>
-									<span className="font-bold">${item.subTotal}</span>
-								</div>
-								{item.toppings && item.toppings.length > 0 && (
-									<div className="mt-2 text-sm text-gray-600">
-										<p>Toppings:</p>
-										<ul className="list-disc pl-4">
-											{item.toppings.map((topping, idx) => (
-												<li key={idx}>{topping}</li>
-											))}
-										</ul>
-									</div>
-								)}
-							</div>
-						))
-					) : (
-						<p className="text-gray-500 text-center w-full py-4">
-							No hay items en el pedido
-						</p>
-					)}
+								item={mapOrderItemToCartFormat(item)}
+								index={index}
+								getDefaultImage={getDefaultImage}
+								decrementQuantity={decrementQuantity}
+								incrementQuantity={incrementQuantity}
+								deleteItem={deleteItem}
+								readOnly={true}
+							/>
+						))}
+					</div>
 				</div>
 
 				{/* Total Section */}
 				{currentOrder && (
-					<div className="w-full mt-4 bg-white rounded-lg p-4 shadow-md">
+					<div className="w-full mt-4 bg-white rounded-xl p-4 shadow-lg">
 						<div className="flex justify-between items-center">
 							<span className="font-medium">Subtotal:</span>
 							<span>${currentOrder.subTotal}</span>
