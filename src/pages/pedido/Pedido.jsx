@@ -8,6 +8,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
 import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints";
+import UpdatedPedidoSection from "./UpdatedPedidoSection";
 import AppleModal from "../../components/AppleModal";
 import {
 	getCadetePhone,
@@ -861,6 +862,14 @@ const Pedido = () => {
 														</div>
 													)}
 												</div>
+											)}
+											{showCancelButton && (
+												<UpdatedPedidoSection
+													currentOrder={currentOrder}
+													showCancelButton={showCancelButton}
+													isDeleting={isDeleting}
+													handleCancelClick={handleCancelClick}
+												/>
 											)}
 										</div>
 
