@@ -772,7 +772,7 @@ const Pedido = () => {
 															{currentOrder.cadete !== "NO ASIGNADO"
 																? currentOrder.cadete.charAt(0).toUpperCase() +
 																  currentOrder.cadete.slice(1).toLowerCase()
-																: "Aún sin asignar."}
+																: "Aún sin asignar"}
 														</p>
 													</div>
 												)}
