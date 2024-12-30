@@ -92,7 +92,7 @@ const UpdatedPedidoSection = ({
 		<div className="flex flex-col font-coolvetica w-full">
 			{/* Pregunta */}
 			<div
-				className="w-full mt-2 flex-col flex cursor-pointer"
+				className="w-full mt-2 flex-col px-4 flex cursor-pointer"
 				onClick={toggleModifyOrder}
 			>
 				<div className="flex flex-row gap-2">
@@ -116,7 +116,7 @@ const UpdatedPedidoSection = ({
 				</div>
 			</div>
 
-			<div className="w-full justify-center flex">
+			<div className="w-full justify-center px-4 flex">
 				<img
 					src={arrow}
 					className={`h-2 w-1.5 mt-4 transform ${
@@ -136,7 +136,7 @@ const UpdatedPedidoSection = ({
 							WebkitOverflowScrolling: "touch",
 						}}
 					>
-						<div className="flex flex-col md:flex-row gap-2 md:w-max">
+						<div className="flex flex-col md:flex-row px-4 gap-2 md:w-max">
 							{currentOrder?.detallePedido?.map((item, index) => (
 								<CartCard
 									key={index}
@@ -155,11 +155,11 @@ const UpdatedPedidoSection = ({
 					</div>
 
 					<div className="flex justify-center flex-col mt-6 items-start w-full">
-						<p className="text-xl font-bold text-center mx-auto mb-4">
+						<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
 							Enorgullese a Anhelo. Agrega algo:
 						</p>
 						<div
-							className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar"
+							className="flex gap-2 pl-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
 							style={{
 								maxHeight: "300px",
 								paddingBottom: "1rem",
