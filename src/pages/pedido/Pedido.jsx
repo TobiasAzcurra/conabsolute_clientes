@@ -648,33 +648,54 @@ const Pedido = () => {
 										<div className="flex flex-col w-full">
 											<div className="mb-10">
 												<div className="w-full flex flex-row gap-2 relative">
-													<div
-														className={`w-1/4 h-2.5 rounded-full ${
-															!currentOrder.elaborado
-																? "animated-loading"
-																: "bg-black"
-														}`}
-													></div>
-
-													<div
-														className={`w-1/4 h-2.5 rounded-full ${
-															currentOrder.elaborado &&
-															currentOrder.cadete === "NO ASIGNADO"
-																? "animated-loading"
-																: currentOrder.elaborado
-																? "bg-black"
-																: "bg-gray-100 border-opacity-20 border-black border-1 border"
-														}`}
-													></div>
-
-													<div
-														className={`w-1/2 h-2.5 rounded-full ${
-															currentOrder.elaborado &&
-															currentOrder.cadete !== "NO ASIGNADO"
-																? "animated-loading"
-																: "bg-gray-100 border-opacity-20 border-black border-1 border"
-														}`}
-													></div>
+													{currentOrder.direccion === "" ? (
+														// Barras de progreso para pedidos de retiro (2 barras)
+														<>
+															<div
+																className={`w-1/2 h-2.5 rounded-full ${
+																	!currentOrder.elaborado
+																		? "animated-loading"
+																		: "bg-black"
+																}`}
+															></div>
+															<div
+																className={`w-1/2 h-2.5 rounded-full ${
+																	currentOrder.elaborado
+																		? "animated-loading"
+																		: "bg-gray-100 border-opacity-20 border-black border-1 border"
+																}`}
+															></div>
+														</>
+													) : (
+														// Barras de progreso originales para delivery (3 barras)
+														<>
+															<div
+																className={`w-1/4 h-2.5 rounded-full ${
+																	!currentOrder.elaborado
+																		? "animated-loading"
+																		: "bg-black"
+																}`}
+															></div>
+															<div
+																className={`w-1/4 h-2.5 rounded-full ${
+																	currentOrder.elaborado &&
+																	currentOrder.cadete === "NO ASIGNADO"
+																		? "animated-loading"
+																		: currentOrder.elaborado
+																		? "bg-black"
+																		: "bg-gray-100 border-opacity-20 border-black border-1 border"
+																}`}
+															></div>
+															<div
+																className={`w-1/2 h-2.5 rounded-full ${
+																	currentOrder.elaborado &&
+																	currentOrder.cadete !== "NO ASIGNADO"
+																		? "animated-loading"
+																		: "bg-gray-100 border-opacity-20 border-black border-1 border"
+																}`}
+															></div>
+														</>
+													)}
 
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
@@ -687,7 +708,11 @@ const Pedido = () => {
 													</svg>
 												</div>
 												<p className="text-black font-coolvetica font-bold text-left mt-2">
-													{!currentOrder.elaborado
+													{currentOrder.direccion === ""
+														? !currentOrder.elaborado
+															? "Anhelo está preparando tu pedido..."
+															: "Esperando que retires tu pedido..."
+														: !currentOrder.elaborado
 														? "Anhelo está preparando tu pedido..."
 														: currentOrder.cadete !== "NO ASIGNADO"
 														? "En camino... Atención, te va a llamar tu cadete."
@@ -828,32 +853,6 @@ const Pedido = () => {
 												</div>
 											)}
 
-											{/* {showCadeteCallButton && (
-												<div
-													onClick={() => handleCadeteCall(currentOrder.cadete)}
-													className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
-												>
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														viewBox="0 0 24 24"
-														fill="currentColor"
-														className="h-5 mr-2"
-													>
-														<path
-															fillRule="evenodd"
-															d="M15 3.75a.75.75 0 01.75-.75h4.5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0V5.56l-4.72 4.72a.75.75 0 11-1.06-1.06l4.72-4.72h-2.69a.75.75 0 01-.75-.75z"
-															clipRule="evenodd"
-														/>
-														<path
-															fillRule="evenodd"
-															d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z"
-															clipRule="evenodd"
-														/>
-														</svg>
-														Llamar cadete
-														</div>
-														)} */}
-
 											{showCancelButton && (
 												<div
 													onClick={() => handleCancelClick(currentOrder.id)}
@@ -922,7 +921,7 @@ const Pedido = () => {
 					title="¡Califica tu pedido!"
 					isRatingModal={true}
 					orderProducts={selectedOrderProducts}
-					additionalProducts={additionalProducts} // Pass computed additionalProducts here
+					additionalProducts={additionalProducts}
 					onConfirm={handleRateOrder}
 					isLoading={isRatingLoading}
 				>
