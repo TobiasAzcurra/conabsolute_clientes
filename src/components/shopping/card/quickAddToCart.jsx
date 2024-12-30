@@ -114,6 +114,14 @@ const QuickAddToCart = ({
 
 		pendingUpdateRef.current = setTimeout(async () => {
 			try {
+				// Validación de cantidad antes de proceder
+				if (quantityRef.current <= 0) {
+					console.log("❌ Cannot add product with quantity 0 or less");
+					setIsAdding(false);
+					setTimeout(() => setIsEditing(false), 300);
+					return;
+				}
+
 				if (isPedidoComponente && currentOrder?.id) {
 					// Fetch materials and products data for cost calculation
 					const materialesData = await ReadMateriales();
