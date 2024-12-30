@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Items from "../../pages/menu/Items";
 import CartCard from "../../components/shopping/cart/CartCard";
 import burgers from "../../assets/burgers-v1.json";
@@ -14,6 +14,9 @@ const UpdatedPedidoSection = ({
 	isDeleting,
 	handleCancelClick,
 }) => {
+	// Estado para controlar la visibilidad de las secciones
+	const [isModifyOrderExpanded, setIsModifyOrderExpanded] = useState(false);
+
 	// Preparar los arrays de productos
 	const burgersArray = Object.values(burgers).map((product) => ({
 		...product,
@@ -87,114 +90,133 @@ const UpdatedPedidoSection = ({
 	const incrementQuantity = () => {};
 	const deleteItem = () => {};
 
+	// Manejador para expandir/contraer la sección de modificación de pedido
+	const toggleModifyOrder = () => {
+		setIsModifyOrderExpanded(!isModifyOrderExpanded);
+	};
+
 	return (
-		<div className="flex flex-col font-coolvetica  w-full">
+		<div className="flex flex-col font-coolvetica w-full">
 			{/* Pregunta */}
-			<div className="w-full mt-2  gap-2 flex-row flex  ">
+			<div
+				className="w-full mt-2 gap-2 flex-row flex cursor-pointer"
+				onClick={toggleModifyOrder}
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
 					fill="currentColor"
-					class="h-6"
+					className="h-6"
 				>
 					<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
 					<path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
 				</svg>
 
-				<p className=" font-bold text-left ">¿Queres modificar tu pedido?</p>
+				<p className="font-bold text-left">¿Queres modificar tu pedido?</p>
 				<div className="flex items-center">
-					<img src={arrow} className="h-2  " alt="" />
+					<img
+						src={arrow}
+						className={`h-2 transition-transform duration-300 ${
+							isModifyOrderExpanded ? "rotate-180" : ""
+						}`}
+						alt=""
+					/>
 				</div>
 			</div>
 
-			{/* Detalle del pedido */}
-			<div
-				className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
-				style={{
-					scrollBehavior: "smooth",
-					WebkitOverflowScrolling: "touch",
-				}}
-			>
-				<div className="flex flex-col md:flex-row gap-2 md:w-max">
-					{currentOrder?.detallePedido?.map((item, index) => (
-						<CartCard
-							key={index}
-							item={mapOrderItemToCartFormat(item)}
-							index={index}
-							getDefaultImage={getDefaultImage}
-							decrementQuantity={decrementQuantity}
-							incrementQuantity={incrementQuantity}
-							deleteItem={deleteItem}
-							currentOrder={currentOrder} // Añadir esta prop
-							readOnly={false} // Cambiar a false para mostrar el control
-						/>
-					))}
-				</div>
-			</div>
-
-			{/* Agrega mas items al pedido */}
-			<div className="flex justify-center flex-col mt-6 items-start w-full">
-				<p className="text-xl font-bold text-center mx-auto mb-4">
-					Agrega y orgullese a Anhelo:
-				</p>
-				<div
-					className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar"
-					style={{
-						maxHeight: "300px",
-						paddingBottom: "1rem",
-						scrollBehavior: "smooth",
-						WebkitOverflowScrolling: "touch",
-						width: "100%",
-					}}
-				>
-					<div className="flex gap-2" style={{ width: "max-content" }}>
-						{allProducts
-							.filter(
-								(product) =>
-									!currentOrder?.detallePedido?.some(
-										(item) => item.burger === product.name
-									)
-							)
-							.map((product, index) => (
-								<Items
-									key={product.id || index}
-									selectedItem={product}
-									img={
-										product.img
-											? `/menu/${product.img}`
-											: getDefaultImage(product)
-									}
-									name={product.name}
-									handleItemClick={() => {
-										console.log("🛍️ Producto seleccionado:", product);
-									}}
-									isCart={true}
-									price={product.price}
+			{/* Detalle del pedido y Agregar más items - Solo visible cuando isModifyOrderExpanded es true */}
+			{isModifyOrderExpanded && (
+				<>
+					{/* Detalle del pedido */}
+					<div
+						className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
+						style={{
+							scrollBehavior: "smooth",
+							WebkitOverflowScrolling: "touch",
+						}}
+					>
+						<div className="flex flex-col md:flex-row gap-2 md:w-max">
+							{currentOrder?.detallePedido?.map((item, index) => (
+								<CartCard
+									key={index}
+									item={mapOrderItemToCartFormat(item)}
+									index={index}
+									getDefaultImage={getDefaultImage}
+									decrementQuantity={decrementQuantity}
+									incrementQuantity={incrementQuantity}
+									deleteItem={deleteItem}
+									currentOrder={currentOrder}
+									readOnly={false}
 								/>
 							))}
+						</div>
 					</div>
-				</div>
-			</div>
+
+					{/* Agrega mas items al pedido */}
+					<div className="flex justify-center flex-col mt-6 items-start w-full">
+						<p className="text-xl font-bold text-center mx-auto mb-4">
+							Agrega y orgullese a Anhelo:
+						</p>
+						<div
+							className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar"
+							style={{
+								maxHeight: "300px",
+								paddingBottom: "1rem",
+								scrollBehavior: "smooth",
+								WebkitOverflowScrolling: "touch",
+								width: "100%",
+							}}
+						>
+							<div className="flex gap-2" style={{ width: "max-content" }}>
+								{allProducts
+									.filter(
+										(product) =>
+											!currentOrder?.detallePedido?.some(
+												(item) => item.burger === product.name
+											)
+									)
+									.map((product, index) => (
+										<Items
+											key={product.id || index}
+											selectedItem={product}
+											img={
+												product.img
+													? `/menu/${product.img}`
+													: getDefaultImage(product)
+											}
+											name={product.name}
+											handleItemClick={() => {
+												console.log("🛍️ Producto seleccionado:", product);
+											}}
+											isCart={true}
+											price={product.price}
+										/>
+									))}
+							</div>
+						</div>
+					</div>
+				</>
+			)}
 
 			<style>
 				{`
-          .custom-scrollbar::-webkit-scrollbar {
-            height: 8px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f3f4f6;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #f3f4f6;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            background-clip: padding-box;
-          }
-          .custom-scrollbar {
-            scrollbar-width: thin;
-            scrollbar-color: #f3f4f6 #f3f4f6;
-          }
-        `}
+					.custom-scrollbar::-webkit-scrollbar {
+						height: 8px;
+					}
+					.custom-scrollbar::-webkit-scrollbar-track {
+						background: #f3f4f6;
+					}
+					.custom-scrollbar::-webkit-scrollbar-thumb {
+						background: #f3f4f6;
+						border-radius: 10px;
+						border: 2px solid transparent;
+						background-clip: padding-box;
+					}
+					.custom-scrollbar {
+						scrollbar-width: thin;
+						scrollbar-color: #f3f4f6 #f3f4f6;
+					}
+				`}
 			</style>
 		</div>
 	);
