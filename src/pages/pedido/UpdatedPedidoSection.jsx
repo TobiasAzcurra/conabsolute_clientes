@@ -87,12 +87,24 @@ const UpdatedPedidoSection = ({
 	const deleteItem = () => {};
 
 	return (
-		<div className="flex flex-col font-coolvetica w-full">
+		<div className="flex flex-col font-coolvetica  w-full">
 			{/* Pedido Items Section */}
-			<div className="flex justify-center flex-col mt-8 items-center w-full px-4">
-				<p className="text-2xl font-bold">Tu pedido</p>
+			<div className="flex justify-center flex-col  items-center w-full ">
+				<div className="w-full mt-2  gap-2 flex-row flex">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 24 24"
+						fill="currentColor"
+						class="h-6"
+					>
+						<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+						<path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+					</svg>
+
+					<p className=" font-bold text-left ">¿Queres modificar tu pedido?</p>
+				</div>
 				<div
-					className="flex flex-col md:flex-row gap-2 w-full mt-2 overflow-x-auto custom-scrollbar"
+					className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
 					style={{
 						scrollBehavior: "smooth",
 						WebkitOverflowScrolling: "touch",
@@ -114,30 +126,12 @@ const UpdatedPedidoSection = ({
 						))}
 					</div>
 				</div>
-
-				{/* Total Section */}
-				{currentOrder && (
-					<div className="w-full mt-4 bg-white rounded-xl p-4 shadow-lg">
-						<div className="flex justify-between items-center">
-							<span className="font-medium">Subtotal:</span>
-							<span>${currentOrder.subTotal}</span>
-						</div>
-						<div className="flex justify-between items-center mt-2">
-							<span className="font-medium">Envío:</span>
-							<span>${currentOrder.envio}</span>
-						</div>
-						<div className="flex justify-between items-center mt-2 text-lg font-bold">
-							<span>Total:</span>
-							<span>${currentOrder.total}</span>
-						</div>
-					</div>
-				)}
 			</div>
 
 			{/* Add More Items Section */}
-			<div className="flex justify-center flex-col mt-6 items-start w-full px-4">
-				<p className="text-2xl font-bold mx-auto mb-4">
-					Agrega. Esto no es para tibios.
+			<div className="flex justify-center flex-col mt-6 items-start w-full">
+				<p className="text-xl font-bold text-center mx-auto mb-4">
+					Agrega. Anhelo estara orgulloso de vos.
 				</p>
 				<div
 					className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar"
