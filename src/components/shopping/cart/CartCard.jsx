@@ -139,7 +139,7 @@ const CartCard = ({
 				</div>
 			</div>
 			{isDisabled && (
-				<div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black bg-opacity-40">
+				<div className="absolute border-2 border-black inset-0 flex items-center justify-center rounded-3xl bg-black bg-opacity-40">
 					<div className="flex flex-col items-center space-y-2">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
