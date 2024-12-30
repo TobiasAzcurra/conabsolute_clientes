@@ -637,7 +637,7 @@ const Pedido = () => {
 										key={currentOrder.id}
 										className={`flex items-center  flex-col w-full ${
 											index !== 0 ? "mt-4" : ""
-										} ${index === pedidosPagados.length - 1 ? "pb-6" : ""}`}
+										} ${index === pedidosPagados.length - 1 ? "pb-4" : ""}`}
 									>
 										{pedidosPagados.length > 1 && (
 											<h2 className="text-2xl w-full px-4 text-left font-bold font-coolvetica mb-10">
