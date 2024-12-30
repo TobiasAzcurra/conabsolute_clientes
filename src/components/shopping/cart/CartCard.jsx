@@ -8,6 +8,7 @@ const CartCard = ({
 	index,
 	getDefaultImage,
 	decrementQuantity,
+	isPedidoComponente,
 	incrementQuantity,
 	deleteItem,
 	currentOrder = null,
@@ -114,6 +115,7 @@ const CartCard = ({
 					<QuickAddToCart
 						product={item}
 						isOrderItem={!!currentOrder}
+						isPedidoComponente={true}
 						initialOrderQuantity={quantity}
 						onOrderQuantityChange={
 							currentOrder ? handleQuantityChange : undefined

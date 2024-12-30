@@ -149,6 +149,7 @@ const UpdatedPedidoSection = ({
 									index={index}
 									getDefaultImage={getDefaultImage}
 									decrementQuantity={decrementQuantity}
+									isPedidoComponente={true}
 									incrementQuantity={incrementQuantity}
 									deleteItem={deleteItem}
 									currentOrder={currentOrder}
