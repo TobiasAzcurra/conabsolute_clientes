@@ -182,7 +182,7 @@ const UpdatedPedidoSection = ({
 												clip-rule="evenodd"
 											/>
 										</svg>
-										Confirmar pedido
+										Enviar a cocina
 									</div>
 								</div>
 							</div>
@@ -190,7 +190,7 @@ const UpdatedPedidoSection = ({
 					</div>
 
 					<div className="flex justify-center flex-col mt-6 items-start w-full">
-						{currentOrder?.onEditByUser ? (
+						{currentOrder?.detallePedido?.some((item) => item.extra) ? (
 							<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
 								¿Algo más? Jajaj
 							</p>
