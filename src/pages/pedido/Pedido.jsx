@@ -835,15 +835,8 @@ const Pedido = () => {
 											</div>
 										</div>
 										{/* botones */}
-										{!currentOrder.elaborado && (
-											<UpdatedPedidoSection
-												currentOrder={currentOrder}
-												showCancelButton={showCancelButton}
-												isDeleting={isDeleting}
-												handleCancelClick={handleCancelClick}
-											/>
-										)}
-										<div className={`w-full px-4 ${hasButtons ? "mt-12" : ""}`}>
+
+										<div className={`w-full px-4 ${hasButtons ? "mt-11" : ""}`}>
 											{showSupportButton && (
 												<div
 													onClick={handleSupportClick}
@@ -892,6 +885,15 @@ const Pedido = () => {
 												</div>
 											)}
 										</div>
+
+										{!currentOrder.elaborado && (
+											<UpdatedPedidoSection
+												currentOrder={currentOrder}
+												showCancelButton={showCancelButton}
+												isDeleting={isDeleting}
+												handleCancelClick={handleCancelClick}
+											/>
+										)}
 
 										{index < pedidosPagados.length - 1 && (
 											<div className="w-full h-px bg-black opacity-20 mt-8"></div>
