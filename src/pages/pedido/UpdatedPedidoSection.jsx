@@ -67,6 +67,7 @@ const UpdatedPedidoSection = ({
 			img: img,
 			costoBurger: orderItem.costoBurger,
 			subTotal: orderItem.subTotal,
+			extra: orderItem.extra, // Agregamos la propiedad extra aquí
 		};
 	};
 
