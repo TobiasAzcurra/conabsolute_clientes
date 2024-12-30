@@ -6,6 +6,7 @@ import papas from "../../assets/papas-v1.json";
 import drinks from "../../assets/drinks-v1.json";
 import box from "../../assets/box.png";
 import fries from "../../assets/fries.png";
+import arrow from "../../assets/arrowIcon.png";
 
 const UpdatedPedidoSection = ({
 	currentOrder,
@@ -90,7 +91,7 @@ const UpdatedPedidoSection = ({
 		<div className="flex flex-col font-coolvetica  w-full">
 			{/* Pedido Items Section */}
 			<div className="flex justify-center flex-col  items-center w-full ">
-				<div className="w-full mt-2  gap-2 flex-row flex">
+				<div className="w-full mt-2  gap-2 flex-row flex  ">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
 						viewBox="0 0 24 24"
@@ -102,6 +103,9 @@ const UpdatedPedidoSection = ({
 					</svg>
 
 					<p className=" font-bold text-left ">¿Queres modificar tu pedido?</p>
+					<div className="flex items-center">
+						<img src={arrow} className="h-2  " alt="" />
+					</div>
 				</div>
 				<div
 					className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
