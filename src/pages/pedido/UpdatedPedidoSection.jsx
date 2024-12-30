@@ -112,7 +112,9 @@ const UpdatedPedidoSection = ({
 					<path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
 				</svg>
 
-				<p className="font-bold text-left">¿Queres modificar tu pedido?</p>
+				<p className="font-bold  text-left">
+					Todavia podes modificar tu pedido
+				</p>
 				<div className="flex items-center">
 					<img
 						src={arrow}
