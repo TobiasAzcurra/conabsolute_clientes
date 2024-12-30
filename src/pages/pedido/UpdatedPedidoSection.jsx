@@ -136,6 +136,9 @@ const UpdatedPedidoSection = ({
 						}}
 					>
 						<div className="flex flex-col md:flex-row px-4 gap-2 md:w-max">
+							<p className="text-xl px-4 font-bold text-center mx-auto mb-2">
+								Tu pedido:
+							</p>
 							{currentOrder?.detallePedido?.map((item, index) => (
 								<CartCard
 									key={index}
