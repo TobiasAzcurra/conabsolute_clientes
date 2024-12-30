@@ -115,7 +115,8 @@ const UpdatedPedidoSection = ({
 					<div className="flex flex-col  ">
 						<p className="font-bold  text-left">
 							Podes modificar tu pedido,
-							<br /> cuando se cocine esta opcion desaparece.
+							<br /> cuando se cocine esta opcion desaparece. <br /> Por
+							logistica, <br /> las modificaciones se abonan en efectivo.
 						</p>
 					</div>
 				</div>
