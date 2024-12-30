@@ -114,7 +114,7 @@ const UpdatedPedidoSection = ({
 					</svg>
 					<div className="flex flex-col  ">
 						<p className="font-bold  text-left">
-							Todavia podes modificar tu pedido,
+							Podes modificar tu pedido,
 							<br /> cuando se cocine esta opcion desaparece.
 						</p>
 					</div>
