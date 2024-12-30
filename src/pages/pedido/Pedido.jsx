@@ -739,11 +739,17 @@ const Pedido = () => {
 															? `Retirar entre ${sumarMinutos(
 																	currentOrder.hora,
 																	15
-															  )} y ${sumarMinutos(currentOrder.hora, 25)}`
-															: `Entrega estimada: ${sumarMinutos(
+															  )} hs y ${sumarMinutos(
+																	currentOrder.hora,
+																	25
+															  )} hs`
+															: `Llega entre ${sumarMinutos(
 																	currentOrder.hora,
 																	30
-															  )} a ${sumarMinutos(currentOrder.hora, 50)}`}
+															  )} hs a ${sumarMinutos(
+																	currentOrder.hora,
+																	50
+															  )} hs`}
 													</p>
 												</div>
 
@@ -797,7 +803,7 @@ const Pedido = () => {
 															"Retirar por Buenos Aires 618"
 														) : (
 															<>
-																Destino:{" "}
+																Destino a{" "}
 																{showFullAddress
 																	? currentOrder.direccion
 																	: (currentOrder.direccion
@@ -823,7 +829,7 @@ const Pedido = () => {
 														<path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
 													</svg>
 													<p className="text-black font-coolvetica font-medium">
-														Total: ${currentOrder.total || "0.00"}
+														${currentOrder.total || "0.00"}
 													</p>
 												</div>
 											</div>
