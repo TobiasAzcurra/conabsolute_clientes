@@ -92,7 +92,7 @@ const UpdatedPedidoSection = ({
 		<div className="flex flex-col justify-center  items-center font-coolvetica w-full">
 			{/* Pregunta */}
 			<div
-				className="w-full mt-6 flex-col  px-4 flex cursor-pointer"
+				className="w-full mt-8 flex-col  px-4 flex cursor-pointer"
 				onClick={toggleModifyOrder}
 			>
 				<div className="flex flex-col justify-center items-center">
