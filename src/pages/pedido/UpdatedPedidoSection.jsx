@@ -108,7 +108,8 @@ const UpdatedPedidoSection = ({
 								decrementQuantity={decrementQuantity}
 								incrementQuantity={incrementQuantity}
 								deleteItem={deleteItem}
-								readOnly={true}
+								currentOrder={currentOrder} // Añadir esta prop
+								readOnly={false} // Cambiar a false para mostrar el control
 							/>
 						))}
 					</div>

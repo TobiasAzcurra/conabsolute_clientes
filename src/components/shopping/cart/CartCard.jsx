@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import currencyFormat from "../../../helpers/currencyFormat";
 import QuickAddToCart from "../card/quickAddToCart";
+import { updateOrderItemQuantity } from "../../../firebase/uploadOrder";
 
 const CartCard = ({
 	item,
@@ -9,8 +10,11 @@ const CartCard = ({
 	decrementQuantity,
 	incrementQuantity,
 	deleteItem,
+	currentOrder = null, // Hacemos opcional currentOrder
+	readOnly = false,
 }) => {
 	const { name, price, quantity, category, img, toppings } = item;
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
@@ -39,13 +43,30 @@ const CartCard = ({
 		return price + toppingsTotal;
 	};
 
+	const handleQuantityChange = async (newQuantity) => {
+		if (!currentOrder) return;
+
+		setIsUpdating(true);
+		try {
+			await updateOrderItemQuantity(
+				currentOrder.id,
+				currentOrder.fecha,
+				index,
+				newQuantity
+			);
+			console.log(`✅ Cantidad actualizada para ${name}: ${newQuantity}`);
+		} catch (error) {
+			console.error("❌ Error al actualizar la cantidad:", error);
+		} finally {
+			setIsUpdating(false);
+		}
+	};
+
 	const totalPrice = calculateTotalPrice();
 
-	"este es el", item;
-
 	return (
-		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ">
-			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300  rounded-l-3xl overflow-hidden">
+		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px]">
+			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden">
 				<img
 					src={img ? `/menu/${img}` : getDefaultImage(item)}
 					alt={name}
@@ -59,9 +80,7 @@ const CartCard = ({
 						{capitalizeWords(name)}
 					</h3>
 
-					{/* Aclaraciones */}
 					<div className="flex flex-col space-y-1">
-						{/* Mostrar toppings formateados */}
 						{toppings && toppings.length > 0 && (
 							<p className="text-xs mb-4 font-medium">
 								Toppings: {formatToppings(toppings)}.
@@ -73,7 +92,15 @@ const CartCard = ({
 					<p className="text-2xl font-bold mb-4 mt-[-5px]">
 						{currencyFormat(totalPrice)}
 					</p>
-					<QuickAddToCart product={item} />
+					<QuickAddToCart
+						product={item}
+						isOrderItem={!!currentOrder} // Solo true si hay currentOrder
+						initialOrderQuantity={quantity}
+						onOrderQuantityChange={
+							currentOrder ? handleQuantityChange : undefined
+						}
+						isUpdating={isUpdating}
+					/>
 				</div>
 			</div>
 		</div>

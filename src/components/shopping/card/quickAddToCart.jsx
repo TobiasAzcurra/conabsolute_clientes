@@ -1,5 +1,3 @@
-// QuickAddToCart.jsx
-
 import { useDispatch, useSelector } from "react-redux";
 import {
 	addItem,
@@ -10,7 +8,14 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
 
-const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
+const QuickAddToCart = ({
+	product,
+	animateFromCenter,
+	toppings,
+	isOrderItem = false,
+	onOrderQuantityChange = null,
+	initialOrderQuantity = null,
+}) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
 	const location = useLocation();
@@ -23,7 +28,7 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 		);
 	}
 
-	// Definir los toppings efectivos: usar los toppings pasados como prop o los del producto
+	// Definir los toppings efectivos
 	const effectiveToppings =
 		toppings && toppings.length > 0 ? toppings : product.toppings || [];
 
@@ -37,31 +42,46 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 	};
 
 	// Encontrar el ítem en el carrito que coincide con el producto y toppings
-	const cartItem = cart.find(
-		(item) =>
-			item.name === product.name &&
-			item.category === (product.category || "default") &&
-			compareToppings(item.toppings, effectiveToppings)
-	);
-	const cartQuantity = cartItem ? cartItem.quantity : 0;
+	const cartItem = !isOrderItem
+		? cart.find(
+				(item) =>
+					item.name === product.name &&
+					item.category === (product.category || "default") &&
+					compareToppings(item.toppings, effectiveToppings)
+		  )
+		: null;
 
-	// Sincronizar el estado local de cantidad con el carrito
-	const [quantity, setQuantity] = useState(cartQuantity);
+	// Usar la cantidad inicial del pedido si es un item de pedido, si no usar la cantidad del carrito
+	const initialQuantity = isOrderItem
+		? initialOrderQuantity || product.quantity
+		: cartItem
+		? cartItem.quantity
+		: 0;
+
+	const [quantity, setQuantity] = useState(initialQuantity);
 	const [isAdding, setIsAdding] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const quantityRef = useRef(quantity);
 
-	// Actualizar el estado local cuando el carrito cambia
+	// Actualizar el estado local cuando el carrito o la cantidad inicial cambian
 	useEffect(() => {
-		setQuantity(cartQuantity);
-		quantityRef.current = cartQuantity;
-	}, [cartQuantity]);
+		if (isOrderItem) {
+			setQuantity(initialOrderQuantity || product.quantity);
+			quantityRef.current = initialOrderQuantity || product.quantity;
+		} else {
+			setQuantity(cartItem ? cartItem.quantity : 0);
+			quantityRef.current = cartItem ? cartItem.quantity : 0;
+		}
+	}, [cartItem, initialOrderQuantity, isOrderItem, product.quantity]);
 
 	// Manejar incremento de cantidad
 	const handleIncrement = () => {
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
+			if (isOrderItem && onOrderQuantityChange) {
+				onOrderQuantityChange(newQuantity);
+			}
 			return newQuantity;
 		});
 	};
@@ -69,10 +89,12 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 	// Manejar decremento de cantidad
 	const handleDecrement = () => {
 		if (quantity > 0) {
-			// Permitir que la cantidad llegue a 0
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
+				if (isOrderItem && onOrderQuantityChange) {
+					onOrderQuantityChange(newQuantity);
+				}
 				return newQuantity;
 			});
 		}
@@ -82,40 +104,45 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 	const startAddingProcess = () => {
 		setIsEditing(true);
 		setIsAdding(true);
+
 		setTimeout(() => {
-			if (quantityRef.current === 0 && cartItem) {
-				const itemIndex = cart.findIndex(
-					(item) =>
-						item.name === product.name &&
-						item.category === (product.category || "default") &&
-						compareToppings(item.toppings, effectiveToppings)
-				);
-				dispatch(removeItem(itemIndex));
-			} else if (quantityRef.current >= 1) {
-				if (cartItem) {
-					const updatePayload = {
-						name: product.name,
-						category: product.category || "default",
-						toppings: effectiveToppings,
-						quantity: quantityRef.current,
-					};
-					dispatch(updateItemQuantity(updatePayload));
-				} else {
-					const newItem = {
-						name: product.name,
-						price: product.price,
-						img: product.img,
-						toppings: effectiveToppings,
-						quantity: quantityRef.current,
-						category: product.category || "default",
-					};
-					dispatch(addItem(newItem));
+			if (!isOrderItem) {
+				// Lógica original del carrito
+				if (quantityRef.current === 0 && cartItem) {
+					const itemIndex = cart.findIndex(
+						(item) =>
+							item.name === product.name &&
+							item.category === (product.category || "default") &&
+							compareToppings(item.toppings, effectiveToppings)
+					);
+					dispatch(removeItem(itemIndex));
+				} else if (quantityRef.current >= 1) {
+					if (cartItem) {
+						const updatePayload = {
+							name: product.name,
+							category: product.category || "default",
+							toppings: effectiveToppings,
+							quantity: quantityRef.current,
+						};
+						dispatch(updateItemQuantity(updatePayload));
+					} else {
+						const newItem = {
+							name: product.name,
+							price: product.price,
+							img: product.img,
+							toppings: effectiveToppings,
+							quantity: quantityRef.current,
+							category: product.category || "default",
+						};
+						dispatch(addItem(newItem));
+					}
 				}
 			}
+
 			setIsAdding(false);
 			setTimeout(() => {
 				setIsEditing(false);
-			}, 300); // Pequeño retraso para completar la animación de cierre
+			}, 300);
 		}, 2000);
 	};
 
@@ -160,9 +187,9 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 						+
 					</div>
 				</motion.div>
-			) : isMenuProductPage && cartQuantity === 0 ? (
+			) : isMenuProductPage && quantity === 0 && !isOrderItem ? (
 				<button
-					className="bg-black flex flex-row items-center gap-4 font-coolvetica font-medium text-white  rounded-3xl  pl-4 pr-5 pt-2 pb-4 text-4xl"
+					className="bg-black flex flex-row items-center gap-4 font-coolvetica font-medium text-white rounded-3xl pl-4 pr-5 pt-2 pb-4 text-4xl"
 					onClick={startAddingProcess}
 				>
 					<svg
@@ -182,11 +209,11 @@ const QuickAddToCart = ({ product, animateFromCenter, toppings }) => {
 			) : (
 				<div
 					className={`${
-						cartQuantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
+						quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
 					} rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
-					{cartQuantity > 0 ? cartQuantity : "+"}
+					{quantity > 0 ? quantity : "+"}
 				</div>
 			)}
 		</div>
