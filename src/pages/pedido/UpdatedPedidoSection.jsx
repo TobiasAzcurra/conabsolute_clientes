@@ -131,7 +131,7 @@ const UpdatedPedidoSection = ({
 			{/* Add More Items Section */}
 			<div className="flex justify-center flex-col mt-6 items-start w-full">
 				<p className="text-xl font-bold text-center mx-auto mb-4">
-					Agrega. Anhelo estara orgulloso de vos.
+					Agrega y orgullese a Anhelo:
 				</p>
 				<div
 					className="flex gap-2 overflow-x-auto overflow-y-hidden custom-scrollbar"
