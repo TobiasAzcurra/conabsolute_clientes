@@ -159,7 +159,7 @@ const UpdatedPedidoSection = ({
 							Enorgullese a Anhelo. Agrega algo:
 						</p>
 						<div
-							className="flex gap-2 pl-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
+							className="flex gap-2 pl-4 pr-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
 							style={{
 								maxHeight: "300px",
 								paddingBottom: "1rem",
