@@ -114,10 +114,10 @@ const UpdatedPedidoSection = ({
 					</svg>
 					<div className="flex flex-col  ">
 						<p className="font-bold  text-left">
-							Podes modificar tu pedido.
+							Podes agregar productos a tu pedido!
 							<br /> Por logistica:
 							<br /> Cuando se cocine esta opcion desaparece y
-							<br /> las modificaciones se abonan en efectivo.
+							<br /> los agregados se abonan en efectivo.
 						</p>
 					</div>
 				</div>

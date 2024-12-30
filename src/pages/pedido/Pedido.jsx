@@ -823,7 +823,7 @@ const Pedido = () => {
 											</div>
 										</div>
 										{/* botones */}
-										{showCancelButton && (
+										{!currentOrder.elaborado && (
 											<UpdatedPedidoSection
 												currentOrder={currentOrder}
 												showCancelButton={showCancelButton}
