@@ -1,4 +1,3 @@
-// uploadOrder.js
 import {
 	getFirestore,
 	collection,
@@ -54,14 +53,12 @@ export const updateOrderItemQuantity = async (
 	try {
 		await runTransaction(firestore, async (transaction) => {
 			const docSnapshot = await transaction.get(pedidoDocRef);
-
 			if (!docSnapshot.exists()) {
 				throw new Error("El pedido no existe para la fecha especificada.");
 			}
 
 			const existingData = docSnapshot.data();
 			const pedidosDelDia = existingData.pedidos || [];
-
 			const pedidoIndex = pedidosDelDia.findIndex(
 				(pedido) => pedido.id === pedidoId
 			);
@@ -75,27 +72,58 @@ export const updateOrderItemQuantity = async (
 				throw new Error("Item no encontrado en el pedido");
 			}
 
-			// Actualizar cantidad y recalcular subtotal del item
-			const item = pedido.detallePedido[itemIndex];
-			const oldSubTotal = item.subTotal;
-			const pricePerUnit = item.priceBurger;
+			if (newQuantity === 0) {
+				// Eliminamos el item del detallePedido
+				pedido.detallePedido.splice(itemIndex, 1);
 
-			item.quantity = newQuantity;
-			item.subTotal = pricePerUnit * newQuantity;
+				// Si no quedan items en el pedido, eliminamos el pedido completo
+				if (pedido.detallePedido.length === 0) {
+					pedidosDelDia.splice(pedidoIndex, 1);
 
-			// Recalcular totales del pedido
-			const subTotalDifference = item.subTotal - oldSubTotal;
-			pedido.subTotal = (pedido.subTotal || 0) + subTotalDifference;
-			pedido.total = (pedido.total || 0) + subTotalDifference;
+					// Si no quedan pedidos en el día, eliminamos el documento del día
+					if (pedidosDelDia.length === 0) {
+						transaction.delete(pedidoDocRef);
+						console.log("🗑️ Documento del día eliminado por no tener pedidos");
+						return;
+					} else {
+						transaction.set(pedidoDocRef, {
+							...existingData,
+							pedidos: pedidosDelDia,
+						});
+					}
+					console.log("🗑️ Pedido eliminado por no tener items:", pedidoId);
+					return;
+				}
 
-			// Actualizar el pedido en el array
-			pedidosDelDia[pedidoIndex] = pedido;
+				// Si aún quedan items, recalculamos los totales
+				pedido.subTotal = pedido.detallePedido.reduce(
+					(sum, item) => sum + item.subTotal,
+					0
+				);
+				pedido.total = pedido.subTotal + (pedido.envio || 0);
+			} else {
+				// Si no es 0, actualizamos la cantidad y recalculamos subtotal
+				const item = pedido.detallePedido[itemIndex];
+				const oldSubTotal = item.subTotal;
+				const pricePerUnit = item.priceBurger;
 
-			// Actualizar el documento completo
-			transaction.set(pedidoDocRef, {
-				...existingData,
-				pedidos: pedidosDelDia,
-			});
+				item.quantity = newQuantity;
+				item.subTotal = pricePerUnit * newQuantity;
+
+				// Recalcular totales del pedido
+				const subTotalDifference = item.subTotal - oldSubTotal;
+				pedido.subTotal = (pedido.subTotal || 0) + subTotalDifference;
+				pedido.total = pedido.subTotal + (pedido.envio || 0);
+			}
+
+			// Solo actualizamos si no hemos eliminado el documento
+			if (pedido.detallePedido.length > 0) {
+				pedidosDelDia[pedidoIndex] = pedido;
+				transaction.set(pedidoDocRef, {
+					...existingData,
+					pedidos: pedidosDelDia,
+				});
+			}
 		});
 
 		console.log(
@@ -111,17 +139,14 @@ export const updateOrderItemQuantity = async (
 
 export const ReadMateriales = async () => {
 	const firestore = getFirestore();
-
 	const collections = ["materiales"];
-
 	const fetchedData = await Promise.all(
 		collections.map(async (collectionName) => {
 			const collectionRef = collection(firestore, collectionName);
 			const snapshot = await getDocs(collectionRef);
 
 			return snapshot.docs.map((doc) => {
-				const data = doc.data(); // Datos del documento de Firestore
-				// Convertir los datos a un objeto ProductoMaterial
+				const data = doc.data();
 				const productoMaterial = {
 					id: doc.id,
 					nombre: data.nombre,
@@ -135,16 +160,12 @@ export const ReadMateriales = async () => {
 			});
 		})
 	);
-
-	// Hacer un flatten de fetchedData y devolver los datos como un arreglo de ProductoMaterial[]
 	return fetchedData.flat();
 };
 
 export const ReadData = async () => {
 	const firestore = getFirestore();
-
 	const collections = ["burgers", "drinks", "fries", "toppings"];
-
 	const fetchedData = await Promise.all(
 		collections.map(async (collectionName) => {
 			const collectionRef = collection(firestore, collectionName);
@@ -159,18 +180,8 @@ export const ReadData = async () => {
 			return dataWithIds;
 		})
 	);
-
 	return fetchedData.flat();
 };
-
-// rating : {
-//   tiempo: number,
-//   temperatura: number,
-//   presentacion: number,
-//   pagina: number,
-//   [productoNombre: string]: number, // Calificaciones por producto
-//   comentario?: string, // Comentario opcional
-// }
 
 export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 	const firestore = getFirestore();
@@ -198,12 +209,11 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 
 			const pedidosActualizados = pedidosDelDia.map((pedido) => {
 				if (pedido.id === pedidoId) {
-					// Actualizamos el pedido con el nuevo rating
 					return {
 						...pedido,
 						rating: {
-							...rating, // Incluye tanto las calificaciones generales como las de productos
-							comentario: rating.comentario || "", // Comentario opcional
+							...rating,
+							comentario: rating.comentario || "",
 						},
 					};
 				} else {
@@ -237,11 +247,7 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 
 export const getCadetePhone = async (nombreCadete) => {
 	const firestore = getFirestore();
-
-	// Acceder a la colección 'empleados' en Firestore
 	const empleadosRef = collection(firestore, "empleados");
-
-	// Crear una consulta para filtrar por categoría 'cadete' y nombre del cadete
 	const q = query(
 		empleadosRef,
 		where("category", "==", "cadete"),
@@ -249,18 +255,15 @@ export const getCadetePhone = async (nombreCadete) => {
 	);
 
 	console.log("🔍 Buscando cadete con nombre:", nombreCadete);
-
-	// Obtener los documentos que coinciden con la consulta
 	const querySnapshot = await getDocs(q);
 
-	// Si encontramos algún documento, retornamos el número de teléfono
 	if (!querySnapshot.empty) {
-		const empleadoData = querySnapshot.docs[0].data(); // Asumimos que el nombre es único
+		const empleadoData = querySnapshot.docs[0].data();
 		console.log("📱 Teléfono del cadete encontrado:", empleadoData.telefono);
-		return empleadoData.telefono; // Retornar el número de teléfono del cadete
+		return empleadoData.telefono;
 	} else {
 		console.warn("⚠️ Cadete no encontrado");
-		return null; // Retornar null si no se encuentra el cadete
+		return null;
 	}
 };
 
@@ -272,12 +275,11 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
 	const querySnapshot = await getDocs(q);
 
 	if (querySnapshot.empty) {
-		// El número de teléfono no existe en la base de datos, entonces lo agregamos
 		try {
 			const docRef = await addDoc(collectionRef, {
 				telefono: cleanPhone,
 				fecha: fecha,
-				lastOrder: fecha, // Nueva fecha como último pedido al agregar
+				lastOrder: fecha,
 			});
 			console.log(
 				`Se agregó el número de teléfono ${cleanPhone} a Firebase con el ID: ${docRef.id}. Fecha: ${fecha}`
@@ -286,12 +288,11 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
 			console.error("Error al agregar el número de teléfono a Firebase:", e);
 		}
 	} else {
-		// El número de teléfono ya existe en la base de datos, actualizamos el campo lastOrder
 		querySnapshot.forEach(async (documento) => {
 			try {
 				const docRef = doc(firestore, "telefonos", documento.id);
 				await updateDoc(docRef, {
-					lastOrder: fecha, // Actualiza con la nueva fecha del último pedido
+					lastOrder: fecha,
 				});
 				console.log(
 					`El número de teléfono ${cleanPhone} ya existe en la base de datos. Actualizado lastOrder a: ${fecha}`
