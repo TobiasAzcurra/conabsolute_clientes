@@ -84,14 +84,15 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 			const pedido = pedidosDelDia[pedidoIndex];
 			console.log("🧾 Pedido encontrado:", pedido);
 
-			// Crear nuevo item para el pedido
+			// Crear nuevo item para el pedido con la prop extra
 			const newOrderItem = {
 				burger: product.name,
 				priceBurger: product.price,
 				quantity: quantity,
 				toppings: product.toppings || [],
 				subTotal: product.price * quantity,
-				costoBurger: product.costoBurger || 0, // Asegúrate de incluir esto si es necesario
+				costoBurger: product.costoBurger || 0,
+				extra: true, // Agregamos la propiedad extra
 			};
 
 			console.log("🆕 Nuevo item a agregar:", newOrderItem);
@@ -204,6 +205,7 @@ export const updateOrderItemQuantity = async (
 
 				item.quantity = newQuantity;
 				item.subTotal = pricePerUnit * newQuantity;
+				item.extra = true; // Agregamos la propiedad extra al modificar la cantidad
 
 				// Recalcular totales del pedido
 				const subTotalDifference = item.subTotal - oldSubTotal;
