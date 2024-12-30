@@ -110,7 +110,7 @@ const UpdatedPedidoSection = ({
 							Podes agregar productos a tu pedido!
 							<br /> Por logistica:
 							<br /> Cuando se cocine esta opcion desaparece y
-							<br /> los agregados se abonan en efectivo.
+							<br /> las modificaciones tienen limitaciones
 						</p>
 					</div>
 				</div>
