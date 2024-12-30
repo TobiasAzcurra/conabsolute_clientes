@@ -169,7 +169,7 @@ const UpdatedPedidoSection = ({
 							}}
 						>
 							<div className="flex gap-2" style={{ width: "max-content" }}>
-								{allProducts
+								{[...papasArray, ...drinksArray, ...burgersArray]
 									.filter(
 										(product) =>
 											!currentOrder?.detallePedido?.some(
