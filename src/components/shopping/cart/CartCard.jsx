@@ -17,6 +17,8 @@ const CartCard = ({
 	const { name, price, quantity, category, img, toppings, extra } = item;
 	const [isUpdating, setIsUpdating] = useState(false);
 
+	const isDisabled = !extra && isPedidoComponente;
+
 	const capitalizeWords = (str) => {
 		if (!str) return "";
 		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -30,7 +32,6 @@ const CartCard = ({
 		)
 			return "";
 
-		// Manejar tanto arrays de strings como arrays de objetos
 		const names = toppingsArray
 			.map((topping) => {
 				if (typeof topping === "string") {
@@ -40,7 +41,7 @@ const CartCard = ({
 					? capitalizeWords(topping.name)
 					: "";
 			})
-			.filter((name) => name); // Filtrar nombres vacíos
+			.filter((name) => name);
 
 		if (names.length === 0) return "";
 		if (names.length === 1) return names[0];
@@ -85,61 +86,79 @@ const CartCard = ({
 	const totalPrice = calculateTotalPrice();
 
 	return (
-		<div className="flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px]">
-			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden">
-				<img
-					src={img ? `/menu/${img}` : getDefaultImage(item)}
-					alt={name || "Product"}
-					className="h-[350px] object-cover"
-				/>
-			</div>
-
-			<div className="flex flex-col w-2/3 justify-center px-4 pt-2 pb-4">
-				<div>
-					<h3 className="text-2xl font-bold mb-1.5 leading-6">
-						{capitalizeWords(name)}
-					</h3>
-
-					<div className="flex flex-col space-y-1">
-						{toppings && toppings.length > 0 && (
-							<p className="text-xs mb-4 font-medium">
-								Toppings: {formatToppings(toppings)}.
-							</p>
-						)}
-					</div>
+		<div className="relative">
+			<div
+				className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px]  ${
+					isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
+				}`}
+			>
+				<div
+					className={`w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden ${
+						isDisabled ? "" : ""
+					}`}
+				>
+					<img
+						src={img ? `/menu/${img}` : getDefaultImage(item)}
+						alt={name || "Product"}
+						className="h-[350px] object-cover"
+					/>
 				</div>
-				<div className="flex flex-col items-start">
-					<p className="text-2xl font-bold mb-4 mt-[-5px]">
-						{currencyFormat(totalPrice)}
-					</p>
-					<div className="flex flex-row items-center gap-2">
-						<QuickAddToCart
-							product={item}
-							isOrderItem={!!currentOrder}
-							isPedidoComponente={true}
-							initialOrderQuantity={quantity}
-							onOrderQuantityChange={
-								currentOrder ? handleQuantityChange : undefined
-							}
-							isUpdating={isUpdating}
-						/>
-						{!extra && isPedidoComponente && (
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								className="h-6"
-							>
-								<path
-									fillRule="evenodd"
-									d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
-									clipRule="evenodd"
-								/>
-							</svg>
-						)}
+
+				<div className="flex flex-col w-2/3 justify-center px-4 pt-2 pb-4">
+					<div>
+						<h3 className="text-2xl font-bold mb-1.5 leading-6">
+							{capitalizeWords(name)}
+						</h3>
+
+						<div className="flex flex-col space-y-1">
+							{toppings && toppings.length > 0 && (
+								<p className="text-xs mb-4 font-medium">
+									Toppings: {formatToppings(toppings)}.
+								</p>
+							)}
+						</div>
+					</div>
+					<div className="flex flex-col items-start">
+						<p className="text-2xl font-bold mb-4 mt-[-5px]">
+							{currencyFormat(totalPrice)}
+						</p>
+						<div className="flex flex-row items-center gap-2">
+							<QuickAddToCart
+								product={item}
+								isOrderItem={!!currentOrder}
+								isPedidoComponente={true}
+								initialOrderQuantity={quantity}
+								onOrderQuantityChange={
+									currentOrder ? handleQuantityChange : undefined
+								}
+								isUpdating={isUpdating}
+								disabled={isDisabled}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
+			{isDisabled && (
+				<div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-black bg-opacity-40">
+					<div className="flex flex-col items-center space-y-2">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 24 24"
+							fill="white"
+							className="h-12 w-12"
+						>
+							<path
+								fillRule="evenodd"
+								d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
+								clipRule="evenodd"
+							/>
+						</svg>
+						<span className="text-white font-bold text-2xl">
+							Ya cocinándose
+						</span>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 };
