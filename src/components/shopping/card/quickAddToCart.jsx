@@ -1,13 +1,18 @@
+import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import {
 	addItem,
 	updateItemQuantity,
 	removeItem,
 } from "../../../redux/cart/cartSlice";
-import { useState, useRef, useEffect } from "react";
+import {
+	addProductToOrder,
+	ReadMateriales,
+	ReadData,
+} from "../../../firebase/uploadOrder";
+import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
-import { addProductToOrder } from "../../../firebase/uploadOrder";
 
 const QuickAddToCart = ({
 	product,
@@ -98,15 +103,8 @@ const QuickAddToCart = ({
 		}
 	};
 
-	const startAddingProcess = () => {
-		console.log("🔵 Iniciando startAddingProcess");
-		console.log("📦 Props recibidos:", {
-			isPedidoComponente,
-			currentOrder,
-			product,
-			quantity: quantityRef.current,
-		});
-
+	const startAddingProcess = async () => {
+		console.log("🔵 Starting add process");
 		setIsEditing(true);
 		setIsAdding(true);
 
@@ -117,42 +115,63 @@ const QuickAddToCart = ({
 		pendingUpdateRef.current = setTimeout(async () => {
 			try {
 				if (isPedidoComponente && currentOrder?.id) {
-					console.log("🎯 Detectado modo pedido componente");
-					console.log("🔑 ID del pedido:", currentOrder.id);
-					console.log("📝 Producto a agregar:", {
+					// Fetch materials and products data for cost calculation
+					const materialesData = await ReadMateriales();
+					const productsData = await ReadData();
+
+					// Find the product data
+					const productData = productsData.find(
+						(p) => p.data.name === product.name
+					)?.data;
+
+					// Calculate the cost using the existing helper function
+					const costoBurger = productData
+						? calcularCostoHamburguesa(materialesData, productData.ingredients)
+						: 0;
+
+					// Calculate toppings cost
+					let costoToppings = 0;
+					if (effectiveToppings.length > 0) {
+						effectiveToppings.forEach((topping) => {
+							const materialTopping = materialesData.find(
+								(material) =>
+									material.nombre.toLowerCase() === topping.name.toLowerCase()
+							);
+							if (materialTopping) {
+								costoToppings += materialTopping.costo;
+							}
+						});
+					}
+
+					// Prepare the product with costs
+					const productWithCosts = {
 						...product,
 						toppings: effectiveToppings,
-					});
-					console.log("🔢 Cantidad:", quantityRef.current);
+						costoBurger: (costoBurger + costoToppings) * quantityRef.current,
+					};
 
-					// Agregar al pedido existente
+					// Add to existing order
 					await addProductToOrder(
 						currentOrder.id,
-						{
-							...product,
-							toppings: effectiveToppings,
-						},
+						productWithCosts,
 						quantityRef.current
 					);
 
-					console.log("✅ Producto agregado exitosamente al pedido");
-
-					// Actualizar UI si es necesario
-					if (onOrderQuantityChange) {
-						console.log("🔄 Actualizando UI");
-						onOrderQuantityChange(quantityRef.current);
-					}
+					console.log(
+						"✅ Product added successfully with costs:",
+						productWithCosts
+					);
 				} else if (!isOrderItem) {
-					console.log("🛒 Procesando lógica del carrito normal");
-					// Lógica original del carrito
-					if (quantityRef.current === 0 && cartItem) {
-						const itemIndex = cart.findIndex(
-							(item) =>
-								item.name === product.name &&
-								item.category === (product.category || "default") &&
-								compareToppings(item.toppings, effectiveToppings)
-						);
-						dispatch(removeItem(itemIndex));
+					// Original cart logic
+					if (quantityRef.current === 0) {
+						if (cartItem) {
+							const itemIndex = cart.findIndex(
+								(item) =>
+									item.name === product.name &&
+									compareToppings(item.toppings, effectiveToppings)
+							);
+							dispatch(removeItem(itemIndex));
+						}
 					} else if (quantityRef.current >= 1) {
 						if (cartItem) {
 							const updatePayload = {
@@ -174,18 +193,16 @@ const QuickAddToCart = ({
 							dispatch(addItem(newItem));
 						}
 					}
-				} else if (onOrderQuantityChange) {
-					console.log("🔄 Ejecutando onOrderQuantityChange");
+				}
+
+				if (onOrderQuantityChange) {
 					onOrderQuantityChange(quantityRef.current);
 				}
 			} catch (error) {
-				console.error("❌ Error en startAddingProcess:", error);
+				console.error("❌ Error in startAddingProcess:", error);
 			} finally {
-				console.log("🏁 Finalizando proceso de agregar");
 				setIsAdding(false);
-				setTimeout(() => {
-					setIsEditing(false);
-				}, 300);
+				setTimeout(() => setIsEditing(false), 300);
 			}
 		}, 2000);
 	};
