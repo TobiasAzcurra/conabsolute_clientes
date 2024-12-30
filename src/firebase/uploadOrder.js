@@ -92,13 +92,16 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 				toppings: product.toppings || [],
 				subTotal: product.price * quantity,
 				costoBurger: product.costoBurger || 0,
-				extra: true, // Agregamos la propiedad extra
+				extra: true,
 			};
 
 			console.log("🆕 Nuevo item a agregar:", newOrderItem);
 
 			// Agregar el nuevo item al detallePedido
 			pedido.detallePedido.push(newOrderItem);
+
+			// Marcar el pedido como editado por el usuario
+			pedido.onEditByUser = true;
 
 			// Recalcular totales del pedido
 			pedido.subTotal = pedido.detallePedido.reduce(
@@ -205,7 +208,10 @@ export const updateOrderItemQuantity = async (
 
 				item.quantity = newQuantity;
 				item.subTotal = pricePerUnit * newQuantity;
-				item.extra = true; // Agregamos la propiedad extra al modificar la cantidad
+				item.extra = true;
+
+				// Marcar el pedido como editado por el usuario
+				pedido.onEditByUser = true;
 
 				// Recalcular totales del pedido
 				const subTotalDifference = item.subTotal - oldSubTotal;
