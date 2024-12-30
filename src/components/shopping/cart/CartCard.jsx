@@ -10,37 +10,56 @@ const CartCard = ({
 	decrementQuantity,
 	incrementQuantity,
 	deleteItem,
-	currentOrder = null, // Hacemos opcional currentOrder
+	currentOrder = null,
 	readOnly = false,
 }) => {
 	const { name, price, quantity, category, img, toppings } = item;
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
+		if (!str) return "";
 		return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 	};
 
-	// Función para formatear los toppings en una oración
 	const formatToppings = (toppingsArray) => {
-		if (!toppingsArray || toppingsArray.length === 0) return "";
-		const names = toppingsArray.map((topping) => capitalizeWords(topping.name));
-		if (names.length === 1) {
-			return names[0];
-		} else if (names.length === 2) {
-			return `${names[0]} y ${names[1]}`;
-		} else {
-			const last = names.pop();
-			return `${names.join(", ")} y ${last}`;
-		}
+		if (
+			!toppingsArray ||
+			!Array.isArray(toppingsArray) ||
+			toppingsArray.length === 0
+		)
+			return "";
+
+		// Manejar tanto arrays de strings como arrays de objetos
+		const names = toppingsArray
+			.map((topping) => {
+				if (typeof topping === "string") {
+					return capitalizeWords(topping);
+				}
+				return topping && typeof topping === "object" && topping.name
+					? capitalizeWords(topping.name)
+					: "";
+			})
+			.filter((name) => name); // Filtrar nombres vacíos
+
+		if (names.length === 0) return "";
+		if (names.length === 1) return names[0];
+		if (names.length === 2) return `${names[0]} y ${names[1]}`;
+
+		const last = names.pop();
+		return `${names.join(", ")} y ${last}`;
 	};
 
-	// Función para calcular el precio total incluyendo los toppings pagos
 	const calculateTotalPrice = () => {
-		const toppingsTotal = toppings
-			? toppings.reduce((acc, topping) => acc + topping.price, 0)
-			: 0;
-		return price + toppingsTotal;
+		const toppingsTotal =
+			toppings && Array.isArray(toppings)
+				? toppings.reduce((acc, topping) => {
+						if (typeof topping === "object" && topping?.price) {
+							return acc + topping.price;
+						}
+						return acc;
+				  }, 0)
+				: 0;
+		return (price || 0) + toppingsTotal;
 	};
 
 	const handleQuantityChange = async (newQuantity) => {
@@ -69,7 +88,7 @@ const CartCard = ({
 			<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden">
 				<img
 					src={img ? `/menu/${img}` : getDefaultImage(item)}
-					alt={name}
+					alt={name || "Product"}
 					className="h-[350px] object-cover"
 				/>
 			</div>
@@ -94,7 +113,7 @@ const CartCard = ({
 					</p>
 					<QuickAddToCart
 						product={item}
-						isOrderItem={!!currentOrder} // Solo true si hay currentOrder
+						isOrderItem={!!currentOrder}
 						initialOrderQuantity={quantity}
 						onOrderQuantityChange={
 							currentOrder ? handleQuantityChange : undefined
