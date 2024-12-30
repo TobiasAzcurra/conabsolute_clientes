@@ -591,7 +591,7 @@ const Pedido = () => {
 			/>
 			<div className="justify-center my-auto items-center flex flex-col">
 				<div className="flex items-center flex-col pt-16">
-					<img src={logo} className="w-1/2" alt="Logo" />
+					<img src={logo} className="w-2/3" alt="Logo" />
 				</div>
 				{loading && (
 					<div className="flex items-center justify-center">
