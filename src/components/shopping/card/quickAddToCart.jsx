@@ -62,6 +62,7 @@ const QuickAddToCart = ({
 	const [isAdding, setIsAdding] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const quantityRef = useRef(quantity);
+	const pendingUpdateRef = useRef(null);
 
 	// Actualizar el estado local cuando el carrito o la cantidad inicial cambian
 	useEffect(() => {
@@ -74,14 +75,20 @@ const QuickAddToCart = ({
 		}
 	}, [cartItem, initialOrderQuantity, isOrderItem, product.quantity]);
 
+	// Limpiar timeout al desmontar
+	useEffect(() => {
+		return () => {
+			if (pendingUpdateRef.current) {
+				clearTimeout(pendingUpdateRef.current);
+			}
+		};
+	}, []);
+
 	// Manejar incremento de cantidad
 	const handleIncrement = () => {
 		setQuantity((prevQuantity) => {
 			const newQuantity = prevQuantity + 1;
 			quantityRef.current = newQuantity;
-			if (isOrderItem && onOrderQuantityChange) {
-				onOrderQuantityChange(newQuantity);
-			}
 			return newQuantity;
 		});
 	};
@@ -92,9 +99,6 @@ const QuickAddToCart = ({
 			setQuantity((prevQuantity) => {
 				const newQuantity = prevQuantity - 1;
 				quantityRef.current = newQuantity;
-				if (isOrderItem && onOrderQuantityChange) {
-					onOrderQuantityChange(newQuantity);
-				}
 				return newQuantity;
 			});
 		}
@@ -105,7 +109,12 @@ const QuickAddToCart = ({
 		setIsEditing(true);
 		setIsAdding(true);
 
-		setTimeout(() => {
+		// Limpiar cualquier actualización pendiente
+		if (pendingUpdateRef.current) {
+			clearTimeout(pendingUpdateRef.current);
+		}
+
+		pendingUpdateRef.current = setTimeout(() => {
 			if (!isOrderItem) {
 				// Lógica original del carrito
 				if (quantityRef.current === 0 && cartItem) {
@@ -137,6 +146,9 @@ const QuickAddToCart = ({
 						dispatch(addItem(newItem));
 					}
 				}
+			} else if (onOrderQuantityChange) {
+				// Solo actualizar Firestore cuando la animación termine
+				onOrderQuantityChange(quantityRef.current);
 			}
 
 			setIsAdding(false);
