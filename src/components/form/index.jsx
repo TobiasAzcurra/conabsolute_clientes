@@ -150,6 +150,26 @@ const FormCustom = ({ cart, total }) => {
 		setIsCloseRestrictedModalOpen(false);
 	};
 
+	// Nueva función para obtener la cantidad total de hamburguesas
+	const getTotalBurgers = (cartToCheck = cart) => {
+		if (!Array.isArray(cartToCheck)) {
+			console.error("Invalid cart passed to getTotalBurgers", cartToCheck);
+			return 0;
+		}
+
+		let totalBurgers = 0;
+		for (const item of cartToCheck) {
+			if (item.category === "burger" || item.category === "burgers") {
+				if (item.name.includes("2x1")) {
+					totalBurgers += item.quantity * 2;
+				} else {
+					totalBurgers += item.quantity;
+				}
+			}
+		}
+		return totalBurgers;
+	};
+
 	// Función para agregar un nuevo campo de cupón dinámicamente
 	const addCouponField = () => {
 		// Calcular el máximo de cupones permitidos
@@ -164,7 +184,6 @@ const FormCustom = ({ cart, total }) => {
 			// Opcional: Mostrar un mensaje o manejar el caso cuando se alcanza el máximo de cupones
 		}
 	};
-
 	const handleCouponChange = (index, value, setFieldValue) => {
 		const updatedCoupons = [...couponCodes];
 		updatedCoupons[index] = value;
@@ -206,7 +225,7 @@ const FormCustom = ({ cart, total }) => {
 
 	useEffect(() => {
 		let hasInvalidVoucher = false;
-		let invalidCount = 0;
+		let validCouponCount = 0;
 		// Recorre el voucherStatus
 
 		console.log(voucherStatus);
@@ -216,14 +235,13 @@ const FormCustom = ({ cart, total }) => {
 			if (v !== "¡Código válido!") {
 				hasInvalidVoucher = true;
 			} else {
-				invalidCount++;
-				return;
+				validCouponCount++;
 			}
 		});
 		// Si algún cupón no es válido, quitar el descuento
 		if (hasInvalidVoucher && descuento !== 0) {
 			console.log("descuentoForOneUnit", descuentoForOneUnit);
-			const newDescuento = descuentoForOneUnit * invalidCount;
+			const newDescuento = descuentoForOneUnit * validCouponCount;
 			console.log("NUEVO DESCUENTO", newDescuento);
 			setDescuento(newDescuento);
 			setDiscountedTotal(total - newDescuento);
@@ -233,10 +251,18 @@ const FormCustom = ({ cart, total }) => {
 	}, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
 
 	// Función para validar la cantidad de hamburguesas necesarias
-	function validarCantidadDeBurgers(cart, numCoupons) {
+	function validarCantidadDeBurgers(cartToCheck, numCoupons) {
+		if (!Array.isArray(cartToCheck)) {
+			console.error(
+				"Invalid cart passed to validarCantidadDeBurgers",
+				cartToCheck
+			);
+			return false;
+		}
+
 		let burgerCount = 0;
 
-		for (const item of cart) {
+		for (const item of cartToCheck) {
 			if (item.category === "burger" || item.category === "burgers") {
 				// Maneja ambas categorías
 				burgerCount += item.quantity;
@@ -246,6 +272,12 @@ const FormCustom = ({ cart, total }) => {
 		const minBurgersRequired = numCoupons * 2;
 		return burgerCount >= minBurgersRequired;
 	}
+
+	const getPromoAndNonPromoProducts = (cart) => {
+		const promoProducts = cart.filter((item) => item.type === "promo");
+		const nonPromoProducts = cart.filter((item) => item.type !== "promo");
+		return { promoProducts, nonPromoProducts };
+	};
 
 	// Función para manejar la validación de un cupón
 	const handleVoucherValidation = async (
@@ -260,6 +292,9 @@ const FormCustom = ({ cart, total }) => {
 			updated[index] = true; // Activar el estado de carga
 			return updated;
 		});
+
+		// Obtener la cantidad total de hamburguesas
+		const totalBurgers = getTotalBurgers(cart);
 
 		// Primera validación: evitar cupones duplicados
 		if (updatedCoupons.indexOf(value) !== index) {
@@ -278,20 +313,50 @@ const FormCustom = ({ cart, total }) => {
 		const numCoupons = updatedCoupons.filter(
 			(code) => code.trim() !== ""
 		).length;
-		const hasEnoughBurgers = validarCantidadDeBurgers(cart, numCoupons);
+
+		const hasEnoughBurgers = totalBurgers >= numCoupons * 2;
 
 		if (!hasEnoughBurgers) {
 			const updatedVoucherStatus = [...voucherStatus];
 			updatedVoucherStatus[index] = `Necesitas al menos ${
 				numCoupons * 2
-			} hamburguesas para canjear los vouchers.`;
+			} hamburguesas (considerando las promociones 2x1) para canjear los vouchers.`;
 			setVoucherStatus(updatedVoucherStatus);
-			setIsValidating((prev) => {
-				const updated = [...prev];
-				updated[index] = false; // Desactivar el estado de carga
-				return updated;
-			});
 			return;
+		}
+
+		// Verificar si hay productos promocionales y no promocionales
+		const { promoProducts, nonPromoProducts } =
+			getPromoAndNonPromoProducts(cart);
+
+		if (promoProducts.length > 0 && nonPromoProducts.length === 0) {
+			const updatedVoucherStatus = [...voucherStatus];
+			updatedVoucherStatus[index] =
+				"No se pueden aplicar vouchers a productos en promoción.";
+			setVoucherStatus(updatedVoucherStatus);
+			return;
+		}
+
+		if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
+			const updatedVoucherStatus = [...voucherStatus];
+			updatedVoucherStatus[index] =
+				"El cupón se aplica solo a productos no promocionales.";
+			setVoucherStatus(updatedVoucherStatus);
+			// Continuar con la validación y aplicación del descuento solo para productos no promocionales
+			const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+			const numNonPromoCoupons = updatedCoupons.filter(
+				(code) => code.trim() !== ""
+			).length;
+			const hasEnoughNonPromoBurgers =
+				totalNonPromoBurgers >= numNonPromoCoupons * 2;
+
+			if (!hasEnoughNonPromoBurgers) {
+				updatedVoucherStatus[index] = `Necesitas al menos ${
+					numNonPromoCoupons * 2
+				} hamburguesas no promocionales (considerando las promociones 2x1) para canjear los vouchers.`;
+				setVoucherStatus(updatedVoucherStatus);
+				return;
+			}
 		}
 
 		try {
@@ -354,18 +419,6 @@ const FormCustom = ({ cart, total }) => {
 
 	const handleChange = (event) => {
 		setSelectedHora(event.target.value);
-	};
-
-	// Nueva función para obtener la cantidad total de hamburguesas
-	const getTotalBurgers = () => {
-		const totalBurgers = cart.reduce((acc, item) => {
-			if (item.category === "burger" || item.category === "burgers") {
-				// Maneja ambas categorías
-				return acc + item.quantity;
-			}
-			return acc;
-		}, 0);
-		return totalBurgers;
 	};
 
 	// Función para ajustar la hora restando 30 minutos
