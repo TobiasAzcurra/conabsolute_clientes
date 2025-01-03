@@ -1015,10 +1015,18 @@ const FormCustom = ({ cart, total }) => {
 										</p>
 									</div>
 									<div className="flex flex-row justify-between w-full">
+										<p className="font-coolvetica font-mediu">Express </p>
+										<p>
+											{values.deliveryMethod === "delivery"
+												? currencyFormat(0)
+												: currencyFormat(0)}
+										</p>
+									</div>
+									<div className="flex flex-row justify-between w-full">
 										<p>Descuentos</p>
 										<p>-{currencyFormat(descuento)}</p>
 									</div>
-									<div className="flex flex-row justify-between border-t border-black border-opacity-20 mt-4 pt-4 w-full">
+									<div className="flex flex-row justify-between border-t border-opacity-20 border-black  mt-4 pt-4 px-4 w-screen">
 										<p className="text-2xl font-bold">Total</p>
 										<p className="text-2xl font-bold">
 											{values.deliveryMethod === "delivery"
