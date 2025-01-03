@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Tooltip = () => {
+const Tooltip = ({ text, duration = 10000, className = "" }) => {
 	const [isVisible, setIsVisible] = useState(false);
 
 	const showTooltip = () => {
@@ -8,17 +8,17 @@ const Tooltip = () => {
 
 		const timer = setTimeout(() => {
 			setIsVisible(false);
-		}, 10000);
+		}, duration);
 
 		return () => clearTimeout(timer);
 	};
 
 	return (
-		<div className="relative inline-block">
-			{/* Info Icon - Using a more Apple-style icon */}
+		<div className={`relative inline-block ${className}`}>
+			{/* Info Icon */}
 			<div
 				onClick={showTooltip}
-				className="cursor-pointer  hover:bg-gray-100 rounded-full transition-colors duration-200"
+				className="cursor-pointer hover:bg-gray-100 rounded-full transition-colors duration-200"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -37,32 +37,29 @@ const Tooltip = () => {
 			{/* Tooltip */}
 			<div
 				className={`
-        absolute z-50 w-72  
-        transform -transla -translate-y-full
-         -top-4
-        transition-all duration-200 ease-out
-        ${
-					isVisible
-						? "opacity-100 translate-y-0"
-						: "opacity-0 translate-y-2 pointer-events-none"
-				}
-      `}
+          absolute z-50 w-72
+          transform -translate-y-full
+          -top-4
+          transition-all duration-200 ease-out
+          ${
+						isVisible
+							? "opacity-100 translate-y-0"
+							: "opacity-0 translate-y-2 pointer-events-none"
+					}
+        `}
 			>
 				{/* Backdrop blur container */}
 				<div
 					className="relative bg-black bg-opacity-50 backdrop-blur-sm 
-          rounded-2xl shadow-lg border border-gray-200
-          overflow-hidden"
+            rounded-2xl shadow-lg border border-gray-200
+            overflow-hidden"
 				>
 					{/* Content */}
 					<div className="px-4 py-3">
-						<p className=" text-gray-100 leading-relaxed">
-							Si priorizas la <b>velocidad</b>
-							, esta opcion es para vos: Tu pedido pasa al frente de la fila en
-							cocinarse y, en caso de delivery, tu cadete sale solo con tu
-							pedido. <br /> Si priorizas la <b>accesibilidad</b>, sin marcar
-							esta opcion tu entrega sigue siendo lo mas eficiente posible.
-						</p>
+						<p
+							className="text-gray-100 leading-relaxed"
+							dangerouslySetInnerHTML={{ __html: text }}
+						/>
 					</div>
 				</div>
 			</div>

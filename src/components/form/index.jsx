@@ -947,7 +947,11 @@ const FormCustom = ({ cart, total }) => {
 										<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
 											<div className="flex flex-row items-center gap-2">
 												<div className="flex flex-row items-center gap-2">
-													<Tooltip />
+													<Tooltip
+														text={`Si priorizas la <b>velocidad</b>, esta opcion es para vos: Tu pedido pasa al frente de la fila en cocinarse y, en caso de delivery, tu cadete sale solo con tu pedido. Si priorizas la <b>accesibilidad</b>, sin marcar esta opcion tu entrega sigue siendo lo mas eficiente posible.`}
+														duration={10000}
+														className="flex items-center"
+													/>
 													<p className="font-coolvetica flex flex-row items-center gap-1">
 														Lo mas rapido posible
 														<p className="font-bold ">(+$1000)</p>
