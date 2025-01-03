@@ -2,7 +2,7 @@
 	{
 		"name": "Simple Chessburger",
 		"description": "Smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 7370,
+		"price": 7870,
 		"id": "TIS213231",
 		"type": "originals",
 		"img": "simple.png",
@@ -11,7 +11,7 @@
 	{
 		"name": "Doble Cheeseburger",
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 9870,
+		"price": 10370,
 		"id": "TASD4444",
 		"type": "originals",
 		"img": "doble.png",
@@ -20,7 +20,7 @@
 	{
 		"name": "Triple Cheeseburger",
 		"description": "Triple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 10360,
+		"price": 10860,
 		"id": "ASD134212",
 		"type": "originals",
 		"img": "triple.png",
@@ -29,7 +29,7 @@
 	{
 		"name": "Cuadruple Cheeseburger",
 		"description": "Cuadruple smash burger de nuestro blend de carnes, cheddar y toppings a elección envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 11860,
+		"price": 12360,
 		"id": "GFDYH3245",
 		"type": "originals",
 		"img": "cuadruple.png",
@@ -38,7 +38,7 @@
 	{
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
 		"name": "ANHELO Classic",
-		"price": 10290,
+		"price": 10790,
 		"id": "JUYTTR32",
 		"type": "our",
 		"img": "classic.png",
@@ -47,7 +47,7 @@
 	{
 		"name": "BCN Cheeseburger",
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 9960,
+		"price": 10460,
 		"id": "SADA231424",
 		"type": "our",
 		"img": "baconCheeseburger.png",
@@ -56,7 +56,7 @@
 	{
 		"name": "BBQ BCN Cheeseburger",
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, cebolla caramelizada y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 9970,
+		"price": 10470,
 		"id": "GERCV45",
 		"type": "our",
 		"img": "bbqBcnCheeseburger.png",
@@ -65,7 +65,7 @@
 	{
 		"name": "Easter Egg",
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 10300,
+		"price": 10800,
 		"id": "154525FAS",
 		"type": "our",
 		"img": "easterEgg.png",
@@ -74,7 +74,7 @@
 	{
 		"name": "Mario Inspired",
 		"description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla caramelizada y salsa de champiñones envuelto en un delicioso pan de papa. Incluye porción de papas.",
-		"price": 10050,
+		"price": 10550,
 		"id": "151A2A5ASFAS",
 		"type": "our",
 		"img": "marioInspired.png",
@@ -83,7 +83,7 @@
 	{
 		"name": "Satisfyer Easter Egg",
 		"description": "Smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 4250,
+		"price": 4750,
 		"id": "151ASaFAS",
 		"type": "satisfyer",
 		"img": "satisfyerEasterEgg.png",
@@ -92,7 +92,7 @@
 	{
 		"name": "Satisfyer BCN Cheeseburger",
 		"description": "Smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 4000,
+		"price": 4500,
 		"id": "151A5ASzFAS",
 		"type": "satisfyer",
 		"img": "satisfyerBcnCheeseburger.png",
@@ -101,7 +101,7 @@
 	{
 		"name": "Satisfyer ANHELO Classic",
 		"description": "Smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. NO incluye porción de papas.",
-		"price": 4220,
+		"price": 4720,
 		"id": "151AcSFAS",
 		"type": "satisfyer",
 		"img": "satisfyerClassic.png",
@@ -112,7 +112,7 @@
 		"img": "promo2x1bcn.png",
 		"id": "PROMO2X1BCN",
 		"name": "2x1 Triple Cheeseburger",
-		"price": 10360,
+		"price": 10860,
 		"type": "promo",
 		"category": "burger"
 	}
