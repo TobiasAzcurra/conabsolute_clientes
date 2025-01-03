@@ -201,6 +201,7 @@ const QuickAddToCart = ({
 								toppings: effectiveToppings,
 								quantity: quantityRef.current,
 								category: product.category || "default",
+								type: product.type || "default",
 							};
 							dispatch(addItem(newItem));
 						}

@@ -71,6 +71,7 @@ const Section = ({ products = [], path }) => {
 											path={path}
 											id={product.id}
 											rating={product.rating}
+											type={product.type} // Agregar la propiedad 'type' aquí
 										/>
 									))}
 								</div>
@@ -85,14 +86,15 @@ const Section = ({ products = [], path }) => {
 									{satisfyer.map((product, i) => (
 										<Card
 											key={i}
-											img={product.img}
-											name={product.name}
 											category={product.category}
+											img={product.img}
+											rating={product.rating}
+											name={product.name}
 											description={product.description}
 											price={product.price}
 											path={path}
 											id={product.id}
-											rating={product.rating}
+											type={product.type} // Agregar la propiedad 'type' aquí
 										/>
 									))}
 								</div>
@@ -115,6 +117,7 @@ const Section = ({ products = [], path }) => {
 											price={product.price}
 											path={path}
 											id={product.id}
+											type={product.type} // Agregar la propiedad 'type' aquí
 										/>
 									))}
 								</div>
@@ -128,15 +131,16 @@ const Section = ({ products = [], path }) => {
 								<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
 									{ourCollection.map((product, i) => (
 										<Card
-											key={product.id}
-											img={product.img}
-											name={product.name}
-											rating={product.rating}
+											key={i}
 											category={product.category}
+											img={product.img}
+											rating={product.rating}
+											name={product.name}
 											description={product.description}
 											price={product.price}
 											path={path}
 											id={product.id}
+											type={product.type} // Agregar la propiedad 'type' aquí
 										/>
 									))}
 								</div>
@@ -151,12 +155,13 @@ const Section = ({ products = [], path }) => {
 									key={i}
 									category={product.category}
 									img={product.img}
+									rating={product.rating}
 									name={product.name}
 									description={product.description}
 									price={product.price}
-									rating={product.rating}
 									path={path}
 									id={product.id}
+									type={product.type} // Agregar la propiedad 'type' aquí
 								/>
 							))
 						) : (

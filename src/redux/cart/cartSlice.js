@@ -33,8 +33,8 @@ export const cartSlices = createSlice({
 				// Sumar la cantidad a la existente (acumulativa)
 				state.cart[existingItemIndex].quantity += item.quantity;
 			} else {
-				// Agregar un nuevo artículo
-				state.cart = [...state.cart, item];
+				// Agregar un nuevo artículo, incluyendo la propiedad 'type'
+				state.cart = [...state.cart, { ...item, type: item.type }];
 			}
 
 			state.total = getTotal(state.cart);
