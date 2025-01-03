@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { handleConfirmChanges } from "../../../firebase/uploadOrder";
 import currencyFormat from "../../../helpers/currencyFormat";
 import QuickAddToCart from "../card/quickAddToCart";
-import { updateOrderItemQuantity } from "../../../firebase/uploadOrder";
 
 const CartCard = ({
 	item,
@@ -17,31 +17,45 @@ const CartCard = ({
 	const { name, price, quantity, category, img, toppings, extra } = item;
 	const isConfirmed = item.isConfirmed || false;
 	const [isUpdating, setIsUpdating] = useState(false);
+	const [countdown, setCountdown] = useState(null);
+	const [showConfirmation, setShowConfirmation] = useState(false);
 
-	console.log("🔍 Renderizando CartCard para:", name);
-	console.log("📦 Props del item:", {
-		extra,
-		isConfirmed,
-		isPedidoComponente,
-		hasExtraProp: item.hasOwnProperty("extra"),
-	});
+	useEffect(() => {
+		let timer;
+		if (countdown !== null && countdown > 0) {
+			timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+		} else if (countdown === 0) {
+			handleAutoConfirm();
+		}
+		return () => clearTimeout(timer);
+	}, [countdown]);
 
-	// Un producto estará deshabilitado si:
-	// 1. No tiene la prop extra O tiene extra undefined (producto original)
-	// 2. O tiene extra:true y está confirmado
+	const handleAutoConfirm = async () => {
+		if (!currentOrder) return;
+		setIsUpdating(true);
+		try {
+			await handleConfirmChanges(currentOrder.id);
+			console.log("✅ Producto confirmado automáticamente");
+		} catch (error) {
+			console.error("❌ Error al confirmar el producto:", error);
+		} finally {
+			setIsUpdating(false);
+			setShowConfirmation(false);
+		}
+	};
+
+	useEffect(() => {
+		if (extra && !isConfirmed && currentOrder?.onEditByUser) {
+			setCountdown(5);
+			setShowConfirmation(true);
+		}
+	}, [extra, isConfirmed, currentOrder]);
+
 	const isDisabled =
 		isPedidoComponente &&
 		(!item.hasOwnProperty("extra") ||
 			item.extra === undefined ||
 			(extra === true && isConfirmed));
-
-	console.log("🔒 Estado de disabled:", {
-		isDisabled,
-		noTieneExtra: !item.hasOwnProperty("extra"),
-		extraUndefined: item.extra === undefined,
-		esExtraConfirmado: extra === true && isConfirmed,
-		isPedidoComponente,
-	});
 
 	const capitalizeWords = (str) => {
 		if (!str) return "";
@@ -55,12 +69,9 @@ const CartCard = ({
 			toppingsArray.length === 0
 		)
 			return "";
-
 		const names = toppingsArray
 			.map((topping) => {
-				if (typeof topping === "string") {
-					return capitalizeWords(topping);
-				}
+				if (typeof topping === "string") return capitalizeWords(topping);
 				return topping && typeof topping === "object" && topping.name
 					? capitalizeWords(topping.name)
 					: "";
@@ -70,7 +81,6 @@ const CartCard = ({
 		if (names.length === 0) return "";
 		if (names.length === 1) return names[0];
 		if (names.length === 2) return `${names[0]} y ${names[1]}`;
-
 		const last = names.pop();
 		return `${names.join(", ")} y ${last}`;
 	};
@@ -88,25 +98,6 @@ const CartCard = ({
 		return (price || 0) + toppingsTotal;
 	};
 
-	const handleQuantityChange = async (newQuantity) => {
-		if (!currentOrder) return;
-
-		setIsUpdating(true);
-		try {
-			await updateOrderItemQuantity(
-				currentOrder.id,
-				currentOrder.fecha,
-				index,
-				newQuantity
-			);
-			console.log(`✅ Cantidad actualizada para ${name}: ${newQuantity}`);
-		} catch (error) {
-			console.error("❌ Error al actualizar la cantidad:", error);
-		} finally {
-			setIsUpdating(false);
-		}
-	};
-
 	const totalPrice = calculateTotalPrice();
 
 	return (
@@ -116,9 +107,7 @@ const CartCard = ({
 					isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
 				}`}
 			>
-				<div
-					className={`w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden`}
-				>
+				<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden">
 					<img
 						src={img ? `/menu/${img}` : getDefaultImage(item)}
 						alt={name || "Product"}
@@ -131,35 +120,47 @@ const CartCard = ({
 						<h3 className="text-2xl font-bold mb-1.5 leading-6">
 							{capitalizeWords(name)}
 						</h3>
-
-						<div className="flex flex-col space-y-1">
-							{toppings && toppings.length > 0 && (
-								<p className="text-xs mb-4 font-medium">
-									Toppings: {formatToppings(toppings)}.
-								</p>
-							)}
-						</div>
+						{toppings && toppings.length > 0 && (
+							<p className="text-xs mb-4 font-medium">
+								Toppings: {formatToppings(toppings)}.
+							</p>
+						)}
 					</div>
 					<div className="flex flex-col items-start">
 						<p className="text-2xl font-bold mb-4 mt-[-5px]">
 							{currencyFormat(totalPrice)}
 						</p>
-						<div className="flex flex-row items-center gap-2">
+						<div className="flex flex-col w-full gap-2">
 							<QuickAddToCart
 								product={item}
 								isOrderItem={!!currentOrder}
 								isPedidoComponente={true}
 								initialOrderQuantity={quantity}
 								onOrderQuantityChange={
-									currentOrder ? handleQuantityChange : undefined
+									currentOrder ? handleAutoConfirm : undefined
 								}
 								isUpdating={isUpdating}
 								disabled={isDisabled}
 							/>
+
+							{showConfirmation && countdown !== null && (
+								<div className="flex flex-col items-center w-full">
+									<p className="text-sm text-gray-600 font-medium">
+										Tenés {countdown} segundos para cancelar este producto
+									</p>
+									<div className="w-full bg-gray-200 rounded-full h-2 mt-1">
+										<div
+											className="bg-blue-600 h-2 rounded-full transition-all duration-1000"
+											style={{ width: `${(countdown / 10) * 100}%` }}
+										/>
+									</div>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
 			</div>
+
 			{isDisabled && (
 				<div className="absolute border-2 border-black inset-0 flex items-center justify-center rounded-3xl bg-black bg-opacity-40">
 					<div className="flex flex-col items-center space-y-2">
