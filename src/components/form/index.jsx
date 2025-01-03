@@ -958,7 +958,7 @@ const FormCustom = ({ cart, total }) => {
 											</svg>
 											<p className="font-coolvetica flex flex-row items-center gap-1">
 												Lo mas rapido posible
-												<p className="font-bold ">(+$500)</p>
+												<p className="font-bold ">(+$1000)</p>
 											</p>
 										</div>
 										<Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
