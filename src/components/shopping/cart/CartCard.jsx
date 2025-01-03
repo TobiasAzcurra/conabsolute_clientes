@@ -15,9 +15,33 @@ const CartCard = ({
 	readOnly = false,
 }) => {
 	const { name, price, quantity, category, img, toppings, extra } = item;
+	const isConfirmed = item.isConfirmed || false;
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	const isDisabled = !extra && isPedidoComponente;
+	console.log("🔍 Renderizando CartCard para:", name);
+	console.log("📦 Props del item:", {
+		extra,
+		isConfirmed,
+		isPedidoComponente,
+		hasExtraProp: item.hasOwnProperty("extra"),
+	});
+
+	// Un producto estará deshabilitado si:
+	// 1. No tiene la prop extra O tiene extra undefined (producto original)
+	// 2. O tiene extra:true y está confirmado
+	const isDisabled =
+		isPedidoComponente &&
+		(!item.hasOwnProperty("extra") ||
+			item.extra === undefined ||
+			(extra === true && isConfirmed));
+
+	console.log("🔒 Estado de disabled:", {
+		isDisabled,
+		noTieneExtra: !item.hasOwnProperty("extra"),
+		extraUndefined: item.extra === undefined,
+		esExtraConfirmado: extra === true && isConfirmed,
+		isPedidoComponente,
+	});
 
 	const capitalizeWords = (str) => {
 		if (!str) return "";
@@ -88,14 +112,12 @@ const CartCard = ({
 	return (
 		<div className="relative">
 			<div
-				className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px]  ${
+				className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
 					isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
 				}`}
 			>
 				<div
-					className={`w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden ${
-						isDisabled ? "" : ""
-					}`}
+					className={`w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden`}
 				>
 					<img
 						src={img ? `/menu/${img}` : getDefaultImage(item)}

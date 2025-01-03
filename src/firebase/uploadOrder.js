@@ -84,7 +84,7 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 			const pedido = pedidosDelDia[pedidoIndex];
 			console.log("🧾 Pedido encontrado:", pedido);
 
-			// Crear nuevo item para el pedido con la prop extra
+			// Crear nuevo item para el pedido con la prop extra e isConfirmed
 			const newOrderItem = {
 				burger: product.name,
 				priceBurger: product.price,
@@ -93,6 +93,7 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 				subTotal: product.price * quantity,
 				costoBurger: product.costoBurger || 0,
 				extra: true,
+				isConfirmed: false, // Nuevo producto, aún no confirmado
 			};
 
 			console.log("🆕 Nuevo item a agregar:", newOrderItem);
@@ -431,7 +432,20 @@ export const handleConfirmChanges = async (orderId) => {
 				throw new Error("Pedido no encontrado");
 			}
 
-			// Update the onEditByUser flag to false
+			// Marcar todos los productos extra como confirmados
+			pedidosDelDia[pedidoIndex].detallePedido = pedidosDelDia[
+				pedidoIndex
+			].detallePedido.map((item) => {
+				if (item.extra && !item.isConfirmed) {
+					return {
+						...item,
+						isConfirmed: true,
+					};
+				}
+				return item;
+			});
+
+			// Reset the onEditByUser flag
 			pedidosDelDia[pedidoIndex].onEditByUser = false;
 
 			// Update the document

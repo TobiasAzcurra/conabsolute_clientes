@@ -71,16 +71,22 @@ const UpdatedPedidoSection = ({
 			costoBurger: orderItem.costoBurger,
 			subTotal: orderItem.subTotal,
 			extra: orderItem.extra,
+			isConfirmed: orderItem.isConfirmed,
 		};
 	};
 
 	useEffect(() => {
-		console.log("Detalle del pedido:", currentOrder?.detallePedido);
+		console.log("🧾 Detalle del pedido original:", currentOrder?.detallePedido);
 		if (currentOrder?.detallePedido) {
-			const mappedItems = currentOrder.detallePedido.map(
-				mapOrderItemToCartFormat
-			);
-			console.log("Items mapeados:", mappedItems);
+			const mappedItems = currentOrder.detallePedido.map((item) => {
+				const mapped = mapOrderItemToCartFormat(item);
+				console.log(`📦 Item mapeado - ${mapped.name}:`, {
+					original: item,
+					mapped: mapped,
+				});
+				return mapped;
+			});
+			console.log("✅ Todos los items mapeados:", mappedItems);
 		}
 	}, [currentOrder]);
 
