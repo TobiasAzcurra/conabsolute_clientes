@@ -554,37 +554,37 @@ const Pedido = () => {
 		}
 	}, [pedidosPagados]);
 
-	console.log("🛍️ Detalles del Pedido:", {
-		id: order.id,
-		fecha: order.fecha,
-		hora: order.hora,
-		estado: {
-			elaborado: order.elaborado,
-			entregado: order.entregado,
-			pagado: order.paid,
-		},
-		pago: {
-			metodoPago: order.metodoPago,
-			total: order.total,
-			subTotal: order.subTotal,
-			envio: order.envio,
-		},
-		delivery: {
-			direccion: order.direccion,
-			cadete: order.cadete,
-			deliveryMethod: order.deliveryMethod,
-		},
-		detalles: {
-			productos: order.detallePedido,
-			aclaraciones: order.aclaraciones,
-			referencias: order.referencias,
-			couponCodes: order.couponCodes,
-		},
-		cliente: {
-			telefono: order.telefono,
-		},
-		rating: order.rating || "Sin calificar",
-	});
+	// console.log("🛍️ Detalles del Pedido:", {
+	// 	id: order.id,
+	// 	fecha: order.fecha,
+	// 	hora: order.hora,
+	// 	estado: {
+	// 		elaborado: order.elaborado,
+	// 		entregado: order.entregado,
+	// 		pagado: order.paid,
+	// 	},
+	// 	pago: {
+	// 		metodoPago: order.metodoPago,
+	// 		total: order.total,
+	// 		subTotal: order.subTotal,
+	// 		envio: order.envio,
+	// 	},
+	// 	delivery: {
+	// 		direccion: order.direccion,
+	// 		cadete: order.cadete,
+	// 		deliveryMethod: order.deliveryMethod,
+	// 	},
+	// 	detalles: {
+	// 		productos: order.detallePedido,
+	// 		aclaraciones: order.aclaraciones,
+	// 		referencias: order.referencias,
+	// 		couponCodes: order.couponCodes,
+	// 	},
+	// 	cliente: {
+	// 		telefono: order.telefono,
+	// 	},
+	// 	rating: order.rating || "Sin calificar",
+	// });
 
 	return (
 		<div

@@ -169,7 +169,7 @@ const UpdatedPedidoSection = ({
 						</div>
 					</div>
 
-					<div className="flex justify-center flex-col mt-6 items-start w-full pb-28">
+					<div className="flex justify-center flex-col mt-6 items-start w-full ">
 						{currentOrder?.detallePedido?.some((item) => item.extra) ? (
 							<p className="text-xl px-4 font-bold text-center mx-auto mb-4">
 								¿Algo más? Jajaj
@@ -221,7 +221,7 @@ const UpdatedPedidoSection = ({
 						</div>
 					</div>
 
-					{/* Confirm Changes Button */}
+					{/* Confirm Changes Button
 					{currentOrder?.onEditByUser && (
 						<div className="fixed bottom-0 w-full px-4 p-4 border-t border-opacity-20 border-black  bg-gray-100">
 							<div
@@ -253,7 +253,7 @@ const UpdatedPedidoSection = ({
 								)}
 							</div>
 						</div>
-					)}
+					)} */}
 				</>
 			)}
 
