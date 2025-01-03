@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { handleConfirmChanges } from "../../../firebase/uploadOrder";
+import {
+	handleConfirmChanges,
+	updateOrderItemQuantity,
+} from "../../../firebase/uploadOrder";
 import currencyFormat from "../../../helpers/currencyFormat";
 import QuickAddToCart from "../card/quickAddToCart";
 
@@ -19,6 +22,7 @@ const CartCard = ({
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [countdown, setCountdown] = useState(null);
 	const [showConfirmation, setShowConfirmation] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 
 	useEffect(() => {
 		let timer;
@@ -41,6 +45,24 @@ const CartCard = ({
 		} finally {
 			setIsUpdating(false);
 			setShowConfirmation(false);
+		}
+	};
+
+	const handleDelete = async () => {
+		if (!currentOrder || isDeleting) return;
+		setIsDeleting(true);
+		try {
+			await updateOrderItemQuantity(
+				currentOrder.id,
+				currentOrder.fecha,
+				index,
+				0
+			);
+			console.log("✅ Producto eliminado exitosamente");
+		} catch (error) {
+			console.error("❌ Error al eliminar el producto:", error);
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
@@ -144,7 +166,7 @@ const CartCard = ({
 							/>
 
 							{showConfirmation && countdown !== null && (
-								<div className="flex flex-col items-center w-full">
+								<div className="flex flex-col mt-2 items-center w-full">
 									<p className="text-sm text-gray-600 font-medium">
 										Tenés {countdown} segundos para cancelar este producto
 									</p>
@@ -154,6 +176,31 @@ const CartCard = ({
 											style={{ width: `${(countdown / 10) * 100}%` }}
 										/>
 									</div>
+									<button
+										onClick={handleDelete}
+										disabled={isDeleting}
+										className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${
+											isDeleting
+												? "opacity-50 cursor-not-allowed"
+												: "cursor-pointer"
+										}`}
+									>
+										<div className="flex items-center gap-1">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												className="h-4 w-4"
+											>
+												<path
+													fillRule="evenodd"
+													d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+													clipRule="evenodd"
+												/>
+											</svg>
+											ELIMINAR
+										</div>
+									</button>
 								</div>
 							)}
 						</div>
