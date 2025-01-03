@@ -554,6 +554,38 @@ const Pedido = () => {
 		}
 	}, [pedidosPagados]);
 
+	console.log("🛍️ Detalles del Pedido:", {
+		id: order.id,
+		fecha: order.fecha,
+		hora: order.hora,
+		estado: {
+			elaborado: order.elaborado,
+			entregado: order.entregado,
+			pagado: order.paid,
+		},
+		pago: {
+			metodoPago: order.metodoPago,
+			total: order.total,
+			subTotal: order.subTotal,
+			envio: order.envio,
+		},
+		delivery: {
+			direccion: order.direccion,
+			cadete: order.cadete,
+			deliveryMethod: order.deliveryMethod,
+		},
+		detalles: {
+			productos: order.detallePedido,
+			aclaraciones: order.aclaraciones,
+			referencias: order.referencias,
+			couponCodes: order.couponCodes,
+		},
+		cliente: {
+			telefono: order.telefono,
+		},
+		rating: order.rating || "Sin calificar",
+	});
+
 	return (
 		<div
 			ref={containerRef}
@@ -886,14 +918,15 @@ const Pedido = () => {
 											)}
 										</div>
 
-										{!currentOrder.elaborado && (
-											<UpdatedPedidoSection
-												currentOrder={currentOrder}
-												showCancelButton={showCancelButton}
-												isDeleting={isDeleting}
-												handleCancelClick={handleCancelClick}
-											/>
-										)}
+										{!currentOrder.elaborado &&
+											currentOrder.metodoPago === "efectivo" && (
+												<UpdatedPedidoSection
+													currentOrder={currentOrder}
+													showCancelButton={showCancelButton}
+													isDeleting={isDeleting}
+													handleCancelClick={handleCancelClick}
+												/>
+											)}
 
 										{index < pedidosPagados.length - 1 && (
 											<div className="w-full h-px bg-black opacity-20 mt-8"></div>
