@@ -18,6 +18,7 @@ import {
 	isWithinOrderTimeRange,
 } from "../../helpers/validate-hours";
 import LoadingPoints from "../LoadingPoints";
+import Toggle from "../Toggle";
 import AppleModal from "../AppleModal";
 import { listenToAltaDemanda } from "../../firebase/readConstants";
 
@@ -30,6 +31,8 @@ const FormCustom = ({ cart, total }) => {
 	const formValidations = validations(total + envio);
 	const [mapUrl, setUrl] = useState("");
 	const [validarUbi, setValidarUbi] = useState(false);
+	const [isEnabled, setIsEnabled] = useState(false);
+
 	const [noEncontre, setNoEncontre] = useState(false);
 
 	// Estados para alta demanda
@@ -651,7 +654,7 @@ const FormCustom = ({ cart, total }) => {
 										Datos para la entrega
 									</p>
 									{/* Botones para seleccionar método de envío */}
-									<div className="flex flex-row w-full gap-2 mb-4">
+									<div className="flex flex-row w-full gap-2">
 										<button
 											type="button"
 											className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${
@@ -700,6 +703,13 @@ const FormCustom = ({ cart, total }) => {
 											</div>
 											<p className="font-light text-xs">por Buenos Aires 618</p>
 										</button>
+									</div>
+									<div className="  w-full  mb-2 mt-2 ">
+										<p className="font-coolvetica font-bold">Envio express</p>
+										<Toggle
+											isOn={isEnabled}
+											onToggle={() => setIsEnabled(!isEnabled)}
+										/>
 									</div>
 									<div
 										className={`w-full items-center rounded-3xl border-2 border-black transition-all duration-300`}
