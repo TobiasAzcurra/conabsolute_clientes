@@ -56,12 +56,12 @@ const Tooltip = () => {
 				>
 					{/* Content */}
 					<div className="px-4 py-3">
-						<p className="text-xs text-gray-100 leading-relaxed">
-							Si valoras la velocidad, esta opcion es para vos: Tu pedido pasa
-							al frente de la fila en cocinarse y, en caso de delivery, tu
-							cadete sale solo con tu pedido. Si valoras que sea accesible, sin
-							marcar esta opcion tu entrega sigue siendo lo mas eficiente
-							posible.
+						<p className=" text-gray-100 leading-relaxed">
+							Si priorizas la <b>velocidad</b>
+							, esta opcion es para vos: Tu pedido pasa al frente de la fila en
+							cocinarse y, en caso de delivery, tu cadete sale solo con tu
+							pedido. <br /> Si priorizas la <b>accesibilidad</b>, sin marcar
+							esta opcion tu entrega sigue siendo lo mas eficiente posible.
 						</p>
 					</div>
 				</div>
