@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Tooltip = () => {
 	const [isVisible, setIsVisible] = useState(false);
@@ -6,18 +6,20 @@ const Tooltip = () => {
 	const showTooltip = () => {
 		setIsVisible(true);
 
-		// Hide tooltip after 3 seconds
 		const timer = setTimeout(() => {
 			setIsVisible(false);
-		}, 3000);
+		}, 10000);
 
 		return () => clearTimeout(timer);
 	};
 
 	return (
 		<div className="relative inline-block">
-			{/* Info Icon */}
-			<div onClick={showTooltip} className="cursor-pointer">
+			{/* Info Icon - Using a more Apple-style icon */}
+			<div
+				onClick={showTooltip}
+				className="cursor-pointer  hover:bg-gray-100 rounded-full transition-colors duration-200"
+			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					viewBox="0 0 24 24"
@@ -33,14 +35,37 @@ const Tooltip = () => {
 			</div>
 
 			{/* Tooltip */}
-			{isVisible && (
-				<div className="absolute z-50 w-64 px-4 py-2 text-sm text-white bg-black rounded-lg shadow-lg -left-4 -top-16">
-					Tu pedido pasa al frente de la fila en cocinarse y tu cadete sale solo
-					con tu pedido.
-					{/* Arrow */}
-					<div className="absolute w-2 h-2 bg-black rotate-45 -bottom-1 left-5"></div>
+			<div
+				className={`
+        absolute z-50 w-72  
+        transform -transla -translate-y-full
+         -top-4
+        transition-all duration-200 ease-out
+        ${
+					isVisible
+						? "opacity-100 translate-y-0"
+						: "opacity-0 translate-y-2 pointer-events-none"
+				}
+      `}
+			>
+				{/* Backdrop blur container */}
+				<div
+					className="relative bg-black bg-opacity-50 backdrop-blur-sm 
+          rounded-2xl shadow-lg border border-gray-200
+          overflow-hidden"
+				>
+					{/* Content */}
+					<div className="px-4 py-3">
+						<p className="text-xs text-gray-100 leading-relaxed">
+							Si valoras la velocidad, esta opcion es para vos: Tu pedido pasa
+							al frente de la fila en cocinarse y, en caso de delivery, tu
+							cadete sale solo con tu pedido. Si valoras que sea accesible, sin
+							marcar esta opcion tu entrega sigue siendo lo mas eficiente
+							posible.
+						</p>
+					</div>
 				</div>
-			)}
+			</div>
 		</div>
 	);
 };
