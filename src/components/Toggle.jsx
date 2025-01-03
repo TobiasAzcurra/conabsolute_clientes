@@ -20,11 +20,7 @@ const Toggle = ({ isOn = false, onToggle }) => {
 const DemoContainer = () => {
 	const [isEnabled, setIsEnabled] = React.useState(false);
 
-	return (
-		<div className="p-4">
-			<Toggle isOn={isEnabled} onToggle={() => setIsEnabled(!isEnabled)} />
-		</div>
-	);
+	return <Toggle isOn={isEnabled} onToggle={() => setIsEnabled(!isEnabled)} />;
 };
 
 export default DemoContainer;
