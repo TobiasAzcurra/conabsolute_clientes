@@ -23,7 +23,7 @@ import { listenToAltaDemanda } from "../../firebase/readConstants";
 import Tooltip from "../Tooltip";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000; // valor por defecto de 2000
-const expressDeliveryFee = 500; // Define the express delivery fee
+const expressDeliveryFee = 1000; // Define the express delivery fee
 
 const FormCustom = ({ cart, total }) => {
 	const navigate = useNavigate();
