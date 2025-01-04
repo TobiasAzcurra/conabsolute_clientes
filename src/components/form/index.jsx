@@ -478,6 +478,17 @@ const FormCustom = ({ cart, total }) => {
 		});
 	};
 
+	console.log("Current isEnabled state:", isEnabled);
+
+	const handleExpressToggle = () => {
+		console.log("Express toggle clicked");
+		setIsEnabled((prev) => {
+			console.log("Setting isEnabled from", prev, "to", !prev);
+			return !prev;
+		});
+	};
+	const expressDeliveryFee = 500; // Define the express delivery fee
+
 	// TimeSelector component
 	const TimeSelector = ({ selectedHora, handleChange, setFieldValue }) => {
 		const availableTimeSlots = useMemo(getAvailableTimeSlots, []);
@@ -592,6 +603,28 @@ const FormCustom = ({ cart, total }) => {
 					submitForm,
 					isValid,
 				}) => {
+					// Calculate the final total including express delivery fee if enabled
+					const calculateFinalTotal = () => {
+						console.log("Calculating final total:");
+						console.log("- Delivery Method:", values.deliveryMethod);
+						console.log("- Express Enabled:", isEnabled);
+						console.log("- Base Total:", discountedTotal);
+						console.log("- Envío:", envio);
+						console.log("- Express Fee:", expressDeliveryFee);
+
+						let finalTotal = discountedTotal;
+						if (values.deliveryMethod === "delivery") {
+							finalTotal += envio;
+							console.log("- After adding envío:", finalTotal);
+
+							if (isEnabled) {
+								finalTotal += expressDeliveryFee;
+								console.log("- After adding express fee:", finalTotal);
+							}
+						}
+						console.log("Final total:", finalTotal);
+						return finalTotal;
+					};
 					useEffect(() => {
 						couponCodes.forEach((code, index) => {
 							if (
@@ -975,10 +1008,10 @@ const FormCustom = ({ cart, total }) => {
 								</div>
 								{/* Resumen */}
 								<div className="flex justify-center flex-col mt-6 items-center">
-									<p className="text-2xl font-bold  w-full text-center ">
+									<p className="text-2xl font-bold w-full text-center">
 										Resumen
 									</p>
-									<div className="  w-full flex flex-row justify-between items-center   mb-4 mt-4 ">
+									<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
 										<div className="flex flex-row items-center gap-2">
 											<svg
 												xmlns="http://www.w3.org/2000/svg"
@@ -987,14 +1020,14 @@ const FormCustom = ({ cart, total }) => {
 												className="h-4 text-black"
 											>
 												<path
-													fill-rule="evenodd"
+													fillRule="evenodd"
 													d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-													clip-rule="evenodd"
+													clipRule="evenodd"
 												/>
 											</svg>
-
-											<p className="font-coolvetica font-">
-												Envio express (En desarrollo)
+											<p className="font-coolvetica flex flex-row items-center gap-1">
+												Envio express
+												<p className="font-bold ">(+$500)</p>
 											</p>
 										</div>
 										<Toggle
@@ -1007,7 +1040,7 @@ const FormCustom = ({ cart, total }) => {
 										<p>{currencyFormat(total)}</p>
 									</div>
 									<div className="flex flex-row justify-between w-full">
-										<p className="font-coolvetica font-mediu">Envio </p>
+										<p className="font-coolvetica font-medium">Envío</p>
 										<p>
 											{values.deliveryMethod === "delivery"
 												? currencyFormat(envio)
@@ -1015,10 +1048,10 @@ const FormCustom = ({ cart, total }) => {
 										</p>
 									</div>
 									<div className="flex flex-row justify-between w-full">
-										<p className="font-coolvetica font-mediu">Express </p>
+										<p className="font-coolvetica font-medium">Express</p>
 										<p>
-											{values.deliveryMethod === "delivery"
-												? currencyFormat(0)
+											{values.deliveryMethod === "delivery" && isEnabled
+												? currencyFormat(expressDeliveryFee)
 												: currencyFormat(0)}
 										</p>
 									</div>
@@ -1026,12 +1059,10 @@ const FormCustom = ({ cart, total }) => {
 										<p>Descuentos</p>
 										<p>-{currencyFormat(descuento)}</p>
 									</div>
-									<div className="flex flex-row justify-between border-t border-opacity-20 border-black  mt-4 pt-4 px-4 w-screen">
+									<div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-screen">
 										<p className="text-2xl font-bold">Total</p>
 										<p className="text-2xl font-bold">
-											{values.deliveryMethod === "delivery"
-												? currencyFormat(discountedTotal + envio)
-												: currencyFormat(discountedTotal)}
+											{currencyFormat(calculateFinalTotal())}
 										</p>
 									</div>
 								</div>
