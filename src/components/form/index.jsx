@@ -23,7 +23,7 @@ import { listenToAltaDemanda } from "../../firebase/readConstants";
 import Tooltip from "../Tooltip";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000; // valor por defecto de 2000
-const expressDeliveryFee = 1000; // Define the express delivery fee
+const expressDeliveryFee = 2000; // Define the express delivery fee
 
 const FormCustom = ({ cart, total }) => {
 	const navigate = useNavigate();
@@ -944,7 +944,7 @@ const FormCustom = ({ cart, total }) => {
 										Resumen
 									</p>
 									<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
-										{/* <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
+										<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
 											<div className="flex flex-row items-center gap-2">
 												<div className="flex flex-row items-center gap-2">
 													<Tooltip
@@ -954,12 +954,12 @@ const FormCustom = ({ cart, total }) => {
 													/>
 													<p className="font-coolvetica flex flex-row items-center gap-1">
 														Lo mas rapido posible
-														<p className="font-bold ">(+$1000)</p>
+														<p className="font-bold ">(+$2000)</p>
 													</p>
 												</div>
 											</div>
 											<Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
-										</div> */}
+										</div>
 									</div>
 									<div className="flex flex-row justify-between w-full">
 										<p>Productos</p>
@@ -984,7 +984,7 @@ const FormCustom = ({ cart, total }) => {
 												: currencyFormat(0)}
 										</p>
 									</div>
-									{/* <div className="flex flex-row justify-between w-full">
+									<div className="flex flex-row justify-between w-full">
 										<p className="font-coolvetica font-medium">
 											Velocidad extra
 										</p>
@@ -993,7 +993,7 @@ const FormCustom = ({ cart, total }) => {
 												? currencyFormat(expressDeliveryFee)
 												: currencyFormat(0)}
 										</p>
-									</div> */}
+									</div>
 									<div className="flex flex-row justify-between w-full">
 										<p>Descuentos</p>
 										<p>-{currencyFormat(descuento)}</p>
