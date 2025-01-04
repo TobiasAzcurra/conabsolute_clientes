@@ -944,7 +944,7 @@ const FormCustom = ({ cart, total }) => {
 										Resumen
 									</p>
 									<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
-										<div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
+										{/* <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
 											<div className="flex flex-row items-center gap-2">
 												<div className="flex flex-row items-center gap-2">
 													<Tooltip
@@ -959,7 +959,7 @@ const FormCustom = ({ cart, total }) => {
 												</div>
 											</div>
 											<Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
-										</div>
+										</div> */}
 									</div>
 									<div className="flex flex-row justify-between w-full">
 										<p>Productos</p>
@@ -984,7 +984,7 @@ const FormCustom = ({ cart, total }) => {
 												: currencyFormat(0)}
 										</p>
 									</div>
-									<div className="flex flex-row justify-between w-full">
+									{/* <div className="flex flex-row justify-between w-full">
 										<p className="font-coolvetica font-medium">
 											Velocidad extra
 										</p>
@@ -993,7 +993,7 @@ const FormCustom = ({ cart, total }) => {
 												? currencyFormat(expressDeliveryFee)
 												: currencyFormat(0)}
 										</p>
-									</div>
+									</div> */}
 									<div className="flex flex-row justify-between w-full">
 										<p>Descuentos</p>
 										<p>-{currencyFormat(descuento)}</p>
