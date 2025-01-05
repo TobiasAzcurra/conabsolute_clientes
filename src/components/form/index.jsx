@@ -1,11 +1,10 @@
-// src/components/FormCustom.jsx
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import MyTextInput from "./MyTextInput";
 import validations from "./validations";
 import handleSubmit from "./handleSubmit";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addLastCart } from "../../redux/cart/cartSlice";
+import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
 import { useEffect, useState, useMemo } from "react";
 import { MapDirection } from "./MapDirection";
 import { canjearVoucher } from "../../firebase/validateVoucher";
@@ -23,6 +22,7 @@ import AppleModal from "../AppleModal";
 import { listenToAltaDemanda } from "../../firebase/readConstants";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000; // valor por defecto de 2000
+const expressDeliveryFee = 500; // Define the express delivery fee
 
 const FormCustom = ({ cart, total }) => {
 	const navigate = useNavigate();
@@ -44,7 +44,6 @@ const FormCustom = ({ cart, total }) => {
 	const [couponCodes, setCouponCodes] = useState([""]); // Inicializado con un campo vacío
 	const [descuento, setDescuento] = useState(0);
 	const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
-	// En FormCustom.jsx, agregar estado de loading
 	const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
 
 	const [voucherStatus, setVoucherStatus] = useState([""]);
@@ -61,7 +60,6 @@ const FormCustom = ({ cart, total }) => {
 	// Estado para controlar el modal de restricción de tiempo
 	const [isTimeRestrictedModalOpen, setIsTimeRestrictedModalOpen] =
 		useState(false);
-
 	const [isCloseRestrictedModalOpen, setIsCloseRestrictedModalOpen] =
 		useState(false);
 
@@ -92,6 +90,12 @@ const FormCustom = ({ cart, total }) => {
 		};
 	}, []);
 
+	const handleExpressToggle = () => {
+		const newValue = !isEnabled;
+		setIsEnabled(newValue);
+		dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
+	};
+
 	// Función para procesar el pedido
 	const processPedido = async (values, isReserva) => {
 		let adjustedHora = values.hora;
@@ -115,7 +119,14 @@ const FormCustom = ({ cart, total }) => {
 			adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
 		}
 
-		const updatedValues = { ...values, hora: adjustedHora };
+		const updatedValues = {
+			...values,
+			hora: adjustedHora,
+			envioExpress:
+				values.deliveryMethod === "delivery" && isEnabled
+					? expressDeliveryFee
+					: 0,
+		};
 
 		const orderId = await handleSubmit(
 			updatedValues,
@@ -183,10 +194,9 @@ const FormCustom = ({ cart, total }) => {
 			setCouponCodes([...couponCodes, ""]); // Añadir un nuevo campo vacío
 			setVoucherStatus([...voucherStatus, ""]); // Añadir un nuevo estado vacío para el nuevo cupón
 			setIsValidating([...isValidating, false]); // Añadir el estado de validación para el nuevo campo
-		} else {
-			// Opcional: Mostrar un mensaje o manejar el caso cuando se alcanza el máximo de cupones
 		}
 	};
+
 	const handleCouponChange = (index, value, setFieldValue) => {
 		const updatedCoupons = [...couponCodes];
 		updatedCoupons[index] = value;
@@ -194,21 +204,13 @@ const FormCustom = ({ cart, total }) => {
 
 		const updatedVoucherStatus = [...voucherStatus];
 
-		console.log(descuento);
-		console.log(voucherStatus);
 		if (value.length < 5) {
-			// Mostrar mensaje de error indicando que deben ser al menos 5 dígitos
 			updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
 			setVoucherStatus(updatedVoucherStatus);
 		} else if (value.length === 5) {
-			// Limpiar cualquier mensaje de error previo
 			updatedVoucherStatus[index] = "";
 			setVoucherStatus(updatedVoucherStatus);
-
-			// Validar el cupón cuando tiene exactamente 5 caracteres
-			// No establecemos updatedVoucherStatus aquí para evitar sobrescribir el resultado de la validación
 		} else {
-			// Mostrar mensaje de error si el código es mayor a 5 caracteres
 			updatedVoucherStatus[index] =
 				"El código debe tener exactamente 5 caracteres.";
 			setVoucherStatus(updatedVoucherStatus);
@@ -217,43 +219,31 @@ const FormCustom = ({ cart, total }) => {
 
 	// Nueva función para manejar la eliminación de cupones excedentes
 	const removeExcessCoupons = (maxCoupons) => {
-		// Asegurarse de que siempre haya al menos un campo de cupón
 		const adjustedMaxCoupons = Math.max(maxCoupons, 1);
-
 		const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
 		const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
 		const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
-		// Asegúrate de actualizar los estados correspondientes si es necesario
 	};
 
 	useEffect(() => {
 		let hasInvalidVoucher = false;
 		let validCouponCount = 0;
-		// Recorre el voucherStatus
 
-		console.log(voucherStatus);
-		console.log(couponCodes);
 		voucherStatus.forEach((v, index) => {
-			// Si el voucher no es "¡Código válido!" o está vacío, es inválido
 			if (v !== "¡Código válido!") {
 				hasInvalidVoucher = true;
 			} else {
 				validCouponCount++;
 			}
 		});
-		// Si algún cupón no es válido, quitar el descuento
+
 		if (hasInvalidVoucher && descuento !== 0) {
-			console.log("descuentoForOneUnit", descuentoForOneUnit);
 			const newDescuento = descuentoForOneUnit * validCouponCount;
-			console.log("NUEVO DESCUENTO", newDescuento);
 			setDescuento(newDescuento);
 			setDiscountedTotal(total - newDescuento);
-		} else {
-			// Opcional: Manejar el caso cuando no hay cupones inválidos
 		}
 	}, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
 
-	// Función para validar la cantidad de hamburguesas necesarias
 	function validarCantidadDeBurgers(cartToCheck, numCoupons) {
 		if (!Array.isArray(cartToCheck)) {
 			console.error(
@@ -264,10 +254,8 @@ const FormCustom = ({ cart, total }) => {
 		}
 
 		let burgerCount = 0;
-
 		for (const item of cartToCheck) {
 			if (item.category === "burger" || item.category === "burgers") {
-				// Maneja ambas categorías
 				burgerCount += item.quantity;
 			}
 		}
@@ -282,53 +270,46 @@ const FormCustom = ({ cart, total }) => {
 		return { promoProducts, nonPromoProducts };
 	};
 
-	// Función para manejar la validación de un cupón
 	const handleVoucherValidation = async (
 		index,
 		value,
 		updatedCoupons,
 		setFieldValue
 	) => {
-		// Iniciar la animación de carga
 		setIsValidating((prev) => {
 			const updated = [...prev];
-			updated[index] = true; // Activar el estado de carga
+			updated[index] = true;
 			return updated;
 		});
 
-		// Obtener la cantidad total de hamburguesas
 		const totalBurgers = getTotalBurgers(cart);
 
-		// Primera validación: evitar cupones duplicados
 		if (updatedCoupons.indexOf(value) !== index) {
 			const updatedVoucherStatus = [...voucherStatus];
 			updatedVoucherStatus[index] = "Este código ya fue ingresado.";
 			setVoucherStatus(updatedVoucherStatus);
 			setIsValidating((prev) => {
 				const updated = [...prev];
-				updated[index] = false; // Desactivar el estado de carga
+				updated[index] = false;
 				return updated;
 			});
 			return;
 		}
 
-		// Validar que haya suficientes hamburguesas
 		const numCoupons = updatedCoupons.filter(
 			(code) => code.trim() !== ""
 		).length;
-
 		const hasEnoughBurgers = totalBurgers >= numCoupons * 2;
 
 		if (!hasEnoughBurgers) {
 			const updatedVoucherStatus = [...voucherStatus];
 			updatedVoucherStatus[index] = `Necesitas al menos ${
 				numCoupons * 2
-			} hamburguesas (considerando las promociones 2x1) para canjear los vouchers.`;
+			} hamburguesas para canjear los vouchers.`;
 			setVoucherStatus(updatedVoucherStatus);
 			return;
 		}
 
-		// Verificar si hay productos promocionales y no promocionales
 		const { promoProducts, nonPromoProducts } =
 			getPromoAndNonPromoProducts(cart);
 
@@ -345,7 +326,7 @@ const FormCustom = ({ cart, total }) => {
 			updatedVoucherStatus[index] =
 				"El cupón se aplica solo a productos no promocionales.";
 			setVoucherStatus(updatedVoucherStatus);
-			// Continuar con la validación y aplicación del descuento solo para productos no promocionales
+
 			const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
 			const numNonPromoCoupons = updatedCoupons.filter(
 				(code) => code.trim() !== ""
@@ -356,14 +337,13 @@ const FormCustom = ({ cart, total }) => {
 			if (!hasEnoughNonPromoBurgers) {
 				updatedVoucherStatus[index] = `Necesitas al menos ${
 					numNonPromoCoupons * 2
-				} hamburguesas no promocionales (considerando las promociones 2x1) para canjear los vouchers.`;
+				} hamburguesas no promocionales para canjear los vouchers.`;
 				setVoucherStatus(updatedVoucherStatus);
 				return;
 			}
 		}
 
 		try {
-			// Validar el cupón
 			const isValid = await canjearVoucher(value);
 			const updatedVoucherStatus = [...voucherStatus];
 
@@ -377,14 +357,13 @@ const FormCustom = ({ cart, total }) => {
 					setDescuentoForOneUnit(totalDescuento);
 				}
 				setDiscountedTotal(newTotal);
-				setDescuento(totalDescuento); // Establece el descuento total si hay cupones válidos
+				setDescuento(totalDescuento);
 				updatedVoucherStatus[index] = "¡Código válido!";
 				setFieldValue("efectivoCantidad", "");
 				setFieldValue("mercadopagoCantidad", "");
 			} else {
 				updatedVoucherStatus[index] = "Código no válido.";
 
-				// Filtrar solo los cupones válidos y recalcular el descuento
 				const validCoupons = updatedCoupons.filter(
 					(code, i) => voucherStatus[i] === "¡Código válido!"
 				);
@@ -393,8 +372,8 @@ const FormCustom = ({ cart, total }) => {
 					validCoupons.length
 				);
 
-				setDiscountedTotal(newTotal); // Recalcula el total con solo cupones válidos
-				setDescuento(totalDescuento); // Recalcula el descuento con solo cupones válidos
+				setDiscountedTotal(newTotal);
+				setDescuento(totalDescuento);
 			}
 
 			setVoucherStatus(updatedVoucherStatus);
@@ -405,7 +384,6 @@ const FormCustom = ({ cart, total }) => {
 			setVoucherStatus(updatedVoucherStatus);
 		}
 
-		// Desactivar la animación de carga
 		setIsValidating((prev) => {
 			const updated = [...prev];
 			updated[index] = false;
@@ -413,7 +391,6 @@ const FormCustom = ({ cart, total }) => {
 		});
 	};
 
-	// Actualizar el total con descuentos cuando cambia el total original
 	useEffect(() => {
 		setDiscountedTotal(total);
 	}, [total]);
@@ -424,27 +401,23 @@ const FormCustom = ({ cart, total }) => {
 		setSelectedHora(event.target.value);
 	};
 
-	// Función para ajustar la hora restando 30 minutos
 	const adjustHora = (hora) => {
 		const [hours, minutes] = hora.split(":").map(Number);
 		const date = new Date();
 		date.setHours(hours, minutes, 0, 0);
 		date.setMinutes(date.getMinutes() - 30);
 
-		// Formatear la nueva hora en "HH:mm"
 		const adjustedHours = date.getHours().toString().padStart(2, "0");
 		const adjustedMinutes = date.getMinutes().toString().padStart(2, "0");
 		const adjustedTime = `${adjustedHours}:${adjustedMinutes}`;
 		return adjustedTime;
 	};
 
-	// Function to get available time slots
 	const getAvailableTimeSlots = () => {
 		const now = new Date();
 		const currentHour = now.getHours();
 		const currentMinute = now.getMinutes();
 
-		// Define all possible time slots
 		const allTimeSlots = [
 			"20:30",
 			"21:00",
@@ -456,21 +429,16 @@ const FormCustom = ({ cart, total }) => {
 			"00:00",
 		];
 
-		// Calculate the next 30-minute slot
-		// First, round up to the next 30 minutes
 		const nextSlotMinutes =
 			Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
 		const nextSlotHour = Math.floor(nextSlotMinutes / 60);
 		const nextSlotMinute = nextSlotMinutes % 60;
 
-		// Filter time slots
 		return allTimeSlots.filter((timeSlot) => {
 			let [slotHour, slotMinute] = timeSlot.split(":").map(Number);
 
-			// Handle midnight (00:00) special case
 			if (slotHour === 0) slotHour = 24;
 
-			// Convert both times to minutes for comparison
 			const slotTimeInMinutes = slotHour * 60 + slotMinute;
 			const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
 
@@ -478,18 +446,6 @@ const FormCustom = ({ cart, total }) => {
 		});
 	};
 
-	console.log("Current isEnabled state:", isEnabled);
-
-	const handleExpressToggle = () => {
-		console.log("Express toggle clicked");
-		setIsEnabled((prev) => {
-			console.log("Setting isEnabled from", prev, "to", !prev);
-			return !prev;
-		});
-	};
-	const expressDeliveryFee = 500; // Define the express delivery fee
-
-	// TimeSelector component
 	const TimeSelector = ({ selectedHora, handleChange, setFieldValue }) => {
 		const availableTimeSlots = useMemo(getAvailableTimeSlots, []);
 
@@ -553,37 +509,28 @@ const FormCustom = ({ cart, total }) => {
 				}}
 				validationSchema={formValidations}
 				onSubmit={async (values) => {
-					// if (true) {
-					//   return;
-					// }
-					// Determinar si el pedido es una reserva
 					if (!altaDemanda?.open) {
-						openCloseModal(); // Abrir el modal personalizado
-						return; // No proceder si es lunes, martes o miércoles
+						openCloseModal();
+						return;
 					}
 					const isReserva = values.hora.trim() !== "";
 
-					// Solo verificar alta demanda si NO es una reserva
 					if (!isReserva && altaDemanda?.isHighDemand) {
 						setPendingValues(values);
 						setShowHighDemandModal(true);
 						return;
 					}
 
-					// Verificar si es una reserva y proceder sin el modal de alta demanda
-					// (Opcional: Puedes manejar alguna lógica adicional aquí si es necesario)
-
-					// Verificar restricciones de horario antes de procesar el pedido
 					if (isWithinClosedDays()) {
-						openTimeRestrictedModal(); // Abrir el modal personalizado
-						return; // No proceder si es lunes, martes o miércoles
+						openTimeRestrictedModal();
+						return;
 					}
 
 					if (!isWithinOrderTimeRange()) {
 						console.log(
 							"La hora actual está fuera del rango permitido para pedidos"
 						);
-						openTimeRestrictedModal(); // Abrir el modal personalizado
+						openTimeRestrictedModal();
 						return;
 					}
 
@@ -591,7 +538,6 @@ const FormCustom = ({ cart, total }) => {
 						await processPedido(values, isReserva);
 					} else if (values.paymentMethod === "mercadopago") {
 						// Manejar el pago con Mercado Pago aquí si es necesario
-						// Por ejemplo, podrías llamar a un método para procesar el pago
 					}
 				}}
 			>
@@ -603,28 +549,18 @@ const FormCustom = ({ cart, total }) => {
 					submitForm,
 					isValid,
 				}) => {
-					// Calculate the final total including express delivery fee if enabled
 					const calculateFinalTotal = () => {
-						console.log("Calculating final total:");
-						console.log("- Delivery Method:", values.deliveryMethod);
-						console.log("- Express Enabled:", isEnabled);
-						console.log("- Base Total:", discountedTotal);
-						console.log("- Envío:", envio);
-						console.log("- Express Fee:", expressDeliveryFee);
-
 						let finalTotal = discountedTotal;
 						if (values.deliveryMethod === "delivery") {
 							finalTotal += envio;
-							console.log("- After adding envío:", finalTotal);
 
 							if (isEnabled) {
 								finalTotal += expressDeliveryFee;
-								console.log("- After adding express fee:", finalTotal);
 							}
 						}
-						console.log("Final total:", finalTotal);
 						return finalTotal;
 					};
+
 					useEffect(() => {
 						couponCodes.forEach((code, index) => {
 							if (
@@ -638,11 +574,9 @@ const FormCustom = ({ cart, total }) => {
 									setFieldValue
 								);
 							}
-							// No limpiar el estado de validación aquí
 						});
 					}, [cart, couponCodes, setFieldValue]);
 
-					// Nuevo useEffect para manejar la cantidad de cupones basada en la cantidad de hamburguesas
 					useEffect(() => {
 						setCouponCodes([""]);
 						setVoucherStatus([""]);
@@ -651,7 +585,6 @@ const FormCustom = ({ cart, total }) => {
 						setDescuentoForOneUnit(0);
 					}, [cart]);
 
-					// Agregar logs para cambios en el carrito si se modifica dentro de este componente
 					useEffect(() => {
 						console.log("Descuento aplicado:", descuento);
 					}, [cart, total, discountedTotal, descuento]);
@@ -681,11 +614,13 @@ const FormCustom = ({ cart, total }) => {
 										/>
 									</div>
 								</div>
+
 								{/* Datos para la entrega */}
 								<div className="flex justify-center flex-col mt-7 items-center">
 									<p className="text-2xl font-bold mb-2">
 										Datos para la entrega
 									</p>
+
 									{/* Botones para seleccionar método de envío */}
 									<div className="flex flex-row w-full gap-2 mb-4">
 										<button
@@ -713,7 +648,7 @@ const FormCustom = ({ cart, total }) => {
 										</button>
 										<button
 											type="button"
-											className={`h-20 flex-1 flex-col font-bold items-center flex justify-center   rounded-lg ${
+											className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
 												values.deliveryMethod === "takeaway"
 													? "bg-black text-gray-100"
 													: "bg-gray-300 text-black"
@@ -803,6 +738,7 @@ const FormCustom = ({ cart, total }) => {
 												</div>
 											</>
 										)}
+
 										{/* Campo para el número de teléfono */}
 										<div
 											className={`flex flex-row justify-between px-3 h-auto items-start ${
@@ -872,14 +808,13 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 									</div>
 								</div>
+
 								{/* Método de pago y cupones */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold mb-2">Método de pago</p>
 									<div className="w-full items-center rounded-3xl border-2 border-black">
 										<div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
-											{/* Campo de selección de método de pago */}
 											<div className="flex flex-row items-center gap-2">
-												{/* Icono */}
 												<svg
 													xmlns="http://www.w3.org/2000/svg"
 													viewBox="0 0 24 24"
@@ -925,7 +860,6 @@ const FormCustom = ({ cart, total }) => {
 													}`}
 												>
 													<div className="flex flex-row gap-2 px-3 items-center">
-														{/* Icono de cupón */}
 														<svg
 															xmlns="http://www.w3.org/2000/svg"
 															viewBox="0 0 24 24"
@@ -939,7 +873,6 @@ const FormCustom = ({ cart, total }) => {
 															/>
 														</svg>
 
-														{/* Campo de entrada de cupón */}
 														<MyTextInput
 															name={`couponCode${index}`}
 															type="text"
@@ -959,7 +892,6 @@ const FormCustom = ({ cart, total }) => {
 															className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
 														/>
 
-														{/* Indicador de validación */}
 														{isValidating[index] ? (
 															<div
 																className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
@@ -983,7 +915,6 @@ const FormCustom = ({ cart, total }) => {
 														) : null}
 													</div>
 
-													{/* Mensaje de validación */}
 													{voucherStatus[index] &&
 														voucherStatus[index] !== "¡Código válido!" && (
 															<div className="flex flex-row h-10 justify-between px-3 items-start">
@@ -995,7 +926,6 @@ const FormCustom = ({ cart, total }) => {
 															</div>
 														)}
 
-													{/* Lógica para agregar un nuevo campo de cupón */}
 													{voucherStatus[index] === "¡Código válido!" &&
 														index === couponCodes.length - 1 &&
 														couponCodes.length <
@@ -1006,6 +936,7 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 									</div>
 								</div>
+
 								{/* Resumen */}
 								<div className="flex justify-center flex-col mt-6 items-center">
 									<p className="text-2xl font-bold w-full text-center">
@@ -1030,10 +961,7 @@ const FormCustom = ({ cart, total }) => {
 												<p className="font-bold ">(+$500)</p>
 											</p>
 										</div>
-										<Toggle
-											isOn={isEnabled}
-											onToggle={() => setIsEnabled(!isEnabled)}
-										/>
+										<Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
 									</div>
 									<div className="flex flex-row justify-between w-full">
 										<p>Productos</p>
@@ -1066,6 +994,7 @@ const FormCustom = ({ cart, total }) => {
 										</p>
 									</div>
 								</div>
+
 								{/* Botón de envío */}
 								{values.paymentMethod === "mercadopago" ? (
 									<Payment
@@ -1078,7 +1007,7 @@ const FormCustom = ({ cart, total }) => {
 										submitForm={submitForm}
 										setPendingValues={setPendingValues}
 										altaDemanda={altaDemanda}
-										isValid={isValid} // Pasamos isValid al componente Payment
+										isValid={isValid}
 										pendingValues={pendingValues}
 									/>
 								) : (
@@ -1101,6 +1030,7 @@ const FormCustom = ({ cart, total }) => {
 					);
 				}}
 			</Formik>
+
 			{/* Modal de restricción de tiempo */}
 			<AppleModal
 				isOpen={isTimeRestrictedModalOpen}
@@ -1120,10 +1050,11 @@ const FormCustom = ({ cart, total }) => {
 					captura de esto, vale por 2x1 😎
 				</p>
 			</AppleModal>
+
 			{/* Modal de alta demanda */}
 			<AppleModal
 				isOpen={
-					showHighDemandModal && pendingValues.paymentMethod === "efectivo"
+					showHighDemandModal && pendingValues?.paymentMethod === "efectivo"
 				}
 				onClose={() => setShowHighDemandModal(false)}
 				title="Alta Demanda"

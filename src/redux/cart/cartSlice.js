@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const getTotal = (cart) => {
+const getTotal = (cart, envioExpress = 0) => {
 	let total = 0;
 	let totalToppings = 0;
 	cart.forEach(({ price, quantity, toppings }) => {
@@ -9,7 +9,7 @@ const getTotal = (cart) => {
 			totalToppings += price * quantity;
 		});
 	});
-	return total + totalToppings;
+	return total + totalToppings + envioExpress;
 };
 
 export const cartSlices = createSlice({
@@ -18,9 +18,15 @@ export const cartSlices = createSlice({
 		cart: [],
 		lastCart: [],
 		total: 0,
+		envioExpress: 0,
 	},
 
 	reducers: {
+		// Add a new reducer to handle express delivery:
+		setEnvioExpress: (state, action) => {
+			state.envioExpress = action.payload;
+			state.total = getTotal(state.cart, state.envioExpress);
+		},
 		addItem: (state, action) => {
 			const item = action.payload;
 			const existingItemIndex = state.cart.findIndex(
@@ -30,14 +36,12 @@ export const cartSlices = createSlice({
 			);
 
 			if (existingItemIndex >= 0) {
-				// Sumar la cantidad a la existente (acumulativa)
 				state.cart[existingItemIndex].quantity += item.quantity;
 			} else {
-				// Agregar un nuevo artículo, incluyendo la propiedad 'type'
 				state.cart = [...state.cart, { ...item, type: item.type }];
 			}
 
-			state.total = getTotal(state.cart);
+			state.total = getTotal(state.cart, state.envioExpress);
 		},
 
 		updateItemQuantity: (state, action) => {
@@ -98,6 +102,7 @@ export const {
 	removeItem,
 	addLastCart,
 	changeLastCart,
+	setEnvioExpress,
 } = cartSlices.actions;
 
 export default cartSlices.reducer;
