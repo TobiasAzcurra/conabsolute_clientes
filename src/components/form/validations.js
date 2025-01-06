@@ -3,7 +3,7 @@ import * as Yup from "yup";
 const validations = (total) =>
 	Yup.object({
 		phone: Yup.string()
-			.required("Contacto obligatorio")
+			.required("Telefono obligatorio")
 			.min(6, "Debe de tener 6 caracteres o más"),
 
 		// deliveryMethod: Yup.string()

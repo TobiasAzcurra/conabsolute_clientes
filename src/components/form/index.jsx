@@ -945,13 +945,9 @@ const FormCustom = ({ cart, total }) => {
 
 													{voucherStatus[index] &&
 														voucherStatus[index] !== "¡Código válido!" && (
-															<div className="flex flex-row h-10 justify-between px-3 items-start">
-																<div className="flex flex-row items-center gap-2">
-																	<p className="bg-transparent px-0 text-opacity-100 w-full text-red-main">
-																		{voucherStatus[index]}
-																	</p>
-																</div>
-															</div>
+															<AppleErrorMessage voucher={true}>
+																{voucherStatus[index]}
+															</AppleErrorMessage>
 														)}
 
 													{voucherStatus[index] === "¡Código válido!" &&
