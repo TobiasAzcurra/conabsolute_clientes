@@ -44,47 +44,32 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 	const firestore = getFirestore();
 	const fechaActual = obtenerFechaActual();
 	const [dia, mes, anio] = fechaActual.split("/");
-
-	console.log("🔍 Iniciando addProductToOrder con:", {
-		orderId,
-		product,
-		quantity,
-		fecha: fechaActual,
-	});
-
 	const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
 	const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
 	try {
 		await runTransaction(firestore, async (transaction) => {
-			console.log("📝 Iniciando transacción");
-
 			const docSnapshot = await transaction.get(pedidoDocRef);
 			if (!docSnapshot.exists()) {
-				console.error("❌ Documento no encontrado para la fecha:", fechaActual);
 				throw new Error("El pedido no existe para la fecha especificada.");
 			}
 
 			const existingData = docSnapshot.data();
-			console.log("📄 Datos existentes:", existingData);
-
 			const pedidosDelDia = existingData.pedidos || [];
 			const pedidoIndex = pedidosDelDia.findIndex(
 				(pedido) => pedido.id === orderId
 			);
 
-			console.log("🔎 Buscando pedido con ID:", orderId);
-			console.log("📍 Índice encontrado:", pedidoIndex);
-
 			if (pedidoIndex === -1) {
-				console.error("❌ Pedido no encontrado con ID:", orderId);
 				throw new Error("Pedido no encontrado");
 			}
 
 			const pedido = pedidosDelDia[pedidoIndex];
-			console.log("🧾 Pedido encontrado:", pedido);
 
-			// Crear nuevo item para el pedido con la prop extra e isConfirmed
+			// Guardamos el total con descuento original
+			const totalOriginalConDescuento = pedido.total;
+
+			// Crear nuevo item para el pedido
 			const newOrderItem = {
 				burger: product.name,
 				priceBurger: product.price,
@@ -93,45 +78,27 @@ export const addProductToOrder = async (orderId, product, quantity) => {
 				subTotal: product.price * quantity,
 				costoBurger: product.costoBurger || 0,
 				extra: true,
-				isConfirmed: false, // Nuevo producto, aún no confirmado
+				isConfirmed: false,
 			};
-
-			console.log("🆕 Nuevo item a agregar:", newOrderItem);
 
 			// Agregar el nuevo item al detallePedido
 			pedido.detallePedido.push(newOrderItem);
-
-			// Marcar el pedido como editado por el usuario
 			pedido.onEditByUser = true;
 
-			// Recalcular totales del pedido
-			pedido.subTotal = pedido.detallePedido.reduce(
-				(sum, item) => sum + item.subTotal,
-				0
-			);
-			pedido.total = pedido.subTotal + (pedido.envio || 0);
+			// Actualizar subtotal
+			pedido.subTotal = pedido.subTotal + newOrderItem.subTotal;
 
-			console.log("💰 Nuevos totales:", {
-				subTotal: pedido.subTotal,
-				total: pedido.total,
-			});
-
-			// Actualizar el pedido en el array
-			pedidosDelDia[pedidoIndex] = pedido;
+			// El nuevo total es: total original con descuento + precio completo del nuevo producto
+			pedido.total = totalOriginalConDescuento + newOrderItem.subTotal;
 
 			// Actualizar el documento
-			const updateData = {
+			pedidosDelDia[pedidoIndex] = pedido;
+			transaction.set(pedidoDocRef, {
 				...existingData,
 				pedidos: pedidosDelDia,
-			};
-
-			console.log("📤 Datos a actualizar:", updateData);
-
-			transaction.set(pedidoDocRef, updateData);
-			console.log("✅ Transacción completada");
+			});
 		});
 
-		console.log("✅ Producto agregado al pedido exitosamente");
 		return true;
 	} catch (error) {
 		console.error("❌ Error al agregar producto al pedido:", error);
