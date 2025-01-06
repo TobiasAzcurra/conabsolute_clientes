@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const Tooltip = ({ text, duration = 10000, className = "" }) => {
 	const [isVisible, setIsVisible] = useState(false);
@@ -15,6 +15,34 @@ const Tooltip = ({ text, duration = 10000, className = "" }) => {
 
 	return (
 		<div className={`relative inline-block ${className}`}>
+			{/* Tooltip */}
+			<div
+				className={`
+          absolute z-50 w-72
+          bottom-full mb-2
+          
+          transition-all duration-200 ease-out
+          ${
+						isVisible
+							? "opacity-100 translate-y-0"
+							: "opacity-0 translate-y-2 pointer-events-none"
+					}
+        `}
+			>
+				<div
+					className="relative bg-black bg-opacity-50 backdrop-blur-sm 
+          rounded-2xl shadow-lg border border-gray-200
+          overflow-hidden"
+				>
+					<div className="px-4 py-3">
+						<p
+							className="text-gray-100 leading-relaxed"
+							dangerouslySetInnerHTML={{ __html: text }}
+						/>
+					</div>
+				</div>
+			</div>
+
 			{/* Info Icon */}
 			<div
 				onClick={showTooltip}
@@ -32,36 +60,6 @@ const Tooltip = ({ text, duration = 10000, className = "" }) => {
 						clipRule="evenodd"
 					/>
 				</svg>
-			</div>
-
-			{/* Tooltip */}
-			<div
-				className={`
-          absolute z-50 w-72
-          transform -translate-y-full
-          -top-4
-          transition-all duration-200 ease-out
-          ${
-						isVisible
-							? "opacity-100 translate-y-0"
-							: "opacity-0 translate-y-2 pointer-events-none"
-					}
-        `}
-			>
-				{/* Backdrop blur container */}
-				<div
-					className="relative bg-black bg-opacity-50 backdrop-blur-sm 
-            rounded-2xl shadow-lg border border-gray-200
-            overflow-hidden"
-				>
-					{/* Content */}
-					<div className="px-4 py-3">
-						<p
-							className="text-gray-100 leading-relaxed"
-							dangerouslySetInnerHTML={{ __html: text }}
-						/>
-					</div>
-				</div>
 			</div>
 		</div>
 	);

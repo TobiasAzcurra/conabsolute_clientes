@@ -7,7 +7,10 @@ import { useDispatch } from "react-redux";
 import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
 import { useEffect, useState, useMemo } from "react";
 import { MapDirection } from "./MapDirection";
-import { canjearVoucher } from "../../firebase/validateVoucher";
+import {
+	validarVoucher,
+	canjearVouchers,
+} from "../../firebase/validateVoucher";
 import Payment from "../mercadopago/Payment";
 import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
@@ -96,73 +99,74 @@ const FormCustom = ({ cart, total }) => {
 		setIsEnabled(newValue);
 		dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
 	};
-
 	// Función para procesar el pedido
 	const processPedido = async (values, isReserva) => {
-		let adjustedHora = values.hora;
+		try {
+			// Si hay cupones válidos, intentamos canjearlos primero
+			const validCoupons = couponCodes.filter(
+				(code, index) =>
+					code.trim() !== "" && voucherStatus[index] === "¡Código válido!"
+			);
 
-		// Si es una reserva, ajusta la hora restando 30 minutos
-		if (isReserva) {
-			adjustedHora = adjustHora(values.hora);
+			if (validCoupons.length > 0) {
+				const canjeSuccess = await canjearVouchers(validCoupons);
+				if (!canjeSuccess) {
+					console.error("Error al canjear los cupones");
+					return;
+				}
+			}
+
+			let adjustedHora = values.hora;
+
+			// Si es una reserva, ajusta la hora restando 30 minutos
+			if (isReserva) {
+				adjustedHora = adjustHora(values.hora);
+			}
+
+			// Si estamos en alta demanda, ajusta la hora sumando los minutos de demora
+			if (altaDemanda?.isHighDemand && pendingValues) {
+				const delayMinutes = altaDemanda.delayMinutes || 0;
+				const currentTime = new Date();
+				currentTime.setMinutes(currentTime.getMinutes() + delayMinutes);
+
+				const adjustedHours = currentTime
+					.getHours()
+					.toString()
+					.padStart(2, "0");
+				const adjustedMinutes = currentTime
+					.getMinutes()
+					.toString()
+					.padStart(2, "0");
+				adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
+			}
+
+			const updatedValues = {
+				...values,
+				hora: adjustedHora,
+				envioExpress:
+					values.deliveryMethod === "delivery" && isEnabled
+						? expressDeliveryFee
+						: 0,
+			};
+
+			const orderId = await handleSubmit(
+				updatedValues,
+				cart,
+				discountedTotal,
+				envio,
+				mapUrl,
+				couponCodes
+			);
+
+			if (orderId) {
+				navigate(`/success/${orderId}`);
+				dispatch(addLastCart());
+			} else {
+				console.error("Error al procesar la orden");
+			}
+		} catch (error) {
+			console.error("Error al procesar el pedido:", error);
 		}
-
-		// Si estamos en alta demanda, ajusta la hora sumando los minutos de demora
-		if (altaDemanda?.isHighDemand && pendingValues) {
-			const delayMinutes = altaDemanda.delayMinutes || 0;
-			const currentTime = new Date();
-			currentTime.setMinutes(currentTime.getMinutes() + delayMinutes);
-
-			const adjustedHours = currentTime.getHours().toString().padStart(2, "0");
-			const adjustedMinutes = currentTime
-				.getMinutes()
-				.toString()
-				.padStart(2, "0");
-			adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
-		}
-
-		const updatedValues = {
-			...values,
-			hora: adjustedHora,
-			envioExpress:
-				values.deliveryMethod === "delivery" && isEnabled
-					? expressDeliveryFee
-					: 0,
-		};
-
-		const orderId = await handleSubmit(
-			updatedValues,
-			cart,
-			discountedTotal,
-			envio,
-			mapUrl,
-			couponCodes
-		);
-
-		if (orderId) {
-			navigate(`/success/${orderId}`);
-			dispatch(addLastCart());
-		} else {
-			console.error("Error al procesar la orden");
-		}
-	};
-
-	// Función para abrir el modal de restricción de tiempo
-	const openTimeRestrictedModal = () => {
-		setIsTimeRestrictedModalOpen(true);
-	};
-
-	// Función para cerrar el modal de restricción de tiempo
-	const closeTimeRestrictedModal = () => {
-		setIsTimeRestrictedModalOpen(false);
-	};
-
-	// Función para abrir el modal de restricción de tiempo
-	const openCloseModal = () => {
-		setIsCloseRestrictedModalOpen(true);
-	};
-
-	const closeCloseRestrictedModal = () => {
-		setIsCloseRestrictedModalOpen(false);
 	};
 
 	// Nueva función para obtener la cantidad total de hamburguesas
@@ -224,8 +228,115 @@ const FormCustom = ({ cart, total }) => {
 		const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
 		const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
 		const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
+
+		setCouponCodes(newCouponCodes);
+		setVoucherStatus(newVoucherStatus);
+		setIsValidating(newIsValidating);
 	};
 
+	const handleVoucherValidation = async (
+		index,
+		value,
+		updatedCoupons,
+		setFieldValue
+	) => {
+		setIsValidating((prev) => {
+			const updated = [...prev];
+			updated[index] = true;
+			return updated;
+		});
+
+		try {
+			// Validaciones de negocio primero
+			const totalBurgers = getTotalBurgers(cart);
+
+			if (updatedCoupons.indexOf(value) !== index) {
+				const updatedVoucherStatus = [...voucherStatus];
+				updatedVoucherStatus[index] = "Este código ya fue ingresado.";
+				setVoucherStatus(updatedVoucherStatus);
+				return;
+			}
+
+			const numCoupons = updatedCoupons.filter(
+				(code) => code.trim() !== ""
+			).length;
+			if (totalBurgers < numCoupons * 2) {
+				const updatedVoucherStatus = [...voucherStatus];
+				updatedVoucherStatus[index] = `Necesitas al menos ${
+					numCoupons * 2
+				} hamburguesas para canjear los vouchers.`;
+				setVoucherStatus(updatedVoucherStatus);
+				return;
+			}
+
+			const { promoProducts, nonPromoProducts } =
+				getPromoAndNonPromoProducts(cart);
+
+			if (promoProducts.length > 0 && nonPromoProducts.length === 0) {
+				const updatedVoucherStatus = [...voucherStatus];
+				updatedVoucherStatus[index] =
+					"No se pueden aplicar vouchers a productos en promoción.";
+				setVoucherStatus(updatedVoucherStatus);
+				return;
+			}
+
+			if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
+				const updatedVoucherStatus = [...voucherStatus];
+				updatedVoucherStatus[index] =
+					"El cupón se aplica solo a productos no promocionales.";
+				setVoucherStatus(updatedVoucherStatus);
+
+				const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+				const numNonPromoCoupons = updatedCoupons.filter(
+					(code) => code.trim() !== ""
+				).length;
+				const hasEnoughNonPromoBurgers =
+					totalNonPromoBurgers >= numNonPromoCoupons * 2;
+
+				if (!hasEnoughNonPromoBurgers) {
+					updatedVoucherStatus[index] = `Necesitas al menos ${
+						numNonPromoCoupons * 2
+					} hamburguesas no promocionales para canjear los vouchers.`;
+					setVoucherStatus(updatedVoucherStatus);
+					return;
+				}
+			}
+
+			// Ahora validamos el cupón
+			const { isValid, message } = await validarVoucher(value);
+			const updatedVoucherStatus = [...voucherStatus];
+
+			if (isValid) {
+				updatedVoucherStatus[index] = "¡Código válido!";
+
+				// Calculamos el descuento potencial
+				const { newTotal, totalDescuento } = calculateDiscountedTotal(
+					cart,
+					numCoupons
+				);
+				if (descuentoForOneUnit === 0) {
+					setDescuentoForOneUnit(totalDescuento / numCoupons);
+				}
+				setDiscountedTotal(newTotal);
+				setDescuento(totalDescuento);
+			} else {
+				updatedVoucherStatus[index] = message;
+			}
+
+			setVoucherStatus(updatedVoucherStatus);
+		} catch (error) {
+			console.error("Error validating voucher:", error);
+			const updatedVoucherStatus = [...voucherStatus];
+			updatedVoucherStatus[index] = "Error al validar el cupón.";
+			setVoucherStatus(updatedVoucherStatus);
+		} finally {
+			setIsValidating((prev) => {
+				const updated = [...prev];
+				updated[index] = false;
+				return updated;
+			});
+		}
+	};
 	useEffect(() => {
 		let hasInvalidVoucher = false;
 		let validCouponCount = 0;
@@ -245,156 +356,33 @@ const FormCustom = ({ cart, total }) => {
 		}
 	}, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
 
-	function validarCantidadDeBurgers(cartToCheck, numCoupons) {
-		if (!Array.isArray(cartToCheck)) {
-			console.error(
-				"Invalid cart passed to validarCantidadDeBurgers",
-				cartToCheck
-			);
-			return false;
-		}
-
-		let burgerCount = 0;
-		for (const item of cartToCheck) {
-			if (item.category === "burger" || item.category === "burgers") {
-				burgerCount += item.quantity;
-			}
-		}
-
-		const minBurgersRequired = numCoupons * 2;
-		return burgerCount >= minBurgersRequired;
-	}
-
-	const getPromoAndNonPromoProducts = (cart) => {
-		const promoProducts = cart.filter((item) => item.type === "promo");
-		const nonPromoProducts = cart.filter((item) => item.type !== "promo");
-		return { promoProducts, nonPromoProducts };
-	};
-
-	const handleVoucherValidation = async (
-		index,
-		value,
-		updatedCoupons,
-		setFieldValue
-	) => {
-		setIsValidating((prev) => {
-			const updated = [...prev];
-			updated[index] = true;
-			return updated;
-		});
-
-		const totalBurgers = getTotalBurgers(cart);
-
-		if (updatedCoupons.indexOf(value) !== index) {
-			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] = "Este código ya fue ingresado.";
-			setVoucherStatus(updatedVoucherStatus);
-			setIsValidating((prev) => {
-				const updated = [...prev];
-				updated[index] = false;
-				return updated;
-			});
-			return;
-		}
-
-		const numCoupons = updatedCoupons.filter(
-			(code) => code.trim() !== ""
-		).length;
-		const hasEnoughBurgers = totalBurgers >= numCoupons * 2;
-
-		if (!hasEnoughBurgers) {
-			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] = `Necesitas al menos ${
-				numCoupons * 2
-			} hamburguesas para canjear los vouchers.`;
-			setVoucherStatus(updatedVoucherStatus);
-			return;
-		}
-
-		const { promoProducts, nonPromoProducts } =
-			getPromoAndNonPromoProducts(cart);
-
-		if (promoProducts.length > 0 && nonPromoProducts.length === 0) {
-			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] =
-				"No se pueden aplicar vouchers a productos en promoción.";
-			setVoucherStatus(updatedVoucherStatus);
-			return;
-		}
-
-		if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
-			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] =
-				"El cupón se aplica solo a productos no promocionales.";
-			setVoucherStatus(updatedVoucherStatus);
-
-			const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
-			const numNonPromoCoupons = updatedCoupons.filter(
-				(code) => code.trim() !== ""
-			).length;
-			const hasEnoughNonPromoBurgers =
-				totalNonPromoBurgers >= numNonPromoCoupons * 2;
-
-			if (!hasEnoughNonPromoBurgers) {
-				updatedVoucherStatus[index] = `Necesitas al menos ${
-					numNonPromoCoupons * 2
-				} hamburguesas no promocionales para canjear los vouchers.`;
-				setVoucherStatus(updatedVoucherStatus);
-				return;
-			}
-		}
-
-		try {
-			const isValid = await canjearVoucher(value);
-			const updatedVoucherStatus = [...voucherStatus];
-
-			if (isValid) {
-				const { newTotal, totalDescuento } = calculateDiscountedTotal(
-					cart,
-					numCoupons
-				);
-
-				if (descuentoForOneUnit === 0) {
-					setDescuentoForOneUnit(totalDescuento);
-				}
-				setDiscountedTotal(newTotal);
-				setDescuento(totalDescuento);
-				updatedVoucherStatus[index] = "¡Código válido!";
-				setFieldValue("efectivoCantidad", "");
-				setFieldValue("mercadopagoCantidad", "");
-			} else {
-				updatedVoucherStatus[index] = "Código no válido.";
-
-				const validCoupons = updatedCoupons.filter(
-					(code, i) => voucherStatus[i] === "¡Código válido!"
-				);
-				const { newTotal, totalDescuento } = calculateDiscountedTotal(
-					cart,
-					validCoupons.length
-				);
-
-				setDiscountedTotal(newTotal);
-				setDescuento(totalDescuento);
-			}
-
-			setVoucherStatus(updatedVoucherStatus);
-		} catch (error) {
-			console.error("Error while validating coupon:", error);
-			const updatedVoucherStatus = [...voucherStatus];
-			updatedVoucherStatus[index] = "Error al validar el cupón.";
-			setVoucherStatus(updatedVoucherStatus);
-		}
-
-		setIsValidating((prev) => {
-			const updated = [...prev];
-			updated[index] = false;
-			return updated;
-		});
-	};
-
 	useEffect(() => {
 		setDiscountedTotal(total);
 	}, [total]);
+
+	useEffect(() => {
+		const validatePendingCoupons = async () => {
+			const pendingCoupons = couponCodes.filter(
+				(code, index) =>
+					code.trim().length === 5 && voucherStatus[index] !== "¡Código válido!"
+			);
+
+			if (pendingCoupons.length > 0) {
+				const lastIndex = couponCodes.findIndex(
+					(code, index) => code === pendingCoupons[pendingCoupons.length - 1]
+				);
+
+				await handleVoucherValidation(
+					lastIndex,
+					pendingCoupons[pendingCoupons.length - 1],
+					couponCodes,
+					setFieldValue
+				);
+			}
+		};
+
+		validatePendingCoupons();
+	}, [cart, couponCodes]);
 
 	const [selectedHora, setSelectedHora] = useState("");
 
@@ -475,6 +463,47 @@ const FormCustom = ({ cart, total }) => {
 		);
 	};
 
+	const openTimeRestrictedModal = () => {
+		setIsTimeRestrictedModalOpen(true);
+	};
+
+	const closeTimeRestrictedModal = () => {
+		setIsTimeRestrictedModalOpen(false);
+	};
+
+	const openCloseModal = () => {
+		setIsCloseRestrictedModalOpen(true);
+	};
+
+	const closeCloseRestrictedModal = () => {
+		setIsCloseRestrictedModalOpen(false);
+	};
+
+	function validarCantidadDeBurgers(cartToCheck, numCoupons) {
+		if (!Array.isArray(cartToCheck)) {
+			console.error(
+				"Invalid cart passed to validarCantidadDeBurgers",
+				cartToCheck
+			);
+			return false;
+		}
+
+		let burgerCount = 0;
+		for (const item of cartToCheck) {
+			if (item.category === "burger" || item.category === "burgers") {
+				burgerCount += item.quantity;
+			}
+		}
+
+		const minBurgersRequired = numCoupons * 2;
+		return burgerCount >= minBurgersRequired;
+	}
+
+	const getPromoAndNonPromoProducts = (cart) => {
+		const promoProducts = cart.filter((item) => item.type === "promo");
+		const nonPromoProducts = cart.filter((item) => item.type !== "promo");
+		return { promoProducts, nonPromoProducts };
+	};
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style>{`
@@ -522,18 +551,18 @@ const FormCustom = ({ cart, total }) => {
 						return;
 					}
 
-					if (isWithinClosedDays()) {
-						openTimeRestrictedModal();
-						return;
-					}
+					// if (isWithinClosedDays()) {
+					// 	openTimeRestrictedModal();
+					// 	return;
+					// }
 
-					if (!isWithinOrderTimeRange()) {
-						console.log(
-							"La hora actual está fuera del rango permitido para pedidos"
-						);
-						openTimeRestrictedModal();
-						return;
-					}
+					// if (!isWithinOrderTimeRange()) {
+					// 	console.log(
+					// 		"La hora actual está fuera del rango permitido para pedidos"
+					// 	);
+					// 	openTimeRestrictedModal();
+					// 	return;
+					// }
 
 					if (values.paymentMethod === "efectivo") {
 						await processPedido(values, isReserva);
@@ -615,7 +644,6 @@ const FormCustom = ({ cart, total }) => {
 										/>
 									</div>
 								</div>
-
 								{/* Datos para la entrega */}
 								<div className="flex justify-center flex-col mt-7 items-center">
 									<p className="text-2xl font-bold mb-2">
@@ -716,7 +744,6 @@ const FormCustom = ({ cart, total }) => {
 														</div>
 													</div>
 												)}
-
 												{/* Campo para referencias */}
 												<div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
 													<svg
@@ -742,41 +769,39 @@ const FormCustom = ({ cart, total }) => {
 
 										{/* Campo para el número de teléfono */}
 										<div
-											className={`flex flex-row justify-between px-3 h-auto items-start ${
+											className={`flex flex-row pl-3 gap-2 h-10 items-center ${
 												values.deliveryMethod === "delivery"
 													? "border-t border-black border-opacity-20"
 													: ""
 											}`}
 										>
-											<div className="flex flex-row items-center gap-2">
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													className="h-6"
-												>
-													<path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
-													<path
-														fillRule="evenodd"
-														d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
-														clipRule="evenodd"
-													/>
-												</svg>
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												viewBox="0 0 24 24"
+												fill="currentColor"
+												className="h-6"
+											>
+												<path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
+												<path
+													fillRule="evenodd"
+													d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125C7.5 3.504 8.004 3 8.625 3H9.75v.375c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3h1.125c.621 0 1.125.504 1.125 1.125v15.75c0 .621-.504 1.125-1.125 1.125h-6.75A1.125 1.125 0 0 1 7.5 19.875V4.125Z"
+													clipRule="evenodd"
+												/>
+											</svg>
 
-												<div className="flex flex-col w-full">
-													<MyTextInput
-														name="phone"
-														type="text"
-														placeholder="Tu número de teléfono"
-														autoComplete="phone"
-														className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-													/>
-													<ErrorMessage
-														name="phone"
-														component="span"
-														className="text-sm text-red-main font-coolvetica font-light mt-1"
-													/>
-												</div>
+											<div className="flex flex-col w-full">
+												<MyTextInput
+													name="phone"
+													type="text"
+													placeholder="Tu número de teléfono"
+													autoComplete="phone"
+													className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+												/>
+												<ErrorMessage
+													name="phone"
+													component="span"
+													className="text-sm text-red-main font-coolvetica font-light mt-1"
+												/>
 											</div>
 										</div>
 
@@ -848,7 +873,6 @@ const FormCustom = ({ cart, total }) => {
 												</Field>
 											</div>
 										</div>
-
 										{/* Campos de cupones */}
 										<div className="flex flex-col">
 											{couponCodes.map((coupon, index) => (
