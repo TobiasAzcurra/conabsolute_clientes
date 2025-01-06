@@ -1,15 +1,18 @@
 import { ErrorMessage, useField } from "formik";
 
 const MyTextInput = ({ ...props }) => {
-	const [field] = useField(props);
-	// en el field se encuentra el valor del input, el name, el onChange, onBlur, etc
-	//en el meta los errores
+	const [field, meta] = useField(props);
+	// Obtenemos meta para poder verificar si hay error y si el campo fue tocado
 
 	return (
 		<div className="rounded-r-3xl rounded-3xl w-full">
-			<input {...field} {...props} />
-
-			{/* se puede pasar el className en el ErrorMessage */}
+			<input
+				{...field}
+				{...props}
+				className={`${props.className} transition-all duration-300 ${
+					meta.error && meta.touched ? "h-12" : "h-10"
+				}`}
+			/>
 		</div>
 	);
 };
