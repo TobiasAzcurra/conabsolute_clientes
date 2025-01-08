@@ -683,21 +683,53 @@ const Pedido = () => {
 													{currentOrder.direccion === "" ? (
 														// Barras de progreso para pedidos de retiro (2 barras)
 														<>
-															<div
-																className={`w-1/2 h-2.5 rounded-full ${
-																	!currentOrder.elaborado
-																		? "animated-loading"
-																		: "bg-black"
-																}`}
-															></div>
-															<div
-																className={`w-1/2 h-2.5 rounded-full ${
-																	currentOrder.elaborado
-																		? "animated-loading"
-																		: "bg-gray-100 border-opacity-20 border-black border-1 border"
-																}`}
-															></div>
-														</>
+    {(() => {
+        // Extraer la hora del pedido
+        const horaPedido = currentOrder.hora; // Ejemplo: "02:20"
+        const partesHora = horaPedido.split(":"); // ["02", "20"]
+
+        // Obtener la fecha actual
+        const fechaActual = new Date();
+
+        // Construir la fecha completa del pedido
+        const fechaHoraPedido = new Date(
+            fechaActual.getFullYear(),
+            fechaActual.getMonth(),
+            fechaActual.getDate(),
+            parseInt(partesHora[0]), // Hora
+            parseInt(partesHora[1])  // Minuto
+        );
+
+        // Calcular la diferencia en minutos
+        const diferenciaEnMinutos = (new Date() - fechaHoraPedido) / 60000;
+
+        // Logs para depuración
+        console.log("Hora del pedido:", currentOrder.hora);
+        console.log("Fecha completa del pedido:", fechaHoraPedido);
+        console.log("Diferencia en minutos:", diferenciaEnMinutos);
+
+        // Renderizar las barras de progreso
+        return (
+            <>
+                <div
+                    className={`w-1/2 h-2.5 rounded-full ${
+                        diferenciaEnMinutos <= 20
+                            ? "animated-loading"
+                            : "bg-black"
+                    }`}
+                ></div>
+                <div
+                    className={`w-1/2 h-2.5 rounded-full ${
+                        diferenciaEnMinutos > 20
+                            ? "animated-loading"
+                            : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                    }`}
+                ></div>
+            </>
+        );
+    })()}
+</>
+
 													) : (
 														// Barras de progreso originales para delivery (3 barras)
 														<>
@@ -741,9 +773,9 @@ const Pedido = () => {
 												</div>
 												<p className="text-black font-coolvetica font-bold text-left mt-2">
 													{currentOrder.direccion === ""
-														? !currentOrder.elaborado
-															? "Anhelo está preparando tu pedido..."
-															: "Esperando que retires tu pedido..."
+													? (new Date() - new Date(currentOrder.hora)) / 60000 <= 20
+													? "Anhelo está preparando tu pedido..."
+													: "Esperando que retires tu pedido..."
 														: !currentOrder.elaborado
 														? "Anhelo está preparando tu pedido..."
 														: currentOrder.cadete !== "NO ASIGNADO"
