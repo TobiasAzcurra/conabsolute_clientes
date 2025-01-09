@@ -144,10 +144,7 @@ const FormCustom = ({ cart, total }) => {
 			const updatedValues = {
 				...values,
 				hora: adjustedHora,
-				envioExpress:
-					values.deliveryMethod === "delivery" && isEnabled
-						? expressDeliveryFee
-						: 0,
+				envioExpress: isEnabled ? expressDeliveryFee : 0,  // Asignar si está habilitado, sin importar el método
 			};
 
 			const orderId = await handleSubmit(
@@ -574,13 +571,13 @@ const FormCustom = ({ cart, total }) => {
 					// 	return;
 					// }
 
-					if (!isWithinOrderTimeRange()) {
-						console.log(
-							"La hora actual está fuera del rango permitido para pedidos"
-						);
-						openTimeRestrictedModal();
-						return;
-					}
+					// if (!isWithinOrderTimeRange()) {
+					// 	console.log(
+					// 		"La hora actual está fuera del rango permitido para pedidos"
+					// 	);
+					// 	openTimeRestrictedModal();
+					// 	return;
+					// }
 
 					if (values.paymentMethod === "efectivo") {
 						await processPedido(values, isReserva);
@@ -598,12 +595,12 @@ const FormCustom = ({ cart, total }) => {
 					isValid,
 				}) => {
 					const calculateFinalTotal = () => {
-						let finalTotal = calculateProductsTotal() - descuento; // Primero calculamos productos menos descuentos
+						let finalTotal = calculateProductsTotal() - descuento;
 						if (values.deliveryMethod === "delivery") {
-							finalTotal += envio;  // Sumamos envío base
-							if (isEnabled) {
-								finalTotal += expressDeliveryFee;  // Sumamos envío express si está activo
-							}
+							finalTotal += envio;
+						}
+						if (isEnabled) {  // Siempre sumar expressDeliveryFee si está habilitado, sin importar el método
+							finalTotal += expressDeliveryFee;
 						}
 						return finalTotal;
 					};
