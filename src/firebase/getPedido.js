@@ -201,47 +201,58 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 };
 
 /**
- * Función para eliminar un pedido específico por ID
- * @param {string} orderId - ID del pedido a eliminar
+ * Función para marcar un pedido como cancelado
+ * @param {string} orderId - ID del pedido a cancelar
  * @returns {Promise<void>}
  */
-export const deleteOrder = async (orderId) => {
+export const cancelOrder = async (orderId) => {
 	const firestore = getFirestore();
 	const todayDateString = obtenerFechaActual();
 	const [day, month, year] = todayDateString.split("/");
-
-	// Referencia al documento del día actual dentro de la colección del mes actual
+  
+	// Referencia al documento del día actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
-
-	console.log(
-		`🗑️ Iniciando eliminación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`
-	);
-
+  
+	console.log(`🚫 Iniciando cancelación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`);
+  
 	try {
-		// Obtener el documento actual
-		const docSnapshot = await getDoc(ordersDocRef);
-		if (docSnapshot.exists()) {
-			const pedidosDelDia = docSnapshot.data()?.pedidos || [];
-
-			// Encontrar el pedido a eliminar
-			const pedidoAEliminar = pedidosDelDia.find(
-				(pedido) => pedido.id === orderId
-			);
-			if (!pedidoAEliminar) {
-				throw new Error("Pedido no encontrado en los pedidos del día.");
-			}
-
-			// Utilizar arrayRemove para eliminar el pedido
-			await updateDoc(ordersDocRef, {
-				pedidos: arrayRemove(pedidoAEliminar),
-			});
-
-			console.log(`✅ Pedido ID ${orderId} eliminado exitosamente.`);
-		} else {
-			throw new Error("No existen pedidos para el día actual.");
-		}
+	  // Obtener el documento actual
+	  const docSnapshot = await getDoc(ordersDocRef);
+	  if (!docSnapshot.exists()) {
+		throw new Error("No existen pedidos para el día actual.");
+	  }
+  
+	  const pedidosDelDia = docSnapshot.data()?.pedidos || [];
+	  
+	  // Encontrar el pedido a cancelar
+	  const pedidoIndex = pedidosDelDia.findIndex(pedido => pedido.id === orderId);
+	  if (pedidoIndex === -1) {
+		throw new Error("Pedido no encontrado en los pedidos del día.");
+	  }
+  
+	  // Crear copia del array de pedidos
+	  const pedidosActualizados = [...pedidosDelDia];
+	  
+	  // Obtener timestamp actual en formato HH:mm
+	  const now = new Date();
+	  const hours = String(now.getHours()).padStart(2, '0');
+	  const minutes = String(now.getMinutes()).padStart(2, '0');
+	  const cancelTime = `${hours}:${minutes}`;
+  
+	  // Actualizar el pedido con la marca de cancelado
+	  pedidosActualizados[pedidoIndex] = {
+		...pedidosActualizados[pedidoIndex],
+		canceled: cancelTime
+	  };
+  
+	  // Actualizar el documento con el array modificado
+	  await updateDoc(ordersDocRef, {
+		pedidos: pedidosActualizados
+	  });
+  
+	  console.log(`✅ Pedido ID ${orderId} marcado como cancelado a las ${cancelTime}`);
 	} catch (error) {
-		console.error("❌ Error al eliminar el pedido:", error);
-		throw error; // Propagar el error para que pueda ser manejado en el frontend
+	  console.error("❌ Error al cancelar el pedido:", error);
+	  throw error;
 	}
-};
+  };

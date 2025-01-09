@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import {
 	ReadOrdersForTodayById,
 	ListenOrdersForTodayByPhoneNumber,
-	deleteOrder,
+	cancelOrder,
 } from "../../firebase/getPedido";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import logo from "../../assets/anheloTMblack.png";
@@ -256,38 +256,40 @@ const Pedido = () => {
 
 	const eliminarPedido = async () => {
 		if (!selectedOrderId) return;
-
-		console.log("🗑️ Eliminando pedido:", selectedOrderId);
+	
+		console.log("🚫 Cancelando pedido:", selectedOrderId);
 		setIsDeleting(true);
 		setMessage(null);
 		setError(null);
-
+	
 		try {
-			await deleteOrder(selectedOrderId);
-			console.log(
-				"✅ El pedido seleccionado fue cancelado exitosamente:",
-				selectedOrderId
-			);
-			setMessage("El pedido seleccionado fue cancelado exitosamente.");
-
-			if (orderId) {
-				setOrder(null);
-				console.log("🧹 Order state cleared.");
-			}
-
-			setPedidosPagados((prevPedidos) =>
-				prevPedidos.filter((pedido) => pedido.id !== selectedOrderId)
-			);
-
-			setIsModalOpen(false);
+		  await cancelOrder(selectedOrderId);
+		  console.log("✅ El pedido fue marcado como cancelado:", selectedOrderId);
+		  setMessage("El pedido fue cancelado exitosamente.");
+	
+		  if (orderId) {
+			setOrder(null);
+			console.log("🧹 Order state cleared.");
+		  }
+	
+		  // Actualizar el estado local para reflejar la cancelación
+		  setPedidosPagados((prevPedidos) =>
+			prevPedidos.map((pedido) =>
+			  pedido.id === selectedOrderId
+				? { ...pedido, canceled: true }
+				: pedido
+			)
+		  );
+	
+		  setIsModalOpen(false);
 		} catch (err) {
-			console.error("❌ Hubo un problema al cancelar el pedido:", err);
-			setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
+		  console.error("❌ Hubo un problema al cancelar el pedido:", err);
+		  setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
 		} finally {
-			setIsDeleting(false);
-			setSelectedOrderId(null);
+		  setIsDeleting(false);
+		  setSelectedOrderId(null);
 		}
-	};
+	  };
 
 	const computeAdditionalProducts = (order) => {
 		const excludedPrefixes = [
@@ -922,32 +924,33 @@ const Pedido = () => {
 												</div>
 											)}
 
-											{showCancelButton && (
-												<div
-													onClick={() => handleCancelClick(currentOrder.id)}
-													className={`${
-														isDeleting
-															? "opacity-50 cursor-not-allowed"
-															: "cursor-pointer"
-													} bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
-												>
-													<div className="flex items-center">
-														<svg
-															xmlns="http://www.w3.org/2000/svg"
-															viewBox="0 0 24 24"
-															fill="currentColor"
-															className="h-5 mr-2"
-														>
-															<path
-																fillRule="evenodd"
-																d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-																clipRule="evenodd"
-															/>
-														</svg>
-														Cancelar pedido
-													</div>
-												</div>
-											)}
+{showCancelButton && (
+      <div
+        onClick={() => handleCancelClick(currentOrder.id)}
+        className={`${
+          isDeleting || currentOrder.canceled
+            ? "opacity-50 cursor-not-allowed"
+            : "cursor-pointer"
+        } bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
+        disabled={isDeleting || currentOrder.canceled}
+      >
+        <div className="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-5 mr-2"
+          >
+            <path
+              fillRule="evenodd"
+              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+              clipRule="evenodd"
+            />
+          </svg>
+          {currentOrder.canceled ? "Pedido cancelado" : "Cancelar pedido"}
+        </div>
+      </div>
+    )}
 										</div>
 
 										{!currentOrder.elaborado &&
