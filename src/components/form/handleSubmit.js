@@ -1,121 +1,124 @@
 import {
-	addTelefonoFirebase,
-	ReadData,
-	ReadMateriales,
-	UploadOrder,
+    addTelefonoFirebase,
+    ReadData,
+    ReadMateriales,
+    UploadOrder,
 } from "../../firebase/uploadOrder";
 import { canjearVoucherPedir } from "../../firebase/validateVoucher";
 import {
-	calcularCostoHamburguesa,
-	extractCoordinates,
-	obtenerFechaActual,
-	obtenerHoraActual,
+    calcularCostoHamburguesa,
+    extractCoordinates,
+    obtenerFechaActual,
+    obtenerHoraActual,
 } from "../../helpers/currencyFormat";
 import { cleanPhoneNumber } from "../../helpers/validate-hours";
 
 const handleSubmit = async (
-	values,
-	cart,
-	discountedTotal,
-	envio,
-	mapUrl,
-	couponCodes
+    values,
+    cart,
+    discountedTotal,
+    envio,
+    mapUrl,
+    couponCodes
 ) => {
-	const coordinates = extractCoordinates(mapUrl);
-	const materialesData = await ReadMateriales();
-	const productsData = await ReadData();
+    const coordinates = extractCoordinates(mapUrl);
+    const materialesData = await ReadMateriales();
+    const productsData = await ReadData();
 
-	const formattedData = productsData.map(({ data }) => ({
-		description: data.description || "",
-		img: data.img,
-		name: data.name,
-		price: data.price,
-		type: data.type,
-		ingredients: data.ingredients,
-		costo: calcularCostoHamburguesa(materialesData, data.ingredients),
-	}));
+    const formattedData = productsData.map(({ data }) => ({
+        description: data.description || "",
+        img: data.img,
+        name: data.name,
+        price: data.price,
+        type: data.type,
+        ingredients: data.ingredients,
+        costo: calcularCostoHamburguesa(materialesData, data.ingredients),
+    }));
 
-	const phone = String(values.phone) || "";
+    const phone = String(values.phone) || "";
 
-	const validacionCupones = await Promise.all(
-		couponCodes.map(async (cupon) => {
-			return await canjearVoucherPedir(cupon);
-		})
-	);
+    const validacionCupones = await Promise.all(
+        couponCodes.map(async (cupon) => {
+            return await canjearVoucherPedir(cupon);
+        })
+    );
 
-	console.log(validacionCupones);
+    console.log(validacionCupones);
 
-	const orderDetail = {
-		envio: values.deliveryMethod === "delivery" ? envio : 0,
-		envioExpress: values.envioExpress || 0, // Agregamos el envío express
-		detallePedido: cart.map((item) => {
-			const quantity = item.quantity !== undefined ? item.quantity : 0;
+    const orderDetail = {
+        envio: values.deliveryMethod === "delivery" ? envio : 0,
+        envioExpress: values.envioExpress || 0,
+        detallePedido: cart.map((item) => {
+            const quantity = item.quantity !== undefined ? item.quantity : 0;
 
-			const productoSeleccionado = formattedData.find(
-				(producto) => producto.name === item.name
-			);
+            const productoSeleccionado = formattedData.find(
+                (producto) => producto.name === item.name
+            );
 
-			const toppingsSeleccionados = item.toppings || [];
-			let costoToppings = 0;
+            const toppingsSeleccionados = item.toppings || [];
+            let costoToppings = 0;
 
-			toppingsSeleccionados.forEach((topping) => {
-				const materialTopping = materialesData.find(
-					(material) =>
-						material.nombre.toLowerCase() === topping.name.toLowerCase()
-				);
+            toppingsSeleccionados.forEach((topping) => {
+                const materialTopping = materialesData.find(
+                    (material) =>
+                        material.nombre.toLowerCase() === topping.name.toLowerCase()
+                );
 
-				if (materialTopping) {
-					costoToppings += materialTopping.costo;
-				}
-			});
+                if (materialTopping) {
+                    costoToppings += materialTopping.costo;
+                }
+            });
 
-			const costoBurger = productoSeleccionado
-				? (productoSeleccionado.costo + costoToppings) * quantity
-				: 0;
+            const costoBurger = productoSeleccionado
+                ? (productoSeleccionado.costo + costoToppings) * quantity
+                : 0;
 
-			return {
-				burger: item.name,
-				toppings: item.toppings.map((topping) => topping.name),
-				quantity: item.quantity,
-				priceBurger: item.price,
-				priceToppings: item.toppings.reduce(
-					(total, topping) => total + (topping.price || 0),
-					0
-				),
-				subTotal: item.price * item.quantity,
-				costoBurger,
-			};
-		}),
-		subTotal: values.subTotal,
-		total:
-			discountedTotal +
-			(values.deliveryMethod === "delivery" ? envio : 0) +
-			(values.envioExpress || 0), // Agregamos envioExpress al total
-		fecha: obtenerFechaActual(),
-		aclaraciones: values.aclaraciones || "",
-		metodoPago: values.paymentMethod,
-		direccion: values.address,
-		telefono: cleanPhoneNumber(phone),
-		hora: values.hora || obtenerHoraActual(),
-		cerca: false,
-		cadete: "NO ASIGNADO",
-		referencias: values.references,
-		map: coordinates || [0, 0],
-		elaborado: false,
-		couponCodes,
-		ubicacion: mapUrl,
-		paid: true,
-		deliveryMethod: values.deliveryMethod,
-	};
+            return {
+                burger: item.name,
+                toppings: item.toppings.map((topping) => topping.name),
+                quantity: item.quantity,
+                priceBurger: item.price,
+                priceToppings: item.toppings.reduce(
+                    (total, topping) => total + (topping.price || 0),
+                    0
+                ),
+                subTotal: item.price * item.quantity,
+                costoBurger,
+            };
+        }),
+        subTotal: cart.reduce((total, item) => 
+            total + (item.price * item.quantity) + 
+            item.toppings.reduce((toppingTotal, topping) => toppingTotal + (topping.price || 0), 0) * item.quantity
+        , 0),
+        total:
+            (discountedTotal - (values.envioExpress || 0)) +
+            (values.deliveryMethod === "delivery" ? envio : 0) +
+            (values.envioExpress || 0),
+        fecha: obtenerFechaActual(),
+        aclaraciones: values.aclaraciones || "",
+        metodoPago: values.paymentMethod,
+        direccion: values.address,
+        telefono: cleanPhoneNumber(phone),
+        hora: values.hora || obtenerHoraActual(),
+        cerca: false,
+        cadete: "NO ASIGNADO",
+        referencias: values.references,
+        map: coordinates || [0, 0],
+        elaborado: false,
+        couponCodes,
+        ubicacion: mapUrl,
+        paid: true,
+        deliveryMethod: values.deliveryMethod,
+    };
 
-	try {
-		const orderId = await UploadOrder(orderDetail);
-		await addTelefonoFirebase(phone, obtenerFechaActual());
-		return orderId;
-	} catch (error) {
-		console.error("Error al subir la orden: ", error);
-		return null;
-	}
+    try {
+        const orderId = await UploadOrder(orderDetail);
+        await addTelefonoFirebase(phone, obtenerFechaActual());
+        return orderId;
+    } catch (error) {
+        console.error("Error al subir la orden: ", error);
+        return null;
+    }
 };
 
 export default handleSubmit;

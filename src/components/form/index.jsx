@@ -505,6 +505,22 @@ const FormCustom = ({ cart, total }) => {
 		const nonPromoProducts = cart.filter((item) => item.type !== "promo");
 		return { promoProducts, nonPromoProducts };
 	};
+
+	const calculateProductsTotal = () => {
+        let productsTotal = 0;
+        let totalToppings = 0;
+        cart.forEach(({ price, quantity, toppings }) => {
+            productsTotal += price * quantity;
+            toppings.forEach(({ price }) => {
+                totalToppings += price * quantity;
+            });
+        });
+        return productsTotal + totalToppings;
+    };
+
+
+
+
 	return (
 		<div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
 			<style>{`
@@ -583,11 +599,7 @@ const FormCustom = ({ cart, total }) => {
 					const calculateFinalTotal = () => {
 						let finalTotal = discountedTotal;
 						if (values.deliveryMethod === "delivery") {
-							finalTotal += envio;
-
-							if (isEnabled) {
-								finalTotal += expressDeliveryFee;
-							}
+							finalTotal += envio;  // Solo sumamos el envío base
 						}
 						return finalTotal;
 					};
@@ -985,9 +997,9 @@ const FormCustom = ({ cart, total }) => {
 										</div>
 									</div>
 									<div className="flex flex-row justify-between w-full">
-										<p>Productos</p>
-										<p>{currencyFormat(total)}</p>
-									</div>
+            <p>Productos</p>
+            <p>{currencyFormat(calculateProductsTotal())}</p>
+        </div>
 									<div className="flex flex-row justify-between w-full">
 										<div className="flex flex-row items-center gap-2">
 											<div className="flex flex-row items-center gap-2">
