@@ -19,7 +19,8 @@ const handleSubmit = async (
     discountedTotal,
     envio,
     mapUrl,
-    couponCodes
+    couponCodes,
+    descuento  
 ) => {
     const coordinates = extractCoordinates(mapUrl);
     const materialesData = await ReadMateriales();
@@ -90,10 +91,13 @@ const handleSubmit = async (
             total + (item.price * item.quantity) + 
             item.toppings.reduce((toppingTotal, topping) => toppingTotal + (topping.price || 0), 0) * item.quantity
         , 0),
-        total:
-            (discountedTotal - (values.envioExpress || 0)) +
-            (values.deliveryMethod === "delivery" ? envio : 0) +
-            (values.envioExpress || 0),
+        total: cart.reduce((total, item) => 
+            total + (item.price * item.quantity) + 
+            item.toppings.reduce((toppingTotal, topping) => 
+                toppingTotal + (topping.price || 0), 0
+            ) * item.quantity, 0) - descuento +  // Subtotal menos descuentos
+            (values.deliveryMethod === "delivery" ? envio : 0) +  // Envío si aplica
+            (values.envioExpress || 0),  // Envío express si aplica
         fecha: obtenerFechaActual(),
         aclaraciones: values.aclaraciones || "",
         metodoPago: values.paymentMethod,

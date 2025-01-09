@@ -156,7 +156,8 @@ const FormCustom = ({ cart, total }) => {
 				discountedTotal,
 				envio,
 				mapUrl,
-				couponCodes
+				couponCodes,
+				descuento
 			);
 
 			if (orderId) {
@@ -597,9 +598,12 @@ const FormCustom = ({ cart, total }) => {
 					isValid,
 				}) => {
 					const calculateFinalTotal = () => {
-						let finalTotal = discountedTotal;
+						let finalTotal = calculateProductsTotal() - descuento; // Primero calculamos productos menos descuentos
 						if (values.deliveryMethod === "delivery") {
-							finalTotal += envio;  // Solo sumamos el envío base
+							finalTotal += envio;  // Sumamos envío base
+							if (isEnabled) {
+								finalTotal += expressDeliveryFee;  // Sumamos envío express si está activo
+							}
 						}
 						return finalTotal;
 					};
