@@ -62,13 +62,13 @@ const Payment = ({
 		//   return; // No proceder si es lunes, martes o miércoles
 		// }
 
-		// if (!isWithinOrderTimeRange()) {
-		//   return;
-		// }
+		if (!isWithinOrderTimeRange()) {
+		  return;
+		}
 
-		// if (true) {
-		//   return;
-		// }
+		if (true) {
+		  return;
+		}
 
 		setIsLoading(true);
 		submitForm();
