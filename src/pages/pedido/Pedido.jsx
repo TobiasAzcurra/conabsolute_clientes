@@ -265,7 +265,15 @@ const Pedido = () => {
 		try {
 		  await cancelOrder(selectedOrderId);
 		  console.log("✅ El pedido fue marcado como cancelado:", selectedOrderId);
-		  setMessage("El pedido fue cancelado exitosamente.");
+		  // Verificar si el pedido tenía vouchers
+		  const pedidoCancelado = pedidosPagados.find(pedido => pedido.id === selectedOrderId);
+		  const tieneVouchers = pedidoCancelado?.couponCodes?.length > 0;
+		  
+		  setMessage(
+		    tieneVouchers 
+		      ? "El pedido fue cancelado exitosamente, tus vouchers están disponibles para que los canjees en tu próximo pedido!"
+		      : "El pedido fue cancelado exitosamente."
+		  );
 	
 		  if (orderId) {
 			setOrder(null);
