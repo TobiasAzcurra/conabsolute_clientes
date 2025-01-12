@@ -20,7 +20,8 @@ const handleSubmit = async (
     envio,
     mapUrl,
     couponCodes,
-    descuento  
+    descuento,
+    isPending = false 
 ) => {
     const coordinates = extractCoordinates(mapUrl);
     const materialesData = await ReadMateriales();
@@ -47,6 +48,7 @@ const handleSubmit = async (
     console.log(validacionCupones);
 
     const orderDetail = {
+        pendingOfBeingAccepted: isPending,
         envio: values.deliveryMethod === "delivery" ? envio : 0,
         envioExpress: values.envioExpress || 0,
         detallePedido: cart.map((item) => {

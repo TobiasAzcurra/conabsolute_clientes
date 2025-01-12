@@ -46,6 +46,7 @@ const FormCustom = ({ cart, total }) => {const navigate = useNavigate();
 
     const [discountedTotal, setDiscountedTotal] = useState(total);
     const [couponCodes, setCouponCodes] = useState([""]); 
+    
     const [descuento, setDescuento] = useState(0);
     const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
     const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
@@ -487,6 +488,7 @@ const FormCustom = ({ cart, total }) => {const navigate = useNavigate();
                 validationSchema={formValidations}
                 onSubmit={async (values) => {
                     if (!altaDemanda?.open) {
+                        setPendingValues(values);
                         openCloseModal();
                         return;
                     }
@@ -830,9 +832,41 @@ const FormCustom = ({ cart, total }) => {const navigate = useNavigate();
 		<p>Abrimos de jueves a domingo de 20:00 hs a 00:00 hs.</p>
 	</AppleModal>
 
-	<AppleModal isOpen={isCloseRestrictedModalOpen} onClose={closeCloseRestrictedModal} title="Está cerrado">
-		<p> Se vendieron mas de 500 burgers wtff ❤️‍🔥 PD: Saca captura de esto, vale por 2x1 😎</p>
-	</AppleModal>
+    <AppleModal 
+        isOpen={isCloseRestrictedModalOpen} 
+        onClose={closeCloseRestrictedModal} 
+        title="Verificación de Stock"
+        twoOptions={true}
+        isLoading={isModalConfirmLoading}
+        onConfirm={async () => {
+            setIsModalConfirmLoading(true);
+            try {
+                if (pendingValues) {
+                    const orderId = await handleSubmit(
+                        pendingValues,
+                        cart,
+                        discountedTotal,
+                        envio,
+                        mapUrl,
+                        couponCodes,
+                        descuento,
+                        true // isPending
+                    );
+                    if (orderId) {
+                        navigate(`/success/${orderId}`);
+                        dispatch(addLastCart());
+                    }
+                }
+            } catch (error) {
+                console.error("Error al procesar el pedido pendiente:", error);
+            } finally {
+                setIsModalConfirmLoading(false);
+                closeCloseRestrictedModal();
+            }
+        }}
+    >
+        <p>En cocina están verificando si hay stock, tu pedido estará pendiente de aprobación durante los próximos 5 minutos, ¿aceptas?</p>
+    </AppleModal>
 
 	<AppleModal
 		isOpen={showHighDemandModal && pendingValues?.paymentMethod === "efectivo"}
