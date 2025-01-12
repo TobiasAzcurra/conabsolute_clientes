@@ -511,7 +511,7 @@ const FormCustom = ({ cart, total }) => {
           mercadopagoCantidad: 0,
           aclaraciones: '',
         }}
-        // validationSchema={formValidations}
+        validationSchema={formValidations}
         onSubmit={async (values) => {
           if (!altaDemanda?.open) {
             setPendingValues(values);
@@ -520,17 +520,19 @@ const FormCustom = ({ cart, total }) => {
           }
           const isReserva = values.hora.trim() !== '';
 
-          // if (!isReserva && altaDemanda?.isHighDemand) {
-          //     setPendingValues(values);
-          //     setShowHighDemandModal(true);
-          //     return;
-          // }
+          if (!isReserva && altaDemanda?.isHighDemand) {
+            setPendingValues(values);
+            setShowHighDemandModal(true);
+            return;
+          }
 
-          // if (!isWithinOrderTimeRange()) {
-          //     console.log("La hora actual está fuera del rango permitido para pedidos");
-          //     openTimeRestrictedModal();
-          //     return;
-          // }
+          if (!isWithinOrderTimeRange()) {
+            console.log(
+              'La hora actual está fuera del rango permitido para pedidos'
+            );
+            openTimeRestrictedModal();
+            return;
+          }
 
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);

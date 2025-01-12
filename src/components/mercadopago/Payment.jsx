@@ -28,21 +28,16 @@ const Payment = ({
     try {
       const finalTotal = calculateFinalTotal();
       // aca sera q se resta
-      const adjustedSubTotal =
-        values.deliveryMethod === 'delivery'
-          ? discountedTotal
-          : discountedTotal - envio;
 
       console.log('Calling createPreference with data:', {
         updatedValues: {
           ...values,
-          subTotal: adjustedSubTotal,
           hora: values.hora || '',
           envioExpress: isEnabled ? 2000 : 0,
           mercadopagoCantidad: finalTotal,
         },
         cart,
-        discountedTotal: adjustedSubTotal,
+        discountedTotal,
         envio,
         mapUrl,
         couponCodes,
@@ -52,13 +47,12 @@ const Payment = ({
       const result = await createPreference({
         updatedValues: {
           ...values,
-          subTotal: adjustedSubTotal,
           hora: values.hora || '',
           envioExpress: isEnabled ? 2000 : 0,
           mercadopagoCantidad: finalTotal,
         },
         cart,
-        discountedTotal: adjustedSubTotal,
+        discountedTotal,
         envio,
         mapUrl,
         couponCodes,
