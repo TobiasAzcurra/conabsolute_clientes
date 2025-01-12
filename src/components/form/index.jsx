@@ -831,7 +831,7 @@ const FormCustom = ({ cart, total }) => {const navigate = useNavigate();
 	</AppleModal>
 
 	<AppleModal isOpen={isCloseRestrictedModalOpen} onClose={closeCloseRestrictedModal} title="Está cerrado">
-		<p>FELIZ NAVIDAD 🎁 Se vendieron mas de 500 burgers wtff ❤️‍🔥 PD: Saca captura de esto, vale por 2x1 😎</p>
+		<p> Se vendieron mas de 500 burgers wtff ❤️‍🔥 PD: Saca captura de esto, vale por 2x1 😎</p>
 	</AppleModal>
 
 	<AppleModal
