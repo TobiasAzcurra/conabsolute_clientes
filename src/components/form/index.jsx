@@ -1025,7 +1025,7 @@ const FormCustom = ({ cart, total }) => {
       <AppleModal
         isOpen={isCloseRestrictedModalOpen}
         onClose={closeCloseRestrictedModal}
-        title="Verificación de Stock"
+        title="Pendiente de confirmar"
         twoOptions={true}
         isLoading={isModalConfirmLoading}
         onConfirm={async () => {
@@ -1056,8 +1056,9 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p>
-          En cocina están verificando si hay stock, tu pedido estará pendiente
-          de aprobación durante los próximos 5 minutos, ¿aceptas?
+          Van +400 burgers, en cocina están verificando si hay stock, tu pedido estará pendiente
+          de aprobación durante los próximos 5 minutos, aceptas? <br />
+          *Este feature esta en desarrollo, por default se enviara que pagas en efectivo pero podes escribir a 3585168971 para transferir! 
         </p>
       </AppleModal>
 
