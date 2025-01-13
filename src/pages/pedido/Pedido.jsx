@@ -550,7 +550,7 @@ const Pedido = () => {
                                                     </svg>
                                                     <p className="text-black font-coolvetica font-medium">
         {currentOrder.pendingOfBeingAccepted 
-            ? "Menos de 5 minutos la confirmacion"
+            ? "Entre 3 a 5 minutos para confirmar"
             : currentOrder.direccion === ""
                 ? `Retirar entre ${sumarMinutos(currentOrder.hora, 15)} hs y ${sumarMinutos(currentOrder.hora, 25)} hs`
                 : `Llega entre ${sumarMinutos(currentOrder.hora, 30)} hs a ${sumarMinutos(currentOrder.hora, 50)} hs`}
