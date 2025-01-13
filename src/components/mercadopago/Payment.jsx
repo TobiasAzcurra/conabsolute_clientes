@@ -29,7 +29,7 @@ const Payment = ({
     setIsLoading(true);
     setError(null);
     try {
-      // Primero procesamos los vouchers válidos en una transacción atómica
+      // Primero procesamos los vouchers válidos
       const validCoupons = couponCodes.filter(code => code.trim() !== '');
       if (validCoupons.length > 0) {
         const canjeSuccess = await canjearVouchers(validCoupons);
@@ -38,7 +38,7 @@ const Payment = ({
         }
       }
 
-      // Si los vouchers se procesaron correctamente, creamos la preferencia
+      // Calculamos los totales correctamente
       const finalTotal = calculateFinalTotal();
       const productsTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
       const toppingsTotal = cart.reduce((acc, item) => {
@@ -46,22 +46,25 @@ const Payment = ({
       }, 0);
       
       const baseTotal = productsTotal + toppingsTotal;
-      const deliveryFee = values.deliveryMethod === 'delivery' ? envio : 0;
+      const deliveryFee = values.deliveryMethod === 'delivery' ? 0 : 0;
       const expressDeliveryFee = isEnabled ? 2000 : 0;
-      
+
+      // Crear los valores actualizados incluyendo todos los totales correctamente
+      const updatedValues = {
+        ...values,
+        hora: values.hora || '',
+        envioExpress: expressDeliveryFee,
+        mercadopagoCantidad: finalTotal,
+        subTotal: baseTotal, // El total final después de descuentos
+        total: finalTotal, // El total original sin descuentos
+        envio: deliveryFee,
+      };
+
       const createPreference = httpsCallable(functions, 'createPreference');
       const result = await createPreference({
-        updatedValues: {
-          ...values,
-          hora: values.hora || '',
-          envioExpress: expressDeliveryFee,
-          mercadopagoCantidad: finalTotal,
-          subTotal: finalTotal, // El total final después de descuentos
-          total: baseTotal, // El total original sin descuentos
-          envio: deliveryFee,
-        },
+        updatedValues,
         cart,
-        discountedTotal,
+        discountedTotal: finalTotal, // Enviamos el total final correcto
         envio: deliveryFee,
         mapUrl,
         couponCodes,
