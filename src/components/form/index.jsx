@@ -806,38 +806,45 @@ const FormCustom = ({ cart, total }) => {
                   <p className="text-2xl font-bold mb-2">Método de pago</p>
                   <div className="w-full items-center rounded-3xl border-2 border-black">
                     <div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
-                      <div className="flex flex-row items-center gap-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-6"
-                        >
-                          <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-                            clipRule="evenodd"
-                          />
-                          <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-                        </svg>
+                    <div className="flex flex-row items-center gap-2">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className="h-6 "
+  >
+    <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+    <path
+      fillRule="evenodd"
+      d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
+      clipRule="evenodd"
+    />
+    <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
+  </svg>
 
-                        <Field
-                          as="select"
-                          name="paymentMethod"
-                          className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-                          style={{
-                            WebkitAppearance: 'none',
-                            MozAppearance: 'none',
-                          }}
-                          onChange={(e) => {
-                            setFieldValue('paymentMethod', e.target.value);
-                          }}
-                        >
-                          <option value="efectivo">Efectivo</option>
-                          <option value="mercadopago">Mercado Pago</option>
-                        </Field>
-                      </div>
+  <Field
+    as="select"
+    name="paymentMethod"
+    className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+    style={{
+      WebkitAppearance: 'none',
+      MozAppearance: 'none',
+    }}
+    onChange={(e) => {
+      setFieldValue('paymentMethod', e.target.value);
+    }}
+  >
+    <option value="efectivo">Efectivo</option>
+    {altaDemanda?.open && (
+      <option value="mercadopago">Mercado Pago</option>
+    )}
+  </Field>
+  {!altaDemanda?.open && (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 absolute text-red-main right-8">
+      <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
+    </svg>
+  )}
+</div>
                     </div>
 
                     {/* Campos de cupones */}
