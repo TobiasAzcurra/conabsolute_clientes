@@ -553,9 +553,9 @@ const FormCustom = ({ cart, total }) => {
             let finalTotal = calculateProductsTotal() - descuento;
             if (values.deliveryMethod === 'delivery') {
               finalTotal += envio;
-              if (isEnabled) {
-                finalTotal += expressDeliveryFee;
-              }
+            }
+            if (isEnabled) {
+              finalTotal += expressDeliveryFee;
             }
             console.log('isEnabled:', isEnabled);
             return finalTotal;
