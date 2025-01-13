@@ -386,6 +386,7 @@ const Pedido = () => {
                 <div className="flex items-center flex-col pt-16">
                     <img src={logo} className="w-2/3" alt="Logo" />
                 </div>
+                
                 {loading && (
                     <div className="flex items-center justify-center">
                         <div
@@ -437,6 +438,11 @@ const Pedido = () => {
                                         )}
                                         {/* info */}
                                         <div className="flex flex-col px-4 w-full">
+                                        {currentOrder.aceptado && (
+  <p className="text-green-600 font-medium  mb-4 text-center">
+    ¡Anhelo aceptó tu pedido!
+  </p>
+)}
                                             <div className="mb-10">
                                                 <div className="w-full flex flex-row gap-2 relative">
                                                     {currentOrder.pendingOfBeingAccepted ? (
