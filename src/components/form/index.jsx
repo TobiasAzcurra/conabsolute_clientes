@@ -37,21 +37,21 @@ const FormCustom = ({ cart, total }) => {
   const [mapUrl, setUrl] = useState('');
   const [validarUbi, setValidarUbi] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
-
+  
   const [noEncontre, setNoEncontre] = useState(false);
-
+  
   // Estados para alta demanda
   const [altaDemanda, setAltaDemanda] = useState(null);
   const [showHighDemandModal, setShowHighDemandModal] = useState(false);
   const [pendingValues, setPendingValues] = useState(null);
-
+  
   const [discountedTotal, setDiscountedTotal] = useState(total);
   const [couponCodes, setCouponCodes] = useState(['']);
-
+  
   const [descuento, setDescuento] = useState(0);
   const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
   const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
-
+  
   const [voucherStatus, setVoucherStatus] = useState(['']);
   const [showCouponInput, setShowCouponInput] = useState(false);
   const [showReservaInput, setShowReservaInput] = useState(false);
@@ -61,12 +61,13 @@ const FormCustom = ({ cart, total }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const [isValidating, setIsValidating] = useState([false]);
-
+  
   const [isTimeRestrictedModalOpen, setIsTimeRestrictedModalOpen] =
-    useState(false);
+  useState(false);
   const [isCloseRestrictedModalOpen, setIsCloseRestrictedModalOpen] =
-    useState(false);
-
+  useState(false);
+  const [isOpenPaymentMethod, setIsOpenPaymentMethod] = useState(altaDemanda?.open || false);
+  
   // Escucha de alta demanda
   useEffect(() => {
     let unsubscribeAltaDemanda = null;
@@ -478,6 +479,12 @@ const FormCustom = ({ cart, total }) => {
     const nonPromoProducts = cart.filter((item) => item.type !== 'promo');
     return { promoProducts, nonPromoProducts };
   };
+
+  useEffect(() => {
+    setIsOpenPaymentMethod(altaDemanda?.open || false);
+  }, [altaDemanda]);
+
+
   return (
     <div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
       <style>{`
@@ -512,34 +519,37 @@ const FormCustom = ({ cart, total }) => {
           aclaraciones: '',
         }}
         validationSchema={formValidations}
-        onSubmit={async (values) => {
-          if (!altaDemanda?.open) {
-            setPendingValues(values);
-            openCloseModal();
-            return;
-          }
-          const isReserva = values.hora.trim() !== '';
+       onSubmit={async (values) => {
+  if (!altaDemanda?.open) {
+    if (values.paymentMethod === 'mercadopago') {
+      setFieldValue('paymentMethod', 'efectivo');
+    }
+    setPendingValues({ ...values, paymentMethod: 'efectivo' });
+    openCloseModal();
+    return;
+  }
+  const isReserva = values.hora.trim() !== '';
 
-          if (!isReserva && altaDemanda?.isHighDemand) {
-            setPendingValues(values);
-            setShowHighDemandModal(true);
-            return;
-          }
+  if (!isReserva && altaDemanda?.isHighDemand) {
+    setPendingValues(values);
+    setShowHighDemandModal(true);
+    return;
+  }
 
-          if (!isWithinOrderTimeRange()) {
-            console.log(
-              'La hora actual está fuera del rango permitido para pedidos'
-            );
-            openTimeRestrictedModal();
-            return;
-          }
+  if (!isWithinOrderTimeRange()) {
+    console.log(
+      'La hora actual está fuera del rango permitido para pedidos'
+    );
+    openTimeRestrictedModal();
+    return;
+  }
 
-          if (values.paymentMethod === 'efectivo') {
-            await processPedido(values, isReserva);
-          } else if (values.paymentMethod === 'mercadopago') {
-            // await processPedido(values, isReserva);
-          }
-        }}
+  if (values.paymentMethod === 'efectivo') {
+    await processPedido(values, isReserva);
+  } else if (values.paymentMethod === 'mercadopago') {
+    // await processPedido(values, isReserva);
+  }
+}}
       >
         {({
           getFieldProps,
@@ -823,27 +833,28 @@ const FormCustom = ({ cart, total }) => {
   </svg>
 
   <Field
-    as="select"
-    name="paymentMethod"
-    className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
-    style={{
-      WebkitAppearance: 'none',
-      MozAppearance: 'none',
-    }}
-    onChange={(e) => {
-      setFieldValue('paymentMethod', e.target.value);
-    }}
-  >
-    <option value="efectivo">Efectivo</option>
-    {altaDemanda?.open && (
-      <option value="mercadopago">Mercado Pago</option>
-    )}
-  </Field>
-  {!altaDemanda?.open && (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 absolute text-red-main right-8">
-      <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
-    </svg>
+  as="select"
+  name="paymentMethod"
+  className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+  style={{
+    WebkitAppearance: 'none',
+    MozAppearance: 'none',
+  }}
+  onChange={(e) => {
+    setFieldValue('paymentMethod', e.target.value);
+  }}
+>
+  <option value="efectivo">Efectivo</option>
+  {isOpenPaymentMethod && (
+    <option value="mercadopago">Mercado Pago</option>
   )}
+</Field>
+ 
+  {!isOpenPaymentMethod && (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 absolute text-red-main right-8">
+    <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
+  </svg>
+)}
 </div>
                     </div>
 
@@ -1063,8 +1074,8 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p>
-          Van +400 burgers, en cocina están verificando si hay stock, tu pedido estará pendiente
-          de aprobación durante los próximos 5 minutos, aceptas? <br />
+          Van +400 burgers ❤️‍🔥 En cocina están verificando si hay stock. Tu pedido estará pendiente
+          de aprobación durante los próximos 3 a 5 minutos, aceptas? <br />
           *Este feature esta en desarrollo, por default se enviara que pagas en efectivo pero podes escribir a 3585168971 para transferir! 
         </p>
       </AppleModal>
