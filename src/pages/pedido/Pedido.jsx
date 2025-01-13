@@ -443,6 +443,11 @@ const Pedido = () => {
     ¡Anhelo aceptó tu pedido!
   </p>
 )}
+{currentOrder.rechazado && (
+  <p className="text-red-600 font-medium  mb-4 text-center">
+    Anhelo rechazó tu pedido por falta de stock.
+  </p>
+)}
                                             <div className="mb-10">
                                                 <div className="w-full flex flex-row gap-2 relative">
                                                     {currentOrder.pendingOfBeingAccepted ? (
