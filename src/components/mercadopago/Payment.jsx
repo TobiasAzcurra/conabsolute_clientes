@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import { functions } from '../../firebase/config';
 import { httpsCallable } from 'firebase/functions';
 import LoadingPoints from '../LoadingPoints';
+import { canjearVouchers } from '../../firebase/validateVoucher';
 
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY, {
   locale: 'es-AR',
@@ -22,49 +23,60 @@ const Payment = ({
   const [preferenceId, setPreferenceId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [error, setError] = useState(null);
 
-  const createPreferenceAndPay = async () => {
+  const processVouchersAndCreatePreference = async () => {
     setIsLoading(true);
+    setError(null);
     try {
+      // Primero procesamos los vouchers válidos en una transacción atómica
+      const validCoupons = couponCodes.filter(code => code.trim() !== '');
+      if (validCoupons.length > 0) {
+        const canjeSuccess = await canjearVouchers(validCoupons);
+        if (!canjeSuccess) {
+          throw new Error('Error al procesar los cupones');
+        }
+      }
+
+      // Si los vouchers se procesaron correctamente, creamos la preferencia
       const finalTotal = calculateFinalTotal();
-      // aca sera q se resta
-
-      console.log('Calling createPreference with data:', {
-        updatedValues: {
-          ...values,
-          hora: values.hora || '',
-          envioExpress: isEnabled ? 2000 : 0,
-          mercadopagoCantidad: finalTotal,
-        },
-        cart,
-        discountedTotal,
-        envio,
-        mapUrl,
-        couponCodes,
-      });
-
+      const productsTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      const toppingsTotal = cart.reduce((acc, item) => {
+        return acc + item.toppings.reduce((tAcc, topping) => tAcc + (topping.price * item.quantity), 0);
+      }, 0);
+      
+      const baseTotal = productsTotal + toppingsTotal;
+      const deliveryFee = values.deliveryMethod === 'delivery' ? envio : 0;
+      const expressDeliveryFee = isEnabled ? 2000 : 0;
+      
       const createPreference = httpsCallable(functions, 'createPreference');
       const result = await createPreference({
         updatedValues: {
           ...values,
           hora: values.hora || '',
-          envioExpress: isEnabled ? 2000 : 0,
+          envioExpress: expressDeliveryFee,
           mercadopagoCantidad: finalTotal,
+          subTotal: finalTotal, // El total final después de descuentos
+          total: baseTotal, // El total original sin descuentos
+          envio: deliveryFee,
         },
         cart,
         discountedTotal,
-        envio,
+        envio: deliveryFee,
         mapUrl,
         couponCodes,
       });
 
       setPreferenceId(result.data.id);
     } catch (error) {
-      console.error('Error al crear preferencia:', error);
+      console.error('Error al procesar el pago:', error);
+      setError(error.message || 'Error al procesar el pago');
+      // Podríamos implementar aquí lógica para revertir el canje de vouchers si falla la creación de preferencia
     } finally {
       setIsLoading(false);
     }
   };
+
   const handleOnReady = () => {
     setIsReady(true);
   };
@@ -77,11 +89,19 @@ const Payment = ({
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-500 text-gray-100 rounded-3xl h-[80px] font-bold w-full">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <div>
       {!preferenceId ? (
         <button
-          onClick={createPreferenceAndPay}
+          onClick={processVouchersAndCreatePreference}
           disabled={isLoading}
           className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 w-full"
         >
@@ -123,11 +143,12 @@ const Payment = ({
             onReady={handleOnReady}
             onError={(error) => {
               console.error('Error en el pago:', error);
-              setPreferenceId(null); // Resetear para permitir nuevo intento
+              setPreferenceId(null);
+              setError('Error en el pago. Por favor intenta nuevamente.');
             }}
             onClose={() => {
               console.log('Modal de pago cerrado');
-              setPreferenceId(null); // Resetear para permitir nuevo intento
+              setPreferenceId(null);
             }}
           />
         </div>
