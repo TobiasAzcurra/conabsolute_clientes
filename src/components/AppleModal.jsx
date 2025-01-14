@@ -183,7 +183,7 @@ const AppleModal = ({
           </h2>
         )}
         <div className="w-full px-4 max-h-[80vh] overflow-y-auto">
-          <div className="text-black mt-2 text-center">
+          <div className="text-black mt-4 text-center">
             {isEditAddressModal ? (
               <div className="space-y-4">
                 <div className="w-full items-center rounded-3xl border-2 border-black">
