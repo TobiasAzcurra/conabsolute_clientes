@@ -5,6 +5,7 @@ import LoadingPoints from "./LoadingPoints";
 import { MapDirection } from "./form/MapDirection";
 import { doc, runTransaction, collection, getFirestore } from 'firebase/firestore';
 import { obtenerFechaActual } from '../helpers/currencyFormat';
+import isologo from '../assets/isologo.png';
 
 const AppleModal = ({
   isOpen,
@@ -31,38 +32,63 @@ const AppleModal = ({
   });
 
   // Estados para la edición de dirección
+  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
   const [newAddress, setNewAddress] = useState('');
   const [mapUrl, setMapUrl] = useState('');
   const [addressError, setAddressError] = useState('');
   const [isUpdatingAddress, setIsUpdatingAddress] = useState(false);
   const [aclaraciones, setAclaraciones] = useState('');
 
-  useEffect(() => {
-    if (isOpen && isRatingModal) {
-      const initialOrderRatings = orderProducts.reduce((acc, product) => {
-        acc[product.burger] = 0;
-        return acc;
-      }, {});
-
-      const initialAdditionalRatings = additionalProducts.reduce((acc, product) => {
-        acc[product] = 0;
-        return acc;
-      }, {});
-
-      setRatings({
-        tiempo: 0,
-        temperatura: 0,
-        presentacion: 0,
-        pagina: 0,
-        comentario: "",
-        ...initialOrderRatings,
-        ...initialAdditionalRatings,
-      });
-    }
-  }, [isOpen, orderProducts, additionalProducts]);
-
   const handleUpdateAddress = async () => {
-    if (!newAddress) {
+    if (deliveryMethod === 'takeaway') {
+      try {
+        const firestore = getFirestore();
+        const fechaActual = obtenerFechaActual();
+        const [dia, mes, anio] = fechaActual.split("/");
+        const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+        const pedidoDocRef = doc(pedidosCollectionRef, dia);
+
+        await runTransaction(firestore, async (transaction) => {
+          const docSnapshot = await transaction.get(pedidoDocRef);
+          if (!docSnapshot.exists()) {
+            throw new Error("El pedido no existe para la fecha especificada.");
+          }
+
+          const existingData = docSnapshot.data();
+          const pedidosDelDia = existingData.pedidos || [];
+          const pedidoIndex = pedidosDelDia.findIndex(
+            (pedido) => pedido.id === orderId
+          );
+
+          if (pedidoIndex === -1) {
+            throw new Error("Pedido no encontrado");
+          }
+
+          // Actualizamos a retiro en local
+          pedidosDelDia[pedidoIndex].direccion = "";
+          pedidosDelDia[pedidoIndex].deliveryMethod = "takeaway";
+          pedidosDelDia[pedidoIndex].ubicacion = "";
+          pedidosDelDia[pedidoIndex].referencias = "";
+          pedidosDelDia[pedidoIndex].map = [];
+
+          transaction.set(pedidoDocRef, {
+            ...existingData,
+            pedidos: pedidosDelDia,
+          });
+        });
+
+        onAddressSuccess?.("");
+        onClose();
+      } catch (error) {
+        console.error('Error al cambiar a retiro:', error);
+        setAddressError('Hubo un error al cambiar a retiro. Por favor intenta nuevamente.');
+      } finally {
+        setIsUpdatingAddress(false);
+      }
+      return;
+    }
+
+    if (!newAddress && deliveryMethod === 'delivery') {
       setAddressError('Por favor selecciona una dirección válida');
       return;
     }
@@ -96,6 +122,7 @@ const AppleModal = ({
         pedidosDelDia[pedidoIndex].direccion = newAddress;
         pedidosDelDia[pedidoIndex].ubicacion = mapUrl;
         pedidosDelDia[pedidoIndex].referencias = aclaraciones;
+        pedidosDelDia[pedidoIndex].deliveryMethod = "delivery";
 
         const coords = mapUrl.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (coords) {
@@ -121,107 +148,6 @@ const AppleModal = ({
     }
   };
 
-  const handleChangeToPickup = async () => {
-    setIsUpdatingAddress(true);
-    setAddressError('');
-
-    try {
-      const firestore = getFirestore();
-      const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split("/");
-      const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
-      const pedidoDocRef = doc(pedidosCollectionRef, dia);
-
-      await runTransaction(firestore, async (transaction) => {
-        const docSnapshot = await transaction.get(pedidoDocRef);
-        if (!docSnapshot.exists()) {
-          throw new Error("El pedido no existe para la fecha especificada.");
-        }
-
-        const existingData = docSnapshot.data();
-        const pedidosDelDia = existingData.pedidos || [];
-        const pedidoIndex = pedidosDelDia.findIndex(
-          (pedido) => pedido.id === orderId
-        );
-
-        if (pedidoIndex === -1) {
-          throw new Error("Pedido no encontrado");
-        }
-
-        // Actualizamos a retiro en local
-        pedidosDelDia[pedidoIndex].direccion = "";
-        pedidosDelDia[pedidoIndex].deliveryMethod = "takeaway";
-        pedidosDelDia[pedidoIndex].ubicacion = "";
-        pedidosDelDia[pedidoIndex].referencias = "";
-        pedidosDelDia[pedidoIndex].map = [];
-
-        transaction.set(pedidoDocRef, {
-          ...existingData,
-          pedidos: pedidosDelDia,
-        });
-      });
-
-      onAddressSuccess?.("");
-      onClose();
-    } catch (error) {
-      console.error('Error al cambiar a retiro:', error);
-      setAddressError('Hubo un error al cambiar a retiro. Por favor intenta nuevamente.');
-    } finally {
-      setIsUpdatingAddress(false);
-    }
-  };
-
-  const StarRating = ({ rating, onRatingChange }) => {
-    return (
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <svg
-            key={star}
-            xmlns="http://www.w3.org/2000/svg"
-            className={`h-6 w-6 cursor-pointer ${
-              star <= rating ? "text-black" : "text-gray-300"
-            }`}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            onClick={() => onRatingChange(star)}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-            />
-          </svg>
-        ))}
-      </div>
-    );
-  };
-
-  const RatingSection = ({ label, category }) => (
-    <div className="flex flex-row justify-center items-center gap-2">
-      <label className="font-bold">{label}:</label>
-      <StarRating
-        rating={ratings[category]}
-        onRatingChange={(value) =>
-          setRatings((prev) => ({ ...prev, [category]: value }))
-        }
-      />
-    </div>
-  );
-
-  const ProductRatingSection = ({ productName }) => (
-    <div className="flex flex-row justify-center items-center gap-2">
-      <label className="block font-bold">{productName}:</label>
-      <StarRating
-        rating={ratings[productName]}
-        onRatingChange={(value) =>
-          setRatings((prev) => ({ ...prev, [productName]: value }))
-        }
-      />
-    </div>
-  );
-
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
@@ -233,11 +159,60 @@ const AppleModal = ({
           </h2>
         )}
         <div className="w-full px-4 max-h-[80vh] overflow-y-auto">
-          <div className="text-black mt-4 text-center">
-            {isEditAddressModal ? (
-              <div className="space-y-4">
+          {isEditAddressModal ? (
+            <div className="space-y-4 mt-4">
+              {/* Botones de selección */}
+              <div className="flex flex-row w-full gap-2 mb-4">
+                <button
+                  type="button"
+                  className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
+                    deliveryMethod === 'delivery'
+                      ? 'bg-black text-gray-100'
+                      : 'bg-gray-300 text-black'
+                  }`}
+                  onClick={() => setDeliveryMethod('delivery')}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 500 500"
+                    className="h-8"
+                  >
+                    <path
+                      d="M76.849,210.531C34.406,210.531,0,244.937,0,287.388c0,42.438,34.406,76.847,76.849,76.847 c30.989,0,57.635-18.387,69.789-44.819l18.258,14.078c0,0,134.168,0.958,141.538-3.206c0,0-16.65-45.469,4.484-64.688 c2.225-2.024,5.021-4.332,8.096-6.777c-3.543,8.829-5.534,18.45-5.534,28.558c0,42.446,34.403,76.846,76.846,76.846 c42.443,0,76.843-34.415,76.843-76.846c0-42.451-34.408-76.849-76.843-76.849c-0.697,0-1.362,0.088-2.056,0.102 c5.551-3.603,9.093-5.865,9.093-5.865l-5.763-5.127c0,0,16.651-3.837,12.816-12.167c-3.848-8.33-44.19-58.28-44.19-58.28 s7.146-15.373-7.634-26.261l-7.098,15.371c0,0-18.093-12.489-25.295-10.084c-7.205,2.398-18.005,3.603-21.379,8.884l-3.358,3.124 c0,0-0.95,5.528,4.561,13.693c0,0,55.482,17.05,58.119,29.537c0,0,3.848,7.933-12.728,9.844l-3.354,4.328l-8.896,0.479 l-16.082-36.748c0,0-15.381,4.082-23.299,10.323l1.201,6.24c0,0-64.599-43.943-125.362,21.137c0,0-44.909,12.966-76.37-26.897 c0,0-0.479-12.968-76.367-10.565l5.286,5.524c0,0-5.286,0.479-7.444,3.841c-2.158,3.358,1.2,6.961,18.494,6.961 c0,0,39.153,44.668,69.17,42.032l42.743,20.656l18.975,32.42c0,0,0.034,2.785,0.23,7.045c-4.404,0.938-9.341,1.979-14.579,3.09 C139.605,232.602,110.832,210.531,76.849,210.531z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Delivery
+                </button>
+                <button
+                  type="button"
+                  className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
+                    deliveryMethod === 'takeaway'
+                      ? 'bg-black text-gray-100'
+                      : 'bg-gray-300 text-black'
+                  }`}
+                  onClick={() => setDeliveryMethod('takeaway')}
+                >
+                  <div className="flex flex-row items-center gap-2">
+                    <img
+                      src={isologo}
+                      className={`h-4 ${
+                        deliveryMethod === 'takeaway'
+                          ? 'invert brightness-0'
+                          : 'brightness-0'
+                      }`}
+                      alt=""
+                    />
+                    <p className="font-bold text-">Retiro</p>
+                  </div>
+                  <p className="font-light text-xs">por Buenos Aires 618</p>
+                </button>
+              </div>
+
+              {/* Contenido condicional según deliveryMethod */}
+              {deliveryMethod === 'delivery' && (
                 <div className="w-full items-center rounded-3xl border-2 border-black">
-                  <div className=" border-b border-black border-opacity-20">
+                  <div className="border-b border-black border-opacity-20">
                     <MapDirection
                       setUrl={setMapUrl}
                       setValidarUbi={() => {}}
@@ -270,138 +245,86 @@ const AppleModal = ({
                     </div>
                   </div>
                 </div>
-                
-                {addressError && (
-                  <p className="text-red-500 text-lg font-bold">{addressError}</p>
-                )}
-              </div>
-            ) : (
-              children
-            )}
-          </div>
+              )}
 
-          {isRatingModal && (
-            <div className="mt-8 space-y-2">
-              <RatingSection category="tiempo" label="Tiempo" />
-              <RatingSection category="temperatura" label="Temperatura" />
-              <RatingSection category="presentacion" label="Presentación" />
-              <RatingSection category="pagina" label="Página" />
-
-              {orderProducts.map((product, index) => (
-                <ProductRatingSection
-                  key={index}
-                  productName={product.burger}
-                />
-              ))}
-
-              {additionalProducts.map((product, index) => (
-                <ProductRatingSection
-                  key={`additional-${index}`}
-                  productName={product}
-                />
-              ))}
-
-              <div className="w-full">
-                <p className="flex w-full mb-2 items-center justify-center text-center font-bold">
-                  ¿Algún comentario?
-                </p>
-                <textarea
-                  value={ratings.comentario}
-                  onChange={(e) =>
-                    setRatings((prev) => ({
-                      ...prev,
-                      comentario: e.target.value,
-                    }))
-                  }
-                  className="w-full px-4 h-10 flex items-center bg-white border-2 border-black rounded-xl"
-                  rows={4}
-                />
-              </div>
+              {addressError && (
+                <p className="text-red-500 text-lg font-bold">{addressError}</p>
+              )}
             </div>
+          ) : (
+            children
           )}
         </div>
 
+        {/* Botones de acción */}
         <div className="w-full px-4 mt-6">
-  {isEditAddressModal ? (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-center gap-2">
-        <button
-          onClick={handleUpdateAddress}
-          disabled={isUpdatingAddress}
-          className="w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all"
-        >
-          {isUpdatingAddress ? (
-            <LoadingPoints color="text-gray-100" />
+          {isEditAddressModal ? (
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={handleUpdateAddress}
+                disabled={isUpdatingAddress}
+                className="w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all"
+              >
+                {isUpdatingAddress ? (
+                  <LoadingPoints color="text-gray-100" />
+                ) : (
+                  "Confirmar"
+                )}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : twoOptions ? (
+            <div className="flex justify-center gap-2">
+              <button
+                onClick={onConfirm}
+                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
+                  isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
+              >
+                No
+              </button>
+            </div>
           ) : (
-            "Confirmar"
+            <button
+              onClick={() => {
+                if (isRatingModal) {
+                  onConfirm(ratings);
+                } else {
+                  onClose();
+                }
+              }}
+              className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center"
+              disabled={
+                isRatingModal &&
+                Object.entries(ratings)
+                  .filter(([key]) => key !== "comentario")
+                  .some(([_, value]) => value === 0)
+              }
+            >
+              {isRatingModal ? (
+                isLoading ? (
+                  <LoadingPoints color="text-gray-100" />
+                ) : (
+                  "Enviar"
+                )
+              ) : (
+                "Entendido"
+              )}
+            </button>
           )}
-        </button>
-        <button
-          onClick={onClose}
-          className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
-        >
-          Cancelar
-        </button>
-      </div>
-      <button
-        onClick={handleChangeToPickup}
-        disabled={isUpdatingAddress}
-        className="w-full h-20 text-2xl flex items-center justify-center bg-gray-300 text-black rounded-3xl font-bold hover:bg-opacity-90 transition-all"
-      >
-        {isUpdatingAddress ? (
-          <LoadingPoints color="text-black" />
-        ) : (
-          "Paso a retirar"
-        )}
-      </button>
-    </div>
-  ) : twoOptions ? (
-    <div className="flex justify-center gap-2">
-      <button
-        onClick={onConfirm}
-        className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
-          isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-        }`}
-        disabled={isLoading}
-      >
-        {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
-      </button>
-      <button
-        onClick={onClose}
-        className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
-      >
-        No
-      </button>
-    </div>
-  ) : (
-    <button
-      onClick={() => {
-        if (isRatingModal) {
-          onConfirm(ratings);
-        } else {
-          onClose();
-        }
-      }}
-      className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center"
-      disabled={
-        isRatingModal &&
-        Object.entries(ratings)
-          .filter(([key]) => key !== "comentario")
-          .some(([_, value]) => value === 0)
-      }
-    >
-      {isRatingModal ? (
-        isLoading ? (
-          <LoadingPoints color="text-gray-100" />
-        ) : (
-          "Enviar"
-        )
-      ) : (
-        "Entendido"
-      )}
-    </button>
-  )}
-</div>
+        </div>
       </div>
     </div>,
     document.getElementById("modal-root")
