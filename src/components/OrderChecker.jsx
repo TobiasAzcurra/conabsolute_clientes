@@ -20,18 +20,19 @@ const OrderChecker = () => {
       // 2. No estamos ya en la página de pedido
       // 3. No estamos en la ruta raíz
       if (phoneNumber && 
-          !location.pathname.includes('/pedido') && 
-          location.pathname !== '/') {
-        
-        unsubscribe = ListenOrdersForTodayByPhoneNumber(phoneNumber, (pedidos) => {
-          const pedidosActivos = pedidos.filter(pedido => 
-            !pedido.entregado && !pedido.canceled);
-            
-          if (pedidosActivos.length > 0 && !hasActiveOrder) {
-            setHasActiveOrder(true);
-            setIsModalOpen(true);
-          }
-        });
+        !location.pathname.includes('/pedido') && 
+        location.pathname !== '/' &&
+        !location.pathname.startsWith('/success/')) {
+      
+      unsubscribe = ListenOrdersForTodayByPhoneNumber(phoneNumber, (pedidos) => {
+        const pedidosActivos = pedidos.filter(pedido => 
+          !pedido.entregado && !pedido.canceled);
+          
+        if (pedidosActivos.length > 0 && !hasActiveOrder) {
+          setHasActiveOrder(true);
+          setIsModalOpen(true);
+        }
+      });
       }
     };
 
