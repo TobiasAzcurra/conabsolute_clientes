@@ -774,12 +774,14 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             >
                 <p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
             </AppleModal>
-            <EditAddressModal
+            <AppleModal
     isOpen={isEditAddressModalOpen}
     onClose={() => setIsEditAddressModalOpen(false)}
+    title="Cambiar direccion"
+    isEditAddressModal={true}
     orderId={editingOrderId}
     currentAddress={pedidosPagados.find(p => p.id === editingOrderId)?.direccion || ''}
-    onSuccess={handleAddressUpdateSuccess}
+    onAddressSuccess={handleAddressUpdateSuccess}
 />
         </div>
     </div>
