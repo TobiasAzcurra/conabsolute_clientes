@@ -640,7 +640,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     { !currentOrder.elaborado && (
         <button
             onClick={() => handleEditAddress(currentOrder.id)}
-            className="ml-2 p-2 rounded-full hover:bg-gray-100"
+            className="ml-2  rounded-full hover:bg-gray-100"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
