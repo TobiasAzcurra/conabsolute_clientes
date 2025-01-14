@@ -338,7 +338,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     const handleSupportClick = () => {
         console.log("💬 Iniciando contacto con soporte");
         const phoneNumber = "543584306832";
-        const message = "Hola! Mi pedido lleva más de 40 minutos de demora y aún no tiene cadete asignado.";
+        const message = "Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.";
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
     };
@@ -451,6 +451,22 @@ const [editingOrderId, setEditingOrderId] = useState(null);
         setMessage("¡Hora actualizada exitosamente!");
         setTimeout(() => setMessage(null), 3000);
       };
+
+      function sumarMinutos(hora, minutosASumar) {
+        if (!hora) return "";
+        const [horaStr, minutoStr] = hora.split(":");
+        const horas = parseInt(horaStr, 10);
+        const minutos = parseInt(minutoStr, 10);
+    
+        const fecha = new Date();
+        fecha.setHours(horas, minutos, 0, 0);
+        fecha.setMinutes(fecha.getMinutes() + minutosASumar);
+    
+        const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
+        const nuevosMinutos = fecha.getMinutes().toString().padStart(2, "0");
+    
+        return `${nuevasHoras}:${nuevosMinutos}`;
+    }
 
     return (
         <div
@@ -636,17 +652,29 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                                                     )}
                                                 </div>
                                                 <p className="text-black font-coolvetica font-bold text-left mt-2">
-                                                    {currentOrder.pendingOfBeingAccepted 
-                                                        ? "Tu pedido está pendiente de aprobación..."
-                                                        : currentOrder.direccion === ""
-                                                            ? (new Date() - new Date(currentOrder.hora)) / 60000 <= 20
-                                                                ? "Anhelo está preparando tu pedido..."
-                                                                : "Esperando que retires tu pedido..."
-                                                            : !currentOrder.elaborado
-                                                                ? "Anhelo está preparando tu pedido..."
-                                                                : currentOrder.cadete !== "NO ASIGNADO"
-                                                                    ? "En camino... Atención, te va a llamar tu cadete."
-                                                                    : "Tu cadete está llegando a Anhelo..."}</p>
+        {currentOrder.pendingOfBeingAccepted 
+            ? "Tu pedido está pendiente de aprobación..."
+            : currentOrder.direccion === ""
+                ? (new Date() - new Date(currentOrder.hora)) / 60000 <= 20
+                    ? "Anhelo está preparando tu pedido..."
+                    : "Esperando que retires tu pedido..."
+                : !currentOrder.elaborado
+                    ? "Anhelo está preparando tu pedido..."
+                    : (() => {
+                        const horaPedidoConTiempoElaborado = sumarMinutos(
+                            currentOrder.hora,
+                            parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                        );
+                        const diffMinutes =
+                            (new Date() - new Date(`${currentOrder.fecha} ${horaPedidoConTiempoElaborado}`)) /
+                            60000;
+                    
+                        return diffMinutes <= 15 
+                            ? "Tu cadete está llegando a Anhelo..." 
+                            : "En camino... Atención, te va a llamar tu cadete.";
+                    })()
+            }
+    </p>
                                                                     </div>
                                                                     <div className="flex flex-col text-left gap-2">
                                                                     <div className="flex flex-row gap-2">
@@ -685,27 +713,29 @@ const [editingOrderId, setEditingOrderId] = useState(null);
 </div>
                                                                         
                                                                         {currentOrder.direccion !== "" && (
-                                                <div className="flex flex-row gap-2">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        fill="currentColor"
-                                                        className="h-6"
-                                                    >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                    <p className="text-black font-coolvetica font-medium">
-                                                        Envio a cargo de:{" "}
-                                                        {currentOrder.cadete !== "NO ASIGNADO"
-                                                            ? currentOrder.cadete.charAt(0).toUpperCase() +
-                                                            currentOrder.cadete.slice(1).toLowerCase()
-                                                            : "Aun sin asignar"}
-                                                    </p>
-                                                </div>
+                                                // <div className="flex flex-row gap-2">
+                                                //     <svg
+                                                //         xmlns="http://www.w3.org/2000/svg"
+                                                //         viewBox="0 0 24 24"
+                                                //         fill="currentColor"
+                                                //         className="h-6"
+                                                //     >
+                                                //         <path
+                                                //             fillRule="evenodd"
+                                                //             d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+                                                //             clipRule="evenodd"
+                                                //         />
+                                                //     </svg>
+                                                //     Deshabilitado de momento
+                                                //     <p className="text-black font-coolvetica font-medium">
+                                                //         Envio a cargo de:{" "}
+                                                //         {currentOrder.cadete !== "NO ASIGNADO"
+                                                //             ? currentOrder.cadete.charAt(0).toUpperCase() +
+                                                //             currentOrder.cadete.slice(1).toLowerCase()
+                                                //             : "Aun sin asignar"}
+                                                //     </p>
+                                                // </div>
+                                                <></>
                                             )}
                                             <div className="flex flex-row gap-2 items-center">
     {currentOrder.direccion === "" ? (
