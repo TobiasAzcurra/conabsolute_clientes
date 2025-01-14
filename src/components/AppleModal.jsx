@@ -35,6 +35,7 @@ const AppleModal = ({
   const [mapUrl, setMapUrl] = useState('');
   const [addressError, setAddressError] = useState('');
   const [isUpdatingAddress, setIsUpdatingAddress] = useState(false);
+  const [aclaraciones, setAclaraciones] = useState('');
 
   useEffect(() => {
     if (isOpen && isRatingModal) {
@@ -94,6 +95,7 @@ const AppleModal = ({
 
         pedidosDelDia[pedidoIndex].direccion = newAddress;
         pedidosDelDia[pedidoIndex].ubicacion = mapUrl;
+        pedidosDelDia[pedidoIndex].referencias = aclaraciones;
 
         const coords = mapUrl.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (coords) {
@@ -184,20 +186,41 @@ const AppleModal = ({
           <div className="text-black mt-2 text-center">
             {isEditAddressModal ? (
               <div className="space-y-4">
-				
-                <p className="text-xl font-bold mb-2"></p>
-                <div className="mb-4">
-                  <MapDirection
-                    setUrl={setMapUrl}
-                    setValidarUbi={() => {}}
-                    setNoEncontre={() => {}}
-                    setFieldValue={(field, value) => {
-                      if (field === 'address') {
-                        setNewAddress(value);
-                      }
-                    }}
-                  />
+                <div className="w-full items-center rounded-3xl border-2 border-black">
+                  <div className=" border-b border-black border-opacity-20">
+                    <MapDirection
+                      setUrl={setMapUrl}
+                      setValidarUbi={() => {}}
+                      setNoEncontre={() => {}}
+                      setFieldValue={(field, value) => {
+                        if (field === 'address') {
+                          setNewAddress(value);
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <div className="flex flex-row px-3 h-10 items-center">
+                    <div className="flex flex-row w-full items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="h-6"
+                      >
+                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={aclaraciones}
+                        onChange={(e) => setAclaraciones(e.target.value)}
+                        placeholder="¿Referencias? Ej: Casa con portón"
+                        className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                      />
+                    </div>
+                  </div>
                 </div>
+                
                 {addressError && (
                   <p className="text-red-500 text-lg font-bold">{addressError}</p>
                 )}
