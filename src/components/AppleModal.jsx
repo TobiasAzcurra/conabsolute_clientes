@@ -162,7 +162,7 @@ const AppleModal = ({
           {isEditAddressModal ? (
             <div className="space-y-4 mt-4">
               {/* Botones de selección */}
-              <div className="flex flex-row w-full gap-2 mb-4">
+              <div className="flex flex-row w-full gap-2 ">
                 <button
                   type="button"
                   className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
@@ -257,7 +257,7 @@ const AppleModal = ({
         </div>
 
         {/* Botones de acción */}
-        <div className="w-full px-4 mt-6">
+        <div className="w-full px-4 mt-8">
           {isEditAddressModal ? (
             <div className="flex justify-center gap-2">
               <button
