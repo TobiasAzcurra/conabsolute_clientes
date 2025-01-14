@@ -120,6 +120,8 @@ const handleSubmit = async (
     try {
         const orderId = await UploadOrder(orderDetail);
         await addTelefonoFirebase(phone, obtenerFechaActual());
+        localStorage.setItem('customerPhone', cleanPhoneNumber(phone));
+        
         return orderId;
     } catch (error) {
         console.error("Error al subir la orden: ", error);
