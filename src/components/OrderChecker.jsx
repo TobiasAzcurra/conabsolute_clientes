@@ -55,11 +55,11 @@ const OrderChecker = () => {
     <AppleModal
       isOpen={isModalOpen}
       onClose={() => setIsModalOpen(false)}
-      title="¡Tenés un pedido en curso!"
+      title="Tenés un pedido en curso"
       twoOptions={true}
       onConfirm={handleViewOrder}
     >
-      <p>¿Querés ver el estado de tu pedido?</p>
+      <p className='text-center '>¿Querés ver su estado?</p>
     </AppleModal>
   );
 };
