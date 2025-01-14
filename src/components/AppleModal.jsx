@@ -158,9 +158,9 @@ const AppleModal = ({
             {title}
           </h2>
         )}
-        <div className="w-full px-4 max-h-[80vh] overflow-y-auto">
+        <div className="w-full px-4 max-h-[80vh] pt-4 overflow-y-auto">
           {isEditAddressModal ? (
-            <div className="space-y-4 mt-4">
+            <div className="space-y-4">
               {/* Botones de selección */}
               <div className="flex flex-row w-full gap-2 ">
                 <button
