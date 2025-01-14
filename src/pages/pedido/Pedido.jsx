@@ -15,6 +15,7 @@ import {
     getCadetePhone,
     updateRatingForOrder,
 } from "../../firebase/uploadOrder";
+import EditAddressModal from './EditAddressModal';
 
 const Pedido = () => {
     console.log("🔄 Inicializando componente Pedido");
@@ -27,6 +28,8 @@ const Pedido = () => {
     const { orderId } = useParams();
     const location = useLocation();
     const [pedidosPagados, setPedidosPagados] = useState([]);
+    const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
+const [editingOrderId, setEditingOrderId] = useState(null);
     const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
     const [showFullAddress, setShowFullAddress] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
@@ -264,6 +267,18 @@ const Pedido = () => {
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
     };
+
+    const handleEditAddress = (orderId) => {
+        setEditingOrderId(orderId);
+        setIsEditAddressModalOpen(true);
+    };
+
+    const handleAddressUpdateSuccess = (newAddress) => {
+        // Opcional: Puedes mostrar un mensaje de éxito aquí
+        setMessage("¡Dirección actualizada exitosamente!");
+        setTimeout(() => setMessage(null), 3000);
+    };
+    
 
     useEffect(() => {
         let unsubscribeOrder;
@@ -587,41 +602,57 @@ const Pedido = () => {
                                                     </p>
                                                 </div>
                                             )}
-                                            <div className="flex flex-row gap-2">
-                                                {currentOrder.direccion === "" ? (
-                                                    <img
-                                                        src={isologo}
-                                                        className="h-6 brightness-0"
-                                                        alt=""
-                                                    />
-                                                ) : (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        fill="currentColor"
-                                                        className="h-6"
-                                                    >
-                                                        <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-                                                        <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-                                                    </svg>
-                                                )}<p
-                                                className="text-black font-coolvetica font-medium cursor-pointer"
-                                                onClick={() => setShowFullAddress(!showFullAddress)}
-                                            >
-                                                {currentOrder.direccion === "" ? (
-                                                    "Retirar por Buenos Aires 618"
-                                                ) : (
-                                                    <>
-                                                        Destino a{" "}
-                                                        {showFullAddress
-                                                            ? currentOrder.direccion
-                                                            : (currentOrder.direccion
-                                                                    ?.split(",")[0]
-                                                                    .trim() || "No disponible") + "..."}
-                                                    </>
-                                                )}
-                                            </p>
-                                        </div>
+                                            <div className="flex flex-row gap-2 items-center">
+    {currentOrder.direccion === "" ? (
+        <img
+            src={isologo}
+            className="h-6 brightness-0"
+            alt=""
+        />
+    ) : (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-6"
+        >
+            <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+            <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+        </svg>
+    )}
+    <p
+        className="text-black font-coolvetica font-medium cursor-pointer flex-1"
+        onClick={() => setShowFullAddress(!showFullAddress)}
+    >
+        {currentOrder.direccion === "" ? (
+            "Retirar por Buenos Aires 618"
+        ) : (
+            <>
+                Destino a{" "}
+                {showFullAddress
+                    ? currentOrder.direccion
+                    : (currentOrder.direccion
+                            ?.split(",")[0]
+                            .trim() || "No disponible") + "..."}
+            </>
+        )}
+    </p>
+    {currentOrder.direccion !== "" && !currentOrder.elaborado && (
+        <button
+            onClick={() => handleEditAddress(currentOrder.id)}
+            className="ml-2 p-2 rounded-full hover:bg-gray-100"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-5 w-5"
+            >
+                <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+            </svg>
+        </button>
+    )}
+</div>
                                         <div className="flex flex-row gap-2">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -743,6 +774,13 @@ const Pedido = () => {
             >
                 <p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
             </AppleModal>
+            <EditAddressModal
+    isOpen={isEditAddressModalOpen}
+    onClose={() => setIsEditAddressModalOpen(false)}
+    orderId={editingOrderId}
+    currentAddress={pedidosPagados.find(p => p.id === editingOrderId)?.direccion || ''}
+    onSuccess={handleAddressUpdateSuccess}
+/>
         </div>
     </div>
 );
