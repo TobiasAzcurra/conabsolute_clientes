@@ -14,6 +14,8 @@ import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import Footer from "./components/Footer";
 import React, { useEffect, useState } from "react";
+import OrderChecker from "./components/OrderChecker"
+
 import Pedido from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
@@ -256,6 +258,8 @@ const AppRouter = () => {
 
 	return (
 		<div className="flex flex-col">
+		<OrderChecker />
+
 			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
