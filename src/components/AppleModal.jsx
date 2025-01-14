@@ -121,6 +121,56 @@ const AppleModal = ({
     }
   };
 
+  const handleChangeToPickup = async () => {
+    setIsUpdatingAddress(true);
+    setAddressError('');
+
+    try {
+      const firestore = getFirestore();
+      const fechaActual = obtenerFechaActual();
+      const [dia, mes, anio] = fechaActual.split("/");
+      const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+      const pedidoDocRef = doc(pedidosCollectionRef, dia);
+
+      await runTransaction(firestore, async (transaction) => {
+        const docSnapshot = await transaction.get(pedidoDocRef);
+        if (!docSnapshot.exists()) {
+          throw new Error("El pedido no existe para la fecha especificada.");
+        }
+
+        const existingData = docSnapshot.data();
+        const pedidosDelDia = existingData.pedidos || [];
+        const pedidoIndex = pedidosDelDia.findIndex(
+          (pedido) => pedido.id === orderId
+        );
+
+        if (pedidoIndex === -1) {
+          throw new Error("Pedido no encontrado");
+        }
+
+        // Actualizamos a retiro en local
+        pedidosDelDia[pedidoIndex].direccion = "";
+        pedidosDelDia[pedidoIndex].deliveryMethod = "takeaway";
+        pedidosDelDia[pedidoIndex].ubicacion = "";
+        pedidosDelDia[pedidoIndex].referencias = "";
+        pedidosDelDia[pedidoIndex].map = [];
+
+        transaction.set(pedidoDocRef, {
+          ...existingData,
+          pedidos: pedidosDelDia,
+        });
+      });
+
+      onAddressSuccess?.("");
+      onClose();
+    } catch (error) {
+      console.error('Error al cambiar a retiro:', error);
+      setAddressError('Hubo un error al cambiar a retiro. Por favor intenta nuevamente.');
+    } finally {
+      setIsUpdatingAddress(false);
+    }
+  };
+
   const StarRating = ({ rating, onRatingChange }) => {
     return (
       <div className="flex space-x-1">
@@ -272,73 +322,86 @@ const AppleModal = ({
         </div>
 
         <div className="w-full px-4 mt-6">
-          {isEditAddressModal ? (
-            <div className="flex justify-center gap-2">
-              <button
-                onClick={handleUpdateAddress}
-                disabled={isUpdatingAddress}
-                className="w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all"
-              >
-                {isUpdatingAddress ? (
-                  <LoadingPoints color="text-gray-100" />
-                ) : (
-                  "Confirmar"
-                )}
-              </button>
-              <button
-                onClick={onClose}
-                className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
-              >
-                Cancelar
-              </button>
-            </div>
-          ) : twoOptions ? (
-            <div className="flex justify-center gap-2">
-              <button
-                onClick={onConfirm}
-                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
-                  isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                }`}
-                disabled={isLoading}
-              >
-                {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
-              </button>
-              <button
-                onClick={onClose}
-                className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
-              >
-                No
-              </button>
-            </div>
+  {isEditAddressModal ? (
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-center gap-2">
+        <button
+          onClick={handleUpdateAddress}
+          disabled={isUpdatingAddress}
+          className="w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all"
+        >
+          {isUpdatingAddress ? (
+            <LoadingPoints color="text-gray-100" />
           ) : (
-            <button
-              onClick={() => {
-                if (isRatingModal) {
-                  onConfirm(ratings);
-                } else {
-                  onClose();
-                }
-              }}
-              className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center"
-              disabled={
-                isRatingModal &&
-                Object.entries(ratings)
-                  .filter(([key]) => key !== "comentario")
-                  .some(([_, value]) => value === 0)
-              }
-            >
-              {isRatingModal ? (
-                isLoading ? (
-                  <LoadingPoints color="text-gray-100" />
-                ) : (
-                  "Enviar"
-                )
-              ) : (
-                "Entendido"
-              )}
-            </button>
+            "Confirmar"
           )}
-        </div>
+        </button>
+        <button
+          onClick={onClose}
+          className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
+        >
+          Cancelar
+        </button>
+      </div>
+      <button
+        onClick={handleChangeToPickup}
+        disabled={isUpdatingAddress}
+        className="w-full h-20 text-2xl flex items-center justify-center bg-gray-300 text-black rounded-3xl font-bold hover:bg-opacity-90 transition-all"
+      >
+        {isUpdatingAddress ? (
+          <LoadingPoints color="text-black" />
+        ) : (
+          "Paso a retirar"
+        )}
+      </button>
+    </div>
+  ) : twoOptions ? (
+    <div className="flex justify-center gap-2">
+      <button
+        onClick={onConfirm}
+        className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
+          isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+        }`}
+        disabled={isLoading}
+      >
+        {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
+      </button>
+      <button
+        onClick={onClose}
+        className="w-1/2 h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all"
+      >
+        No
+      </button>
+    </div>
+  ) : (
+    <button
+      onClick={() => {
+        if (isRatingModal) {
+          onConfirm(ratings);
+        } else {
+          onClose();
+        }
+      }}
+      className="w-full h-20 text-2xl bg-black text-gray-100 rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center"
+      disabled={
+        isRatingModal &&
+        Object.entries(ratings)
+          .filter(([key]) => key !== "comentario")
+          .some(([_, value]) => value === 0)
+      }
+    >
+      {isRatingModal ? (
+        isLoading ? (
+          <LoadingPoints color="text-gray-100" />
+        ) : (
+          "Enviar"
+        )
+      ) : (
+        "Entendido"
+      )}
+    </button>
+  )}
+</div>
       </div>
     </div>,
     document.getElementById("modal-root")
