@@ -315,7 +315,7 @@ const AppRouter = () => {
 								<p className="text-center w-full text-xs text-gray-100 font-medium">
 									Ingresa tu número con el código de área sin espacios ni
 									símbolos. Ej:
-									<span className="font-bold opacity-100"> 3585168971</span>
+									<span className="font-bold opacity-100"> 3584306832</span>
 								</p>
 							</div>
 						)}

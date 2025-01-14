@@ -1080,7 +1080,8 @@ const FormCustom = ({ cart, total }) => {
         <p>
           Van +400 burgers ❤️‍🔥 En cocina están verificando si hay stock. Tu pedido estará pendiente
           de aprobación durante los próximos 3 a 5 minutos, aceptas? <br />
-          *Este feature esta en desarrollo, por default se enviara que pagas en efectivo pero podes escribir a 3585168971 para transferir! 
+          *Este feature esta en desarrollo, por default se enviara que pagas en efectivo pero podes escribir a 3584306832 para transferir! 
+          
         </p>
       </AppleModal>
 
