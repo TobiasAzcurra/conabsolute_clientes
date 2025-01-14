@@ -637,7 +637,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             </>
         )}
     </p>
-    {currentOrder.direccion !== "" && !currentOrder.elaborado && (
+    { !currentOrder.elaborado && (
         <button
             onClick={() => handleEditAddress(currentOrder.id)}
             className="ml-2 p-2 rounded-full hover:bg-gray-100"
