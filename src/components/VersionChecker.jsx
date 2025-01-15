@@ -96,12 +96,10 @@ const VersionChecker = ({ children }) => {
         onClose={() => {}} // No permitimos cerrar manualmente
         title="Nueva versión disponible"
       >
-        <div className="p-2">
           <p className="text-black text-lg">
             Se han actualizado partes importantes de la app. <br />
             Se actualizará automáticamente en unos segundos para que uses la ultima version.
           </p>
-        </div>
       </AppleModal>
     );
   }
