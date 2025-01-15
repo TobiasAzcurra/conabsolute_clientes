@@ -17,6 +17,7 @@ import {
 } from "../../firebase/uploadOrder";
 import EditAddressModal from './EditAddressModal';
 import { doc, runTransaction, collection, getFirestore } from 'firebase/firestore';
+import Payment from "../../components/mercadopago/Payment"
 
 const Pedido = () => {
     console.log("🔄 Inicializando componente Pedido");
@@ -40,6 +41,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isEditPaymentMethodModalOpen, setIsEditPaymentMethodModalOpen] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
     const [isUpdatingTime, setIsUpdatingTime] = useState(false);
@@ -350,6 +352,11 @@ const [editingOrderId, setEditingOrderId] = useState(null);
         // Opcional: Puedes mostrar un mensaje de éxito aquí
         setMessage("¡Dirección actualizada exitosamente!");
         setTimeout(() => setMessage(null), 3000);
+    };
+
+    const handleEditPaymentMethod = (orderId) => {
+        setEditingOrderId(orderId);
+        setIsEditPaymentMethodModalOpen(true);
     };
     
 
@@ -758,25 +765,36 @@ const [editingOrderId, setEditingOrderId] = useState(null);
   </div>
 )}
 </div>
-                                        <div className="flex flex-row gap-2">
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 24 24"
-                                                fill="currentColor"
-                                                className="h-6"
-                                            >
-                                                <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-                                                    clipRule="evenodd"
-                                                />
-                                                <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-                                            </svg>
-                                            <p className="text-black font-coolvetica font-medium">
-                                                ${currentOrder.total || "0.00"}
-                                            </p>
-                                        </div>
+<div className="flex flex-row items-center justify-between ">
+    <div className="flex flex-row items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6">
+  <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+  <path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z" clip-rule="evenodd" />
+  <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
+</svg>
+
+                                                <p className="text-black font-coolvetica font-medium">
+                                                    ${currentOrder.total || "0.00"} {currentOrder.metodoPago === "efectivo" ? "en efectivo" : "en Mercado Pago"}
+                                                </p>
+    </div>
+
+    {/* deshabilitado de momento */}
+                                                {/* {!currentOrder.elaborado && (
+                                                    <button
+                                                        onClick={() => handleEditPaymentMethod(currentOrder.id)}
+                                                        className="rounded-full hover:bg-gray-100"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                            className="h-5 w-5"
+                                                        >
+                                                            <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+                                                        </svg>
+                                                    </button>
+                                                )} */}
+                                            </div>
                                     </div></div>
                                     {/* botones */}
                                     <div className={`w-full px-4 ${hasButtons ? "mt-11" : ""}`}>
@@ -899,6 +917,33 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     currentAddress={pedidosPagados.find(p => p.id === editingOrderId)?.direccion || ''}
     onAddressSuccess={handleAddressUpdateSuccess}
 />
+<AppleModal
+    isOpen={isEditPaymentMethodModalOpen}
+    onClose={() => setIsEditPaymentMethodModalOpen(false)}
+    title="Cambiar método de pago"
+>
+    <div className="flex flex-col space-y-4">
+        {pedidosPagados.find(p => p.id === editingOrderId) && (
+            <Payment
+                cart={pedidosPagados.find(p => p.id === editingOrderId)?.detallePedido || []}
+                values={{
+                    ...pedidosPagados.find(p => p.id === editingOrderId),
+                    paymentMethod: 'mercadopago',
+                    phone: pedidosPagados.find(p => p.id === editingOrderId)?.telefono,
+                    address: pedidosPagados.find(p => p.id === editingOrderId)?.direccion,
+                    deliveryMethod: pedidosPagados.find(p => p.id === editingOrderId)?.direccion ? 'delivery' : 'takeaway',
+                    references: pedidosPagados.find(p => p.id === editingOrderId)?.referencias,
+                }}
+                discountedTotal={pedidosPagados.find(p => p.id === editingOrderId)?.total || 0}
+                envio={pedidosPagados.find(p => p.id === editingOrderId)?.envio || 0}
+                mapUrl={pedidosPagados.find(p => p.id === editingOrderId)?.ubicacion || ""}
+                couponCodes={pedidosPagados.find(p => p.id === editingOrderId)?.couponCodes || []}
+                calculateFinalTotal={() => pedidosPagados.find(p => p.id === editingOrderId)?.total || 0}
+                isEnabled={false}
+            />
+        )}
+    </div>
+</AppleModal>
         </div>
     </div>
 );
