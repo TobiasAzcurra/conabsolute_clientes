@@ -663,6 +663,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                     ? `Retirar entre ${sumarMinutos(currentOrder.hora, 15)} hs y ${sumarMinutos(currentOrder.hora, 25)} hs`
                     : `Llega entre ${sumarMinutos(currentOrder.hora, 30)} hs a ${sumarMinutos(currentOrder.hora, 50)} hs`}
         </p>
+    </div>
         {!currentOrder.elaborado && (
             <button
                 onClick={() => handleEditTime(currentOrder.id)}
@@ -678,7 +679,6 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                 </svg>
             </button>
         )}
-    </div>
 </div>
                                                                         
                                                                         {currentOrder.direccion !== "" && (
@@ -754,19 +754,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
         <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
       </svg>
     </button>
-    <button
-      onClick={() => handleEditTime(currentOrder.id)}
-      className="rounded-full hover:bg-gray-100"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="h-5 w-5"
-      >
-        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
-      </svg>
-    </button>
+    
   </div>
 )}
 </div>
