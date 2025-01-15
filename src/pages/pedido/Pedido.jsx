@@ -16,6 +16,7 @@ import {
     updateRatingForOrder,
 } from "../../firebase/uploadOrder";
 import EditAddressModal from './EditAddressModal';
+import { doc, runTransaction, collection, getFirestore } from 'firebase/firestore';
 
 const Pedido = () => {
     console.log("🔄 Inicializando componente Pedido");
@@ -32,6 +33,7 @@ const Pedido = () => {
 const [editingOrderId, setEditingOrderId] = useState(null);
     const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
     const [showFullAddress, setShowFullAddress] = useState(false);
+    const [isEditTimeModalOpen, setIsEditTimeModalOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
     const [message, setMessage] = useState(null);
     const [error, setError] = useState(null);
@@ -40,6 +42,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+    const [isUpdatingTime, setIsUpdatingTime] = useState(false);
     const [isRatingLoading, setIsRatingLoading] = useState(false);
     const [orderRatings, setOrderRatings] = useState({});
     const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
@@ -198,6 +201,62 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             setAdditionalProducts([]);
         }
     };
+
+    const handleUpdateTime = async () => {
+        if (!editingOrderId) return;
+      
+        console.log("🕒 Actualizando hora para pedido:", editingOrderId);
+        setIsUpdatingTime(true);
+        setMessage(null);
+        setError(null);
+      
+        try {
+          const currentOrder = pedidosPagados.find((pedido) => pedido.id === editingOrderId);
+          if (!currentOrder) {
+            throw new Error("Pedido no encontrado.");
+          }
+      
+          const firestore = getFirestore();
+          const fechaActual = obtenerFechaActual();
+          const [dia, mes, anio] = fechaActual.split("/");
+          const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+          const pedidoDocRef = doc(pedidosCollectionRef, dia);
+      
+          await runTransaction(firestore, async (transaction) => {
+            const docSnapshot = await transaction.get(pedidoDocRef);
+            if (!docSnapshot.exists()) {
+              throw new Error("El pedido no existe para la fecha especificada.");
+            }
+      
+            const existingData = docSnapshot.data();
+            const pedidosDelDia = existingData.pedidos || [];
+            const pedidoIndex = pedidosDelDia.findIndex(
+              (pedido) => pedido.id === editingOrderId
+            );
+      
+            if (pedidoIndex === -1) {
+              throw new Error("Pedido no encontrado");
+            }
+      
+            // Actualizamos la hora
+            pedidosDelDia[pedidoIndex].hora = currentOrder.hora;
+      
+            transaction.set(pedidoDocRef, {
+              ...existingData,
+              pedidos: pedidosDelDia,
+            });
+          });
+      
+          setMessage("¡Hora actualizada exitosamente!");
+          setIsEditTimeModalOpen(false);
+        } catch (err) {
+          console.error("❌ Error al actualizar la hora:", err);
+          setError("Hubo un problema al actualizar la hora. Inténtalo de nuevo.");
+        } finally {
+          setIsUpdatingTime(false);
+          setEditingOrderId(null);
+        }
+      };
 
     const eliminarPedido = async () => {
         if (!selectedOrderId) return;
@@ -361,6 +420,16 @@ const [editingOrderId, setEditingOrderId] = useState(null);
         window.addEventListener("resize", updateSize);
         return () => window.removeEventListener("resize", updateSize);
     }, []);
+
+    const handleEditTime = (orderId) => {
+        setEditingOrderId(orderId);
+        setIsEditTimeModalOpen(true);
+      };
+      
+      const handleTimeUpdateSuccess = (newTime) => {
+        setMessage("¡Hora actualizada exitosamente!");
+        setTimeout(() => setMessage(null), 3000);
+      };
 
     return (
         <div
@@ -559,27 +628,46 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                                                                     : "Tu cadete está llegando a Anhelo..."}</p>
                                                                     </div>
                                                                     <div className="flex flex-col text-left gap-2">
-                                                                        <div className="flex flex-row gap-2">
-                                                                            <svg
-                                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                                viewBox="0 0 24 24"
-                                                                                fill="currentColor"
-                                                                                className="h-6"
-                                                                            >
-                                                                                <path
-                                                                                    fillRule="evenodd"
-                                                                                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-                                                                                    clipRule="evenodd"
-                                                                                />
-                                                                            </svg>
-                                                                            <p className="text-black font-coolvetica font-medium">
-                                                                                {currentOrder.pendingOfBeingAccepted 
-                                                                                    ? "Entre 3 a 5 minutos para confirmar"
-                                                                                    : currentOrder.direccion === ""
-                                                                                        ? `Retirar entre ${sumarMinutos(currentOrder.hora, 15)} hs y ${sumarMinutos(currentOrder.hora, 25)} hs`
-                                                                                        : `Llega entre ${sumarMinutos(currentOrder.hora, 30)} hs a ${sumarMinutos(currentOrder.hora, 50)} hs`}
-                                                                            </p>
-                                                                        </div>{currentOrder.direccion !== "" && (
+                                                                    <div className="flex flex-row gap-2">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-6"
+    >
+        <path
+            fillRule="evenodd"
+            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
+            clipRule="evenodd"
+        />
+    </svg>
+    <div className="flex flex-row items-center gap-2 flex-1">
+        <p className="text-black font-coolvetica font-medium">
+            {currentOrder.pendingOfBeingAccepted 
+                ? "Entre 3 a 5 minutos para confirmar"
+                : currentOrder.direccion === ""
+                    ? `Retirar entre ${sumarMinutos(currentOrder.hora, 15)} hs y ${sumarMinutos(currentOrder.hora, 25)} hs`
+                    : `Llega entre ${sumarMinutos(currentOrder.hora, 30)} hs a ${sumarMinutos(currentOrder.hora, 50)} hs`}
+        </p>
+        {!currentOrder.elaborado && (
+            <button
+                onClick={() => handleEditTime(currentOrder.id)}
+                className="rounded-full hover:bg-gray-100"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-5 w-5"
+                >
+                    <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+                </svg>
+            </button>
+        )}
+    </div>
+</div>
+                                                                        
+                                                                        {currentOrder.direccion !== "" && (
                                                 <div className="flex flex-row gap-2">
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
@@ -638,20 +726,35 @@ const [editingOrderId, setEditingOrderId] = useState(null);
         )}
     </p>
     { !currentOrder.elaborado && (
-        <button
-            onClick={() => handleEditAddress(currentOrder.id)}
-            className="ml-2  rounded-full hover:bg-gray-100"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-5 w-5"
-            >
-                <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
-            </svg>
-        </button>
-    )}
+  <div className="flex gap-2">
+    <button
+      onClick={() => handleEditAddress(currentOrder.id)}
+      className="rounded-full hover:bg-gray-100"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-5 w-5"
+      >
+        <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
+      </svg>
+    </button>
+    <button
+      onClick={() => handleEditTime(currentOrder.id)}
+      className="rounded-full hover:bg-gray-100"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        className="h-5 w-5"
+      >
+        <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
+      </svg>
+    </button>
+  </div>
+)}
 </div>
                                         <div className="flex flex-row gap-2">
                                             <svg
@@ -774,6 +877,17 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             >
                 <p>¡Nos gustaría conocer tu opinión sobre el pedido!</p>
             </AppleModal>
+            <AppleModal
+  isOpen={isEditTimeModalOpen}
+  onClose={() => setIsEditTimeModalOpen(false)}
+  title="Cambiar hora de entrega"
+  isEditTimeModal={true}
+  twoOptions={true}
+  orderId={editingOrderId}
+  onConfirm={handleUpdateTime}
+  onTimeSuccess={handleTimeUpdateSuccess}
+  isLoading={isUpdatingTime}
+/>
             <AppleModal
     isOpen={isEditAddressModalOpen}
     onClose={() => setIsEditAddressModalOpen(false)}
