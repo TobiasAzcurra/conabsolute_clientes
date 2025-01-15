@@ -184,7 +184,27 @@ const AppleModal = ({
           throw new Error("Pedido no encontrado");
         }
   
-        pedidosDelDia[pedidoIndex].hora = newTime;
+        // Ajustamos la hora según el método de entrega
+        const pedido = pedidosDelDia[pedidoIndex];
+        const isDelivery = pedido.direccion !== "";
+        
+        // Convertimos la hora seleccionada a minutos desde medianoche
+        const [hours, minutes] = newTime.split(':').map(Number);
+        let totalMinutes = hours * 60 + minutes;
+        
+        // Restamos el tiempo de preparación/envío según corresponda
+        if (isDelivery) {
+          totalMinutes -= 30; // Para delivery
+        } else {
+          totalMinutes -= 15; // Para takeaway
+        }
+        
+        // Convertimos nuevamente a formato HH:mm
+        const adjustedHours = Math.floor(totalMinutes / 60);
+        const adjustedMinutes = totalMinutes % 60;
+        const adjustedTime = `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
+  
+        pedidosDelDia[pedidoIndex].hora = adjustedTime;
   
         transaction.set(pedidoDocRef, {
           ...existingData,
@@ -195,8 +215,8 @@ const AppleModal = ({
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('Error al actualizar la hora:', error);
-      setTimeError('Hubo un error al actualizar la hora. Por favor intenta nuevamente.');
+      console.error('❌ Error al actualizar la hora:', error);
+      setTimeError('Hubo un problema al actualizar la hora. Por favor intenta nuevamente.');
     } finally {
       setIsUpdatingTime(false);
     }

@@ -203,19 +203,15 @@ const [editingOrderId, setEditingOrderId] = useState(null);
     };
 
     const handleUpdateTime = async () => {
-        if (!editingOrderId) return;
+        if (!newTime) {
+          setTimeError('Por favor selecciona una hora válida');
+          return;
+        }
       
-        console.log("🕒 Actualizando hora para pedido:", editingOrderId);
         setIsUpdatingTime(true);
-        setMessage(null);
-        setError(null);
+        setTimeError('');
       
         try {
-          const currentOrder = pedidosPagados.find((pedido) => pedido.id === editingOrderId);
-          if (!currentOrder) {
-            throw new Error("Pedido no encontrado.");
-          }
-      
           const firestore = getFirestore();
           const fechaActual = obtenerFechaActual();
           const [dia, mes, anio] = fechaActual.split("/");
@@ -231,15 +227,34 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             const existingData = docSnapshot.data();
             const pedidosDelDia = existingData.pedidos || [];
             const pedidoIndex = pedidosDelDia.findIndex(
-              (pedido) => pedido.id === editingOrderId
+              (pedido) => pedido.id === orderId
             );
       
             if (pedidoIndex === -1) {
               throw new Error("Pedido no encontrado");
             }
       
-            // Actualizamos la hora
-            pedidosDelDia[pedidoIndex].hora = currentOrder.hora;
+            // Ajustamos la hora según el método de entrega
+            const pedido = pedidosDelDia[pedidoIndex];
+            const isDelivery = pedido.direccion !== "";
+            
+            // Convertimos la hora seleccionada a minutos desde medianoche
+            const [hours, minutes] = newTime.split(':').map(Number);
+            let totalMinutes = hours * 60 + minutes;
+            
+            // Restamos el tiempo de preparación/envío según corresponda
+            if (isDelivery) {
+              totalMinutes -= 30; // Para delivery
+            } else {
+              totalMinutes -= 15; // Para takeaway
+            }
+            
+            // Convertimos nuevamente a formato HH:mm
+            const adjustedHours = Math.floor(totalMinutes / 60);
+            const adjustedMinutes = totalMinutes % 60;
+            const adjustedTime = `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
+      
+            pedidosDelDia[pedidoIndex].hora = adjustedTime;
       
             transaction.set(pedidoDocRef, {
               ...existingData,
@@ -247,14 +262,13 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             });
           });
       
-          setMessage("¡Hora actualizada exitosamente!");
-          setIsEditTimeModalOpen(false);
-        } catch (err) {
-          console.error("❌ Error al actualizar la hora:", err);
-          setError("Hubo un problema al actualizar la hora. Inténtalo de nuevo.");
+          onTimeSuccess?.(newTime);
+          onClose();
+        } catch (error) {
+          console.error('❌ Error al actualizar la hora:', error);
+          setTimeError('Hubo un problema al actualizar la hora. Por favor intenta nuevamente.');
         } finally {
           setIsUpdatingTime(false);
-          setEditingOrderId(null);
         }
       };
 
