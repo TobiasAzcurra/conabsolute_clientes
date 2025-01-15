@@ -249,7 +249,7 @@ const AppleModal = ({
                     <select
                         value={newTime}
                         onChange={(e) => setNewTime(e.target.value)}
-                        className="bg-transparent outline-none w-full text-xl custom-select"
+                        className="bg-transparent outline-none w-full  custom-select"
                       >
                         <option value="" disabled>Selecciona un horario</option>
                         {(() => {
