@@ -623,57 +623,78 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                                                         })()}</>
                                                     ) : (
                                                         <>
-                                                            <div
-                                                                className={`w-1/4 h-2.5 rounded-full ${
-                                                                    !currentOrder.elaborado
-                                                                        ? "animated-loading"
-                                                                        : "bg-black"
-                                                                }`}
-                                                            ></div>
-                                                            <div
-                                                                className={`w-1/4 h-2.5 rounded-full ${
-                                                                    currentOrder.elaborado &&
-                                                                    currentOrder.cadete === "NO ASIGNADO"
-                                                                        ? "animated-loading"
-                                                                        : currentOrder.elaborado
-                                                                        ? "bg-black"
-                                                                        : "bg-gray-100 border-opacity-20 border-black border-1 border"
-                                                                }`}
-                                                            ></div>
-                                                            <div
-                                                                className={`w-1/2 h-2.5 rounded-full ${
-                                                                    currentOrder.elaborado &&
-                                                                    currentOrder.cadete !== "NO ASIGNADO"
-                                                                        ? "animated-loading"
-                                                                        : "bg-gray-100 border-opacity-20 border-black border-1 border"
-                                                                }`}
-                                                            ></div>
-                                                        </>
+                                                        <div
+                                                            className={`w-1/4 h-2.5 rounded-full ${
+                                                                !currentOrder.elaborado
+                                                                    ? "animated-loading"
+                                                                    : "bg-black"
+                                                            }`}
+                                                        ></div>
+                                                        <div
+                                                            className={`w-1/4 h-2.5 rounded-full ${
+                                                                currentOrder.elaborado && (() => {
+                                                                    const horaPedidoConTiempoElaborado = sumarMinutos(
+                                                                        currentOrder.hora,
+                                                                        parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                                                                    );
+                                                                    const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
+                                                                    const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
+                                                                    const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
+                                                                    const diffMinutes = (new Date() - fechaElaboracion) / 60000;
+                                                                    
+                                                                    return diffMinutes <= 15;
+                                                                })()
+                                                                    ? "animated-loading"
+                                                                    : currentOrder.elaborado
+                                                                    ? "bg-black"
+                                                                    : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                                                            }`}
+                                                        ></div>
+                                                        <div
+                                                            className={`w-1/2 h-2.5 rounded-full ${
+                                                                currentOrder.elaborado && (() => {
+                                                                    const horaPedidoConTiempoElaborado = sumarMinutos(
+                                                                        currentOrder.hora,
+                                                                        parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                                                                    );
+                                                                    const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
+                                                                    const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
+                                                                    const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
+                                                                    const diffMinutes = (new Date() - fechaElaboracion) / 60000;
+                                                                    
+                                                                    return diffMinutes > 15;
+                                                                })()
+                                                                    ? "animated-loading"
+                                                                    : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                                                            }`}
+                                                        ></div>
+                                                    </>
                                                     )}
                                                 </div>
                                                 <p className="text-black font-coolvetica font-bold text-left mt-2">
-        {currentOrder.pendingOfBeingAccepted 
-            ? "Tu pedido está pendiente de aprobación..."
-            : currentOrder.direccion === ""
-                ? (new Date() - new Date(currentOrder.hora)) / 60000 <= 20
-                    ? "Anhelo está preparando tu pedido..."
-                    : "Esperando que retires tu pedido..."
-                : !currentOrder.elaborado
-                    ? "Anhelo está preparando tu pedido..."
-                    : (() => {
-                        const horaPedidoConTiempoElaborado = sumarMinutos(
-                            currentOrder.hora,
-                            parseInt(currentOrder.tiempoElaborado.split(":")[1])
-                        );
-                        const diffMinutes =
-                            (new Date() - new Date(`${currentOrder.fecha} ${horaPedidoConTiempoElaborado}`)) /
-                            60000;
-                    
-                        return diffMinutes <= 15 
-                            ? "Tu cadete está llegando a Anhelo..." 
-                            : "En camino... Atención, te va a llamar tu cadete.";
-                    })()
-            }
+                                                {currentOrder.pendingOfBeingAccepted 
+    ? "Tu pedido está pendiente de aprobación..."
+    : currentOrder.direccion === ""
+        ? (new Date() - new Date(currentOrder.hora)) / 60000 <= 20
+            ? "Anhelo está preparando tu pedido..."
+            : "Esperando que retires tu pedido..."
+        : !currentOrder.elaborado
+            ? "Anhelo está preparando tu pedido..."
+            : (() => {
+                const horaPedidoConTiempoElaborado = sumarMinutos(
+                    currentOrder.hora,
+                    parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                );
+                const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
+                const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
+                const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
+                const diffMinutes = (new Date() - fechaElaboracion) / 60000;
+                
+                return diffMinutes <= 15 
+                    ? "Tu cadete está llegando a Anhelo..." 
+                    : "En camino... Atención, te va a llamar tu cadete.";
+            })()
+}
     </p>
                                                                     </div>
                                                                     <div className="flex flex-col text-left gap-2">
