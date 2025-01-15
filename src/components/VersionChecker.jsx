@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
+import AppleModal from './AppleModal'; 
 
 const VersionChecker = ({ children }) => {
   const [needsUpdate, setNeedsUpdate] = useState(false);
@@ -90,17 +91,18 @@ const VersionChecker = ({ children }) => {
 
   if (needsUpdate) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg p-4 max-w-md w-full">
-          <h3 className="text-lg font-semibold mb-2">
-            Nueva versión disponible
-          </h3>
-          <p className="mt-2 text-gray-700">
-            Se han actualizado los precios u otros datos importantes.
-            La página se actualizará automáticamente en unos segundos.
+      <AppleModal
+        isOpen={true}
+        onClose={() => {}} // No permitimos cerrar manualmente
+        title="Nueva versión disponible"
+      >
+        <div className="p-2">
+          <p className="text-black text-lg">
+            Se han actualizado partes importantes de la app. <br />
+            Se actualizará automáticamente en unos segundos para que uses la ultima version.
           </p>
         </div>
-      </div>
+      </AppleModal>
     );
   }
 
