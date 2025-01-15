@@ -246,36 +246,41 @@ const AppleModal = ({
                     >
                       <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
                     </svg>
-                    <input
-                      type="time"
-                      value={newTime}
-                      onChange={(e) => setNewTime(e.target.value)}
-                      className="bg-transparent outline-none w-full text-xl"
-                      min={(() => {
-                        const now = new Date();
-                        const minutes = now.getMinutes();
-                        const roundedMinutes = Math.ceil(minutes / 15) * 15;
-                        now.setMinutes(roundedMinutes);
-                        now.setMinutes(now.getMinutes() + 15);
-                        return now.getHours().toString().padStart(2, '0') + ':' + 
-                               now.getMinutes().toString().padStart(2, '0');
-                      })()}
-                      max="23:59"
-                    />
+                    <select
+                        value={newTime}
+                        onChange={(e) => setNewTime(e.target.value)}
+                        className="bg-transparent outline-none w-full text-xl custom-select"
+                      >
+                        <option value="" disabled>Selecciona un horario</option>
+                        {(() => {
+                          const now = new Date();
+                          const currentHour = now.getHours();
+                          const currentMinute = now.getMinutes();
+
+                          const allTimeSlots = [
+                            '20:30', '21:00', '21:30', '22:00',
+                            '22:30', '23:00', '23:30', '00:00'
+                          ];
+
+                          const nextSlotMinutes = Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
+                          const nextSlotHour = Math.floor(nextSlotMinutes / 60);
+                          const nextSlotMinute = nextSlotMinutes % 60;
+
+                          return allTimeSlots.filter((timeSlot) => {
+                            let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+                            if (slotHour === 0) slotHour = 24;
+                            const slotTimeInMinutes = slotHour * 60 + slotMinute;
+                            const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
+                            return slotTimeInMinutes >= nextValidTimeInMinutes;
+                          }).map((timeSlot) => (
+                            <option key={timeSlot} value={timeSlot}>
+                              {timeSlot}
+                            </option>
+                          ));
+                        })()}
+                      </select>
                   </div>
-                  <div className="flex flex-row items-center gap-2 border-t border-black border-opacity-20 pt-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="h-6"
-                    >
-                      <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-sm text-black opacity-60">
-                      Solo puedes elegir horarios con 15 minutos de diferencia desde ahora
-                    </p>
-                  </div>
+                 
                 </div>
               </div>
               {timeError && (

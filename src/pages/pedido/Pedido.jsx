@@ -894,7 +894,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
             <AppleModal
   isOpen={isEditTimeModalOpen}
   onClose={() => setIsEditTimeModalOpen(false)}
-  title="Cambiar hora de entrega"
+  title="Cambiar hora"
   isEditTimeModal={true}
   twoOptions={true}
   orderId={editingOrderId}
