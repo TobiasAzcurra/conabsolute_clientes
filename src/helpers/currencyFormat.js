@@ -70,10 +70,7 @@ export const calcularCostoHamburguesa = (materiales, ingredientes) => {
 };
 
 export const calculateDiscountedTotal = (cart, numCupones) => {
-  // 1. Calcular la cantidad de hamburguesas a las que se aplicará el descuento
-  const discountedBurgersCount = numCupones * 2;
-
-  // 2. Crear un array con todas las hamburguesas, repitiendo según su cantidad
+  // 1. Crear array de todas las hamburguesas individuales con sus precios
   let allBurgers = [];
   cart.forEach((item) => {
     for (let i = 0; i < item.quantity; i++) {
@@ -81,43 +78,56 @@ export const calculateDiscountedTotal = (cart, numCupones) => {
         price: item.price,
         toppingsPrice: item.toppings.reduce(
           (sum, topping) => sum + topping.price,
-          0,
+          0
         ),
       });
     }
   });
 
-  // Calcular el total original antes del descuento
+  // 2. Ordenar todas las hamburguesas de mayor a menor precio
+  allBurgers.sort(
+    (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice)
+  );
+
+  // 3. Calcular el total original antes de descuentos
   const originalTotal = allBurgers.reduce(
     (sum, burger) => sum + burger.price + burger.toppingsPrice,
-    0,
+    0
   );
 
-  // 3. Ordenar las hamburguesas de mayor a menor precio total
-  allBurgers.sort(
-    (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice),
-  );
+  // 4. Aplicar descuentos por pares
+  let newTotal = 0;
+  let processedBurgers = 0;
+  let appliedCoupons = 0;
 
-  // 4. Seleccionar las hamburguesas mas caras según la cantidad de cupones
-  const discountedBurgers = allBurgers.slice(0, discountedBurgersCount);
+  while (processedBurgers < allBurgers.length && appliedCoupons < numCupones) {
+    // Verificar si quedan al menos 2 hamburguesas para aplicar el 2x1
+    if (processedBurgers + 1 < allBurgers.length) {
+      // Tomar el par de hamburguesas actual
+      const burger1 = allBurgers[processedBurgers];
+      const burger2 = allBurgers[processedBurgers + 1];
+      
+      // Calcular el precio del par y dividirlo por 2 (verdadero 2x1)
+      const pairTotal = (burger1.price + burger1.toppingsPrice + 
+                        burger2.price + burger2.toppingsPrice) / 2;
+      newTotal += pairTotal;
+      
+      processedBurgers += 2; // Avanzar al siguiente par
+      appliedCoupons++; // Incrementar cupones usados
+    } else {
+      // Si queda una hamburguesa suelta, se paga completa
+      const burger = allBurgers[processedBurgers];
+      newTotal += burger.price + burger.toppingsPrice;
+      processedBurgers++;
+    }
+  }
 
-  // 5. Calcular el total de las hamburguesas con descuento
-  const discountedTotal =
-    discountedBurgers.reduce(
-      (sum, burger) => sum + burger.price + burger.toppingsPrice,
-      0,
-    ) / 2;
+  // 5. Agregar el costo de las hamburguesas restantes sin descuento
+  for (let i = processedBurgers; i < allBurgers.length; i++) {
+    newTotal += allBurgers[i].price + allBurgers[i].toppingsPrice;
+  }
 
-  // 6. Calcular el total del resto del carrito
-  const remainingBurgers = allBurgers.slice(discountedBurgersCount);
-  const remainingTotal = remainingBurgers.reduce(
-    (sum, burger) => sum + burger.price + burger.toppingsPrice,
-    0,
-  );
-
-  // 7. Sumar ambos totales
-  const newTotal = discountedTotal + remainingTotal;
-  const totalDescuento = originalTotal - newTotal; // Descuento real aplicado
+  const totalDescuento = originalTotal - newTotal;
 
   return {
     newTotal,
