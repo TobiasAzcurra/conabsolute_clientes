@@ -11,16 +11,17 @@ const config = {
     port: 21,
     localRoot: "./dist",
     remoteRoot: "/public_html",
-    include: ["*", "**/*"],
-    exclude: [
-        "/public_html/dashboard/**",
-        "/public_html/fonts/**",
-        "/public_html/.htaccess",
-        "/public_html/default.php"
+    include: [
+        "assets/**/*",           // Solo los archivos de nuestra app
+        "index.html",
+        "version.json",
+        // Agrega aquí cualquier otro archivo/directorio que necesites subir
     ],
-    deleteRemote: true,
+    exclude: [],                 // Ya no necesitamos exclude
+    deleteRemote: false,         // Desactivamos el borrado automático
     forcePasv: true
 };
+
 console.log('📦 Iniciando deploy a Hostinger...');
 
 ftpDeploy.deploy(config)
