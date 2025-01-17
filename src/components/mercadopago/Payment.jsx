@@ -1,4 +1,3 @@
-// En Payment.jsx
 import React, { useState } from 'react';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import classNames from 'classnames';
@@ -10,6 +9,7 @@ import {
   isWithinClosedDays,
   isWithinOrderTimeRange,
 } from '../../helpers/validate-hours';
+import AppleModal from '../AppleModal';
 
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY, {
   locale: 'es-AR',
@@ -32,32 +32,31 @@ const Payment = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
+  const [isTimeRestrictedModalOpen, setIsTimeRestrictedModalOpen] = useState(false);
+
+  const closeTimeRestrictedModal = () => {
+    setIsTimeRestrictedModalOpen(false);
+  };
 
   const processVouchersAndCreatePreference = async () => {
     if (!altaDemanda?.open) {
       return;
     }
 
-    // Si el formulario no es válido, ejecutar submitForm para mostrar los errores
-    // en las ubicaciones originales del FormCustom
     if (!isValid) {
       submitForm();
       return;
     }
 
-    // if (isWithinClosedDays()) {
-    //   return;
-    // }
-
-    // if (!isWithinOrderTimeRange()) {
-    //   return;
-    // }
+    if (!isWithinOrderTimeRange()) {
+      setIsTimeRestrictedModalOpen(true);
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Primero procesamos los vouchers válidos
       const validCoupons = couponCodes.filter((code) => code.trim() !== '');
       if (validCoupons.length > 0) {
         const canjeSuccess = await canjearVouchers(validCoupons);
@@ -118,22 +117,6 @@ const Payment = ({
     setIsReady(true);
   };
 
-  if (isLoading) {
-    return (
-      <div className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 w-full">
-        <LoadingPoints color="text-gray-100" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-500 text-gray-100 rounded-3xl h-[80px] font-bold w-full">
-        {error}
-      </div>
-    );
-  }
-
   return (
     <div>
       {!preferenceId ? (
@@ -191,6 +174,15 @@ const Payment = ({
           />
         </div>
       )}
+
+      {/* Modal de horario restringido */}
+      <AppleModal
+        isOpen={isTimeRestrictedModalOpen}
+        onClose={closeTimeRestrictedModal}
+        title="Está cerrado"
+      >
+        <p>Abrimos de lunes a domingo de 20:00 hs a 00:00 hs.</p>
+      </AppleModal>
     </div>
   );
 };
