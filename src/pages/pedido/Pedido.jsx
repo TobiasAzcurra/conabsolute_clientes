@@ -23,13 +23,14 @@ const Pedido = () => {
     console.log("🔄 Inicializando componente Pedido");
     const [order, setOrder] = useState(null);
     const [pedidos, setPedidos] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [hasBeenRated, setHasBeenRated] = useState(false);
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
     const navigate = useNavigate();
     const { orderId } = useParams();
     const location = useLocation();
     const [pedidosPagados, setPedidosPagados] = useState([]);
+    const [isInitialized, setIsInitialized] = useState(false);
     const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
 const [editingOrderId, setEditingOrderId] = useState(null);
     const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
@@ -407,20 +408,21 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                     const pedidosSinPago = pedidosActualizados.filter(
                         (pedido) => pedido.paid === false
                     );
-
+        
                     const pedidoParaCalificar = pedidosConPago.find(
                         (pedido) => pedido.entregado && !pedido.rating && !hasBeenRated
                     );
-
+        
                     if (pedidoParaCalificar) {
                         setSelectedOrderProducts(pedidoParaCalificar.detallePedido || []);
                         setSelectedOrderId(pedidoParaCalificar.id);
                         setIsRatingModalOpen(true);
                     }
-
+        
                     setPedidosPagados(pedidosConPago);
                     setPedidosNoPagados(pedidosSinPago);
                     setLoading(false);
+                    setIsInitialized(true); // Agregamos esta línea
                 }
             );
         }
@@ -509,15 +511,15 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                 </div>
                 
                 {loading && (
-                    <div className="flex items-center justify-center">
-                        <div
-                            className="mt-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-black border-e-transparent align-[-0.125em] motion-reduce:animate-spin"
-                            role="status"
-                        >
-                            <span className="sr-only">Cargando...</span>
-                        </div>
-                    </div>
-                )}
+    <div className="flex flex-col items-center justify-center mt-8 px-4">
+       
+        <p className="text-black text-center font-coolvetica text-lg">
+            Estamos buscando tus pedidos,
+            Esto puede tomar unos segundos...
+        </p>
+        
+    </div>
+)}
     
                 {error && <div className="mt-4 text-red-600 font-medium">{error}</div>}
                 {message && (
@@ -910,7 +912,7 @@ const [editingOrderId, setEditingOrderId] = useState(null);
                 </div>
             )}
 
-            {!loading && pedidosPagados.length === 0 && (
+{!loading && isInitialized && pedidosPagados.length === 0 && (
                 <div className="flex flex-col items-center justify-center mt-4">
                     <p className="text-gray-700">No se encontraron pedidos para hoy.</p>
                 </div>

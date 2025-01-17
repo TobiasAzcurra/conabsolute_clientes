@@ -537,13 +537,13 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
-          if (!isWithinOrderTimeRange()) {
-            console.log(
-              'La hora actual está fuera del rango permitido para pedidos'
-            );
-            openTimeRestrictedModal();
-            return;
-          }
+          // if (!isWithinOrderTimeRange()) {
+          //   console.log(
+          //     'La hora actual está fuera del rango permitido para pedidos'
+          //   );
+          //   openTimeRestrictedModal();
+          //   return;
+          // }
 
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
