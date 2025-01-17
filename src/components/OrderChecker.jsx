@@ -19,20 +19,24 @@ const OrderChecker = () => {
       // 1. Hay un número de teléfono guardado
       // 2. No estamos ya en la página de pedido
       // 3. No estamos en la ruta raíz
+      // 4. No estamos en la página de éxito
       if (phoneNumber && 
-        !location.pathname.includes('/pedido') && 
-        location.pathname !== '/' &&
-        !location.pathname.startsWith('/success/')) {
+          !location.pathname.includes('/pedido') && 
+          location.pathname !== '/' &&
+          !location.pathname.startsWith('/success/')) {
       
-      unsubscribe = ListenOrdersForTodayByPhoneNumber(phoneNumber, (pedidos) => {
-        const pedidosActivos = pedidos.filter(pedido => 
-          !pedido.entregado && !pedido.canceled);
-          
-        if (pedidosActivos.length > 0 && !hasActiveOrder) {
-          setHasActiveOrder(true);
-          setIsModalOpen(true);
-        }
-      });
+        unsubscribe = ListenOrdersForTodayByPhoneNumber(phoneNumber, (pedidos) => {
+          const pedidosActivos = pedidos.filter(pedido => 
+            !pedido.entregado && 
+            !pedido.canceled && 
+            pedido.paid === true  // Agregamos la condición de paid
+          );
+            
+          if (pedidosActivos.length > 0 && !hasActiveOrder) {
+            setHasActiveOrder(true);
+            setIsModalOpen(true);
+          }
+        });
       }
     };
 
@@ -60,7 +64,7 @@ const OrderChecker = () => {
       twoOptions={true}
       onConfirm={handleViewOrder}
     >
-      <p className='text-center '>¿Querés ver su estado?</p>
+      <p className="text-center">¿Querés ver su estado?</p>
     </AppleModal>
   );
 };

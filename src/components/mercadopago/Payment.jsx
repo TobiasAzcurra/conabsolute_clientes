@@ -1,3 +1,4 @@
+// En Payment.jsx
 import React, { useState } from 'react';
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 import classNames from 'classnames';
@@ -34,22 +35,25 @@ const Payment = ({
 
   const processVouchersAndCreatePreference = async () => {
     if (!altaDemanda?.open) {
-      return; // No proceder si es lunes, martes o miércoles
+      return;
     }
+
+    // Si el formulario no es válido, ejecutar submitForm para mostrar los errores
+    // en las ubicaciones originales del FormCustom
     if (!isValid) {
-      // Si el formulario no es válido, no ejecutar el proceso de pago
+      submitForm();
       return;
-    }
-    if (isWithinClosedDays()) {
-      return; // No proceder si es lunes, martes o miércoles
     }
 
-    if (!isWithinOrderTimeRange()) {
-      return;
-    }
+    // if (isWithinClosedDays()) {
+    //   return;
+    // }
+
+    // if (!isWithinOrderTimeRange()) {
+    //   return;
+    // }
+
     setIsLoading(true);
-    submitForm();
-
     setError(null);
 
     try {
@@ -62,7 +66,6 @@ const Payment = ({
         }
       }
 
-      // Calculamos los totales correctamente
       const finalTotal = calculateFinalTotal();
       const productsTotal = cart.reduce(
         (acc, item) => acc + item.price * item.quantity,
@@ -79,17 +82,16 @@ const Payment = ({
       }, 0);
 
       const baseTotal = productsTotal + toppingsTotal;
-      const deliveryFee = values.deliveryMethod === 'delivery' ? 0 : 0;
+      const deliveryFee = values.deliveryMethod === 'delivery' ? envio : 0;
       const expressDeliveryFee = isEnabled ? 2000 : 0;
 
-      // Crear los valores actualizados incluyendo todos los totales correctamente
       const updatedValues = {
         ...values,
         hora: values.hora || '',
         envioExpress: expressDeliveryFee,
         mercadopagoCantidad: finalTotal,
-        subTotal: baseTotal, // El total final después de descuentos
-        total: finalTotal, // El total original sin descuentos
+        subTotal: baseTotal,
+        total: finalTotal,
         envio: deliveryFee,
       };
 
@@ -97,7 +99,7 @@ const Payment = ({
       const result = await createPreference({
         updatedValues,
         cart,
-        discountedTotal: finalTotal, // Enviamos el total final correcto
+        discountedTotal: finalTotal,
         envio: deliveryFee,
         mapUrl,
         couponCodes,
@@ -107,7 +109,6 @@ const Payment = ({
     } catch (error) {
       console.error('Error al procesar el pago:', error);
       setError(error.message || 'Error al procesar el pago');
-      // Podríamos implementar aquí lógica para revertir el canje de vouchers si falla la creación de preferencia
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +143,7 @@ const Payment = ({
           type="button"
           className="text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-[80px] font-bold hover:bg-red-600 transition-colors duration-300 w-full"
         >
-          {isLoading ? 'Cargando...' : 'Pedir'}
+          {isLoading ? <LoadingPoints color="text-gray-100" /> : 'Pedir'}
         </button>
       ) : (
         <div

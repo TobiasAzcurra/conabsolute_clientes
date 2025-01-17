@@ -1015,34 +1015,37 @@ const FormCustom = ({ cart, total }) => {
 
                 {/* Botón de envío */}
                 {values.paymentMethod === 'mercadopago' ? (
-                  <Payment
-                    cart={cart}
-                    values={values}
-                    discountedTotal={discountedTotal}
-                    envio={envio}
-                    mapUrl={mapUrl}
-                    couponCodes={couponCodes}
-                    calculateFinalTotal={calculateFinalTotal}
-                    isEnabled={isEnabled}
-                    isValid={isValid}
-                    submitForm={submitForm}
-                    altaDemanda={altaDemanda}
-                  />
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
-                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {isSubmitting ? (
-                      <LoadingPoints color="text-gray-100" />
-                    ) : (
-                      'Pedir'
-                    )}
-                  </button>
-                )}
+  <>
+    <Payment
+      cart={cart}
+      values={values}
+      discountedTotal={discountedTotal}
+      envio={envio}
+      mapUrl={mapUrl}
+      couponCodes={couponCodes}
+      calculateFinalTotal={calculateFinalTotal}
+      isEnabled={isEnabled}
+      isValid={isValid}
+      submitForm={submitForm}
+      altaDemanda={altaDemanda}
+      shouldValidate={true}
+    />
+  </>
+) : (
+  <button
+    type="submit"
+    disabled={isSubmitting}
+    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
+      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+    }`}
+  >
+    {isSubmitting ? (
+      <LoadingPoints color="text-gray-100" />
+    ) : (
+      'Pedir'
+    )}
+  </button>
+)}
               </div>
             </Form>
           );
