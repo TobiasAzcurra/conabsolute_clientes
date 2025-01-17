@@ -12,7 +12,13 @@ const config = {
     localRoot: "./dist",
     remoteRoot: "/public_html",
     include: ["*", "**/*"],
-    exclude: [],
+    exclude: [
+        "dashboard/**",            // Protege todo el directorio dashboard
+        "fonts/**",               // Si quieres proteger la carpeta fonts
+        ".htaccess",             // Protege el archivo .htaccess
+        "default.php"            // Protege default.php
+        // "version.json"           // Si necesitas proteger el version.json
+    ],
     deleteRemote: true,
     forcePasv: true
 };
