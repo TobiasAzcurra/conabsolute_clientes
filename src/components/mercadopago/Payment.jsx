@@ -5,6 +5,10 @@ import { functions } from '../../firebase/config';
 import { httpsCallable } from 'firebase/functions';
 import LoadingPoints from '../LoadingPoints';
 import { canjearVouchers } from '../../firebase/validateVoucher';
+import {
+  isWithinClosedDays,
+  isWithinOrderTimeRange,
+} from '../../helpers/validate-hours';
 
 initMercadoPago(import.meta.env.VITE_MERCADOPAGO_PRODUCCION_PUBLIC_KEY, {
   locale: 'es-AR',
@@ -19,6 +23,9 @@ const Payment = ({
   couponCodes,
   calculateFinalTotal,
   isEnabled,
+  submitForm,
+  isValid,
+  altaDemanda,
 }) => {
   const [preferenceId, setPreferenceId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,11 +33,28 @@ const Payment = ({
   const [error, setError] = useState(null);
 
   const processVouchersAndCreatePreference = async () => {
+    if (!altaDemanda?.open) {
+      return; // No proceder si es lunes, martes o miércoles
+    }
+    if (!isValid) {
+      // Si el formulario no es válido, no ejecutar el proceso de pago
+      return;
+    }
+    if (isWithinClosedDays()) {
+      return; // No proceder si es lunes, martes o miércoles
+    }
+
+    if (!isWithinOrderTimeRange()) {
+      return;
+    }
     setIsLoading(true);
+    submitForm();
+
     setError(null);
+
     try {
       // Primero procesamos los vouchers válidos
-      const validCoupons = couponCodes.filter(code => code.trim() !== '');
+      const validCoupons = couponCodes.filter((code) => code.trim() !== '');
       if (validCoupons.length > 0) {
         const canjeSuccess = await canjearVouchers(validCoupons);
         if (!canjeSuccess) {
@@ -40,11 +64,20 @@ const Payment = ({
 
       // Calculamos los totales correctamente
       const finalTotal = calculateFinalTotal();
-      const productsTotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+      const productsTotal = cart.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      );
       const toppingsTotal = cart.reduce((acc, item) => {
-        return acc + item.toppings.reduce((tAcc, topping) => tAcc + (topping.price * item.quantity), 0);
+        return (
+          acc +
+          item.toppings.reduce(
+            (tAcc, topping) => tAcc + topping.price * item.quantity,
+            0
+          )
+        );
       }, 0);
-      
+
       const baseTotal = productsTotal + toppingsTotal;
       const deliveryFee = values.deliveryMethod === 'delivery' ? 0 : 0;
       const expressDeliveryFee = isEnabled ? 2000 : 0;
