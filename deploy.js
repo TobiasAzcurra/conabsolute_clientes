@@ -13,15 +13,14 @@ const config = {
     remoteRoot: "/public_html",
     include: ["*", "**/*"],
     exclude: [
-        "dashboard/**",            // Protege todo el directorio dashboard
-        ".htaccess",             // Protege el archivo .htaccess
-        "default.php"            // Protege default.php
-        // "version.json"           // Si necesitas proteger el version.json
+        "/public_html/dashboard/**",
+        "/public_html/fonts/**",
+        "/public_html/.htaccess",
+        "/public_html/default.php"
     ],
     deleteRemote: true,
     forcePasv: true
 };
-
 console.log('📦 Iniciando deploy a Hostinger...');
 
 ftpDeploy.deploy(config)
