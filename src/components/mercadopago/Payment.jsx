@@ -48,10 +48,10 @@ const Payment = ({
       return;
     }
 
-    if (!isWithinOrderTimeRange()) {
-      setIsTimeRestrictedModalOpen(true);
-      return;
-    }
+    // if (!isWithinOrderTimeRange()) {
+    //   setIsTimeRestrictedModalOpen(true);
+    //   return;
+    // }
 
     setIsLoading(true);
     setError(null);
