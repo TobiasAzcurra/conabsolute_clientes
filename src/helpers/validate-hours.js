@@ -8,13 +8,24 @@ const getCurrentTimeInArgentina = () => {
 
 export const isWithinOrderTimeRange = () => {
   const currentTime = getCurrentTimeInArgentina();
-  const startTime = new Date(currentTime); // 20:00 hs
-  startTime.setHours(20, 0, 0, 0);
+  
+  // Morning range (10:00 - 13:59)
+  const morningStartTime = new Date(currentTime);
+  morningStartTime.setHours(10, 0, 0, 0);
+  const morningEndTime = new Date(currentTime);
+  morningEndTime.setHours(13, 59, 59, 999);
 
-  const endTime = new Date(currentTime); // 23:59 hs
-  endTime.setHours(23, 40, 0, 0);
+  // Evening range (20:00 - 23:59)
+  const eveningStartTime = new Date(currentTime);
+  eveningStartTime.setHours(20, 0, 0, 0);
+  const eveningEndTime = new Date(currentTime);
+  eveningEndTime.setHours(23, 59, 59, 999);
 
-  return currentTime >= startTime && currentTime <= endTime;
+  // Check if current time falls within either range
+  const isInMorningRange = currentTime >= morningStartTime && currentTime <= morningEndTime;
+  const isInEveningRange = currentTime >= eveningStartTime && currentTime <= eveningEndTime;
+
+  return isInMorningRange || isInEveningRange;
 };
 
 export const isWithinClosedDays = () => {
