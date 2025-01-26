@@ -253,9 +253,8 @@ const FormCustom = ({ cart, total }) => {
       ).length;
       if (totalBurgers < numCoupons * 2) {
         const updatedVoucherStatus = [...voucherStatus];
-        updatedVoucherStatus[index] = `Necesitas al menos ${
-          numCoupons * 2
-        } hamburguesas para canjear los vouchers.`;
+        updatedVoucherStatus[index] = `Necesitas al menos ${numCoupons * 2
+          } hamburguesas para canjear los vouchers.`;
         setVoucherStatus(updatedVoucherStatus);
         return;
       }
@@ -285,9 +284,8 @@ const FormCustom = ({ cart, total }) => {
           totalNonPromoBurgers >= numNonPromoCoupons * 2;
 
         if (!hasEnoughNonPromoBurgers) {
-          updatedVoucherStatus[index] = `Necesitas al menos ${
-            numNonPromoCoupons * 2
-          } hamburguesas no promocionales para canjear los vouchers.`;
+          updatedVoucherStatus[index] = `Necesitas al menos ${numNonPromoCoupons * 2
+            } hamburguesas no promocionales para canjear los vouchers.`;
           setVoucherStatus(updatedVoucherStatus);
           return;
         }
@@ -427,9 +425,8 @@ const FormCustom = ({ cart, total }) => {
       <Field
         as="select"
         name="hora"
-        className={`custom-select ${
-          selectedHora === '' ? 'text-gray-400' : 'text-black'
-        }`}
+        className={`custom-select font-light ${selectedHora === '' ? 'text-gray-400' : 'text-black'
+          }`}
         value={selectedHora}
         onChange={(e) => {
           handleChange(e);
@@ -619,7 +616,7 @@ const FormCustom = ({ cart, total }) => {
                       type="text"
                       placeholder="¿Aclaraciones? Ej: La simple vegetariana"
                       autoComplete="off"
-                      className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                      className="bg-transparent font-light  px-0 h-10 text-opacity-20 outline-none w-full"
                     />
                   </div>
                 </div>
@@ -632,11 +629,10 @@ const FormCustom = ({ cart, total }) => {
                   <div className="flex flex-row w-full gap-2 mb-4">
                     <button
                       type="button"
-                      className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${
-                        values.deliveryMethod === 'delivery'
-                          ? 'bg-black text-gray-100'
-                          : 'bg-gray-300 text-black'
-                      }`}
+                      className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${values.deliveryMethod === 'delivery'
+                        ? 'bg-black text-gray-100'
+                        : 'bg-gray-300 text-black'
+                        }`}
                       onClick={() =>
                         setFieldValue('deliveryMethod', 'delivery')
                       }
@@ -655,11 +651,10 @@ const FormCustom = ({ cart, total }) => {
                     </button>
                     <button
                       type="button"
-                      className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
-                        values.deliveryMethod === 'takeaway'
-                          ? 'bg-black text-gray-100'
-                          : 'bg-gray-300 text-black'
-                      }`}
+                      className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${values.deliveryMethod === 'takeaway'
+                        ? 'bg-black text-gray-100'
+                        : 'bg-gray-300 text-black'
+                        }`}
                       onClick={() =>
                         setFieldValue('deliveryMethod', 'takeaway')
                       }
@@ -667,11 +662,10 @@ const FormCustom = ({ cart, total }) => {
                       <div className="flex flex-row items-center gap-2">
                         <img
                           src={isologo}
-                          className={`h-4 ${
-                            values.deliveryMethod === 'takeaway'
-                              ? 'invert brightness-0'
-                              : 'brightness-0'
-                          }`}
+                          className={`h-4 ${values.deliveryMethod === 'takeaway'
+                            ? 'invert brightness-0'
+                            : 'brightness-0'
+                            }`}
                           alt=""
                         />
                         <p className="font-bold text-">Retiro</p>
@@ -715,7 +709,7 @@ const FormCustom = ({ cart, total }) => {
                                 name="address"
                                 type="text"
                                 placeholder="Tu dirección"
-                                className="bg-white text-opacity-20 text-black outline-none px-2"
+                                className="bg-white font-light text-opacity-20 text-black outline-none px-2"
                               />
                             </div>
                           </div>
@@ -737,7 +731,7 @@ const FormCustom = ({ cart, total }) => {
                             type="text"
                             placeholder="¿Referencias? Ej: Casa de portón negro"
                             autoComplete="off"
-                            className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                            className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
                           />
                         </div>
                       </>
@@ -745,11 +739,10 @@ const FormCustom = ({ cart, total }) => {
 
                     {/* Campo para el número de teléfono */}
                     <div
-                      className={`flex flex-col items-center transition-all duration-300 ${
-                        values.deliveryMethod === 'delivery'
-                          ? 'border-t border-black border-opacity-20'
-                          : ''
-                      }`}
+                      className={`flex flex-col items-center transition-all duration-300 ${values.deliveryMethod === 'delivery'
+                        ? 'border-t border-black border-opacity-20'
+                        : ''
+                        }`}
                     >
                       <div className="flex flex-row items-center pl-3 gap-2 w-full">
                         <svg
@@ -770,7 +763,7 @@ const FormCustom = ({ cart, total }) => {
                           type="text"
                           placeholder="Tu número de teléfono"
                           autoComplete="phone"
-                          className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                          className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
                         />
                       </div>
                       <div className="w-full">
@@ -836,7 +829,7 @@ const FormCustom = ({ cart, total }) => {
                         <Field
                           as="select"
                           name="paymentMethod"
-                          className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                          className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
                           style={{
                             WebkitAppearance: 'none',
                             MozAppearance: 'none',
@@ -869,11 +862,10 @@ const FormCustom = ({ cart, total }) => {
                       {couponCodes.map((coupon, index) => (
                         <div
                           key={index}
-                          className={`flex flex-col w-full transition-all duration-300 ${
-                            index !== 0
-                              ? 'border-t border-black border-opacity-20'
-                              : ''
-                          }`}
+                          className={`flex flex-col w-full transition-all duration-300 ${index !== 0
+                            ? 'border-t border-black border-opacity-20'
+                            : ''
+                            }`}
                         >
                           <div className="flex flex-row gap-2 px-3 items-center">
                             <svg
@@ -905,7 +897,7 @@ const FormCustom = ({ cart, total }) => {
                                   setFieldValue
                                 );
                               }}
-                              className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                              className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
                             />
 
                             {isValidating[index] ? (
@@ -941,7 +933,7 @@ const FormCustom = ({ cart, total }) => {
                           {voucherStatus[index] === '¡Código válido!' &&
                             index === couponCodes.length - 1 &&
                             couponCodes.length <
-                              Math.floor(getTotalBurgers() / 2) &&
+                            Math.floor(getTotalBurgers() / 2) &&
                             addCouponField()}
                         </div>
                       ))}
@@ -1015,37 +1007,36 @@ const FormCustom = ({ cart, total }) => {
 
                 {/* Botón de envío */}
                 {values.paymentMethod === 'mercadopago' ? (
-  <>
-    <Payment
-      cart={cart}
-      values={values}
-      discountedTotal={discountedTotal}
-      envio={envio}
-      mapUrl={mapUrl}
-      couponCodes={couponCodes}
-      calculateFinalTotal={calculateFinalTotal}
-      isEnabled={isEnabled}
-      isValid={isValid}
-      submitForm={submitForm}
-      altaDemanda={altaDemanda}
-      shouldValidate={true}
-    />
-  </>
-) : (
-  <button
-    type="submit"
-    disabled={isSubmitting}
-    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
-      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-    }`}
-  >
-    {isSubmitting ? (
-      <LoadingPoints color="text-gray-100" />
-    ) : (
-      'Pedir'
-    )}
-  </button>
-)}
+                  <>
+                    <Payment
+                      cart={cart}
+                      values={values}
+                      discountedTotal={discountedTotal}
+                      envio={envio}
+                      mapUrl={mapUrl}
+                      couponCodes={couponCodes}
+                      calculateFinalTotal={calculateFinalTotal}
+                      isEnabled={isEnabled}
+                      isValid={isValid}
+                      submitForm={submitForm}
+                      altaDemanda={altaDemanda}
+                      shouldValidate={true}
+                    />
+                  </>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                  >
+                    {isSubmitting ? (
+                      <LoadingPoints color="text-gray-100" />
+                    ) : (
+                      'Pedir'
+                    )}
+                  </button>
+                )}
               </div>
             </Form>
           );

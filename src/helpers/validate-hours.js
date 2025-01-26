@@ -13,7 +13,7 @@ export const isWithinOrderTimeRange = () => {
   const morningStartTime = new Date(currentTime);
   morningStartTime.setHours(10, 0, 0, 0);
   const morningEndTime = new Date(currentTime);
-  morningEndTime.setHours(13, 29, 59, 999);
+  morningEndTime.setHours(13, 59, 59, 999);
 
   // Evening range (20:00 - 23:59)
   const eveningStartTime = new Date(currentTime);
