@@ -401,7 +401,7 @@ const FormCustom = ({ cart, total }) => {
       '22:30',
       '23:00',
       '23:30',
-      '00:00',
+      // '00:00', De momento deshabilitado
     ];
 
     const nextSlotMinutes =
