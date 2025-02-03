@@ -323,19 +323,6 @@ const Pedido = () => {
         setIsModalOpen(true);
     };
 
-    const handleCadeteCall = async (cadete) => {
-        console.log("📞 Intentando llamar al cadete:", cadete);
-        const telefonoCadete = await getCadetePhone(cadete);
-
-        if (telefonoCadete) {
-            console.log("📲 Teléfono del cadete encontrado:", telefonoCadete);
-            window.open(`tel:${telefonoCadete}`, "_self");
-        } else {
-            console.warn("⚠️ Cadete no encontrado");
-            alert("Cadete no encontrado");
-        }
-    };
-
     const handleSupportClick = () => {
         console.log("💬 Iniciando contacto con soporte");
         const phoneNumber = "543584306832";
@@ -344,6 +331,13 @@ const Pedido = () => {
         window.open(whatsappUrl, "_blank");
     };
 
+    const handleTransferenciaClick = (total, telefono) => {
+        console.log("💬 Iniciando contacto con soporte");
+        const phoneNumber = "543584306832";
+        const message = `Hola! Hice un pedido de $${total} para el celular ${telefono}, en breve envio foto del comprobante asi controlan y transfiero al alias: onlyanhelo3`;
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+    };
     const handleEditAddress = (orderId) => {
         setEditingOrderId(orderId);
         setIsEditAddressModalOpen(true);
@@ -354,12 +348,6 @@ const Pedido = () => {
         setMessage("¡Dirección actualizada exitosamente!");
         setTimeout(() => setMessage(null), 3000);
     };
-
-    const handleEditPaymentMethod = (orderId) => {
-        setEditingOrderId(orderId);
-        setIsEditPaymentMethodModalOpen(true);
-    };
-
 
     useEffect(() => {
         let unsubscribeOrder;
@@ -838,6 +826,22 @@ const Pedido = () => {
                                             </div></div>
                                         {/* botones */}
                                         <div className={`w-full px-4 ${hasButtons ? "mt-11" : ""}`}>
+                                            <div
+                                                className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                                                onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono)}
+
+
+                                            >
+                                                <div className="flex items-center">
+
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 mr-2">
+                                                        <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
+                                                        <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" />
+                                                    </svg>
+
+                                                    Pagar virtualmente
+                                                </div>
+                                            </div>
                                             {showSupportButton && (
                                                 <div
                                                     onClick={handleSupportClick}
