@@ -607,14 +607,14 @@ const Pedido = () => {
                                                                         <>
                                                                             <div
                                                                                 className={`w-1/2 h-2.5 rounded-full ${diferenciaEnMinutos <= 20
-                                                                                        ? "animated-loading"
-                                                                                        : "bg-black"
+                                                                                    ? "animated-loading"
+                                                                                    : "bg-black"
                                                                                     }`}
                                                                             ></div>
                                                                             <div
                                                                                 className={`w-1/2 h-2.5 rounded-full ${diferenciaEnMinutos > 20
-                                                                                        ? "animated-loading"
-                                                                                        : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                                                                                    ? "animated-loading"
+                                                                                    : "bg-gray-100 border-opacity-20 border-black border-1 border"
                                                                                     }`}
                                                                             ></div>
                                                                         </>
@@ -624,44 +624,44 @@ const Pedido = () => {
                                                         <>
                                                             <div
                                                                 className={`w-1/4 h-2.5 rounded-full ${!currentOrder.elaborado
-                                                                        ? "animated-loading"
-                                                                        : "bg-black"
+                                                                    ? "animated-loading"
+                                                                    : "bg-black"
                                                                     }`}
                                                             ></div>
                                                             <div
                                                                 className={`w-1/4 h-2.5 rounded-full ${currentOrder.elaborado && (() => {
-                                                                        const horaPedidoConTiempoElaborado = sumarMinutos(
-                                                                            currentOrder.hora,
-                                                                            parseInt(currentOrder.tiempoElaborado.split(":")[1])
-                                                                        );
-                                                                        const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
-                                                                        const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
-                                                                        const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
-                                                                        const diffMinutes = (new Date() - fechaElaboracion) / 60000;
+                                                                    const horaPedidoConTiempoElaborado = sumarMinutos(
+                                                                        currentOrder.hora,
+                                                                        parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                                                                    );
+                                                                    const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
+                                                                    const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
+                                                                    const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
+                                                                    const diffMinutes = (new Date() - fechaElaboracion) / 60000;
 
-                                                                        return diffMinutes <= 15;
-                                                                    })()
-                                                                        ? "animated-loading"
-                                                                        : currentOrder.elaborado
-                                                                            ? "bg-black"
-                                                                            : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                                                                    return diffMinutes <= 15;
+                                                                })()
+                                                                    ? "animated-loading"
+                                                                    : currentOrder.elaborado
+                                                                        ? "bg-black"
+                                                                        : "bg-gray-100 border-opacity-20 border-black border-1 border"
                                                                     }`}
                                                             ></div>
                                                             <div
                                                                 className={`w-1/2 h-2.5 rounded-full ${currentOrder.elaborado && (() => {
-                                                                        const horaPedidoConTiempoElaborado = sumarMinutos(
-                                                                            currentOrder.hora,
-                                                                            parseInt(currentOrder.tiempoElaborado.split(":")[1])
-                                                                        );
-                                                                        const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
-                                                                        const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
-                                                                        const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
-                                                                        const diffMinutes = (new Date() - fechaElaboracion) / 60000;
+                                                                    const horaPedidoConTiempoElaborado = sumarMinutos(
+                                                                        currentOrder.hora,
+                                                                        parseInt(currentOrder.tiempoElaborado.split(":")[1])
+                                                                    );
+                                                                    const [dia, mes, anio] = currentOrder.fecha.split("/").map(Number);
+                                                                    const [horas, minutos] = horaPedidoConTiempoElaborado.split(":").map(Number);
+                                                                    const fechaElaboracion = new Date(anio, mes - 1, dia, horas, minutos);
+                                                                    const diffMinutes = (new Date() - fechaElaboracion) / 60000;
 
-                                                                        return diffMinutes > 15;
-                                                                    })()
-                                                                        ? "animated-loading"
-                                                                        : "bg-gray-100 border-opacity-20 border-black border-1 border"
+                                                                    return diffMinutes > 15;
+                                                                })()
+                                                                    ? "animated-loading"
+                                                                    : "bg-gray-100 border-opacity-20 border-black border-1 border"
                                                                     }`}
                                                             ></div>
                                                         </>
@@ -814,7 +814,7 @@ const Pedido = () => {
                                                         </svg>
 
                                                         <p className="text-black font-coolvetica font-medium">
-                                                            ${currentOrder.total || "0.00"} {currentOrder.metodoPago === "efectivo" ? "en efectivo" : "en Mercado Pago"}
+                                                            ${currentOrder.total || "0.00"}
                                                         </p>
                                                     </div>
 
@@ -862,8 +862,8 @@ const Pedido = () => {
                                                 <div
                                                     onClick={() => handleCancelClick(currentOrder.id)}
                                                     className={`${isDeleting || currentOrder.canceled
-                                                            ? "opacity-50 cursor-not-allowed"
-                                                            : "cursor-pointer"
+                                                        ? "opacity-50 cursor-not-allowed"
+                                                        : "cursor-pointer"
                                                         } bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
                                                     disabled={isDeleting || currentOrder.canceled}
                                                 >

@@ -157,61 +157,61 @@ const AppleModal = ({
       setTimeError('Por favor selecciona una hora válida');
       return;
     }
-  
+
     setIsUpdatingTime(true);
     setTimeError('');
-  
+
     try {
       const firestore = getFirestore();
       const fechaActual = obtenerFechaActual();
       const [dia, mes, anio] = fechaActual.split("/");
       const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
       const pedidoDocRef = doc(pedidosCollectionRef, dia);
-  
+
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
           throw new Error("El pedido no existe para la fecha especificada.");
         }
-  
+
         const existingData = docSnapshot.data();
         const pedidosDelDia = existingData.pedidos || [];
         const pedidoIndex = pedidosDelDia.findIndex(
           (pedido) => pedido.id === orderId
         );
-  
+
         if (pedidoIndex === -1) {
           throw new Error("Pedido no encontrado");
         }
-  
+
         // Ajustamos la hora según el método de entrega
         const pedido = pedidosDelDia[pedidoIndex];
         const isDelivery = pedido.direccion !== "";
-        
+
         // Convertimos la hora seleccionada a minutos desde medianoche
         const [hours, minutes] = newTime.split(':').map(Number);
         let totalMinutes = hours * 60 + minutes;
-        
+
         // Restamos el tiempo de preparación/envío según corresponda
         if (isDelivery) {
           totalMinutes -= 30; // Para delivery
         } else {
           totalMinutes -= 15; // Para takeaway
         }
-        
+
         // Convertimos nuevamente a formato HH:mm
         const adjustedHours = Math.floor(totalMinutes / 60);
         const adjustedMinutes = totalMinutes % 60;
         const adjustedTime = `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
-  
+
         pedidosDelDia[pedidoIndex].hora = adjustedTime;
-  
+
         transaction.set(pedidoDocRef, {
           ...existingData,
           pedidos: pedidosDelDia,
         });
       });
-  
+
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
@@ -247,40 +247,40 @@ const AppleModal = ({
                       <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
                     </svg>
                     <select
-                        value={newTime}
-                        onChange={(e) => setNewTime(e.target.value)}
-                        className="bg-transparent outline-none w-full  custom-select"
-                      >
-                        <option value="" disabled>Selecciona un horario</option>
-                        {(() => {
-                          const now = new Date();
-                          const currentHour = now.getHours();
-                          const currentMinute = now.getMinutes();
+                      value={newTime}
+                      onChange={(e) => setNewTime(e.target.value)}
+                      className="bg-transparent outline-none w-full  custom-select"
+                    >
+                      <option value="" disabled>Selecciona un horario</option>
+                      {(() => {
+                        const now = new Date();
+                        const currentHour = now.getHours();
+                        const currentMinute = now.getMinutes();
 
-                          const allTimeSlots = [
-                            '20:30', '21:00', '21:30', '22:00',
-                            '22:30', '23:00', '23:30', '00:00'
-                          ];
+                        const allTimeSlots = [
+                          '20:30', '21:00', '21:30', '22:00',
+                          '22:30', '23:00', '23:30', '00:00'
+                        ];
 
-                          const nextSlotMinutes = Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
-                          const nextSlotHour = Math.floor(nextSlotMinutes / 60);
-                          const nextSlotMinute = nextSlotMinutes % 60;
+                        const nextSlotMinutes = Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
+                        const nextSlotHour = Math.floor(nextSlotMinutes / 60);
+                        const nextSlotMinute = nextSlotMinutes % 60;
 
-                          return allTimeSlots.filter((timeSlot) => {
-                            let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
-                            if (slotHour === 0) slotHour = 24;
-                            const slotTimeInMinutes = slotHour * 60 + slotMinute;
-                            const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
-                            return slotTimeInMinutes >= nextValidTimeInMinutes;
-                          }).map((timeSlot) => (
-                            <option key={timeSlot} value={timeSlot}>
-                              {timeSlot}
-                            </option>
-                          ));
-                        })()}
-                      </select>
+                        return allTimeSlots.filter((timeSlot) => {
+                          let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+                          if (slotHour === 0) slotHour = 24;
+                          const slotTimeInMinutes = slotHour * 60 + slotMinute;
+                          const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
+                          return slotTimeInMinutes >= nextValidTimeInMinutes;
+                        }).map((timeSlot) => (
+                          <option key={timeSlot} value={timeSlot}>
+                            {timeSlot}
+                          </option>
+                        ));
+                      })()}
+                    </select>
                   </div>
-                 
+
                 </div>
               </div>
               {timeError && (
@@ -292,42 +292,39 @@ const AppleModal = ({
               <div className="flex flex-row w-full gap-2 ">
                 <button
                   type="button"
-                  className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
-                    deliveryMethod === 'delivery'
-                      ? 'bg-black text-gray-100'
-                      : 'bg-gray-300 text-black'
-                  }`}
+                  className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${deliveryMethod === 'delivery'
+                    ? 'bg-black text-gray-100'
+                    : 'bg-gray-300 text-black'
+                    }`}
                   onClick={() => setDeliveryMethod('delivery')}
                 >
-                 <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 500 500"
-                        className="h-8"
-                      >
-                        <path
-                          d="M76.849,210.531C34.406,210.531,0,244.937,0,287.388c0,42.438,34.406,76.847,76.849,76.847 c30.989,0,57.635-18.387,69.789-44.819l18.258,14.078c0,0,134.168,0.958,141.538-3.206c0,0-16.65-45.469,4.484-64.688 c2.225-2.024,5.021-4.332,8.096-6.777c-3.543,8.829-5.534,18.45-5.534,28.558c0,42.446,34.403,76.846,76.846,76.846 c42.443,0,76.843-34.415,76.843-76.846c0-42.451-34.408-76.849-76.843-76.849c-0.697,0-1.362,0.088-2.056,0.102 c5.551-3.603,9.093-5.865,9.093-5.865l-5.763-5.127c0,0,16.651-3.837,12.816-12.167c-3.848-8.33-44.19-58.28-44.19-58.28 s7.146-15.373-7.634-26.261l-7.098,15.371c0,0-18.093-12.489-25.295-10.084c-7.205,2.398-18.005,3.603-21.379,8.884l-3.358,3.124 c0,0-0.95,5.528,4.561,13.693c0,0,55.482,17.05,58.119,29.537c0,0,3.848,7.933-12.728,9.844l-3.354,4.328l-8.896,0.479 l-16.082-36.748c0,0-15.381,4.082-23.299,10.323l1.201,6.24c0,0-64.599-43.943-125.362,21.137c0,0-44.909,12.966-76.37-26.897 c0,0-0.479-12.968-76.367-10.565l5.286,5.524c0,0-5.286,0.479-7.444,3.841c-2.158,3.358,1.2,6.961,18.494,6.961 c0,0,39.153,44.668,69.17,42.032l42.743,20.656l18.975,32.42c0,0,0.034,2.785,0.23,7.045c-4.404,0.938-9.341,1.979-14.579,3.09 C139.605,232.602,110.832,210.531,76.849,210.531z M390.325,234.081c29.395,0,53.299,23.912,53.299,53.299 c0,29.39-23.912,53.294-53.299,53.294c-29.394,0-53.294-23.912-53.294-53.294C337.031,257.993,360.932,234.081,390.325,234.081z M76.849,340.683c-29.387,0-53.299-23.913-53.299-53.295c0-29.395,23.912-53.299,53.299-53.299 c22.592,0,41.896,14.154,49.636,34.039c-28.26,6.011-56.31,11.99-56.31,11.99l3.619,19.933l55.339-2.444 C124.365,322.116,102.745,340.683,76.849,340.683z M169.152,295.835c1.571,5.334,3.619,9.574,6.312,11.394l-24.696,0.966 c1.058-3.783,1.857-7.666,2.338-11.662L169.152,295.835z"
-                          fill="currentColor"
-                        />
-                      </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 500 500"
+                    className="h-8"
+                  >
+                    <path
+                      d="M76.849,210.531C34.406,210.531,0,244.937,0,287.388c0,42.438,34.406,76.847,76.849,76.847 c30.989,0,57.635-18.387,69.789-44.819l18.258,14.078c0,0,134.168,0.958,141.538-3.206c0,0-16.65-45.469,4.484-64.688 c2.225-2.024,5.021-4.332,8.096-6.777c-3.543,8.829-5.534,18.45-5.534,28.558c0,42.446,34.403,76.846,76.846,76.846 c42.443,0,76.843-34.415,76.843-76.846c0-42.451-34.408-76.849-76.843-76.849c-0.697,0-1.362,0.088-2.056,0.102 c5.551-3.603,9.093-5.865,9.093-5.865l-5.763-5.127c0,0,16.651-3.837,12.816-12.167c-3.848-8.33-44.19-58.28-44.19-58.28 s7.146-15.373-7.634-26.261l-7.098,15.371c0,0-18.093-12.489-25.295-10.084c-7.205,2.398-18.005,3.603-21.379,8.884l-3.358,3.124 c0,0-0.95,5.528,4.561,13.693c0,0,55.482,17.05,58.119,29.537c0,0,3.848,7.933-12.728,9.844l-3.354,4.328l-8.896,0.479 l-16.082-36.748c0,0-15.381,4.082-23.299,10.323l1.201,6.24c0,0-64.599-43.943-125.362,21.137c0,0-44.909,12.966-76.37-26.897 c0,0-0.479-12.968-76.367-10.565l5.286,5.524c0,0-5.286,0.479-7.444,3.841c-2.158,3.358,1.2,6.961,18.494,6.961 c0,0,39.153,44.668,69.17,42.032l42.743,20.656l18.975,32.42c0,0,0.034,2.785,0.23,7.045c-4.404,0.938-9.341,1.979-14.579,3.09 C139.605,232.602,110.832,210.531,76.849,210.531z M390.325,234.081c29.395,0,53.299,23.912,53.299,53.299 c0,29.39-23.912,53.294-53.299,53.294c-29.394,0-53.294-23.912-53.294-53.294C337.031,257.993,360.932,234.081,390.325,234.081z M76.849,340.683c-29.387,0-53.299-23.913-53.299-53.295c0-29.395,23.912-53.299,53.299-53.299 c22.592,0,41.896,14.154,49.636,34.039c-28.26,6.011-56.31,11.99-56.31,11.99l3.619,19.933l55.339-2.444 C124.365,322.116,102.745,340.683,76.849,340.683z M169.152,295.835c1.571,5.334,3.619,9.574,6.312,11.394l-24.696,0.966 c1.058-3.783,1.857-7.666,2.338-11.662L169.152,295.835z"
+                      fill="currentColor"
+                    />
+                  </svg>
                   Delivery
                 </button>
                 <button
                   type="button"
-                  className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
-                    deliveryMethod === 'takeaway'
-                      ? 'bg-black text-gray-100'
-                      : 'bg-gray-300 text-black'
-                  }`}
+                  className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${deliveryMethod === 'takeaway'
+                    ? 'bg-black text-gray-100'
+                    : 'bg-gray-300 text-black'
+                    }`}
                   onClick={() => setDeliveryMethod('takeaway')}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <img
                       src={isologo}
-                      className={`h-4 ${
-                        deliveryMethod === 'takeaway'
-                          ? 'invert brightness-0'
-                          : 'brightness-0'
-                      }`}
+                      className={`h-4 ${deliveryMethod === 'takeaway'
+                        ? 'invert brightness-0'
+                        : 'brightness-0'
+                        }`}
                       alt=""
                     />
                     <p className="font-bold text-">Retiro</p>
@@ -341,8 +338,8 @@ const AppleModal = ({
                   <div className="border-b border-black border-opacity-20">
                     <MapDirection
                       setUrl={setMapUrl}
-                      setValidarUbi={() => {}}
-                      setNoEncontre={() => {}}
+                      setValidarUbi={() => { }}
+                      setNoEncontre={() => { }}
                       setFieldValue={(field, value) => {
                         if (field === 'address') {
                           setNewAddress(value);
@@ -350,7 +347,7 @@ const AppleModal = ({
                       }}
                     />
                   </div>
-                  
+
                   <div className="flex flex-row px-3 h-10 items-center">
                     <div className="flex flex-row w-full items-center gap-2">
                       <svg
@@ -365,8 +362,8 @@ const AppleModal = ({
                         type="text"
                         value={aclaraciones}
                         onChange={(e) => setAclaraciones(e.target.value)}
-                        placeholder="¿Referencias? Ej: Casa con portón"
-                        className="bg-transparent px-0 h-10 text-opacity-20 outline-none w-full"
+                        placeholder="¿Referencias sobre la direccion? Ej: Portón negro"
+                        className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                       />
                     </div>
                   </div>
@@ -388,9 +385,8 @@ const AppleModal = ({
               <button
                 onClick={handleUpdateTime}
                 disabled={isUpdatingTime}
-                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
-                  isUpdatingTime ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                }`}
+                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${isUpdatingTime ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                  }`}
               >
                 {isUpdatingTime ? <LoadingPoints color="text-gray-100" /> : "Confirmar"}
               </button>
@@ -425,9 +421,8 @@ const AppleModal = ({
             <div className="flex justify-center gap-2">
               <button
                 onClick={onConfirm}
-                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
-                  isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                }`}
+                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                  }`}
                 disabled={isLoading}
               >
                 {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
@@ -497,19 +492,19 @@ AppleModal.propTypes = {
 AppleModal.defaultProps = {
   title: "",
   twoOptions: false,
-  onConfirm: () => {},
+  onConfirm: () => { },
   isLoading: false,
   isRatingModal: false,
   isEditAddressModal: false,
   orderId: "",
   currentAddress: "",
-  onAddressSuccess: () => {},
+  onAddressSuccess: () => { },
   children: null,
   orderProducts: [],
   additionalProducts: [],
   isEditTimeModal: false,
   currentTime: '',
-  onTimeSuccess: () => {},
+  onTimeSuccess: () => { },
 };
 
 export default AppleModal;
