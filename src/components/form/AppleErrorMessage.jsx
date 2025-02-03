@@ -5,9 +5,8 @@ const AppleErrorMessage = ({ children, voucher = false }) => {
 
 	return (
 		<div
-			className={`flex flex-col items-center w-full justify-center gap-2 min-h-10 py-4 px-4 bg-red-main text-gray-100 mt-1 transition-all duration-300 ease-in-out ${
-				voucher ? "rounded-b-3xl" : ""
-			}`}
+			className={`flex flex-col items-center w-full justify-center gap-2 min-h-10 py-4 px-4 bg-red-main text-gray-100 mt-1 transition-all duration-300 ease-in-out ${voucher ? "" : ""
+				}`}
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"

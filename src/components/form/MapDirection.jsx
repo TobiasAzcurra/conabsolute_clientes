@@ -198,7 +198,7 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
 				/>
 			</svg>
 			<input
-				className={`bg-transparent font-light h-10 text-black outline-none w-full pl-2 ${inputValue ? "opacity-100" : "text-gray-400"
+				className={`bg-transparent text-xs font-light h-10 text-black outline-none w-full pl-2 ${inputValue ? "opacity-100" : "text-gray-400"
 					}`}
 				ref={inputRef}
 				value={inputValue}

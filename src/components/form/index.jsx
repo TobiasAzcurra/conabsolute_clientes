@@ -426,7 +426,7 @@ const FormCustom = ({ cart, total }) => {
       <Field
         as="select"
         name="hora"
-        className={`custom-select font-light ${selectedHora === '' ? 'text-gray-400' : 'text-black'
+        className={`custom-select  text-xs font-light ${selectedHora === '' ? 'text-gray-400 ' : 'text-black'
           }`}
         value={selectedHora}
         onChange={(e) => {
@@ -497,7 +497,7 @@ const FormCustom = ({ cart, total }) => {
                     height: 40px;
                     border: none;
                     outline: none;
-                    font-size: 16px;
+                    font-size: 0.75rem;
                 }
                 .custom-select::placeholder {
                     color: rgba(0, 0, 0, 0.5);
@@ -606,27 +606,6 @@ const FormCustom = ({ cart, total }) => {
           return (
             <Form>
               <div className="flex flex-col mb-2">
-                {/* Sección de aclaraciones */}
-                <div className="flex flex-row justify-between px-3 h-10 m items-start border-2 border-black rounded-3xl mt-4">
-                  <div className="flex flex-row w-full items-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="h-6"
-                    >
-                      <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
-                    </svg>
-                    <MyTextInput
-                      label="Aclaraciones"
-                      name="aclaraciones"
-                      type="text"
-                      placeholder="¿Aclaraciones? Ej: La simple vegetariana"
-                      autoComplete="off"
-                      className="bg-transparent font-light  px-0 h-10 text-opacity-20 outline-none w-full"
-                    />
-                  </div>
-                </div>
 
                 {/* Datos para la entrega */}
                 <div className="flex justify-center flex-col mt-7 items-center">
@@ -736,18 +715,122 @@ const FormCustom = ({ cart, total }) => {
                             label="Referencias"
                             name="references"
                             type="text"
-                            placeholder="¿Referencias? Ej: Casa de portón negro"
+                            placeholder="¿Referencias sobre la direccion? Ej: Casa de portón negro"
                             autoComplete="off"
-                            className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
+                            className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                           />
                         </div>
                       </>
                     )}
 
+                    {/* Campo para aclaraciones  */}
+                    <div className="flex flex-row justify-between px-3 h-auto items-start border-y border-black border-opacity-20">
+                      <div className="flex flex-row w-full items-center gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="h-6"
+                        >
+                          <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
+                        </svg>
+                        <MyTextInput
+                          label="Aclaraciones"
+                          name="aclaraciones"
+                          type="text"
+                          placeholder="¿Aclaraciones sobre el pedido? Ej: La simple vegetariana"
+                          autoComplete="off"
+                          className="bg-transparent font-light text-xs px-0 h-10 text-opacity-20 outline-none w-full"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Campo para los cupones */}
+                    <div className="flex flex-col">
+                      {couponCodes.map((coupon, index) => (
+                        <div
+                          key={index}
+                          className={`flex flex-col w-full transition-all duration-300 ${index !== 0
+                            ? 'border-t border-black border-opacity-20'
+                            : ''
+                            }`}
+                        >
+                          <div className="flex flex-row gap-2 px-3 items-center">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="h-6"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+
+                            <MyTextInput
+                              name={`couponCode${index}`}
+                              type="text"
+                              placeholder={
+                                index === 0
+                                  ? '¿Tenes algun codigo de descuento?'
+                                  : '¿Tenes otro cupón?'
+                              }
+                              value={couponCodes[index]}
+                              onChange={(e) => {
+                                handleCouponChange(
+                                  index,
+                                  e.target.value,
+                                  setFieldValue
+                                );
+                              }}
+                              className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
+                            />
+
+                            {isValidating[index] ? (
+                              <div
+                                className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
+                                role="status"
+                              >
+                                <span className="sr-only">Loading...</span>
+                              </div>
+                            ) : voucherStatus[index] === '¡Código válido!' ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="green"
+                                className="h-6"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.828 16.172a.75.75 0 0 1-1.06 0L5.47 11.875a.75.75 0 0 1 1.06-1.06l3.298 3.297 6.364-6.364a.75.75 0 1 1 1.06 1.06l-7.425 7.425Z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ) : null}
+                          </div>
+
+                          {voucherStatus[index] &&
+                            voucherStatus[index] !== '¡Código válido!' && (
+                              <AppleErrorMessage voucher={true}>
+                                {voucherStatus[index]}
+                              </AppleErrorMessage>
+                            )}
+
+                          {voucherStatus[index] === '¡Código válido!' &&
+                            index === couponCodes.length - 1 &&
+                            couponCodes.length <
+                            Math.floor(getTotalBurgers() / 2) &&
+                            addCouponField()}
+                        </div>
+                      ))}
+                    </div>
+
                     {/* Campo para el número de teléfono */}
                     <div
-                      className={`flex flex-col items-center transition-all duration-300 ${values.deliveryMethod === 'delivery'
-                        ? 'border-t border-black border-opacity-20'
+                      className={`flex flex-col border-t border-black border-opacity-20 items-center transition-all duration-300 ${values.deliveryMethod === 'delivery'
+                        ? ''
                         : ''
                         }`}
                     >
@@ -770,7 +853,7 @@ const FormCustom = ({ cart, total }) => {
                           type="text"
                           placeholder="Tu número de teléfono"
                           autoComplete="phone"
-                          className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
+                          className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                         />
                       </div>
                       <div className="w-full">
@@ -782,6 +865,7 @@ const FormCustom = ({ cart, total }) => {
                         />
                       </div>
                     </div>
+
                     {/* Campo para reservar hora */}
                     <div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
                       <div className="flex flex-row items-center gap-2">
@@ -813,7 +897,7 @@ const FormCustom = ({ cart, total }) => {
                 </div>
 
                 {/* Método de pago y cupones */}
-                <div className="flex justify-center flex-col mt-6 items-center">
+                {/* <div className="flex justify-center flex-col mt-6 items-center">
                   <p className="text-2xl font-bold mb-2">Método de pago</p>
                   <div className="bg-gray-300 w-full flex items-center justify-center rounded-3xl p-4 mb-2">
                     <div className="flex flex-row items-center gap-2 text-red-600">
@@ -862,11 +946,11 @@ const FormCustom = ({ cart, total }) => {
                             setFieldValue('paymentMethod', e.target.value);
                           }}
                         >
-                          <option value="efectivo">Efectivo</option>
-                          {/* {isOpenPaymentMethod && (
+                          <option value="efectivo">Efectivo</option> */}
+                {/* {isOpenPaymentMethod && (
                             <option value="mercadopago">Mercado Pago</option>
                           )} */}
-                        </Field>
+                {/* </Field>
 
                         {!isOpenPaymentMethod && (
                           <div className="absolute right-8">
@@ -879,10 +963,10 @@ const FormCustom = ({ cart, total }) => {
                           </div>
                         )}
                       </div>
-                    </div>
+                    </div> */}
 
-                    {/* Campos de cupones */}
-                    <div className="flex flex-col">
+                {/* Campos de cupones */}
+                {/* <div className="flex flex-col">
                       {couponCodes.map((coupon, index) => (
                         <div
                           key={index}
@@ -963,7 +1047,7 @@ const FormCustom = ({ cart, total }) => {
                       ))}
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Resumen */}
                 <div className="flex justify-center flex-col mt-6 items-center">
