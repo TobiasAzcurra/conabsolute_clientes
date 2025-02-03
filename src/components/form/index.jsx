@@ -47,6 +47,7 @@ const FormCustom = ({ cart, total }) => {
 
   const [discountedTotal, setDiscountedTotal] = useState(total);
   const [couponCodes, setCouponCodes] = useState(['']);
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
 
   const [descuento, setDescuento] = useState(0);
   const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
@@ -518,6 +519,12 @@ const FormCustom = ({ cart, total }) => {
         }}
         validationSchema={formValidations}
         onSubmit={async (values) => {
+
+          if (altaDemanda?.out) {
+            setShowOutOfStockModal(true);
+            return;
+          }
+
           if (!altaDemanda?.open) {
             if (values.paymentMethod === 'mercadopago') {
               setFieldValue('paymentMethod', 'efectivo');
@@ -1067,6 +1074,14 @@ const FormCustom = ({ cart, total }) => {
         title="Está cerrado"
       >
         <p>Abrimos de lunes a domingo de 20:00 hs a 00:00 hs.</p>
+      </AppleModal>
+
+      <AppleModal
+        isOpen={showOutOfStockModal}
+        onClose={() => setShowOutOfStockModal(false)}
+        title="Sin stock"
+      >
+        <p>Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche </p>
       </AppleModal>
 
       <AppleModal
