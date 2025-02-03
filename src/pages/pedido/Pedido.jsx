@@ -334,7 +334,7 @@ const Pedido = () => {
     const handleTransferenciaClick = (total, telefono) => {
         console.log("💬 Iniciando contacto con soporte");
         const phoneNumber = "543584306832";
-        const message = `Hola! Hice un pedido de $${total} para el celular ${telefono}, en breve envio foto del comprobante asi controlan y transfiero al alias: onlyanhelo3`;
+        const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3`;
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, "_blank");
     };
