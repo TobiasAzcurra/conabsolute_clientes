@@ -50,7 +50,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 			"Satisfyer Easter Egg": "65%",
 			"Satisfyer BCN Cheeseburger": "40%",
 			"Satisfyer ANHELO Classic": "50%",
-			"Simple Chessburger": "70%",
+			"Simple Cheeseburger": "70%",
 			"Doble Cheeseburger": "60%",
 			"Triple Cheeseburger": "40%",
 			"Cuadruple Cheeseburger": "35%",
