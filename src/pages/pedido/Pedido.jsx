@@ -845,7 +845,7 @@ const Pedido = () => {
                                             {showSupportButton && (
                                                 <div
                                                     onClick={handleSupportClick}
-                                                    className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                                                    className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold mt-2 cursor-pointer transition-colors duration-300"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
