@@ -117,6 +117,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
 	return (
 		<div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
+
 			<div className="absolute right-3.5 top-2.5 z-40">
 				<QuickAddToCart
 					product={{ name, description, price, img, path, id, category, type }}
@@ -130,11 +131,10 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 							<span className="text-gray-400 text-sm">Cargando...</span>
 						</div>
 					)}
-					<div className="absolute inset-0 bg-gradient-to-t from-gray-300 via-transparent to-transparent opacity-50"></div>
+					<div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 					<img
-						className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
-							isLoaded ? "opacity-100" : "opacity-0"
-						}`}
+						className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${isLoaded ? "opacity-100" : "opacity-0"
+							}`}
 						style={{ objectPosition: `center ${imgPosition}` }}
 						src={`/menu/${img}`}
 						alt={name}
@@ -143,16 +143,26 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 				</div>
 
 				<div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
-					<h5 className="mt-4 text-2xl w-full text-left font-bold ">
+					<h5 className="mt-4 text-xl w-full text-center font-medium mb-4">
 						{capitalizeWords(name)}
 					</h5>
-					<p className="text-left text-xs text-opacity-30 text-black">
+					<p className="text-left text-xs font-light text-opacity-30 text-black">
 						{description}
 					</p>
 					<div className="flex w-full mt-4 items-left justify-between mb-6">
-						<span className="font-bold text-4xl text-black ">
-							{currencyFormat(price)}
-						</span>
+
+						{type === "promo" ? (
+							<div className="flex flex-row gap-2 items-baseline">
+								<span className="font-bold text-4xl text-black">
+									{currencyFormat(price)}
+								</span>
+								<p className="font-light line-through">{currencyFormat(price * 2)}</p>
+							</div>
+						) : (
+							<span className="font-bold text-4xl text-black">
+								{currencyFormat(price)}
+							</span>
+						)}
 						{!excludedNames.includes(name) && rating > 0 && (
 							<div className="flex items-center gap-2 ">
 								<div className="flex items-center mb-0.5 ">
