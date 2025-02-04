@@ -156,7 +156,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 								<span className="font-bold text-4xl text-black">
 									{currencyFormat(price)}
 								</span>
-								<p className="font-light line-through">{currencyFormat(price * 2)}</p>
+								<p className="font-light line-through opacity-30">{currencyFormat(price * 2)}</p>
 							</div>
 						) : (
 							<span className="font-bold text-4xl text-black">
