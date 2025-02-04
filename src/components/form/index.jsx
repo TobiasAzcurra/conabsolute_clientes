@@ -1230,7 +1230,7 @@ const FormCustom = ({ cart, total }) => {
       >
         <p>
           Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
-          {altaDemanda?.delayMinutes} minutos, ¿lo esperas?
+          {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
     </div>
