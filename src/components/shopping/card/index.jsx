@@ -164,11 +164,11 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 							</span>
 						)}
 						{!excludedNames.includes(name) && rating > 0 && (
-							<div className="flex items-center gap-2 ">
-								<div className="flex items-center mb-0.5 ">
+							<div className="flex  items-center  gap-4">
+								<div className="flex items-center  mb-0.5 gap-0.5">
 									{renderStars(rating)}
 								</div>
-								<div className="text-xs bg-red-main text-gray-100 h-7 flex items-center text-center justify-center w-8 font-bold rounded-md">
+								<div className="text-sm bg-red-main text-gray-100 h-6 flex items-center text-center justify-center w-9 font-light rounded-md ">
 									{rating.toFixed(1)}
 								</div>
 							</div>
