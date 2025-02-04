@@ -143,7 +143,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 				</div>
 
 				<div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
-					<h5 className="mt-4 text-xl w-full text-center font-medium mb-4">
+					<h5 className="mt-4 text-xl w-full text-center font-medium mb-1">
 						{capitalizeWords(name)}
 					</h5>
 					<p className="text-left text-xs font-light text-opacity-30 text-black">
