@@ -273,7 +273,7 @@ const AppRouter = () => {
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
-						<div className="bg-gray-100   border border-black border-opacity-30 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
+						<div className="bg-gray-100 bg-opacity-60  border border-black border-opacity-30 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
 							<div className="flex items-center w-full">
 								<input
 									type="text"
@@ -281,7 +281,7 @@ const AppRouter = () => {
 									onChange={(e) => setPhoneNumber(e.target.value)}
 									onKeyDown={handleKeyDown}
 									placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-									className="text-black placeholder:text-gray-400 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
+									className="text-black placeholder:text-gray-600 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
 								/>
 								<button onClick={handleSearch} className="bg-gray-100 border-black  border border-opacity-30 h-10 w-20 flex items-center justify-center rounded-r-full">
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
