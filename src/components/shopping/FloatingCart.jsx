@@ -21,7 +21,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
 	}, 0);
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 h-20 bg-gray-100 shadow-[0px_-10px_15px_-3px_rgba(0,0,0,0.1),0px_-4px_6px_-2px_rgba(0,0,0,0.1)]  px-4 flex flex-row items-center justify-between md:justify-center gap-4 font-coolvetica w-full z-50">
+		<div className="fixed border border-black border-opacity-30  bottom-4 rounded-2xl left-4 right-4 h-20 bg-gray-100  pl-4 flex flex-row items-center justify-between md:justify-center gap-4 font-coolvetica  z-50">
 			<div className="flex flex-col items-center">
 				<p className=" text-xs font-medium ">
 					{totalQuantity} {totalQuantity === 1 ? "producto" : "productos"}
@@ -32,9 +32,13 @@ const FloatingCart = ({ totalQuantity, cart }) => {
 			</div>
 			<Link
 				to="/carrito"
-				className="bg-red-main w-full items-center flex justify-center md:w-[500px] h-12  px-6  rounded-3xl  "
+				className="bg-red-main mr-2 w-full  items-center flex justify-center md:w-[500px] h-[62px] px-6  rounded-2xl  "
 			>
-				<p className="text-gray-100 mb-1 text-xl font-bold text-center">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 mr-2 text-gray-100">
+					<path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clip-rule="evenodd" />
+				</svg>
+
+				<p className="text-gray-100  text-2xl font-bold text-center">
 					Ver pedido
 				</p>
 			</Link>
