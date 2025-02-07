@@ -825,7 +825,7 @@ const Pedido = () => {
                                                 </div>
                                             </div></div>
                                         {/* botones */}
-                                        <div className={`w-full px-4 ${hasButtons ? "mt-11" : ""}`}>
+                                        <div className={`w-full px-4 ${hasButtons ? "mt-11" : "mt-4"}`}>
                                             <div
                                                 className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
                                                 onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono)}
