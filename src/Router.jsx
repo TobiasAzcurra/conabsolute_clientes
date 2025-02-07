@@ -89,6 +89,14 @@ const AppRouter = () => {
 		}
 	};
 
+	const handleSearch = () => {
+		if (phoneNumber.trim() === "") {
+			alert("Por favor, ingresa un número de teléfono válido.");
+			return;
+		}
+		navigate("/pedido", { state: { phoneNumber } });
+	};
+
 	const computeAdditionalProducts = (order) => {
 		const excludedPrefixes = [
 			"Satisfyer",
@@ -265,52 +273,24 @@ const AppRouter = () => {
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
-						<div className="bg-gray-100 md:w-[500px] shadow-black h-10 flex items-center justify-center absolute z-50 top-4 font-coolvetica rounded-full px-4 left-4 right-4 opacity-80 focus-within:opacity-100 transition-opacity duration-300 ease-in-out md:left-auto md:right-auto">
-							{/* Ícono de búsqueda */}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								stroke="currentColor"
-								strokeWidth="1"
-								className="mr-1 h-6 opacity-20"
-							>
-								<path
-									fillRule="evenodd"
-									d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z"
-									clipRule="evenodd"
+						<div className="bg-gray-100   border border-black border-opacity-30 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
+							<div className="flex items-center w-full">
+								<input
+									type="text"
+									value={phoneNumber}
+									onChange={(e) => setPhoneNumber(e.target.value)}
+									onKeyDown={handleKeyDown}
+									placeholder="Busca tu pedido con tu telefono ej: 3585168275"
+									className="text-black placeholder:text-gray-400 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
 								/>
-							</svg>
+								<button onClick={handleSearch} className="bg-gray-100 border-black  border border-opacity-30 h-10 w-20 flex items-center justify-center rounded-r-full">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+										<path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+									</svg>
 
-							{/* Input para el número de teléfono */}
-							<input
-								type="text"
-								value={phoneNumber}
-								onChange={(e) => {
-									setPhoneNumber(e.target.value);
-								}}
-								onKeyDown={handleKeyDown}
-								placeholder="Busca tu pedido con tu número de cel"
-								className="text-opacity-60 text-xs font-coolvetica text-black bg-transparent outline-none w-full"
-							/>
+								</button>
 
-							{/* Ícono de información */}
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								className="mr-[-8px] h-8 cursor-pointer"
-								onClick={() => {
-									setShowExplanation(!showExplanation);
-								}}
-								title="Información sobre el formato del número"
-							>
-								<path
-									fillRule="evenodd"
-									d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-									clipRule="evenodd"
-								/>
-							</svg>
+							</div>
 						</div>
 
 						{/* Explicación del formato, renderizado condicionalmente */}
