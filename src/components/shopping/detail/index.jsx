@@ -120,7 +120,7 @@ const DetailCard = ({ products, type }) => {
           <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
             {capitalizeWords(product.name)}
           </h4>
-          <p className="font-coolvetica px-4 text-xs w-full mt-1 text-black text-center">
+          <p className="font-coolvetica  px-4 text-xs w-full mt-1 font-bold text-center">
             {product.description}
           </p>
           {/* Select para elegir toppings */}
@@ -190,10 +190,10 @@ const DetailCard = ({ products, type }) => {
               {product.type === 'satisfyer'
                 ? 'La versión accesible de Anhelo, para que puedas pedir más en todo momento.'
                 : product.type === 'originals'
-                ? 'Anhelo, creado por vos. Tu burger ideal.'
-                : product.type === 'our'
-                ? 'Nuestras mejores combinaciones. Obras de arte.'
-                : ''}
+                  ? 'Anhelo, creado por vos. Tu burger ideal.'
+                  : product.type === 'our'
+                    ? 'Nuestras mejores combinaciones. Obras de arte.'
+                    : ''}
             </p>
           </div>
         </div>
