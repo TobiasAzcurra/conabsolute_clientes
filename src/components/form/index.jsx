@@ -104,7 +104,7 @@ const FormCustom = ({ cart, total }) => {
     dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
   };
 
-  const processPedido = async (values, isReserva) => {
+  const processPedido = async (values, isReserva, message = "") => {
     try {
       const validCoupons = couponCodes.filter(
         (code, index) =>
@@ -156,7 +156,8 @@ const FormCustom = ({ cart, total }) => {
         envio,
         mapUrl,
         couponCodes,
-        descuento
+        descuento,
+        message
       );
 
       if (orderId) {
@@ -1159,6 +1160,7 @@ const FormCustom = ({ cart, total }) => {
       </Formik>
 
       {/* Modales */}
+      {/* por horario */}
       <AppleModal
         isOpen={isTimeRestrictedModalOpen}
         onClose={closeTimeRestrictedModal}
@@ -1167,6 +1169,7 @@ const FormCustom = ({ cart, total }) => {
         <p>Abrimos de lunes a domingo de 20:00 hs a 00:00 hs.</p>
       </AppleModal>
 
+      {/* sin stock */}
       <AppleModal
         isOpen={showOutOfStockModal}
         onClose={() => setShowOutOfStockModal(false)}
@@ -1175,6 +1178,7 @@ const FormCustom = ({ cart, total }) => {
         <p className='font-medium text-center'>Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche </p>
       </AppleModal>
 
+      {/* pendiente de confirmar */}
       <AppleModal
         isOpen={isCloseRestrictedModalOpen}
         onClose={closeCloseRestrictedModal}
@@ -1216,6 +1220,7 @@ const FormCustom = ({ cart, total }) => {
         </p>
       </AppleModal>
 
+      {/* esperas? */}
       <AppleModal
         isOpen={
           showHighDemandModal && pendingValues?.paymentMethod === 'efectivo'
@@ -1239,6 +1244,8 @@ const FormCustom = ({ cart, total }) => {
           {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
+
+      {/* mensaje */}
       <AppleModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
@@ -1249,7 +1256,22 @@ const FormCustom = ({ cart, total }) => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
             const isReserva = pendingValues.hora.trim() !== '';
-            await processPedido(pendingValues, isReserva);
+            const orderId = await handleSubmit(  // Guardamos el orderId que retorna handleSubmit
+              pendingValues,
+              cart,
+              discountedTotal,
+              envio,
+              mapUrl,
+              couponCodes,
+              descuento,
+              false,
+              altaDemanda?.message || ""
+            );
+
+            if (orderId) {  // Si se creó la orden exitosamente
+              navigate(`/success/${orderId}`);  // Redirigimos
+              dispatch(addLastCart());  // Actualizamos el carrito
+            }
           }
           setIsModalConfirmLoading(false);
           setShowMessageModal(false);

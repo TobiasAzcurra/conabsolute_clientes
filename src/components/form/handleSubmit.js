@@ -21,7 +21,8 @@ const handleSubmit = async (
     mapUrl,
     couponCodes,
     descuento,
-    isPending = false 
+    isPending = false,
+    message = ""
 ) => {
     const coordinates = extractCoordinates(mapUrl);
     const materialesData = await ReadMateriales();
@@ -51,6 +52,7 @@ const handleSubmit = async (
         pendingOfBeingAccepted: isPending,
         envio: values.deliveryMethod === "delivery" ? envio : 0,
         envioExpress: values.envioExpress || 0,
+        message: message,
         detallePedido: cart.map((item) => {
             const quantity = item.quantity !== undefined ? item.quantity : 0;
 
@@ -89,13 +91,13 @@ const handleSubmit = async (
                 costoBurger,
             };
         }),
-        subTotal: cart.reduce((total, item) => 
-            total + (item.price * item.quantity) + 
+        subTotal: cart.reduce((total, item) =>
+            total + (item.price * item.quantity) +
             item.toppings.reduce((toppingTotal, topping) => toppingTotal + (topping.price || 0), 0) * item.quantity
-        , 0),
-        total: cart.reduce((total, item) => 
-            total + (item.price * item.quantity) + 
-            item.toppings.reduce((toppingTotal, topping) => 
+            , 0),
+        total: cart.reduce((total, item) =>
+            total + (item.price * item.quantity) +
+            item.toppings.reduce((toppingTotal, topping) =>
                 toppingTotal + (topping.price || 0), 0
             ) * item.quantity, 0) - descuento +  // Subtotal menos descuentos
             (values.deliveryMethod === "delivery" ? envio : 0) +  // Envío si aplica
@@ -121,7 +123,7 @@ const handleSubmit = async (
         const orderId = await UploadOrder(orderDetail);
         await addTelefonoFirebase(phone, obtenerFechaActual());
         localStorage.setItem('customerPhone', cleanPhoneNumber(phone));
-        
+
         return orderId;
     } catch (error) {
         console.error("Error al subir la orden: ", error);
