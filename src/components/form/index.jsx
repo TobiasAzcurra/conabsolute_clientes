@@ -60,6 +60,7 @@ const FormCustom = ({ cart, total }) => {
   // Estados para MercadoPago
   const [preferenceId, setPreferenceId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   const [isValidating, setIsValidating] = useState([false]);
 
@@ -519,6 +520,12 @@ const FormCustom = ({ cart, total }) => {
         }}
         validationSchema={formValidations}
         onSubmit={async (values) => {
+
+          if (altaDemanda?.message && altaDemanda.message !== '') {
+            setPendingValues(values);
+            setShowMessageModal(true);
+            return;
+          }
 
           if (altaDemanda?.out) {
             setShowOutOfStockModal(true);
@@ -1165,7 +1172,7 @@ const FormCustom = ({ cart, total }) => {
         onClose={() => setShowOutOfStockModal(false)}
         title="Sin stock"
       >
-        <p>Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche </p>
+        <p className='font-medium text-center'>Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche </p>
       </AppleModal>
 
       <AppleModal
@@ -1201,7 +1208,7 @@ const FormCustom = ({ cart, total }) => {
           }
         }}
       >
-        <p>
+        <p className='font-medium text-center'>
           Van +400 burgers ❤️‍🔥 En cocina están verificando si hay stock. Tu
           pedido estará pendiente de aprobación durante los próximos 3 a 5
           minutos, aceptas? <br />
@@ -1227,11 +1234,34 @@ const FormCustom = ({ cart, total }) => {
           setShowHighDemandModal(false);
         }}
       >
-        <p>
+        <p className='font-medium text-center'>
           Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
           {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
+      <AppleModal
+        isOpen={showMessageModal}
+        onClose={() => setShowMessageModal(false)}
+        title="Aviso Importante"
+        twoOptions={true}
+        isLoading={isModalConfirmLoading}
+        onConfirm={async () => {
+          setIsModalConfirmLoading(true);
+          if (pendingValues) {
+            const isReserva = pendingValues.hora.trim() !== '';
+            await processPedido(pendingValues, isReserva);
+          }
+          setIsModalConfirmLoading(false);
+          setShowMessageModal(false);
+        }}
+      >
+        <p className='font-medium text-center'>{altaDemanda?.message}</p>
+      </AppleModal>
+
+
+
+
+
     </div>
   );
 };
