@@ -1249,7 +1249,7 @@ const FormCustom = ({ cart, total }) => {
       <AppleModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
-        title="Aviso Importante"
+        title="Aviso importante"
         twoOptions={true}
         isLoading={isModalConfirmLoading}
         onConfirm={async () => {
@@ -1277,7 +1277,7 @@ const FormCustom = ({ cart, total }) => {
           setShowMessageModal(false);
         }}
       >
-        <p className='font-medium text-center'>{altaDemanda?.message}</p>
+        <p className='font-medium text-center'>{altaDemanda?.message} <br />Tendras un boton para pedir tu compensacion ❤️‍🔥  Aceptas?</p>
       </AppleModal>
 
 
