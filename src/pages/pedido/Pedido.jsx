@@ -855,7 +855,7 @@ const Pedido = () => {
 
                                             {/* pago virtual */}
                                             <div
-                                                className="bg-gray-300 text-blue-500 w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                                                className="bg-gray-300 text-blue-500 w-full text-blue-500 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
                                                 onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono)}
 
 
