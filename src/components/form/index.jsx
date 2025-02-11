@@ -1167,7 +1167,7 @@ const FormCustom = ({ cart, total }) => {
         onClose={closeTimeRestrictedModal}
         title="Está cerrado"
       >
-        <p className='text-center'>Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a 00:00 hs.</p>
+        <p className='font-medium text-center'>Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a 00:00 hs.</p>
       </AppleModal>
 
       {/* sin stock */}
