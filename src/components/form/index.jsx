@@ -549,13 +549,13 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
-          // if (!isWithinOrderTimeRange()) {
-          //   console.log(
-          //     'La hora actual está fuera del rango permitido para pedidos'
-          //   );
-          //   openTimeRestrictedModal();
-          //   return;
-          // }
+          if (!isWithinOrderTimeRange()) {
+            console.log(
+              'La hora actual está fuera del rango permitido para pedidos'
+            );
+            openTimeRestrictedModal();
+            return;
+          }
 
           if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
@@ -1167,7 +1167,7 @@ const FormCustom = ({ cart, total }) => {
         onClose={closeTimeRestrictedModal}
         title="Está cerrado"
       >
-        <p>Abrimos de lunes a domingo de 20:00 hs a 00:00 hs.</p>
+        <p className='text-center'>Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a 00:00 hs.</p>
       </AppleModal>
 
       {/* sin stock */}
