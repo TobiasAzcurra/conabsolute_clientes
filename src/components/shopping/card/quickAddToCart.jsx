@@ -23,6 +23,7 @@ const QuickAddToCart = ({
 	initialOrderQuantity = null,
 	isPedidoComponente = false,
 	currentOrder = null,
+	calculatedPrice = null,
 }) => {
 	const dispatch = useDispatch();
 	const { cart } = useSelector((state) => state.cartState);
@@ -48,18 +49,18 @@ const QuickAddToCart = ({
 
 	const cartItem = !isOrderItem
 		? cart.find(
-				(item) =>
-					item.name === product.name &&
-					item.category === (product.category || "default") &&
-					compareToppings(item.toppings, effectiveToppings)
-		  )
+			(item) =>
+				item.name === product.name &&
+				item.category === (product.category || "default") &&
+				compareToppings(item.toppings, effectiveToppings)
+		)
 		: null;
 
 	const initialQuantity = isOrderItem
 		? initialOrderQuantity || product.quantity
 		: cartItem
-		? cartItem.quantity
-		: 0;
+			? cartItem.quantity
+			: 0;
 
 	const [quantity, setQuantity] = useState(initialQuantity);
 	const [isAdding, setIsAdding] = useState(false);
@@ -138,9 +139,9 @@ const QuickAddToCart = ({
 							// Calculate the cost using the existing helper function
 							const costoBurger = productData
 								? calcularCostoHamburguesa(
-										materialesData,
-										productData.ingredients
-								  )
+									materialesData,
+									productData.ingredients
+								)
 								: 0;
 
 							// Calculate toppings cost
@@ -196,7 +197,7 @@ const QuickAddToCart = ({
 						} else {
 							const newItem = {
 								name: product.name,
-								price: product.price,
+								price: calculatedPrice || product.price, // Usar el precio calculado si está disponible
 								img: product.img,
 								toppings: effectiveToppings,
 								quantity: quantityRef.current,
@@ -235,13 +236,12 @@ const QuickAddToCart = ({
 					initial={{ width: 35 }}
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
-					className={`flex items-center absolute ${
-						shouldAnimateBothSides
+					className={`flex items-center absolute ${shouldAnimateBothSides
 							? "left-1/2 transform -translate-x-1/2"
 							: isCarritoPage || isPedidoComponente
-							? "left-0"
-							: "right-0"
-					} top-0 flex-row rounded-3xl font-black border-black border-2 bg-gray-100`}
+								? "left-0"
+								: "right-0"
+						} top-0 flex-row rounded-3xl font-black border-black border-2 bg-gray-100`}
 				>
 					<div
 						className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
@@ -280,9 +280,8 @@ const QuickAddToCart = ({
 				</button>
 			) : (
 				<div
-					className={`${
-						quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
-					} rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
+					className={`${quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
+						} rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
 					onClick={startAddingProcess}
 				>
 					{quantity > 0 ? quantity : "+"}

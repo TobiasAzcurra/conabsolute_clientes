@@ -12,6 +12,7 @@ import originalsPic from '../../../assets/masterpiecesPic.png';
 import friesPic from '../../../assets/friesPic.png';
 import QuickAddToCart from '../card/quickAddToCart';
 import VideoSlider from './VideoSlider';
+import { listenToAltaDemanda } from '../../../firebase/readConstants';
 
 const toppingPrice = 300;
 const toppingsArray = Object.values(toppings);
@@ -25,7 +26,17 @@ const DetailCard = ({ products, type }) => {
   const [disable, setDisable] = useState(false);
   const [dataTopping, setDataTopping] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [altaDemanda, setAltaDemanda] = useState(null);
   const cart = useSelector((state) => state.cartState.cart);
+
+  // Escucha cambios en alta demanda
+  useEffect(() => {
+    const unsubscribe = listenToAltaDemanda((altaDemandaData) => {
+      setAltaDemanda(altaDemandaData);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const product = products.find((p) => p.id === id);
 
@@ -59,39 +70,16 @@ const DetailCard = ({ products, type }) => {
     }
   };
 
-  const addToCart = (name, price, img, category) => {
-    setDisable(true);
-
-    const burgerObject = {
-      name,
-      price,
-      img,
-      toppings: dataTopping,
-      quantity,
-      category,
-    };
-
-    dispatch(addItem(burgerObject));
-    navigate(-1);
-  };
-
-  const incrementQuantity = () => {
-    setQuantity((prevQuantity) => prevQuantity + 1);
-  };
-
-  const decrementQuantity = () => {
-    setQuantity((prevQuantity) =>
-      prevQuantity > 1 ? prevQuantity - 1 : prevQuantity
-    );
-  };
-
-  // Calcula el precio total incluyendo toppings pagados
+  // Calcula el precio total incluyendo toppings pagados y priceFactor
   const totalPrice = useMemo(() => {
+    const basePrice = product.price;
     const toppingsCost = dataTopping
       .filter((t) => t.price > 0)
       .reduce((acc, t) => acc + t.price, 0);
-    return product.price + toppingsCost;
-  }, [product.price, dataTopping]);
+
+    const priceFactor = altaDemanda?.priceFactor || 1;
+    return (basePrice + toppingsCost) * priceFactor;
+  }, [product.price, dataTopping, altaDemanda?.priceFactor]);
 
   const getImageForType = (type) => {
     switch (type) {
@@ -184,7 +172,11 @@ const DetailCard = ({ products, type }) => {
           </div>
           <div className="flex flex-col items-center mb-8 mt-8 gap-2">
             {/* Pasa el producto al QuickAddToCart */}
-            <QuickAddToCart product={product} toppings={dataTopping} />
+            <QuickAddToCart
+              product={product}
+              toppings={dataTopping}
+              calculatedPrice={totalPrice} // Agregar esta prop
+            />
             <p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
               Por <strong>{currencyFormat(totalPrice)}</strong>.{' '}
               {product.type === 'satisfyer'
