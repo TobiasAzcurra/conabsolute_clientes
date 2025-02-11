@@ -22,7 +22,8 @@ const handleSubmit = async (
     couponCodes,
     descuento,
     isPending = false,
-    message = ""
+    message = "",
+    priceFactor = 1
 ) => {
     const coordinates = extractCoordinates(mapUrl);
     const materialesData = await ReadMateriales();
@@ -53,6 +54,7 @@ const handleSubmit = async (
         envio: values.deliveryMethod === "delivery" ? envio : 0,
         envioExpress: values.envioExpress || 0,
         message: message,
+        ...(priceFactor > 1 && { priceFactor }), // Solo incluir si es mayor a 1
         detallePedido: cart.map((item) => {
             const quantity = item.quantity !== undefined ? item.quantity : 0;
 
@@ -99,9 +101,9 @@ const handleSubmit = async (
             total + (item.price * item.quantity) +
             item.toppings.reduce((toppingTotal, topping) =>
                 toppingTotal + (topping.price || 0), 0
-            ) * item.quantity, 0) - descuento +  // Subtotal menos descuentos
-            (values.deliveryMethod === "delivery" ? envio : 0) +  // Envío si aplica
-            (values.envioExpress || 0),  // Envío express si aplica
+            ) * item.quantity, 0) - descuento +
+            (values.deliveryMethod === "delivery" ? envio : 0) +
+            (values.envioExpress || 0),
         fecha: obtenerFechaActual(),
         aclaraciones: values.aclaraciones || "",
         metodoPago: values.paymentMethod,

@@ -147,8 +147,6 @@ const FormCustom = ({ cart, total }) => {
         envioExpress: isEnabled ? expressDeliveryFee : 0,
       };
 
-      console.log('Submitting form with values:', updatedValues);
-
       const orderId = await handleSubmit(
         updatedValues,
         cart,
@@ -157,7 +155,9 @@ const FormCustom = ({ cart, total }) => {
         mapUrl,
         couponCodes,
         descuento,
-        message
+        false,
+        message,
+        altaDemanda?.priceFactor || 1
       );
 
       if (orderId) {
