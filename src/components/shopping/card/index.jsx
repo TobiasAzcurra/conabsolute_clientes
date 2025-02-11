@@ -124,7 +124,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
 	const [isLoaded, setIsLoaded] = useState(false);
 
-	const adjustedPrice = price * priceFactor;
+	const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
 
 	return (
 		<div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">

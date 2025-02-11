@@ -27,7 +27,7 @@ const Items = ({
 	}, []);
 
 
-	const adjustedPrice = selectedItem?.price * priceFactor;
+	const adjustedPrice = Math.ceil((selectedItem?.price * priceFactor) / 100) * 100;
 
 	// Cuando pasamos el producto a QuickAddToCart, incluimos el precio ajustado
 	const adjustedProduct = {
