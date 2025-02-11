@@ -1,5 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
+import { useState } from "react";
+import { listenToAltaDemanda } from '../../firebase/readConstants'
+import { useEffect } from "react";
 
 const Items = ({
 	selectedItem,
@@ -10,7 +13,27 @@ const Items = ({
 	isPedidoComponente = false,
 }) => {
 	// Importamos useLocation para obtener la ruta actual
+	const [priceFactor, setPriceFactor] = useState(1);
 	const location = useLocation();
+
+
+
+	useEffect(() => {
+		const unsubscribe = listenToAltaDemanda((altaDemanda) => {
+			setPriceFactor(altaDemanda.priceFactor);
+		});
+
+		return () => unsubscribe();
+	}, []);
+
+
+	const adjustedPrice = selectedItem?.price * priceFactor;
+
+	// Cuando pasamos el producto a QuickAddToCart, incluimos el precio ajustado
+	const adjustedProduct = {
+		...selectedItem,
+		price: adjustedPrice
+	};
 
 	// Función para capitalizar cada palabra con solo la primera letra en mayúscula
 	const capitalizeWords = (str) => {
@@ -27,9 +50,8 @@ const Items = ({
 		? "border-2 border-black border-opacity-100"
 		: "border border-black border-opacity-20";
 
-	const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
-		isCarrito || isPedidoComponente ? "w-[110px]" : "w-full max-w-[200px]"
-	}`;
+	const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${isCarrito || isPedidoComponente ? "w-[110px]" : "w-full max-w-[200px]"
+		}`;
 
 	// Ajustamos la fuente de la imagen solo si estamos en /carrito
 	let imageSrc = img;
@@ -37,6 +59,8 @@ const Items = ({
 		imageSrc =
 			img.startsWith("/menu/") || img.startsWith("http") ? img : `/menu/${img}`;
 	}
+
+
 
 	const content = (
 		<>
@@ -48,24 +72,23 @@ const Items = ({
 				/>
 			</div>
 			<div
-				className={`font-coolvetica text-center ${
-					isCarrito || isPedidoComponente
-						? "flex flex-col items-center justify-between h-[93px]"
-						: "h-[50px]"
-				}`}
+				className={`font-coolvetica text-center ${isCarrito || isPedidoComponente
+					? "flex flex-col items-center justify-between h-[93px]"
+					: "h-[50px]"
+					}`}
 			>
 				<h5 className="mt-1 text-xs font-medium tracking-tight">
 					{capitalizeWords(name)}
 				</h5>
 				{isCarrito && selectedItem && (
 					<div className="pb-3">
-						<QuickAddToCart product={selectedItem} animateFromCenter={true} />
+						<QuickAddToCart product={adjustedProduct} animateFromCenter={true} />
 					</div>
 				)}
 				{isPedidoComponente && selectedItem && (
 					<div className="pb-3">
 						<QuickAddToCart
-							product={selectedItem}
+							product={adjustedProduct}
 							animateFromCenter={true}
 							isPedidoComponente={isPedidoComponente}
 							currentOrder={currentOrder}
