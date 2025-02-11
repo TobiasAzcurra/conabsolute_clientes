@@ -273,7 +273,7 @@ const AppRouter = () => {
 				<div className="relative mb-[90px]">
 					<div className="flex justify-center w-full">
 						{/* Search by phonenumber */}
-						<div className="bg-gray-100 bg-opacity-60  border border-black border-opacity-30 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
+						<div className="bg-opacity-60  border border-gray-100 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
 							<div className="flex items-center w-full">
 								<input
 									type="text"
@@ -281,9 +281,9 @@ const AppRouter = () => {
 									onChange={(e) => setPhoneNumber(e.target.value)}
 									onKeyDown={handleKeyDown}
 									placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-									className="text-black placeholder:text-gray-600 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
+									className="text-gray-100 placeholder:text-gray-100 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
 								/>
-								<button onClick={handleSearch} className="bg-gray-100 border-black  border border-opacity-30 h-10 w-20 flex items-center justify-center rounded-r-full">
+								<button onClick={handleSearch} className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full">
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
 										<path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
 									</svg>

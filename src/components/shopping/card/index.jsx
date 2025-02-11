@@ -4,10 +4,19 @@ import currencyFormat from "../../../helpers/currencyFormat";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { listenToAltaDemanda } from "../../../firebase/readConstants";
 
 const Card = ({ name, description, price, img, path, id, category, type }) => {
 	const [rating, setRating] = useState(0);
+	const [priceFactor, setPriceFactor] = useState(1);
 
+	useEffect(() => {
+		const unsubscribe = listenToAltaDemanda((altaDemanda) => {
+			setPriceFactor(altaDemanda.priceFactor);
+		});
+
+		return () => unsubscribe();
+	}, []);
 	useEffect(() => {
 		const fetchRating = async () => {
 			try {
@@ -115,12 +124,14 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
 	const [isLoaded, setIsLoaded] = useState(false);
 
+	const adjustedPrice = price * priceFactor;
+
 	return (
 		<div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
 
 			<div className="absolute right-3.5 top-2.5 z-40">
 				<QuickAddToCart
-					product={{ name, description, price, img, path, id, category, type }}
+					product={{ name, description, price: adjustedPrice, img, path, id, category, type }}
 				/>
 			</div>
 
@@ -154,13 +165,13 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 						{type === "promo" ? (
 							<div className="flex flex-row gap-2 items-baseline">
 								<span className="font-bold text-4xl text-black">
-									{currencyFormat(price)}
+									{currencyFormat(adjustedPrice)}
 								</span>
-								<p className="font-light line-through opacity-30">{currencyFormat(price * 2)}</p>
+								<p className="font-light line-through opacity-30">{currencyFormat(adjustedPrice * 2)}</p>
 							</div>
 						) : (
 							<span className="font-bold text-4xl text-black">
-								{currencyFormat(price)}
+								{currencyFormat(adjustedPrice)}
 							</span>
 						)}
 						{!excludedNames.includes(name) && rating > 0 && (

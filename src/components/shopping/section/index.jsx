@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { items } from "../../../pages/menu/MenuPage";
 import Card from "../card";
 import { useSelector } from "react-redux";
-import StickerCanvas from "../../StickerCanvas";
 
 const Section = ({ products = [], path }) => {
 	const cart = useSelector((state) => state.cartState.cart);
@@ -13,25 +12,6 @@ const Section = ({ products = [], path }) => {
 	let satisfyer = [];
 	let promo = [];
 
-	//   {
-	//     "name": "Crispy BCN",
-	//     "description": "Doble smash burger de nuestro blend de carnes, cheddar, cebolla crispy, bacon y salsa barbecue envuelto en un delicioso pan de papa. Incluye porción de papas.",
-	//     "price": 9970,
-	//     "id": "35135ASFA",
-	//     "type": "our",
-	//     "img": "crispy.png",
-	//     "category": "burger"
-	//   },
-
-	// {
-	//   "description": "2 Triples smash burger de nuestro blend de carnes, cheddar,  envuelto en un delicioso pan de papa Incluye dos porciones de papas.",
-	//   "img": "promo2x1bcn.png",
-	//   "id": "PROMO2X1BCN",
-	//   "name": "2x1 Triple Cheeseburger",
-	//   "price": 10360,
-	//   "type": "promo",
-	//   "category": "burger"
-	// }
 	if (items.burgers === path) {
 		promo = products.filter((product) => product.type.includes("promo"));
 		originalsBurgers = products.filter((product) =>

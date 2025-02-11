@@ -9,6 +9,7 @@ export interface AltaDemandaProps {
   open: boolean;
   out: boolean;
   message: string;
+  priceFactor: number;
 }
 
 // Función para leer una sola vez
@@ -31,7 +32,9 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
         isHighDemand: data.isHighDemand,
         open: data.open,
         out: data.out,  // Incluir out aquí también
-        message: data.message
+        message: data.message,
+        priceFactor: data.priceFactor
+
       };
     } else {
       console.log('No se encontró el documento de Alta Demanda');
@@ -65,7 +68,9 @@ export const listenToAltaDemanda = (
           isHighDemand: data.isHighDemand,
           open: data.open,
           out: data.out,  // Incluir out en el callback
-          message: data.message
+          message: data.message,
+          priceFactor: data.priceFactor
+
 
         });
       } else {
