@@ -112,11 +112,11 @@ const CartCard = ({
 		const toppingsTotal =
 			toppings && Array.isArray(toppings)
 				? toppings.reduce((acc, topping) => {
-						if (typeof topping === "object" && topping?.price) {
-							return acc + topping.price;
-						}
-						return acc;
-				  }, 0)
+					if (typeof topping === "object" && topping?.price) {
+						return acc + topping.price;
+					}
+					return acc;
+				}, 0)
 				: 0;
 		return (price || 0) + toppingsTotal;
 	};
@@ -126,9 +126,8 @@ const CartCard = ({
 	return (
 		<div className="relative">
 			<div
-				className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
-					isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
-				}`}
+				className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
+					}`}
 			>
 				<div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden">
 					<img
@@ -141,9 +140,8 @@ const CartCard = ({
 				<div className="flex flex-col w-2/3 justify-center px-4 pt-2 pb-4">
 					<div>
 						<h3
-							className={`text-2xl font-bold mb-1.5 ${
-								showConfirmation ? "truncate leading-none" : "leading-6"
-							}`}
+							className={`text-2xl font-bold mb-1.5 ${showConfirmation ? "truncate leading-none" : "leading-6"
+								}`}
 						>
 							{capitalizeWords(name)}
 						</h3>
@@ -155,7 +153,7 @@ const CartCard = ({
 					</div>
 					<div className="flex flex-col items-start">
 						<p className="text-2xl font-bold mb-4 mt-[-5px]">
-							{currencyFormat(totalPrice)}
+							{currencyFormat(totalPrice * quantity)}
 						</p>
 						<div className="flex flex-col w-full gap-2">
 							<QuickAddToCart
@@ -184,11 +182,10 @@ const CartCard = ({
 									<button
 										onClick={handleDelete}
 										disabled={isDeleting}
-										className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${
-											isDeleting
+										className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${isDeleting
 												? "opacity-50 cursor-not-allowed"
 												: "cursor-pointer"
-										}`}
+											}`}
 									>
 										<div className="flex items-center gap-1">
 											{isDeleting ? (
