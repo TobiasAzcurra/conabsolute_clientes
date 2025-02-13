@@ -78,7 +78,9 @@ const DetailCard = ({ products, type }) => {
       .reduce((acc, t) => acc + t.price, 0);
 
     const priceFactor = altaDemanda?.priceFactor || 1;
-    return (basePrice + toppingsCost) * priceFactor;
+
+    // Aplicamos la misma fórmula de redondeo que en los otros componentes
+    return Math.ceil(((basePrice + toppingsCost) * priceFactor) / 100) * 100;
   }, [product.price, dataTopping, altaDemanda?.priceFactor]);
 
   const getImageForType = (type) => {
