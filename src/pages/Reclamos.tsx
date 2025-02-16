@@ -41,29 +41,9 @@ const Reclamos = () => {
                     onSubmit={handleSubmit}
                     className="w-full max-w-md space-y-4 bg-gray-50 p-6 rounded-lg shadow-md"
                 >
-                    <div className="flex flex-col space-y-2">
-                        <label className="font-semibold">Nombre completo</label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={formData.nombre}
-                            onChange={handleChange}
-                            required
-                            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
-                        />
-                    </div>
 
-                    <div className="flex flex-col space-y-2">
-                        <label className="font-semibold">Correo electrónico</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
-                        />
-                    </div>
+
+
 
                     <div className="flex flex-col space-y-2">
                         <label className="font-semibold">Teléfono</label>
@@ -77,17 +57,6 @@ const Reclamos = () => {
                         />
                     </div>
 
-                    <div className="flex flex-col space-y-2">
-                        <label className="font-semibold">Número de pedido</label>
-                        <input
-                            type="text"
-                            name="pedido"
-                            value={formData.pedido}
-                            onChange={handleChange}
-                            required
-                            className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
-                        />
-                    </div>
 
                     <div className="flex flex-col space-y-2">
                         <label className="font-semibold">Descripción del reclamo</label>
