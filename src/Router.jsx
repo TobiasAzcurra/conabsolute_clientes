@@ -12,7 +12,6 @@ import drinks from "./assets/drinks-v1.json";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
-import Footer from "./components/Footer";
 import React, { useEffect, useState } from "react";
 import OrderChecker from "./components/OrderChecker"
 
@@ -21,6 +20,7 @@ import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
 import FloatingCart from "./components/shopping/FloatingCart";
 import SuccessPage from "./pages/menu/SuccessPage";
+import Reclamos from "./pages/Reclamos";
 import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 import { getOrderById } from "./firebase/getPedido"; // Importamos la función getOrderById
@@ -360,6 +360,7 @@ const AppRouter = () => {
 				<Route path="/success/:orderId" element={<SuccessPage />} />
 				<Route path="/pedido/:orderId" element={<Pedido />} />
 				<Route path="/pedido" element={<Pedido />} />
+				<Route path="/reclamos" element={<Reclamos />} />
 				<Route path="/feedback" element={<Feedback />} />
 				<Route
 					path="*"
