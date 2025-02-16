@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from "../assets/anheloTMblack.png";
+import { searchOrdersByPhone } from '../firebase/getPedido';
 
 const Reclamos = () => {
     const [formData, setFormData] = useState({
@@ -8,6 +8,8 @@ const Reclamos = () => {
     });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
+    const [searching, setSearching] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -30,11 +32,23 @@ const Reclamos = () => {
         }));
     };
 
+    const handleSearch = async () => {
+        if (formData.telefono.length < 8) return;
+
+        setSearching(true);
+        try {
+            const orders = await searchOrdersByPhone(formData.telefono);
+            setSearchResults(orders);
+        } catch (error) {
+            console.error("Error al buscar pedidos:", error);
+        } finally {
+            setSearching(false);
+        }
+    };
+
     return (
         <div className="bg-gray-100 min-h-screen flex flex-col">
             <div className="flex items-center flex-col pt-16 px-4">
-                <img src={logo} className="w-2/3 mb-8" alt="Logo" />
-
                 {submitted && (
                     <div className="w-full max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
                         <p className="text-xl">¡Reclamo enviado!</p>
@@ -50,16 +64,54 @@ const Reclamos = () => {
                             </svg>
                             <label className="font-coolvetica text-lg">Teléfono</label>
                         </div>
-                        <input
-                            type="tel"
-                            name="telefono"
-                            value={formData.telefono}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tu número de teléfono"
-                            className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica"
-                        />
+                        <div className="flex gap-2">
+                            <input
+                                type="tel"
+                                name="telefono"
+                                value={formData.telefono}
+                                onChange={handleChange}
+                                required
+                                placeholder="Ingresa tu número de teléfono"
+                                className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica flex-1"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleSearch}
+                                disabled={searching || formData.telefono.length < 8}
+                                className="px-4 bg-gray-800 text-white rounded-2xl hover:bg-gray-700 disabled:opacity-50"
+                            >
+                                {searching ? 'Buscando...' : 'Buscar'}
+                            </button>
+                        </div>
                     </div>
+
+                    {searchResults.length > 0 && (
+                        <div className="space-y-4 my-4">
+                            <h3 className="font-coolvetica text-lg">Pedidos encontrados:</h3>
+                            {searchResults.map((order) => (
+                                <div
+                                    key={order.id}
+                                    className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
+                                >
+                                    <div className="space-y-2">
+                                        <p><strong>Fecha:</strong> {order.fecha}</p>
+                                        <p><strong>Total:</strong> ${order.total}</p>
+                                        <p><strong>Estado:</strong> {order.canceled ? 'Cancelado' : (order.elaborado ? 'Elaborado' : 'Pendiente')}</p>
+                                        <div>
+                                            <strong>Pedido:</strong>
+                                            <ul className="list-disc pl-5">
+                                                {order.detallePedido.map((item, index) => (
+                                                    <li key={index}>
+                                                        {item.quantity}x {item.burger}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <div className="flex flex-col space-y-2">
                         <div className="flex items-center gap-2 mb-2">
