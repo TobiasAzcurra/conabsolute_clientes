@@ -179,7 +179,7 @@ const Reclamos = () => {
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100 p-4 rounded-3xl mx-4  border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'} cursor-pointer transition-all`}
+                                    className={`bg-gray-100 p-4  rounded-3xl mx-4  border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'} cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <p className='text-4xl font-bold'> {currencyFormat(order.total)}</p>
