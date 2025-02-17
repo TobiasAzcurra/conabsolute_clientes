@@ -211,8 +211,8 @@ const Reclamos = () => {
     };
 
     return (
-        <div className="bg-gray-100 py-4  justify-center font-coolvetica flex flex-col">
-            <div className="flex items-center flex-col pt-16">
+        <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
+            <div className="flex items-center flex-col ">
                 {submitted && (
                     <div className="w-full px-4 max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
                         <p className="text-xl">¡Reclamo enviado!</p>
