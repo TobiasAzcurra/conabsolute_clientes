@@ -164,7 +164,7 @@ const Reclamos = () => {
                 <div className="flex flex-col  px-4 mb-2">
                     <button
                         onClick={handleReset}
-                        className="text-sm text-gray-600 flex flex-row items-center gap-1  text-left hover:text-gray-800"
+                        className="text-sm text-gray-600  absolute top-4 w-min left-4 flex flex-row items-center gap-1  text-left hover:text-gray-800"
                     >
                         <img src={arrow} className='h-2 rotate-180 opacity-60' alt="" />
                         Volver
