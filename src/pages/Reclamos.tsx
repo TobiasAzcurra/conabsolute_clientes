@@ -120,7 +120,7 @@ const Reclamos = () => {
     const renderReclamoStatus = (order) => {
         if (order.reclamo) {
             return (
-                <div className="mt-8 p-2 bg-red-50 rounded-lg">
+                <div className="mt-8 p-2 bg-red-200 rounded-lg">
                     <p className="text-red-700"><strong>Reclamo existente:</strong></p>
                     <p className="text-sm text-red-600">{order.reclamo.descripcion}</p>
                     <p className="text-xs text-red-500">
@@ -142,7 +142,7 @@ const Reclamos = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+                <form onSubmit={handleSubmit} className="w-full max-w-md space-y-8">
                     <div className="flex flex-col px-4 space-y-2">
                         <div className="flex gap-2">
                             <input
@@ -166,18 +166,18 @@ const Reclamos = () => {
                     </div>
 
                     {searchResults.length > 0 && (
-                        <div className="space-y-2">
-                            <h3 className="font-coolvetica text-xl px-4 text-center">Selecciona el pedido para el reclamo:</h3>
+                        <div className="">
+                            <h3 className="font-coolvetica text-sm px-4 text-center mb-4">Selecciona el pedido para el reclamo:</h3>
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100  p-4 shadow-md   border-y relative ${selectedOrder?.id === order.id ? 'border-black' : 'border-gray-200'
+                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-4' : 'border-gray-300'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <p className='text-4xl font-bold '> ${order.total}</p>
                                     <p className='text-sm mt-1 font-medium  '>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
-                                    <div className={`${order.canceled ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
+                                    <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
                                         {order.canceled ? 'Cancelado' : 'Entregado'}
                                     </div>
                                     <div className='mt-6'>
