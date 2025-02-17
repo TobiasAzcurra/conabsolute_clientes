@@ -166,7 +166,7 @@ const Reclamos = () => {
                     </div>
 
                     {searchResults.length > 0 && (
-                        <div className=" space-y-2 ">
+                        <div className="space-y-2">
                             <h3 className="font-coolvetica text-xl text-center">Selecciona el pedido para el reclamo:</h3>
                             {searchResults.map((order) => (
                                 <div
@@ -175,17 +175,15 @@ const Reclamos = () => {
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
-                                    {order.canceled && (
-                                        <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm">
-                                            Cancelado
-                                        </div>
-                                    )}
                                     <p className='text-4xl font-bold '> ${order.total}</p>
-                                    <p className='text- font-medium mt- '>{order.fecha}</p>
+                                    <p className='text-sm mt-1 font-medium  '>en efectivo el {order.fecha} a Marcelo T. De Alvear 546</p>
+                                    <div className={`${order.canceled ? 'bg-red-500' : 'bg-green-500'} w-min text-white px-4 h-10 items-center mt-1 flex rounded-full text-sm`}>
+                                        {order.canceled ? 'Cancelado' : 'Entregado'}
+                                    </div>
                                     <div className='mt-6'>
-                                        <ul className="">
+                                        <ul className="flex justify-center flex-col items-center">
                                             {order.detallePedido.map((item, index) => (
-                                                <li key={index}>
+                                                <li key={index} className='font-medium text-sm'>
                                                     {item.quantity}x {item.burger}
                                                 </li>
                                             ))}
@@ -234,8 +232,8 @@ const Reclamos = () => {
                         )}
                     </button>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
