@@ -169,7 +169,7 @@ const Reclamos = () => {
                         <img src={arrow} className='h-2 rotate-180 opacity-60' alt="" />
                         Volver
                     </button>
-                    <h3 className={`font-coolvetica text-sm text-center ${selectedOrder ? '' : 'mt-4'}`}>
+                    <h3 className={`font-coolvetica text-sm text-center mb-4 ${selectedOrder ? '' : 'mt-8'}`}>
                         {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
                     </h3>
                 </div>
@@ -237,7 +237,7 @@ const Reclamos = () => {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="w-full max-w-md space-y-8">
+                <form onSubmit={handleSubmit} className="w-full max-w-md">
                     {isSearchMode && (
                         <div className="flex flex-col px-4 space-y-2">
                             <div className="flex gap-2">
@@ -265,7 +265,7 @@ const Reclamos = () => {
                     {renderOrdersSection()}
 
                     {selectedOrder && (
-                        <div className="flex flex-col px-4 ">
+                        <div className="flex flex-col px-4 mt-2">
                             <input
                                 name="descripcion"
                                 value={formData.descripcion}
@@ -275,6 +275,8 @@ const Reclamos = () => {
                                 placeholder="Que paso con tu pedido?"
                                 className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm   "
                             />
+
+                            {/* enviar con mt8 */}
                             <button
                                 type="submit"
                                 disabled={loading || !selectedOrder}
