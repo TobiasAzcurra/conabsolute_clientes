@@ -171,12 +171,12 @@ const Reclamos = () => {
                     </div>
 
                     {searchResults.length > 0 && (
-                        <div className="">
-                            <h3 className="font-coolvetica text-sm px-4 text-center mb-4">Selecciona el pedido para el reclamo:</h3>
+                        <div className="space-y-2">
+                            <h3 className="font-coolvetica text-sm px-4 text-center mb-4">Selecciona el pedido fallido:</h3>
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100 p-4 border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2 shadow-md' : 'border-gray-300'} cursor-pointer transition-all`}
+                                    className={`bg-gray-100 p-4 rounded-3xl mx-4  border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'} cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <p className='text-4xl font-bold'> ${order.total}</p>
