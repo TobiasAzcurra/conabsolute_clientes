@@ -168,7 +168,7 @@ const Reclamos = () => {
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2' : 'border-gray-300'
+                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2 shadow-md ' : 'border-gray-300'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
