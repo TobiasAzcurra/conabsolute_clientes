@@ -169,7 +169,7 @@ const Reclamos = () => {
                         <img src={arrow} className='h-2 rotate-180 opacity-60' alt="" />
                         Volver
                     </button>
-                    <h3 className="font-coolvetica text-sm mt-4 text-center">
+                    <h3 className={`font-coolvetica text-sm text-center ${selectedOrder ? '' : 'mt-4'}`}>
                         {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
                     </h3>
                 </div>
