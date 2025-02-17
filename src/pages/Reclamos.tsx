@@ -120,12 +120,9 @@ const Reclamos = () => {
     const renderReclamoStatus = (order) => {
         if (order.reclamo) {
             return (
-                <div className="mt-8 p-2 bg-red-200 rounded-lg">
-                    <p className="text-red-700"><strong>Reclamo existente:</strong></p>
-                    <p className="text-sm text-red-600">{order.reclamo.descripcion}</p>
-                    <p className="text-xs text-red-500">
-                        Estado: {order.reclamo.resuelto ? 'Resuelto' : 'Pendiente'}
-                    </p>
+                <div className='px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm bg-red-100 '>
+                    <p className="text-red-700">Reclamo en curso</p>
+
                 </div>
             );
         }
@@ -171,14 +168,18 @@ const Reclamos = () => {
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-4' : 'border-gray-300'
+                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2' : 'border-gray-300'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <p className='text-4xl font-bold '> ${order.total}</p>
                                     <p className='text-sm mt-1 font-medium  '>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
-                                    <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
-                                        {order.canceled ? 'Cancelado' : 'Entregado'}
+                                    <div className='flex flex-row gap-2'>
+
+                                        <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
+                                            {order.canceled ? 'Cancelado' : 'Entregado'}
+                                        </div>
+                                        {renderReclamoStatus(order)}
                                     </div>
                                     <div className='mt-6'>
                                         <ul className="flex justify-center flex-col items-left">
@@ -189,7 +190,7 @@ const Reclamos = () => {
                                             ))}
                                         </ul>
                                     </div>
-                                    {renderReclamoStatus(order)}
+
                                 </div>
                             ))}
                         </div>
