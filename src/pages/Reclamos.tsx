@@ -266,14 +266,14 @@ const Reclamos = () => {
 
                     {selectedOrder && (
                         <div className="flex flex-col px-4 space-y-2">
-                            <textarea
+                            <input
                                 name="descripcion"
                                 value={formData.descripcion}
                                 onChange={handleChange}
                                 required
                                 rows={4}
                                 placeholder="Describe tu problema aquí"
-                                className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica resize-none"
+                                className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm   "
                             />
                             <button
                                 type="submit"
