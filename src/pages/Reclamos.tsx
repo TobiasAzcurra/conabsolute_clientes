@@ -180,7 +180,7 @@ const Reclamos = () => {
                                     onClick={() => setSelectedOrder(order)}
                                 >
                                     <p className='text-4xl font-bold'> ${order.total}</p>
-                                    <p className='text-sm text-gray-600 hover:text-gray-900 font-medium'>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
+                                    <p className='text-sm text-gray-600  font-medium'>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
                                     <div className='flex flex-row gap-2'>
                                         <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
                                             {order.canceled ? 'Cancelado' : 'Entregado'}
