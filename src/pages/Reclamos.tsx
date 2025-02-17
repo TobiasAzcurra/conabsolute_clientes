@@ -229,7 +229,7 @@ const Reclamos = () => {
         return (
             <div className="bg-gray-100 px-4 min-h-screen justify-center font-coolvetica flex flex-col items-center">
                 <p className="text-2xl text-center font-bold">Reclamo enviado con exito!</p>
-                <p className=" text-sm text-center text-gray-600">Damos lo mejor de nosotros pero a veces hay cosas que escapan de nuestro control y nos responsabilizamos cuando ocurre, es nuestro deber con la gente que nos elige ❤️‍🩹
+                <p className=" text-sm text-center text-gray-600">Damos lo mejor de nosotros pero a veces hay cosas que escapan de nuestro control y nos responsabilizamos cuando ocurre! Es nuestro deber con la gente que nos elige ❤️‍🩹
                     <br />En breve te transfieren la compensacion y aca van unos regalos!
                 </p>
             </div>
