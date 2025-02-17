@@ -161,7 +161,7 @@ const Reclamos = () => {
 
         return (
             <div className="space-y-2">
-                <div className="flex flex-col  px-4 mb-4">
+                <div className="flex flex-col  px-4 mb-2">
                     <button
                         onClick={handleReset}
                         className="text-sm text-gray-600 flex flex-row items-center gap-1  text-left hover:text-gray-800"
