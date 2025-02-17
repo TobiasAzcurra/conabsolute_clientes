@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { searchOrdersByPhone } from '../firebase/getPedido';
+import { getFirestore, doc, runTransaction } from "firebase/firestore";
 
 const Reclamos = () => {
     const [formData, setFormData] = useState({
@@ -10,18 +11,87 @@ const Reclamos = () => {
     const [loading, setLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
-    const handleSubmit = (e) => {
+    const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo) => {
+        const firestore = getFirestore();
+        const [day, month, year] = fecha.split("/");
+
+        // Referencia al documento del día
+        const ordersDocRef = doc(firestore, "pedidos", year, month, day);
+
+        console.log(`📝 Iniciando actualización del reclamo para el pedido ID ${orderId} en la fecha ${fecha}`);
+
+        try {
+            await runTransaction(firestore, async (transaction) => {
+                // 1. Obtener el documento actual
+                const docSnapshot = await transaction.get(ordersDocRef);
+                if (!docSnapshot.exists()) {
+                    throw new Error("No existen pedidos para la fecha especificada.");
+                }
+
+                // 2. Encontrar el pedido específico
+                const pedidosDelDia = docSnapshot.data()?.pedidos || [];
+                const pedidoIndex = pedidosDelDia.findIndex(pedido => pedido.id === orderId);
+
+                if (pedidoIndex === -1) {
+                    throw new Error("Pedido no encontrado en los pedidos del día.");
+                }
+
+                // 3. Crear el array actualizado de pedidos con la nueva estructura de reclamo
+                const pedidosActualizados = [...pedidosDelDia];
+                pedidosActualizados[pedidoIndex] = {
+                    ...pedidosActualizados[pedidoIndex],
+                    reclamo: {
+                        descripcion: descripcionReclamo,
+                        resuelto: false,
+                        fecha: new Date().toISOString()
+                    }
+                };
+
+                // 4. Actualizar el documento
+                transaction.update(ordersDocRef, {
+                    pedidos: pedidosActualizados
+                });
+
+                console.log(`✅ Reclamo registrado exitosamente para el pedido ID ${orderId}`);
+            });
+
+            return true;
+        } catch (error) {
+            console.error("❌ Error al registrar el reclamo:", error);
+            throw error;
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!selectedOrder) {
+            alert('Por favor selecciona un pedido');
+            return;
+        }
+
         setLoading(true);
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            await updateOrderWithComplaint(
+                selectedOrder.id,
+                selectedOrder.fecha,
+                formData.descripcion
+            );
+
             setSubmitted(true);
-            setLoading(false);
             setFormData({ telefono: '', descripcion: '' });
+            setSelectedOrder(null);
+            setSearchResults([]);
+
             setTimeout(() => setSubmitted(false), 3000);
-        }, 1000);
+        } catch (error) {
+            console.error('Error al enviar el reclamo:', error);
+            alert('Error al enviar el reclamo. Por favor intenta nuevamente.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleChange = (e) => {
@@ -44,6 +114,22 @@ const Reclamos = () => {
         } finally {
             setSearching(false);
         }
+    };
+
+    // Función para mostrar el estado del reclamo si existe
+    const renderReclamoStatus = (order) => {
+        if (order.reclamo) {
+            return (
+                <div className="mt-2 p-2 bg-red-50 rounded-lg">
+                    <p className="text-red-700"><strong>Reclamo existente:</strong></p>
+                    <p className="text-sm text-red-600">{order.reclamo.descripcion}</p>
+                    <p className="text-xs text-red-500">
+                        Estado: {order.reclamo.resuelto ? 'Resuelto' : 'Pendiente'}
+                    </p>
+                </div>
+            );
+        }
+        return null;
     };
 
     return (
@@ -87,11 +173,15 @@ const Reclamos = () => {
 
                     {searchResults.length > 0 && (
                         <div className="space-y-4 my-4">
-                            <h3 className="font-coolvetica text-lg">Pedidos encontrados:</h3>
+                            <h3 className="font-coolvetica text-lg">Selecciona el pedido para el reclamo:</h3>
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className="bg-white rounded-lg shadow-md p-4 border border-gray-200"
+                                    className={`bg-white rounded-lg shadow-md p-4 border ${selectedOrder?.id === order.id
+                                            ? 'border-black'
+                                            : 'border-gray-200'
+                                        } cursor-pointer transition-all`}
+                                    onClick={() => setSelectedOrder(order)}
                                 >
                                     <div className="space-y-2">
                                         <p><strong>Fecha:</strong> {order.fecha}</p>
@@ -107,6 +197,7 @@ const Reclamos = () => {
                                                 ))}
                                             </ul>
                                         </div>
+                                        {renderReclamoStatus(order)}
                                     </div>
                                 </div>
                             ))}
@@ -133,9 +224,9 @@ const Reclamos = () => {
 
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !selectedOrder}
                         className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
-                            ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
+                            ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
                             transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
                     >
                         {loading ? (
