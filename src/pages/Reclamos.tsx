@@ -4,7 +4,6 @@ import { getFirestore, doc, runTransaction } from "firebase/firestore";
 import currencyFormat from '../helpers/currencyFormat';
 import arrow from '../assets/arrowIcon.png'
 
-
 const Reclamos = () => {
     const [formData, setFormData] = useState({
         telefono: '',
@@ -18,7 +17,7 @@ const Reclamos = () => {
     const [expandedOrders, setExpandedOrders] = useState(new Set());
 
     const toggleOrderDetails = (orderId, event) => {
-        event.stopPropagation(); // Prevent triggering the order selection
+        event.stopPropagation();
         setExpandedOrders(prev => {
             const newSet = new Set(prev);
             if (newSet.has(orderId)) {
@@ -30,10 +29,18 @@ const Reclamos = () => {
         });
     };
 
+    const handleOrderSelect = (order) => {
+        if (selectedOrder?.id === order.id) {
+            setSelectedOrder(null); // Deselect if clicking the same order
+        } else {
+            setSelectedOrder(order);
+        }
+    };
+
+    // Rest of the existing functions remain the same...
     const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo) => {
         const firestore = getFirestore();
         const [day, month, year] = fecha.split("/");
-
         const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
         console.log(`📝 Iniciando actualización del reclamo para el pedido ID ${orderId} en la fecha ${fecha}`);
@@ -65,8 +72,6 @@ const Reclamos = () => {
                 transaction.update(ordersDocRef, {
                     pedidos: pedidosActualizados
                 });
-
-                console.log(`✅ Reclamo registrado exitosamente para el pedido ID ${orderId}`);
             });
 
             return true;
@@ -122,6 +127,7 @@ const Reclamos = () => {
         try {
             const orders = await searchOrdersByPhone(formData.telefono);
             setSearchResults(orders);
+            setSelectedOrder(null); // Reset selection when searching
         } catch (error) {
             console.error("Error al buscar pedidos:", error);
         } finally {
@@ -132,7 +138,7 @@ const Reclamos = () => {
     const renderReclamoStatus = (order) => {
         if (order.reclamo) {
             return (
-                <div className='px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm bg-red-100 '>
+                <div className='px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm bg-red-100'>
                     <p className="text-red-700">Reclamo en curso</p>
                 </div>
             );
@@ -140,9 +146,73 @@ const Reclamos = () => {
         return null;
     };
 
+    const renderOrdersSection = () => {
+        if (!searchResults.length) return null;
+
+        const ordersToShow = selectedOrder ? [selectedOrder] : searchResults;
+
+        return (
+            <div className="space-y-2">
+                <h3 className="font-coolvetica text-sm px-4 text-center mb-4">
+                    {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
+                </h3>
+                {ordersToShow.map((order) => (
+                    <div
+                        key={order.id}
+                        className={`bg-gray-100 p-4 rounded-3xl mx-4 border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'
+                            } cursor-pointer transition-all`}
+                        onClick={() => handleOrderSelect(order)}
+                    >
+                        <p className='text-4xl font-bold'>{currencyFormat(order.total)}</p>
+                        <p className='text-sm text-gray-600 font-medium'>
+                            En {order.metodoPago} el {order.fecha} para {
+                                order.direccion
+                                    ? `enviar a ${order.direccion}`
+                                    : 'retirar por Buenos Aires 618, X5800 Río Cuarto, Córdoba, Argentina'
+                            }
+                        </p>
+                        <div className='flex flex-row gap-2'>
+                            <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'
+                                } w-min px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
+                                {order.canceled ? 'Cancelado' : 'Entregado'}
+                            </div>
+                            {renderReclamoStatus(order)}
+                        </div>
+                        <div className='mt-6'>
+                            <button
+                                type="button"
+                                onClick={(e) => toggleOrderDetails(order.id, e)}
+                                className="text-sm text-gray-600 flex flex-row gap-1 font-medium items-center"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4">
+                                    <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clipRule="evenodd" />
+                                </svg>
+                                <p>Pedido</p>
+                                <img
+                                    src={arrow}
+                                    alt=""
+                                    className={`h-2 opacity-70 ml-2 ${expandedOrders.has(order.id) ? '-rotate-90' : 'rotate-90'}`}
+                                />
+                            </button>
+                            {expandedOrders.has(order.id) && (
+                                <ul className="flex justify-center flex-col items-left mt-2">
+                                    {order.detallePedido.map((item, index) => (
+                                        <li key={index} className='font-medium text-sm'>
+                                            {item.quantity}x {item.burger}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
-        <div className="bg-gray-100 py-4 justify-center font-coolvetica flex flex-col">
-            <div className="flex items-center flex-col pt-16 ">
+        <div className="bg-gray-100 py-4  justify-center font-coolvetica flex flex-col">
+            <div className="flex items-center flex-col pt-16">
                 {submitted && (
                     <div className="w-full px-4 max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
                         <p className="text-xl">¡Reclamo enviado!</p>
@@ -173,93 +243,42 @@ const Reclamos = () => {
                         </div>
                     </div>
 
-                    {searchResults.length > 0 && (
-                        <div className="space-y-2">
-                            <h3 className="font-coolvetica text-sm px-4 text-center mb-4">Selecciona el pedido fallido:</h3>
-                            {searchResults.map((order) => (
-                                <div
-                                    key={order.id}
-                                    className={`bg-gray-100 p-4  rounded-3xl mx-4  border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'} cursor-pointer transition-all`}
-                                    onClick={() => setSelectedOrder(order)}
-                                >
-                                    <p className='text-4xl font-bold'> {currencyFormat(order.total)}</p>
-                                    <p className='text-sm text-gray-600  font-medium'>En {order.metodoPago} el {order.fecha} para {order.direccion ? `enviar a ${order.direccion}` : 'retirar por Buenos Aires 618, X5800 Río Cuarto, Córdoba, Argentina'}</p>
-                                    <div className='flex flex-row gap-2'>
-                                        <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
-                                            {order.canceled ? 'Cancelado' : 'Entregado'}
-                                        </div>
-                                        {renderReclamoStatus(order)}
-                                    </div>
-                                    <div className='mt-6'>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                toggleOrderDetails(order.id, e);
-                                            }}
-                                            className="text-sm text-gray-600 flex flex-row gap-1 font-medium items-center"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4">
-                                                <path fill-rule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z" clip-rule="evenodd" />
-                                            </svg>
+                    {renderOrdersSection()}
 
-                                            <p>Pedido
-                                            </p>
-
-                                            {expandedOrders.has(order.id) ? <img src={arrow} alt="" className='h-2 opacity-70 ml-2 -rotate-90' /> : <img src={arrow} alt="" className='h-2 opacity-70 ml-2 rotate-90' />}
-                                        </button>
-                                        {expandedOrders.has(order.id) && (
-                                            <ul className="flex justify-center flex-col items-left mt-2">
-                                                {order.detallePedido.map((item, index) => (
-                                                    <li key={index} className='font-medium text-sm'>
-                                                        {item.quantity}x {item.burger}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                    {selectedOrder && (
+                        <div className="flex flex-col px-4 space-y-2">
+                            <textarea
+                                name="descripcion"
+                                value={formData.descripcion}
+                                onChange={handleChange}
+                                required
+                                rows={4}
+                                placeholder="Describe tu problema aquí"
+                                className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica resize-none"
+                            />
+                            <button
+                                type="submit"
+                                disabled={loading || !selectedOrder}
+                                className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
+                            ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
+                            transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
+                            >
+                                {loading ? (
+                                    <>
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Enviando...
+                                    </>
+                                ) : (
+                                    'Enviar'
+                                )}
+                            </button>
                         </div>
                     )}
 
-                    <div className="flex flex-col px-4 space-y-2">
-                        <textarea
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleChange}
-                            required
-                            rows={4}
-                            placeholder="Describe tu problema aquí"
-                            className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica resize-none"
-                        />
-                    </div>
 
-                    <div className='px-4'>
-                        <button
-                            type="submit"
-                            disabled={loading || !selectedOrder}
-                            className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
-                            ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
-                            transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
-                        >
-                            {loading ? (
-                                <>
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Enviando...
-                                </>
-                            ) : (
-                                <>
-
-                                    Enviar
-                                </>
-                            )}
-                        </button>
-                    </div>
                 </form>
             </div>
         </div>
