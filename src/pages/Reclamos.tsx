@@ -15,6 +15,7 @@ const Reclamos = () => {
     const [searching, setSearching] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [expandedOrders, setExpandedOrders] = useState(new Set());
+    const [isSearchMode, setIsSearchMode] = useState(true);
 
     const toggleOrderDetails = (orderId, event) => {
         event.stopPropagation();
@@ -31,19 +32,16 @@ const Reclamos = () => {
 
     const handleOrderSelect = (order) => {
         if (selectedOrder?.id === order.id) {
-            setSelectedOrder(null); // Deselect if clicking the same order
+            setSelectedOrder(null);
         } else {
             setSelectedOrder(order);
         }
     };
 
-    // Rest of the existing functions remain the same...
     const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo) => {
         const firestore = getFirestore();
         const [day, month, year] = fecha.split("/");
         const ordersDocRef = doc(firestore, "pedidos", year, month, day);
-
-        console.log(`📝 Iniciando actualización del reclamo para el pedido ID ${orderId} en la fecha ${fecha}`);
 
         try {
             await runTransaction(firestore, async (transaction) => {
@@ -102,6 +100,7 @@ const Reclamos = () => {
             setSelectedOrder(null);
             setSearchResults([]);
             setExpandedOrders(new Set());
+            setIsSearchMode(true);
 
             setTimeout(() => setSubmitted(false), 3000);
         } catch (error) {
@@ -127,12 +126,21 @@ const Reclamos = () => {
         try {
             const orders = await searchOrdersByPhone(formData.telefono);
             setSearchResults(orders);
-            setSelectedOrder(null); // Reset selection when searching
+            setSelectedOrder(null);
+            setIsSearchMode(false);
         } catch (error) {
             console.error("Error al buscar pedidos:", error);
         } finally {
             setSearching(false);
         }
+    };
+
+    const handleReset = () => {
+        setIsSearchMode(true);
+        setSearchResults([]);
+        setSelectedOrder(null);
+        setFormData({ telefono: '', descripcion: '' });
+        setExpandedOrders(new Set());
     };
 
     const renderReclamoStatus = (order) => {
@@ -153,9 +161,18 @@ const Reclamos = () => {
 
         return (
             <div className="space-y-2">
-                <h3 className="font-coolvetica text-sm px-4 text-center mb-4">
-                    {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
-                </h3>
+                <div className="flex flex-col  px-4 mb-4">
+                    <button
+                        onClick={handleReset}
+                        className="text-sm text-gray-600 flex flex-row items-center gap-1  text-left hover:text-gray-800"
+                    >
+                        <img src={arrow} className='h-2 rotate-180 opacity-60' alt="" />
+                        Volver
+                    </button>
+                    <h3 className="font-coolvetica text-sm mt-4 text-center">
+                        {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
+                    </h3>
+                </div>
                 {ordersToShow.map((order) => (
                     <div
                         key={order.id}
@@ -212,7 +229,7 @@ const Reclamos = () => {
 
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
-            <div className="flex items-center flex-col ">
+            <div className="flex items-center flex-col">
                 {submitted && (
                     <div className="w-full px-4 max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
                         <p className="text-xl">¡Reclamo enviado!</p>
@@ -221,27 +238,29 @@ const Reclamos = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-8">
-                    <div className="flex flex-col px-4 space-y-2">
-                        <div className="flex gap-2">
-                            <input
-                                type="tel"
-                                name="telefono"
-                                value={formData.telefono}
-                                onChange={handleChange}
-                                required
-                                placeholder="Ingresa tu número de teléfono"
-                                className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica flex-1"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleSearch}
-                                disabled={searching || formData.telefono.length < 8}
-                                className="px-4 bg-gray-800 text-white rounded-2xl hover:bg-gray-700 disabled:opacity-50"
-                            >
-                                {searching ? 'Buscando...' : 'Buscar'}
-                            </button>
+                    {isSearchMode && (
+                        <div className="flex flex-col px-4 space-y-2">
+                            <div className="flex gap-2">
+                                <input
+                                    type="tel"
+                                    name="telefono"
+                                    value={formData.telefono}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Ingresa tu número de teléfono"
+                                    className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica flex-1"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleSearch}
+                                    disabled={searching || formData.telefono.length < 8}
+                                    className="px-4 bg-gray-800 text-white rounded-2xl hover:bg-gray-700 disabled:opacity-50"
+                                >
+                                    {searching ? 'Buscando...' : 'Buscar'}
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {renderOrdersSection()}
 
@@ -260,8 +279,8 @@ const Reclamos = () => {
                                 type="submit"
                                 disabled={loading || !selectedOrder}
                                 className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
-                            ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
-                            transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
+                                ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
+                                transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
                             >
                                 {loading ? (
                                     <>
@@ -277,8 +296,6 @@ const Reclamos = () => {
                             </button>
                         </div>
                     )}
-
-
                 </form>
             </div>
         </div>
