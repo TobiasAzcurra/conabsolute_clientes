@@ -134,16 +134,16 @@ const Reclamos = () => {
 
     return (
         <div className="bg-gray-100 py-4 justify-center font-coolvetica flex flex-col">
-            <div className="flex items-center flex-col pt-16 px-4">
+            <div className="flex items-center flex-col pt-16 ">
                 {submitted && (
-                    <div className="w-full max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
+                    <div className="w-full px-4 max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
                         <p className="text-xl">¡Reclamo enviado!</p>
                         <p className="mt-2">Nos contactaremos contigo pronto.</p>
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col px-4 space-y-2">
                         <div className="flex gap-2">
                             <input
                                 type="tel"
@@ -167,11 +167,11 @@ const Reclamos = () => {
 
                     {searchResults.length > 0 && (
                         <div className="space-y-2">
-                            <h3 className="font-coolvetica text-xl text-center">Selecciona el pedido para el reclamo:</h3>
+                            <h3 className="font-coolvetica text-xl px-4 text-center">Selecciona el pedido para el reclamo:</h3>
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-white rounded-lg shadow-md p-4 border relative ${selectedOrder?.id === order.id ? 'border-black' : 'border-gray-200'
+                                    className={`bg-gray-100  p-4 shadow-md   border-y relative ${selectedOrder?.id === order.id ? 'border-black' : 'border-gray-200'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
@@ -181,7 +181,7 @@ const Reclamos = () => {
                                         {order.canceled ? 'Cancelado' : 'Entregado'}
                                     </div>
                                     <div className='mt-6'>
-                                        <ul className="flex justify-center flex-col items-center">
+                                        <ul className="flex justify-center flex-col items-left">
                                             {order.detallePedido.map((item, index) => (
                                                 <li key={index} className='font-medium text-sm'>
                                                     {item.quantity}x {item.burger}
@@ -195,7 +195,7 @@ const Reclamos = () => {
                         </div>
                     )}
 
-                    <div className="flex flex-col space-y-2">
+                    <div className="flex flex-col px-4 space-y-2">
                         <textarea
                             name="descripcion"
                             value={formData.descripcion}
@@ -207,30 +207,33 @@ const Reclamos = () => {
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading || !selectedOrder}
-                        className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
+                    <div className='px-4'>
+                        <button
+                            type="submit"
+                            disabled={loading || !selectedOrder}
+                            className={`w-full bg-black text-white  font-coolvetica text-2xl h-20 rounded-3xl font-bold 
                             ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
                             transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
-                    >
-                        {loading ? (
-                            <>
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Enviando...
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6">
-                                    <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-                                </svg>
-                                Enviar Reclamo
-                            </>
-                        )}
-                    </button>
+                        >
+                            {loading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Enviando...
+                                </>
+                            ) : (
+                                <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6">
+                                        <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                                    </svg>
+                                    Enviar Reclamo
+                                </>
+                            )}
+                        </button>
+                    </div>
+
                 </form>
             </div >
         </div >
