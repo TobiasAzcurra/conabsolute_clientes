@@ -133,7 +133,7 @@ const Reclamos = () => {
     };
 
     return (
-        <div className="bg-gray-100  py-4 justify-center flex flex-col">
+        <div className="bg-gray-100 py-4 justify-center font-coolvetica flex flex-col">
             <div className="flex items-center flex-col pt-16 px-4">
                 {submitted && (
                     <div className="w-full max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
@@ -144,7 +144,6 @@ const Reclamos = () => {
 
                 <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
                     <div className="flex flex-col space-y-2">
-
                         <div className="flex gap-2">
                             <input
                                 type="tel"
@@ -167,40 +166,38 @@ const Reclamos = () => {
                     </div>
 
                     {searchResults.length > 0 && (
-                        <div className="space-y-4 my-4">
-                            <h3 className="font-coolvetica text-lg">Selecciona el pedido para el reclamo:</h3>
+                        <div className=" space-y-2 ">
+                            <h3 className="font-coolvetica text-xl text-center">Selecciona el pedido para el reclamo:</h3>
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-white rounded-lg shadow-md p-4 border ${selectedOrder?.id === order.id
-                                        ? 'border-black'
-                                        : 'border-gray-200'
+                                    className={`bg-white rounded-lg shadow-md p-4 border relative ${selectedOrder?.id === order.id ? 'border-black' : 'border-gray-200'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
-                                    <div className="space-y-2">
-                                        <p><strong>Fecha:</strong> {order.fecha}</p>
-                                        <p><strong>Total:</strong> ${order.total}</p>
-                                        <p><strong>Estado:</strong> {order.canceled ? 'Cancelado' : (order.elaborado ? 'Elaborado' : 'Pendiente')}</p>
-                                        <div>
-                                            <strong>Pedido:</strong>
-                                            <ul className="list-disc pl-5">
-                                                {order.detallePedido.map((item, index) => (
-                                                    <li key={index}>
-                                                        {item.quantity}x {item.burger}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                    {order.canceled && (
+                                        <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm">
+                                            Cancelado
                                         </div>
-                                        {renderReclamoStatus(order)}
+                                    )}
+                                    <p className='text-4xl font-bold '> ${order.total}</p>
+                                    <p className='text- font-medium mt- '>{order.fecha}</p>
+                                    <div className='mt-6'>
+                                        <ul className="">
+                                            {order.detallePedido.map((item, index) => (
+                                                <li key={index}>
+                                                    {item.quantity}x {item.burger}
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
+                                    {renderReclamoStatus(order)}
                                 </div>
                             ))}
                         </div>
                     )}
 
                     <div className="flex flex-col space-y-2">
-
                         <textarea
                             name="descripcion"
                             value={formData.descripcion}
