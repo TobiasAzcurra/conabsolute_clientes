@@ -101,8 +101,6 @@ const Reclamos = () => {
             setSearchResults([]);
             setExpandedOrders(new Set());
             setIsSearchMode(true);
-
-            setTimeout(() => setSubmitted(false), 3000);
         } catch (error) {
             console.error('Error al enviar el reclamo:', error);
             alert('Error al enviar el reclamo. Por favor intenta nuevamente.');
@@ -227,16 +225,18 @@ const Reclamos = () => {
         );
     };
 
+    if (submitted) {
+        return (
+            <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col items-center">
+                <p className="text-2xl text-center">Reclamo enviado con exito!</p>
+                <p className=" text-sm text-center">Damos lo mejor de nosotros pero a veces hay cosas que escapan de nuestro control</p>
+            </div>
+        );
+    }
+
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
             <div className="flex items-center flex-col">
-                {submitted && (
-                    <div className="w-full px-4 max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
-                        <p className="text-xl">¡Reclamo enviado!</p>
-                        <p className="mt-2">Nos contactaremos contigo pronto.</p>
-                    </div>
-                )}
-
                 <form onSubmit={handleSubmit} className="w-full max-w-md">
                     {isSearchMode && (
                         <div className="flex flex-col px-4 space-y-2">
@@ -273,10 +273,8 @@ const Reclamos = () => {
                                 required
                                 rows={4}
                                 placeholder="Que paso con tu pedido?"
-                                className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm   "
+                                className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm"
                             />
-
-                            {/* enviar con mt8 */}
                             <button
                                 type="submit"
                                 disabled={loading || !selectedOrder}
