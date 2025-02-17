@@ -272,7 +272,7 @@ const Reclamos = () => {
                                 onChange={handleChange}
                                 required
                                 rows={4}
-                                placeholder="Describe tu problema aquí"
+                                placeholder="Que paso con tu pedido?"
                                 className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm   "
                             />
                             <button
