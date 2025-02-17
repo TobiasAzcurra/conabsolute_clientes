@@ -197,9 +197,9 @@ const Reclamos = () => {
                                                 e.stopPropagation();
                                                 toggleOrderDetails(order.id, e);
                                             }}
-                                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                                            className="text-sm text-gray-600 font-medium"
                                         >
-                                            {expandedOrders.has(order.id) ? 'Ocultar pedido' : 'Ver pedido...'}
+                                            {expandedOrders.has(order.id) ? 'Ocultar pedido' : 'Ver pedido'}
                                         </button>
                                         {expandedOrders.has(order.id) && (
                                             <ul className="flex justify-center flex-col items-left mt-2">
