@@ -12,25 +12,36 @@ const Reclamos = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [expandedOrders, setExpandedOrders] = useState(new Set());
+
+    const toggleOrderDetails = (orderId, event) => {
+        event.stopPropagation(); // Prevent triggering the order selection
+        setExpandedOrders(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(orderId)) {
+                newSet.delete(orderId);
+            } else {
+                newSet.add(orderId);
+            }
+            return newSet;
+        });
+    };
 
     const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo) => {
         const firestore = getFirestore();
         const [day, month, year] = fecha.split("/");
 
-        // Referencia al documento del día
         const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
         console.log(`📝 Iniciando actualización del reclamo para el pedido ID ${orderId} en la fecha ${fecha}`);
 
         try {
             await runTransaction(firestore, async (transaction) => {
-                // 1. Obtener el documento actual
                 const docSnapshot = await transaction.get(ordersDocRef);
                 if (!docSnapshot.exists()) {
                     throw new Error("No existen pedidos para la fecha especificada.");
                 }
 
-                // 2. Encontrar el pedido específico
                 const pedidosDelDia = docSnapshot.data()?.pedidos || [];
                 const pedidoIndex = pedidosDelDia.findIndex(pedido => pedido.id === orderId);
 
@@ -38,7 +49,6 @@ const Reclamos = () => {
                     throw new Error("Pedido no encontrado en los pedidos del día.");
                 }
 
-                // 3. Crear el array actualizado de pedidos con la nueva estructura de reclamo
                 const pedidosActualizados = [...pedidosDelDia];
                 pedidosActualizados[pedidoIndex] = {
                     ...pedidosActualizados[pedidoIndex],
@@ -49,7 +59,6 @@ const Reclamos = () => {
                     }
                 };
 
-                // 4. Actualizar el documento
                 transaction.update(ordersDocRef, {
                     pedidos: pedidosActualizados
                 });
@@ -84,6 +93,7 @@ const Reclamos = () => {
             setFormData({ telefono: '', descripcion: '' });
             setSelectedOrder(null);
             setSearchResults([]);
+            setExpandedOrders(new Set());
 
             setTimeout(() => setSubmitted(false), 3000);
         } catch (error) {
@@ -116,13 +126,11 @@ const Reclamos = () => {
         }
     };
 
-    // Función para mostrar el estado del reclamo si existe
     const renderReclamoStatus = (order) => {
         if (order.reclamo) {
             return (
                 <div className='px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm bg-red-100 '>
                     <p className="text-red-700">Reclamo en curso</p>
-
                 </div>
             );
         }
@@ -168,29 +176,34 @@ const Reclamos = () => {
                             {searchResults.map((order) => (
                                 <div
                                     key={order.id}
-                                    className={`bg-gray-100  p-4    border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2 shadow-md ' : 'border-gray-300'
-                                        } cursor-pointer transition-all`}
+                                    className={`bg-gray-100 p-4 border-y relative ${selectedOrder?.id === order.id ? 'border-black border-y-2 shadow-md' : 'border-gray-300'} cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
-                                    <p className='text-4xl font-bold '> ${order.total}</p>
-                                    <p className='text-sm mt-1 font-medium  '>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
+                                    <p className='text-4xl font-bold'> ${order.total}</p>
+                                    <p className='text-sm text-gray-600 hover:text-gray-900 font-medium'>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
                                     <div className='flex flex-row gap-2'>
-
-                                        <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
+                                        <div className={`${order.canceled ? 'text-red-500 bg-red-200' : 'text-green-500 bg-green-200'} w-min px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
                                             {order.canceled ? 'Cancelado' : 'Entregado'}
                                         </div>
                                         {renderReclamoStatus(order)}
                                     </div>
                                     <div className='mt-6'>
-                                        <ul className="flex justify-center flex-col items-left">
-                                            {order.detallePedido.map((item, index) => (
-                                                <li key={index} className='font-medium text-sm'>
-                                                    {item.quantity}x {item.burger}
-                                                </li>
-                                            ))}
-                                        </ul>
+                                        <button
+                                            onClick={(e) => toggleOrderDetails(order.id, e)}
+                                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                                        >
+                                            {expandedOrders.has(order.id) ? 'Ocultar pedido' : 'Ver pedido...'}
+                                        </button>
+                                        {expandedOrders.has(order.id) && (
+                                            <ul className="flex justify-center flex-col items-left mt-2">
+                                                {order.detallePedido.map((item, index) => (
+                                                    <li key={index} className='font-medium text-sm'>
+                                                        {item.quantity}x {item.burger}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </div>
-
                                 </div>
                             ))}
                         </div>
@@ -212,7 +225,7 @@ const Reclamos = () => {
                         <button
                             type="submit"
                             disabled={loading || !selectedOrder}
-                            className={`w-full bg-black text-white  font-coolvetica text-2xl h-20 rounded-3xl font-bold 
+                            className={`w-full bg-black text-white font-coolvetica text-2xl h-20 rounded-3xl font-bold 
                             ${(loading || !selectedOrder) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-900'} 
                             transition-colors duration-200 mt-8 flex items-center justify-center gap-2`}
                         >
@@ -234,10 +247,9 @@ const Reclamos = () => {
                             )}
                         </button>
                     </div>
-
                 </form>
-            </div >
-        </div >
+            </div>
+        </div>
     );
 };
 
