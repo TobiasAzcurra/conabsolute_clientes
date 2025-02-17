@@ -133,7 +133,7 @@ const Reclamos = () => {
     };
 
     return (
-        <div className="bg-gray-100 min-h-screen flex flex-col">
+        <div className="bg-gray-100 h-screen justify-center flex flex-col">
             <div className="flex items-center flex-col pt-16 px-4">
                 {submitted && (
                     <div className="w-full max-w-md bg-black text-white font-coolvetica rounded-3xl p-4 mb-6 text-center">
@@ -178,8 +178,8 @@ const Reclamos = () => {
                                 <div
                                     key={order.id}
                                     className={`bg-white rounded-lg shadow-md p-4 border ${selectedOrder?.id === order.id
-                                            ? 'border-black'
-                                            : 'border-gray-200'
+                                        ? 'border-black'
+                                        : 'border-gray-200'
                                         } cursor-pointer transition-all`}
                                     onClick={() => setSelectedOrder(order)}
                                 >
