@@ -189,7 +189,12 @@ const Reclamos = () => {
                                     </div>
                                     <div className='mt-6'>
                                         <button
-                                            onClick={(e) => toggleOrderDetails(order.id, e)}
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                toggleOrderDetails(order.id, e);
+                                            }}
                                             className="text-sm text-gray-600 hover:text-gray-900 font-medium"
                                         >
                                             {expandedOrders.has(order.id) ? 'Ocultar pedido' : 'Ver pedido...'}
