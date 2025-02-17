@@ -177,7 +177,7 @@ const Reclamos = () => {
                                 >
                                     <p className='text-4xl font-bold '> ${order.total}</p>
                                     <p className='text-sm mt-1 font-medium  '>En {order.metodoPago} el {order.fecha} {order.direccion ? `a ${order.direccion}` : 'por take away'}</p>
-                                    <div className={`${order.canceled ? 'bg-red-500' : 'bg-green-500'} w-min text-white px-4 h-10 items-center mt-1 flex rounded-full text-sm`}>
+                                    <div className={`${order.canceled ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'} w-min  px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}>
                                         {order.canceled ? 'Cancelado' : 'Entregado'}
                                     </div>
                                     <div className='mt-6'>
