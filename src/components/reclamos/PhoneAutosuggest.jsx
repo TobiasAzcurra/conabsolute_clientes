@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingPoints from '../LoadingPoints';
 
 const PhoneAutosuggest = ({ value, onChange, onSearch, searching }) => {
     const [showSuggestion, setShowSuggestion] = useState(false);
@@ -49,11 +50,8 @@ const PhoneAutosuggest = ({ value, onChange, onSearch, searching }) => {
                     className={`h-10 w-20 bg-black flex items-center justify-center border-l border-black rounded-r-full ${searching ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     {searching ? (
-                        <div className="flex space-x-1">
-                            <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
-                            <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
-                            <div className="w-1 h-1 bg-white rounded-full animate-bounce"></div>
-                        </div>
+                        <LoadingPoints color="text-gray-100" />
+
                     ) : (
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
