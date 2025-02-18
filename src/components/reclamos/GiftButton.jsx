@@ -19,6 +19,11 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
         throw new Error("Datos del pedido incompletos - Necesario: ID y fecha");
     }
 
+    // Check if order already has gift vouchers
+    if (orderData.reclamo?.gift && orderData.reclamo.gift.length > 0) {
+        throw new Error("Este pedido ya tiene vouchers de regalo asignados");
+    }
+
     const firestore = getFirestore();
     const vouchersDocRef = doc(firestore, "vouchers", "Compensaciones");
     const [day, month, year] = orderData.fecha.split("/");
@@ -30,36 +35,12 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
         const result = await runTransaction(firestore, async (transaction) => {
             console.log("Starting transaction...");
 
-            // Check vouchers document
-            const voucherSnapshot = await transaction.get(vouchersDocRef);
-            if (!voucherSnapshot.exists()) {
-                console.error("Voucher document not found");
-                throw new Error("El documento de compensaciones no existe. Path: vouchers/Compensaciones");
-            }
-            console.log("Voucher document found");
-
-            const currentData = voucherSnapshot.data();
-            console.log("Current voucher data:", {
-                currentCodigos: (currentData.codigos || []).length,
-                currentUsados: currentData.usados,
-                currentCreados: currentData.creados
-            });
-
-            // Generate new vouchers
-            const newVouchers = Array.from({ length: 5 }, (_, index) => ({
-                codigo: generateRandomCode(),
-                estado: "disponible",
-                num: (currentData.creados || 0) + index + 1
-            }));
-            console.log("Generated new vouchers:", newVouchers.map(v => v.codigo));
-
-            // Check order document
+            // Check order document first to validate no existing gift
             const orderSnapshot = await transaction.get(ordersDocRef);
             if (!orderSnapshot.exists()) {
                 console.error("Order document not found:", `pedidos/${year}/${month}/${day}`);
                 throw new Error(`No existen pedidos para la fecha ${day}/${month}/${year}`);
             }
-            console.log("Order document found");
 
             const pedidosDelDia = orderSnapshot.data()?.pedidos || [];
             const pedidoIndex = pedidosDelDia.findIndex(pedido => pedido.id === orderData.id);
@@ -68,7 +49,27 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
                 console.error("Order not found in document. Order ID:", orderData.id);
                 throw new Error("Pedido no encontrado en los pedidos del día");
             }
-            console.log("Found order at index:", pedidoIndex);
+
+            // Double-check for existing gift vouchers in the database
+            if (pedidosDelDia[pedidoIndex].reclamo?.gift && pedidosDelDia[pedidoIndex].reclamo.gift.length > 0) {
+                throw new Error("Este pedido ya tiene vouchers de regalo asignados");
+            }
+
+            // Check vouchers document
+            const voucherSnapshot = await transaction.get(vouchersDocRef);
+            if (!voucherSnapshot.exists()) {
+                console.error("Voucher document not found");
+                throw new Error("El documento de compensaciones no existe. Path: vouchers/Compensaciones");
+            }
+
+            const currentData = voucherSnapshot.data();
+
+            // Generate new vouchers
+            const newVouchers = Array.from({ length: 5 }, (_, index) => ({
+                codigo: generateRandomCode(),
+                estado: "disponible",
+                num: (currentData.creados || 0) + index + 1
+            }));
 
             // Prepare updates
             const pedidosActualizados = [...pedidosDelDia];
@@ -83,7 +84,6 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
             };
 
             // Perform updates
-            console.log("Updating vouchers document...");
             transaction.update(vouchersDocRef, {
                 codigos: [...(currentData.codigos || []), ...newVouchers],
                 creados: (currentData.creados || 0) + 5,
@@ -92,7 +92,6 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
                 titulo: "Compensaciones"
             });
 
-            console.log("Updating order document...");
             transaction.update(ordersDocRef, {
                 pedidos: pedidosActualizados
             });
@@ -110,10 +109,23 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
 
 const GiftButton = ({ orderData }) => {
     const [loading, setLoading] = useState(false);
+    const [hasExistingGift, setHasExistingGift] = useState(false);
+
+    // Check for existing gift on component mount
+    React.useEffect(() => {
+        if (orderData?.reclamo?.gift && orderData.reclamo.gift.length > 0) {
+            setHasExistingGift(true);
+        }
+    }, [orderData]);
 
     const handleGiftClick = async () => {
         if (!orderData) {
             alert('No hay datos del pedido disponibles');
+            return;
+        }
+
+        if (hasExistingGift) {
+            alert('Este pedido ya tiene vouchers de regalo asignados');
             return;
         }
 
@@ -124,6 +136,7 @@ const GiftButton = ({ orderData }) => {
             const result = await generateVouchersAndUpdateOrder(orderData);
             console.log("Voucher generation successful:", result);
             alert('¡Vouchers generados con éxito!');
+            setHasExistingGift(true); // Update state after successful generation
         } catch (error) {
             console.error('Error detallado:', error);
             alert(`Error al generar los vouchers: ${error.message}`);
@@ -131,6 +144,18 @@ const GiftButton = ({ orderData }) => {
             setLoading(false);
         }
     };
+
+    // If there's an existing gift, disable the button and show different text
+    if (hasExistingGift) {
+        return (
+            <button
+                disabled
+                className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-gray-400 text-gray-100 rounded-3xl h-20 font-bold opacity-50 cursor-not-allowed'
+            >
+                Vouchers ya reclamados
+            </button>
+        );
+    }
 
     return (
         <button
