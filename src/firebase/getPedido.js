@@ -305,12 +305,12 @@ export const cancelOrder = async (orderId) => {
  */
 
 
-const generateDatePaths = (months = 3) => {
+const generateDatePaths = (days = 7) => {
 	const paths = [];
 	const today = new Date();
 
-	// Go back 3 months and iterate through each day
-	for (let i = 0; i < months * 30; i++) {
+	// Iteramos por 7 días en lugar de months * 30
+	for (let i = 0; i < days; i++) {
 		const date = new Date(today);
 		date.setDate(today.getDate() - i);
 
@@ -335,7 +335,7 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 
 	try {
 		// Generate paths for the last 3 months
-		const datePaths = generateDatePaths(1);
+		const datePaths = generateDatePaths(7);
 		console.log(`📅 Buscando en ${datePaths.length} días`);
 
 		// Query each date path
