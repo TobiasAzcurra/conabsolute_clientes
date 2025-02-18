@@ -248,26 +248,26 @@ const Reclamos = () => {
             <div className="flex items-center flex-col">
                 <form onSubmit={handleSubmit} className="w-full max-w-md">
                     {isSearchMode && (
-                        <div className="flex flex-col px-4 space-y-2">
-                            <div className="flex gap-2">
-                                <input
-                                    type="tel"
-                                    name="telefono"
-                                    value={formData.telefono}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Ingresa tu número de teléfono"
-                                    className="p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-200 font-coolvetica flex-1"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleSearch}
-                                    disabled={searching || formData.telefono.length < 8}
-                                    className="px-4 bg-gray-800 text-white rounded-2xl hover:bg-gray-700 disabled:opacity-50"
-                                >
-                                    {searching ? 'Buscando...' : 'Buscar'}
-                                </button>
-                            </div>
+                        <div className=" border-2 border-black  h-10 flex items-center z-50 rounded-full mx-4 ">
+
+                            <input
+                                type="tel"
+                                name="telefono"
+                                value={formData.telefono}
+                                onChange={handleChange}
+                                required
+                                placeholder="Ingresa tu número de teléfono"
+                                className="text-black px-4 placeholder:text-gray-600 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleSearch}
+                                disabled={searching || formData.telefono.length < 8}
+                                className=" h-10 w-20 flex items-center justify-center border-l border-black rounded-r-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
+                                    <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
                         </div>
                     )}
 
