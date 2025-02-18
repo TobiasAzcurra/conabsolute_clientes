@@ -335,7 +335,7 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 
 	try {
 		// Generate paths for the last 3 months
-		const datePaths = generateDatePaths(7);
+		const datePaths = generateDatePaths(30);
 		console.log(`📅 Buscando en ${datePaths.length} días`);
 
 		// Query each date path
