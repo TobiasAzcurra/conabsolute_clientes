@@ -169,7 +169,7 @@ const Reclamos = () => {
                         <img src={arrow} className='h-2 rotate-180 opacity-60' alt="" />
                         Volver
                     </button>
-                    <h3 className={`font-coolvetica text-sm text-center  ${selectedOrder ? '' : 'mt-8'}`}>
+                    <h3 className={`font-coolvetica text-sm text-center  ${selectedOrder ? 'mt-2' : 'mt-2'}`}>
                         {selectedOrder ? 'Pedido seleccionado:' : 'Selecciona el pedido fallido:'}
                     </h3>
                 </div>
@@ -247,7 +247,7 @@ const Reclamos = () => {
 
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
-            <div className={`w-full flex flex-col justify-center items-center mb-4 ${selectedOrder ? 'mt-12' : 'mt-12'}`}>
+            <div className={`w-full flex flex-col justify-center items-center mb-4 ${selectedOrder ? '' : 'mt-12'}`}>
 
                 <img
                     src={logo}
