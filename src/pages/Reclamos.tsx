@@ -247,11 +247,15 @@ const Reclamos = () => {
 
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
-            <img
-                src={logo}
-                className={`w-2/3 mb-4 flex mx-auto ${selectedOrder ? 'mt-12' : 'mt-12'}`}
-                alt=""
-            />
+            <div className={`w-full flex flex-col justify-center items-center mb-4 ${selectedOrder ? 'mt-12' : 'mt-12'}`}>
+
+                <img
+                    src={logo}
+                    className={`w-2/3 flex mx-auto `}
+                    alt=""
+                />
+                <p className='font-bold text-xs'>RECLAMOS</p>
+            </div>
             <div className="flex items-center flex-col">
                 <form onSubmit={handleSubmit} className="w-full max-w-md">
                     {isSearchMode && (
