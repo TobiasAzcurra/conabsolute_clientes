@@ -82,6 +82,20 @@ input[type="number"]::-moz-number-spin-box {
   -moz-appearance: textfield;
 }
 
+@layer components {
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+    -webkit-text-fill-color: rgba(3, 3, 3, 0.87) !important;
+    /* Usando el mismo color que tienes en :root */
+    transition: background-color 5000s ease-in-out 0s;
+    caret-color: rgba(3, 3, 3, 0.87);
+    /* Para que el cursor también sea visible */
+  }
+}
+
 .autocomplete-container input,
 .autocomplete-control {
   box-sizing: border-box;
