@@ -24,6 +24,7 @@ const Reclamos = () => {
     const [isSearchMode, setIsSearchMode] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [error, setError] = useState('');
+    const [hasSearched, setHasSearched] = useState(false);
 
     const toggleOrderDetails = (orderId, event) => {
         event.stopPropagation();
@@ -71,7 +72,6 @@ const Reclamos = () => {
                     throw new Error("Pedido no encontrado en los pedidos del día.");
                 }
 
-                // Verificar si ya existe un reclamo
                 if (pedidosDelDia[pedidoIndex].reclamo) {
                     throw new Error("Este pedido ya tiene un reclamo en curso.");
                 }
@@ -149,6 +149,7 @@ const Reclamos = () => {
 
         setSearching(true);
         setError('');
+        setHasSearched(true);
         try {
             const orders = await searchOrdersByPhone(formData.telefono);
             setSearchResults(orders);
@@ -170,6 +171,7 @@ const Reclamos = () => {
         setFormData({ telefono: '', descripcion: '', alias: '' });
         setExpandedOrders(new Set());
         setError('');
+        setHasSearched(false);
     };
 
     const renderReclamoStatus = (order) => {
@@ -184,6 +186,12 @@ const Reclamos = () => {
     };
 
     const renderOrdersSection = () => {
+        if (!searchResults.length && hasSearched) {
+            return (
+                <p className="text-black text-center text-xs">No se encontraron pedidos en los últimos 3 días.</p>
+            );
+        }
+
         if (!searchResults.length) return null;
 
         const ordersToShow = selectedOrder ? [selectedOrder] : searchResults;

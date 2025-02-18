@@ -334,8 +334,7 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 	console.log('🔍 Iniciando búsqueda para el teléfono:', phoneNumber);
 
 	try {
-		// Generate paths for the last 3 months
-		const datePaths = generateDatePaths(30);
+		const datePaths = generateDatePaths(3);
 		console.log(`📅 Buscando en ${datePaths.length} días`);
 
 		// Query each date path
