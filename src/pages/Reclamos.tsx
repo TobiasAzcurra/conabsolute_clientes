@@ -312,6 +312,15 @@ const Reclamos = () => {
                                 placeholder="Que paso con tu pedido?"
                                 className="px-4 h-10 rounded-full outline-none bg-gray-100 border-2  flex justify-center  border-black text-sm"
                             />
+                            <input
+                                name="descripcion"
+                                value={formData.descripcion}
+                                onChange={handleChange}
+                                required
+                                rows={4}
+                                placeholder="Un alias por si hay que transferir"
+                                className="px-4 h-10 mt-2 rounded-full outline-none bg-gray-100 border-2  flex justify-center  border-black text-sm"
+                            />
                             <button
                                 type="submit"
                                 disabled={loading || !selectedOrder}
