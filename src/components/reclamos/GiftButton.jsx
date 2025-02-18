@@ -185,6 +185,8 @@ const GiftButton = ({ orderData }) => {
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 title="Tu regalo!"
+                copy={true}
+                textToCopy={`Mis codigos 2x1 de ANHELO son: ${generatedVouchers.map(v => v.codigo).join(', ')}`}
             >
                 <div className="flex flex-col space-y-4">
                     <p className="text-center text-xs text-gray-500 ">
@@ -195,7 +197,7 @@ const GiftButton = ({ orderData }) => {
                         {generatedVouchers.map((voucher, index) => (
                             <div
                                 key={index}
-                                className="bg-gray-200 p-4 rounded-2xl flex items-center justify-between"
+                                className="bg-gray-200 px-4 h-10 rounded-2xl flex items-center justify-between"
                             >
                                 <span className="font-bold">{voucher.codigo}</span>
                                 <span className="text-gray-600">2x1</span>
