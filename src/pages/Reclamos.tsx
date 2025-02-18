@@ -9,7 +9,8 @@ import LoadingPoints from '../components/LoadingPoints';
 const Reclamos = () => {
     const [formData, setFormData] = useState({
         telefono: '',
-        descripcion: ''
+        descripcion: '',
+        alias: ''
     });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,7 +41,7 @@ const Reclamos = () => {
         }
     };
 
-    const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo) => {
+    const updateOrderWithComplaint = async (orderId, fecha, descripcionReclamo, alias) => {
         const firestore = getFirestore();
         const [day, month, year] = fecha.split("/");
         const ordersDocRef = doc(firestore, "pedidos", year, month, day);
@@ -64,6 +65,7 @@ const Reclamos = () => {
                     ...pedidosActualizados[pedidoIndex],
                     reclamo: {
                         descripcion: descripcionReclamo,
+                        alias: alias,
                         resuelto: false,
                         fecha: new Date().toISOString()
                     }
@@ -94,11 +96,12 @@ const Reclamos = () => {
             await updateOrderWithComplaint(
                 selectedOrder.id,
                 selectedOrder.fecha,
-                formData.descripcion
+                formData.descripcion,
+                formData.alias
             );
 
             setSubmitted(true);
-            setFormData({ telefono: '', descripcion: '' });
+            setFormData({ telefono: '', descripcion: '', alias: '' });
             setSelectedOrder(null);
             setSearchResults([]);
             setExpandedOrders(new Set());
@@ -329,13 +332,12 @@ const Reclamos = () => {
                                 </svg>
 
                                 <input
-                                    name="descripcion"
-                                    value={formData.descripcion}
+                                    name="alias"
+                                    value={formData.alias}
                                     onChange={handleChange}
                                     required
-                                    rows={4}
                                     placeholder="Un alias por si hay que transferir"
-                                    className="w-full  rounded-full outline-none bg- h-10  bg-transparent  flex justify-center   text-sm"
+                                    className="w-full rounded-full outline-none bg- h-10 bg-transparent flex justify-center text-sm"
                                 />
 
                             </div>
