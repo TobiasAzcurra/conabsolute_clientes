@@ -10,58 +10,122 @@ const generateRandomCode = () => {
     return code;
 };
 
-const generateVouchers = async () => {
+const generateVouchersAndUpdateOrder = async (orderData) => {
+    console.log("Starting voucher generation with order data:", orderData);
+
+    if (!orderData || !orderData.id || !orderData.fecha) {
+        console.error("Invalid order data:", orderData);
+        throw new Error("Datos del pedido incompletos - Necesario: ID y fecha");
+    }
+
     const firestore = getFirestore();
     const vouchersDocRef = doc(firestore, "vouchers", "Compensaciones");
+    const [day, month, year] = orderData.fecha.split("/");
+    const ordersDocRef = doc(firestore, "pedidos", year, month, day);
+
+    console.log(`Processing order from date: ${year}/${month}/${day}`);
 
     try {
-        await runTransaction(firestore, async (transaction) => {
-            const docSnapshot = await transaction.get(vouchersDocRef);
+        const result = await runTransaction(firestore, async (transaction) => {
+            console.log("Starting transaction...");
 
-            if (!docSnapshot.exists()) {
-                throw new Error("El documento de compensaciones no existe");
+            // Check vouchers document
+            const voucherSnapshot = await transaction.get(vouchersDocRef);
+            if (!voucherSnapshot.exists()) {
+                console.error("Voucher document not found");
+                throw new Error("El documento de compensaciones no existe. Path: vouchers/Compensaciones");
             }
+            console.log("Voucher document found");
 
-            const currentData = docSnapshot.data();
-            const currentCodigos = currentData.codigos || [];
-            const currentUsados = currentData.usados || 0;
-            const currentCreados = currentData.creados || 0;
+            const currentData = voucherSnapshot.data();
+            console.log("Current voucher data:", {
+                currentCodigos: (currentData.codigos || []).length,
+                currentUsados: currentData.usados,
+                currentCreados: currentData.creados
+            });
 
-            // Generate 5 new voucher codes
+            // Generate new vouchers
             const newVouchers = Array.from({ length: 5 }, (_, index) => ({
                 codigo: generateRandomCode(),
                 estado: "disponible",
-                [`num`]: currentCreados + index + 1
+                num: (currentData.creados || 0) + index + 1
             }));
+            console.log("Generated new vouchers:", newVouchers.map(v => v.codigo));
 
-            // Update the document
+            // Check order document
+            const orderSnapshot = await transaction.get(ordersDocRef);
+            if (!orderSnapshot.exists()) {
+                console.error("Order document not found:", `pedidos/${year}/${month}/${day}`);
+                throw new Error(`No existen pedidos para la fecha ${day}/${month}/${year}`);
+            }
+            console.log("Order document found");
+
+            const pedidosDelDia = orderSnapshot.data()?.pedidos || [];
+            const pedidoIndex = pedidosDelDia.findIndex(pedido => pedido.id === orderData.id);
+
+            if (pedidoIndex === -1) {
+                console.error("Order not found in document. Order ID:", orderData.id);
+                throw new Error("Pedido no encontrado en los pedidos del día");
+            }
+            console.log("Found order at index:", pedidoIndex);
+
+            // Prepare updates
+            const pedidosActualizados = [...pedidosDelDia];
+            const currentReclamo = pedidosActualizados[pedidoIndex].reclamo || {};
+
+            pedidosActualizados[pedidoIndex] = {
+                ...pedidosActualizados[pedidoIndex],
+                reclamo: {
+                    ...currentReclamo,
+                    gift: newVouchers.map(v => v.codigo)
+                }
+            };
+
+            // Perform updates
+            console.log("Updating vouchers document...");
             transaction.update(vouchersDocRef, {
-                codigos: [...currentCodigos, ...newVouchers],
-                creados: currentCreados + 5,
-                usados: currentUsados,
+                codigos: [...(currentData.codigos || []), ...newVouchers],
+                creados: (currentData.creados || 0) + 5,
+                usados: currentData.usados || 0,
                 fecha: new Date().toISOString().split('T')[0],
                 titulo: "Compensaciones"
             });
+
+            console.log("Updating order document...");
+            transaction.update(ordersDocRef, {
+                pedidos: pedidosActualizados
+            });
+
+            return { success: true, vouchers: newVouchers };
         });
 
-        return true;
+        console.log("Transaction completed successfully:", result);
+        return result;
     } catch (error) {
-        console.error("Error al generar los vouchers:", error);
+        console.error("Transaction failed with error:", error);
         throw error;
     }
 };
 
-const GiftButton = () => {
+const GiftButton = ({ orderData }) => {
     const [loading, setLoading] = useState(false);
 
     const handleGiftClick = async () => {
+        if (!orderData) {
+            alert('No hay datos del pedido disponibles');
+            return;
+        }
+
+        console.log("Gift button clicked with order data:", orderData);
         setLoading(true);
+
         try {
-            await generateVouchers();
+            const result = await generateVouchersAndUpdateOrder(orderData);
+            console.log("Voucher generation successful:", result);
             alert('¡Vouchers generados con éxito!');
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error al generar los vouchers. Por favor intenta nuevamente.');
+            console.error('Error detallado:', error);
+            alert(`Error al generar los vouchers: ${error.message}`);
         } finally {
             setLoading(false);
         }
