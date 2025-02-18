@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getFirestore, doc, runTransaction } from 'firebase/firestore';
 import LoadingPoints from '../LoadingPoints';
+import AppleModal from '../AppleModal';
 
 const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -110,8 +111,9 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
 const GiftButton = ({ orderData }) => {
     const [loading, setLoading] = useState(false);
     const [hasExistingGift, setHasExistingGift] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [generatedVouchers, setGeneratedVouchers] = useState([]);
 
-    // Check for existing gift on component mount
     React.useEffect(() => {
         if (orderData?.reclamo?.gift && orderData.reclamo.gift.length > 0) {
             setHasExistingGift(true);
@@ -135,8 +137,11 @@ const GiftButton = ({ orderData }) => {
         try {
             const result = await generateVouchersAndUpdateOrder(orderData);
             console.log("Voucher generation successful:", result);
-            alert('¡Vouchers generados con éxito!');
-            setHasExistingGift(true); // Update state after successful generation
+            if (result && result.vouchers) {
+                setGeneratedVouchers(result.vouchers);
+                setShowModal(true);
+                setHasExistingGift(true);
+            }
         } catch (error) {
             console.error('Error detallado:', error);
             alert(`Error al generar los vouchers: ${error.message}`);
@@ -145,38 +150,65 @@ const GiftButton = ({ orderData }) => {
         }
     };
 
-    // If there's an existing gift, disable the button and show different text
-    if (hasExistingGift) {
-        return (
-            <button
-                disabled
-                className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-gray-400 text-gray-100 rounded-3xl h-20 font-bold opacity-50 cursor-not-allowed'
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 mr-2">
-                    <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.943c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
-                </svg>
-                Ya reclamado
-            </button>
-        );
-    }
-
     return (
-        <button
-            onClick={handleGiftClick}
-            disabled={loading}
-            className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold'
-        >
-            {loading ? (
-                <LoadingPoints color='text-gray-100' />
-            ) : (
-                <>
+        <div className="w-full">
+            {hasExistingGift ? (
+                <button
+                    disabled
+                    className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-gray-400 text-gray-100 rounded-3xl h-20 font-bold opacity-50 cursor-not-allowed'
+                >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 mr-2">
                         <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.943c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
                     </svg>
-                    Regalo
-                </>
+                    Ya reclamado
+                </button>
+            ) : (
+                <button
+                    onClick={handleGiftClick}
+                    disabled={loading}
+                    className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold'
+                >
+                    {loading ? (
+                        <LoadingPoints color='text-gray-100' />
+                    ) : (
+                        <>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 mr-2">
+                                <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.943c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
+                            </svg>
+                            Regalo
+                        </>
+                    )}
+                </button>
             )}
-        </button>
+
+            <AppleModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title="Tu regalo!"
+            >
+                <div className="flex flex-col space-y-4">
+                    <p className="text-center text-sm text-gray-600 ">
+                        Aca hay 5 vouchers 2x1! Podes canjearlos en tus próximos pedidos en donde rellenas con los datos de envio.
+                    </p>
+
+                    <div className="space-y-2">
+                        {generatedVouchers.map((voucher, index) => (
+                            <div
+                                key={index}
+                                className="bg-gray-200 p-4 rounded-2xl flex items-center justify-between"
+                            >
+                                <span className="font-bold">{voucher.codigo}</span>
+                                <span className="text-gray-600">2x1</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <p className="text-center text-xs text-gray-500 mt-4">
+                        Recuerda guardar estos códigos, los necesitarás para tus próximos pedidos.
+                    </p>
+                </div>
+            </AppleModal>
+        </div>
     );
 };
 
