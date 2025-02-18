@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getFirestore, doc, runTransaction } from 'firebase/firestore';
+import LoadingPoints from '../LoadingPoints';
 
 const generateRandomCode = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -138,9 +139,7 @@ const GiftButton = ({ orderData }) => {
             className='text-4xl w-full z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold'
         >
             {loading ? (
-                <div className="flex items-center">
-                    <span className="mr-2">Generando...</span>
-                </div>
+                <LoadingPoints color='text-gray-100' />
             ) : (
                 <>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 mr-2">
