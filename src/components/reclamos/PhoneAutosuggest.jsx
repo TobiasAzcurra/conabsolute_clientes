@@ -72,7 +72,7 @@ const PhoneAutosuggest = ({ value, onChange, onSearch, searching }) => {
             </div>
 
             {showSuggestion && previousPhone && (
-                <div className="absolute w-full mt-2 h-10  bg-gray-100 shadow-lg rounded-lg border border-gray-200">
+                <div className="absolute w-full mt-2 h-10  bg-gray-100 shadow-lg rounded-full border border-gray-200">
                     <button
                         onClick={handleSuggestionClick}
                         className="w-full text-left px-4 h-10  rounded-md text-xs flex items-center "
@@ -87,7 +87,9 @@ const PhoneAutosuggest = ({ value, onChange, onSearch, searching }) => {
                         {previousPhone}
                     </button>
                 </div>
+
             )}
+
         </div>
     );
 };
