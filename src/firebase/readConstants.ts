@@ -14,18 +14,18 @@ export interface AltaDemandaProps {
 
 // Función para leer una sola vez
 export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
-  console.log('Iniciando lectura de Alta Demanda...');
+  // console.log('Iniciando lectura de Alta Demanda...');
   const firestore = getFirestore();
   try {
     const docRef = doc(firestore, 'constantes', 'altaDemanda');
-    console.log('Referencia al documento creada');
+    // console.log('Referencia al documento creada');
 
     const docSnap = await getDoc(docRef);
-    console.log('Snapshot del documento obtenido');
+    // console.log('Snapshot del documento obtenido');
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      console.log('Datos encontrados:', data);
+      // console.log('Datos encontrados:', data);
       return {
         delayMinutes: data.delayMinutes,
         highDemandStartTime: data.highDemandStartTime.toDate(),
@@ -37,7 +37,7 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
 
       };
     } else {
-      console.log('No se encontró el documento de Alta Demanda');
+      // console.log('No se encontró el documento de Alta Demanda');
       return null;
     }
   } catch (error) {
@@ -50,7 +50,7 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
 export const listenToAltaDemanda = (
   callback: (altaDemanda: AltaDemandaProps) => void
 ): Unsubscribe => {
-  console.log('Iniciando escucha de cambios en Alta Demanda...');
+  // console.log('Iniciando escucha de cambios en Alta Demanda...');
   const firestore = getFirestore();
   const docRef = doc(firestore, 'constantes', 'altaDemanda');
 
@@ -59,7 +59,7 @@ export const listenToAltaDemanda = (
     (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        console.log('Cambios detectados en Alta Demanda:', data);
+        // console.log('Cambios detectados en Alta Demanda:', data);
         callback({
           delayMinutes: data.delayMinutes,
           highDemandStartTime: data.highDemandStartTime?.toDate
@@ -74,7 +74,7 @@ export const listenToAltaDemanda = (
 
         });
       } else {
-        console.log('El documento de Alta Demanda no existe');
+        // console.log('El documento de Alta Demanda no existe');
       }
     },
     (error) => {

@@ -79,10 +79,10 @@ const FormCustom = ({ cart, total }) => {
     const iniciarEscuchaAltaDemanda = async () => {
       try {
         unsubscribeAltaDemanda = listenToAltaDemanda((altaDemandaData) => {
-          console.log(
-            '✨ Datos de Alta Demanda recibidos en Form:',
-            altaDemandaData
-          );
+          // console.log(
+          //   '✨ Datos de Alta Demanda recibidos en Form:',
+          //   altaDemandaData
+          // );
           setAltaDemanda(altaDemandaData);
         });
       } catch (error) {
@@ -550,9 +550,9 @@ const FormCustom = ({ cart, total }) => {
           }
 
           if (!isWithinOrderTimeRange()) {
-            console.log(
-              'La hora actual está fuera del rango permitido para pedidos'
-            );
+            // console.log(
+            //   'La hora actual está fuera del rango permitido para pedidos'
+            // );
             openTimeRestrictedModal();
             return;
           }
@@ -581,7 +581,7 @@ const FormCustom = ({ cart, total }) => {
             if (isEnabled) {
               finalTotal += expressDeliveryFee;
             }
-            console.log('isEnabled:', isEnabled);
+            // console.log('isEnabled:', isEnabled);
             return finalTotal;
           };
 
@@ -610,7 +610,7 @@ const FormCustom = ({ cart, total }) => {
           }, [cart]);
 
           useEffect(() => {
-            console.log('Descuento aplicado:', descuento);
+            // console.log('Descuento aplicado:', descuento);
           }, [cart, total, discountedTotal, descuento]);
           return (
             <Form>

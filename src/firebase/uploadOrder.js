@@ -32,7 +32,7 @@ export const UploadOrder = async (orderDetail) => {
 				pedidos: pedidosDelDia,
 			});
 		});
-		console.log("✅ Pedido subido exitosamente con ID:", pedidoId);
+		// console.log("✅ Pedido subido exitosamente con ID:", pedidoId);
 		return pedidoId;
 	} catch (error) {
 		console.error("❌ Error al subir el pedido:", error);
@@ -150,7 +150,7 @@ export const updateOrderItemQuantity = async (
 					// Si no quedan pedidos en el día, eliminamos el documento del día
 					if (pedidosDelDia.length === 0) {
 						transaction.delete(pedidoDocRef);
-						console.log("🗑️ Documento del día eliminado por no tener pedidos");
+						// console.log("🗑️ Documento del día eliminado por no tener pedidos");
 						return;
 					} else {
 						transaction.set(pedidoDocRef, {
@@ -158,7 +158,7 @@ export const updateOrderItemQuantity = async (
 							pedidos: pedidosDelDia,
 						});
 					}
-					console.log("🗑️ Pedido eliminado por no tener items:", pedidoId);
+					// console.log("🗑️ Pedido eliminado por no tener items:", pedidoId);
 					return;
 				}
 
@@ -197,10 +197,10 @@ export const updateOrderItemQuantity = async (
 			}
 		});
 
-		console.log(
-			"✅ Cantidad actualizada exitosamente para el pedido:",
-			pedidoId
-		);
+		// console.log(
+		// 	"✅ Cantidad actualizada exitosamente para el pedido:",
+		// 	pedidoId
+		// );
 		return true;
 	} catch (error) {
 		console.error("❌ Error al actualizar la cantidad:", error);
@@ -262,11 +262,11 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 		const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
 		const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
-		console.log("🔄 updateRatingForOrder llamado con:", {
-			fechaPedido,
-			pedidoId,
-			rating,
-		});
+		// console.log("🔄 updateRatingForOrder llamado con:", {
+		// 	fechaPedido,
+		// 	pedidoId,
+		// 	rating,
+		// });
 
 		runTransaction(firestore, async (transaction) => {
 			const pedidoDocSnapshot = await transaction.get(pedidoDocRef);
@@ -296,13 +296,13 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
 				...existingData,
 				pedidos: pedidosActualizados,
 			});
-			console.log("✅ Pedido actualizado con la calificación:", pedidoId);
+			// console.log("✅ Pedido actualizado con la calificación:", pedidoId);
 		})
 			.then(() => {
-				console.log(
-					"✅ Transacción completada exitosamente para el pedido:",
-					pedidoId
-				);
+				// console.log(
+				// 	"✅ Transacción completada exitosamente para el pedido:",
+				// 	pedidoId
+				// );
 				resolve();
 			})
 			.catch((error) => {
@@ -325,12 +325,12 @@ export const getCadetePhone = async (nombreCadete) => {
 		where("name", "==", nombreCadete)
 	);
 
-	console.log("🔍 Buscando cadete con nombre:", nombreCadete);
+	// console.log("🔍 Buscando cadete con nombre:", nombreCadete);
 	const querySnapshot = await getDocs(q);
 
 	if (!querySnapshot.empty) {
 		const empleadoData = querySnapshot.docs[0].data();
-		console.log("📱 Teléfono del cadete encontrado:", empleadoData.telefono);
+		// console.log("📱 Teléfono del cadete encontrado:", empleadoData.telefono);
 		return empleadoData.telefono;
 	} else {
 		console.warn("⚠️ Cadete no encontrado");
@@ -352,9 +352,9 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
 				fecha: fecha,
 				lastOrder: fecha,
 			});
-			console.log(
-				`Se agregó el número de teléfono ${cleanPhone} a Firebase con el ID: ${docRef.id}. Fecha: ${fecha}`
-			);
+			// console.log(
+			// 	`Se agregó el número de teléfono ${cleanPhone} a Firebase con el ID: ${docRef.id}. Fecha: ${fecha}`
+			// );
 		} catch (e) {
 			console.error("Error al agregar el número de teléfono a Firebase:", e);
 		}
@@ -365,9 +365,9 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
 				await updateDoc(docRef, {
 					lastOrder: fecha,
 				});
-				console.log(
-					`El número de teléfono ${cleanPhone} ya existe en la base de datos. Actualizado lastOrder a: ${fecha}`
-				);
+				// console.log(
+				// 	`El número de teléfono ${cleanPhone} ya existe en la base de datos. Actualizado lastOrder a: ${fecha}`
+				// );
 			} catch (e) {
 				console.error("Error al actualizar el campo lastOrder en Firebase:", e);
 			}
@@ -422,7 +422,7 @@ export const handleConfirmChanges = async (orderId) => {
 			});
 		});
 
-		console.log("✅ Cambios confirmados exitosamente");
+		// console.log("✅ Cambios confirmados exitosamente");
 		return true;
 	} catch (error) {
 		console.error("❌ Error al confirmar los cambios:", error);

@@ -73,7 +73,7 @@ const CartItems = () => {
 		});
 	}, []);
 	// Agregar  para mostrar el carrito completo
-	useEffect(() => {}, [cart]);
+	useEffect(() => { }, [cart]);
 	const decrementQuantity = (index, quantity) => {
 		if (quantity > 1) {
 			dispatch(removeOneItem(index));
@@ -95,7 +95,7 @@ const CartItems = () => {
 		}
 	};
 
-	console.log(cart);
+	// console.log(cart);
 
 	return (
 		<div className="flex flex-col font-coolvetica overflow-x-hidden">
@@ -154,7 +154,7 @@ const CartItems = () => {
 											: getDefaultImage(product)
 									}
 									name={product.name}
-									handleItemClick={() => {}}
+									handleItemClick={() => { }}
 									isCart
 								/>
 							))}

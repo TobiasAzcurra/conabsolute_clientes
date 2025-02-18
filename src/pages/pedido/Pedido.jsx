@@ -20,7 +20,7 @@ import { doc, runTransaction, collection, getFirestore } from 'firebase/firestor
 import Payment from "../../components/mercadopago/Payment"
 
 const Pedido = () => {
-    console.log("🔄 Inicializando componente Pedido");
+    // console.log("🔄 Inicializando componente Pedido");
     const [order, setOrder] = useState(null);
     const [pedidos, setPedidos] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -54,22 +54,22 @@ const Pedido = () => {
     const [modalAdditionalProducts, setModalAdditionalProducts] = useState([]);
 
     useEffect(() => {
-        console.log("🕒 Iniciando cronómetro...");
+        // console.log("🕒 Iniciando cronómetro...");
         const timer = setInterval(() => {
             const newTime = new Date();
-            console.log("⏱️ Actualizando tiempo:", newTime.toLocaleTimeString());
+            // console.log("⏱️ Actualizando tiempo:", newTime.toLocaleTimeString());
             setCurrentTime(newTime);
         }, 60000);
 
         return () => {
-            console.log("🛑 Limpiando cronómetro");
+            // console.log("🛑 Limpiando cronómetro");
             clearInterval(timer);
         };
     }, []);
 
     const getOrderDateTime = (fechaStr, horaStr) => {
         if (!fechaStr || !horaStr) {
-            console.log("⚠️ Fecha u hora faltante:", { fechaStr, horaStr });
+            // console.log("⚠️ Fecha u hora faltante:", { fechaStr, horaStr });
             return null;
         }
 
@@ -91,7 +91,7 @@ const Pedido = () => {
             return null;
         }
 
-        console.log("📅 Fecha del pedido creada:", orderDateTime.toLocaleString());
+        // console.log("📅 Fecha del pedido creada:", orderDateTime.toLocaleString());
         return orderDateTime;
     };
 
@@ -118,10 +118,10 @@ const Pedido = () => {
         const diffMs = currentTime - orderDateTime;
         const diffMinutes = diffMs / (1000 * 60);
 
-        console.log(`⏱️ Minutos de demora: ${diffMinutes.toFixed(2)}`);
+        // console.log(`⏱️ Minutos de demora: ${diffMinutes.toFixed(2)}`);
 
         const retrasado = diffMinutes > 50 && !entregado;
-        console.log(`🚨 Pedido retrasado: ${retrasado}`);
+        // console.log(`🚨 Pedido retrasado: ${retrasado}`);
 
         return retrasado;
     };
@@ -131,14 +131,14 @@ const Pedido = () => {
         const orderDateTime = getOrderDateTime(fecha, hora);
 
         if (!orderDateTime) {
-            console.log("⚠️ No se pudo calcular el tiempo de demora - fecha/hora inválida");
+            // console.log("⚠️ No se pudo calcular el tiempo de demora - fecha/hora inválida");
             return null;
         }
 
         const diffMs = currentTime - orderDateTime;
         const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-        console.log(`⏱️ Tiempo de demora calculado: ${diffMinutes} minutos`);
+        // console.log(`⏱️ Tiempo de demora calculado: ${diffMinutes} minutos`);
         return diffMinutes;
     };
 
@@ -159,7 +159,7 @@ const Pedido = () => {
     }
 
     const handleRateOrder = async (ratings) => {
-        console.log("📥 Iniciando proceso de calificación");
+        // console.log("📥 Iniciando proceso de calificación");
         if (!selectedOrderId) {
             console.error("❌ Error: No hay Order ID seleccionado para calificar");
             return;
@@ -278,14 +278,14 @@ const Pedido = () => {
     const eliminarPedido = async () => {
         if (!selectedOrderId) return;
 
-        console.log("🚫 Cancelando pedido:", selectedOrderId);
+        // console.log("🚫 Cancelando pedido:", selectedOrderId);
         setIsDeleting(true);
         setMessage(null);
         setError(null);
 
         try {
             await cancelOrder(selectedOrderId);
-            console.log("✅ El pedido fue marcado como cancelado:", selectedOrderId);
+            // console.log("✅ El pedido fue marcado como cancelado:", selectedOrderId);
             const pedidoCancelado = pedidosPagados.find(pedido => pedido.id === selectedOrderId);
             const tieneVouchers = pedidoCancelado?.couponCodes?.length > 0;
 
@@ -318,13 +318,13 @@ const Pedido = () => {
     };
 
     const handleCancelClick = (orderId) => {
-        console.log("🛑 Solicitando cancelación para pedido:", orderId);
+        // console.log("🛑 Solicitando cancelación para pedido:", orderId);
         setSelectedOrderId(orderId);
         setIsModalOpen(true);
     };
 
     const handleSupportClick = () => {
-        console.log("💬 Iniciando contacto con soporte");
+        // console.log("💬 Iniciando contacto con soporte");
         const phoneNumber = "543584306832";
         const message = "Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.";
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -332,7 +332,7 @@ const Pedido = () => {
     };
 
     const handleTransferenciaClick = (total, telefono) => {
-        console.log("💬 Iniciando contacto con soporte");
+        // console.log("💬 Iniciando contacto con soporte");
         const phoneNumber = "543584306832";
         const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -340,7 +340,7 @@ const Pedido = () => {
     };
 
     const handleCompensationClick = (message) => {
-        console.log("💬 Iniciando contacto por compensación");
+        // console.log("💬 Iniciando contacto por compensación");
         const phoneNumber = "543584306832";
         const whatsappMessage = `Hola! Acepte mi pedido con esta condicion: ${message}, cual es mi compensacion?`;
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -368,10 +368,10 @@ const Pedido = () => {
         };
 
         if (orderId) {
-            console.log("🔍 Fetching order by ID:", orderId);
+            // console.log("🔍 Fetching order by ID:", orderId);
             setLoading(true);
             unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
-                console.log("📦 Order fetched by ID:", pedido);
+                // console.log("📦 Order fetched by ID:", pedido);
                 if (pedido && typeof pedido.direccion === "string") {
                     if (pedido.entregado && !pedido.rating && !hasBeenRated) {
                         setSelectedOrderProducts(pedido.detallePedido || []);
@@ -380,7 +380,7 @@ const Pedido = () => {
                     }
                     setOrder(pedido);
                     setPhoneNumber(pedido.telefono);
-                    console.log("✅ Order set:", pedido);
+                    // console.log("✅ Order set:", pedido);
                 } else {
                     setOrder(null);
                     setPhoneNumber("");
@@ -541,7 +541,7 @@ const Pedido = () => {
                                     );
                                 }
 
-                                console.log("🔄 Renderizando pedido:", currentOrder.id);
+                                // console.log("🔄 Renderizando pedido:", currentOrder.id);
                                 const retrasado = isDelayed(currentOrder);
                                 const delayMinutes = getDelayTime(currentOrder);
                                 const showSupportButton =

@@ -105,7 +105,7 @@ const QuickAddToCart = ({
 	};
 
 	const startAddingProcess = async () => {
-		console.log("🔵 Starting add process");
+		// console.log("🔵 Starting add process");
 		setIsEditing(true);
 		setIsAdding(true);
 
@@ -237,10 +237,10 @@ const QuickAddToCart = ({
 					animate={{ width: isAdding ? 100 : 35 }}
 					transition={{ duration: 0.3 }}
 					className={`flex items-center absolute ${shouldAnimateBothSides
-							? "left-1/2 transform -translate-x-1/2"
-							: isCarritoPage || isPedidoComponente
-								? "left-0"
-								: "right-0"
+						? "left-1/2 transform -translate-x-1/2"
+						: isCarritoPage || isPedidoComponente
+							? "left-0"
+							: "right-0"
 						} top-0 flex-row rounded-3xl font-black border-black border-2 bg-gray-100`}
 				>
 					<div

@@ -47,7 +47,7 @@ const handleSubmit = async (
         })
     );
 
-    console.log(validacionCupones);
+    // console.log(validacionCupones);
 
     const orderDetail = {
         pendingOfBeingAccepted: isPending,

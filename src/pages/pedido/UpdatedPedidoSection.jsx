@@ -76,23 +76,23 @@ const UpdatedPedidoSection = ({
 	};
 
 	useEffect(() => {
-		console.log("🧾 Detalle del pedido original:", currentOrder?.detallePedido);
+		// console.log("🧾 Detalle del pedido original:", currentOrder?.detallePedido);
 		if (currentOrder?.detallePedido) {
 			const mappedItems = currentOrder.detallePedido.map((item) => {
 				const mapped = mapOrderItemToCartFormat(item);
-				console.log(`📦 Item mapeado - ${mapped.name}:`, {
-					original: item,
-					mapped: mapped,
-				});
+				// console.log(`📦 Item mapeado - ${mapped.name}:`, {
+				// 	original: item,
+				// 	mapped: mapped,
+				// });
 				return mapped;
 			});
-			console.log("✅ Todos los items mapeados:", mappedItems);
+			// console.log("✅ Todos los items mapeados:", mappedItems);
 		}
 	}, [currentOrder]);
 
-	const decrementQuantity = () => {};
-	const incrementQuantity = () => {};
-	const deleteItem = () => {};
+	const decrementQuantity = () => { };
+	const incrementQuantity = () => { };
+	const deleteItem = () => { };
 
 	const toggleModifyOrder = () => {
 		setIsModifyOrderExpanded(!isModifyOrderExpanded);
@@ -102,7 +102,7 @@ const UpdatedPedidoSection = ({
 		setIsConfirming(true);
 		try {
 			await handleConfirmChanges(currentOrder.id);
-			console.log("✅ Cambios confirmados exitosamente");
+			// console.log("✅ Cambios confirmados exitosamente");
 		} catch (error) {
 			console.error("❌ Error al confirmar los cambios:", error);
 		} finally {
@@ -132,9 +132,8 @@ const UpdatedPedidoSection = ({
 
 			<img
 				src={arrow}
-				className={`h-2 w-1.5 transform ${
-					isModifyOrderExpanded ? "-rotate-90" : "arrow-bounce"
-				}`}
+				className={`h-2 w-1.5 transform ${isModifyOrderExpanded ? "-rotate-90" : "arrow-bounce"
+					}`}
 				alt=""
 			/>
 
@@ -209,7 +208,7 @@ const UpdatedPedidoSection = ({
 											}
 											name={product.name}
 											handleItemClick={() => {
-												console.log("🛍️ Selected product:", product);
+												// console.log("🛍️ Selected product:", product);
 											}}
 											isCart={false}
 											price={product.price}

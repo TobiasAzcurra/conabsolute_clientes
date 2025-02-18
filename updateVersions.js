@@ -32,7 +32,7 @@ const updateVersions = async () => {
     // Generar versión usando fecha
     const now = new Date();
     const newVersion = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}.${now.getTime()}`;
-    
+
     // Actualizar version.json
     const versionPath = join(__dirname, 'public', 'version.json');
     writeFileSync(versionPath, JSON.stringify({
@@ -49,7 +49,7 @@ const updateVersions = async () => {
       deployedAt: now
     });
 
-    console.log(`✅ Deploy version ${newVersion} actualizada con éxito`);
+    // console.log(`✅ Deploy version ${newVersion} actualizada con éxito`);
     process.exit(0);
   } catch (error) {
     console.error('❌ Error actualizando versiones:', error);

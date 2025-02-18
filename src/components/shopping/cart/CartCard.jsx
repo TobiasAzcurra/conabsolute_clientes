@@ -40,7 +40,7 @@ const CartCard = ({
 		setIsUpdating(true);
 		try {
 			await handleConfirmChanges(currentOrder.id);
-			console.log("✅ Producto confirmado automáticamente");
+			// console.log("✅ Producto confirmado automáticamente");
 		} catch (error) {
 			console.error("❌ Error al confirmar el producto:", error);
 		} finally {
@@ -59,7 +59,7 @@ const CartCard = ({
 				index,
 				0
 			);
-			console.log("✅ Producto eliminado exitosamente");
+			// console.log("✅ Producto eliminado exitosamente");
 		} catch (error) {
 			console.error("❌ Error al eliminar el producto:", error);
 		} finally {
@@ -183,8 +183,8 @@ const CartCard = ({
 										onClick={handleDelete}
 										disabled={isDeleting}
 										className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${isDeleting
-												? "opacity-50 cursor-not-allowed"
-												: "cursor-pointer"
+											? "opacity-50 cursor-not-allowed"
+											: "cursor-pointer"
 											}`}
 									>
 										<div className="flex items-center gap-1">

@@ -122,24 +122,24 @@ const AppRouter = () => {
 
 		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
 			const nombreLimpio = producto.burger.trim().toLowerCase();
-			console.log("🍔 Verificando producto:", nombreLimpio);
+			// console.log("🍔 Verificando producto:", nombreLimpio);
 
 			if (
 				requiredPrefixes.some((prefix) =>
 					nombreLimpio.startsWith(prefix.toLowerCase())
 				)
 			) {
-				console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
+				// console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
 				return true;
 			}
 
 			const excluded = excludedPrefixes.some((prefix) =>
 				nombreLimpio.startsWith(prefix.toLowerCase())
 			);
-			console.log(
-				excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
-				nombreLimpio
-			);
+			// console.log(
+			// 	excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
+			// 	nombreLimpio
+			// );
 
 			return !excluded;
 		});
@@ -151,12 +151,12 @@ const AppRouter = () => {
 				(producto) =>
 					producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
 			);
-			console.log("🍟 Verificación Papas Anhelo:", {
-				isAlreadyInOrder,
-			});
+			// console.log("🍟 Verificación Papas Anhelo:", {
+			// 	isAlreadyInOrder,
+			// });
 
 			if (!isAlreadyInOrder) {
-				console.log("✅ Agregando Papas Anhelo a productos adicionales");
+				// console.log("✅ Agregando Papas Anhelo a productos adicionales");
 				computedAdditionalProducts.push("Papas Anhelo ®");
 			}
 		}
@@ -165,9 +165,9 @@ const AppRouter = () => {
 	};
 
 	useEffect(() => {
-		console.log(
-			"🔍 Verificando si hay una calificación pendiente en localStorage."
-		);
+		// console.log(
+		// 	"🔍 Verificando si hay una calificación pendiente en localStorage."
+		// );
 
 		const checkPendingRating = async () => {
 			const pendingRating = localStorage.getItem("pendingRating");
@@ -177,9 +177,9 @@ const AppRouter = () => {
 				setSelectedOrderId(selectedOrderId);
 				setSelectedOrderProducts(selectedOrderProducts);
 
-				console.log(
-					`📦 Calificación pendiente encontrada para el pedido ID ${selectedOrderId}.`
-				);
+				// console.log(
+				// 	`📦 Calificación pendiente encontrada para el pedido ID ${selectedOrderId}.`
+				// );
 
 				if (!fecha) {
 					console.error("❌ Fecha no encontrada en la calificación pendiente.");
@@ -187,21 +187,21 @@ const AppRouter = () => {
 				}
 
 				try {
-					console.log(
-						`🔄 Obteniendo el pedido ID ${selectedOrderId} para la fecha ${fecha}`
-					);
+					// console.log(
+					// 	`🔄 Obteniendo el pedido ID ${selectedOrderId} para la fecha ${fecha}`
+					// );
 					const order = await getOrderById(selectedOrderId, fecha);
 					if (order) {
-						console.log("📥 Pedido obtenido desde Firebase:", order);
+						// console.log("📥 Pedido obtenido desde Firebase:", order);
 
 						// Recompute additionalProducts
 						const computedAdditionalProducts = computeAdditionalProducts(order);
 						setAdditionalProducts(computedAdditionalProducts);
 
-						console.log(
-							"📥 Productos adicionales:",
-							computedAdditionalProducts
-						);
+						// console.log(
+						// 	"📥 Productos adicionales:",
+						// 	computedAdditionalProducts
+						// );
 
 						// Set the pending order and open the modal
 						setPendingOrder(order);
@@ -213,7 +213,7 @@ const AppRouter = () => {
 					console.error("❌ Error al obtener el pedido:", error);
 				}
 			} else {
-				console.log("ℹ️ No hay calificaciones pendientes en localStorage.");
+				// console.log("ℹ️ No hay calificaciones pendientes en localStorage.");
 			}
 		};
 
@@ -239,18 +239,18 @@ const AppRouter = () => {
 				throw new Error("Fecha del pedido no disponible.");
 			}
 
-			console.log("📝 Enviando calificación para el pedido:", {
-				fecha,
-				selectedOrderId,
-				ratings,
-			});
+			// console.log("📝 Enviando calificación para el pedido:", {
+			// 	fecha,
+			// 	selectedOrderId,
+			// 	ratings,
+			// });
 
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
 
 			// Elimina la calificación pendiente del localStorage
 			localStorage.removeItem("pendingRating");
 
-			console.log("✅ Calificación enviada exitosamente.");
+			// console.log("✅ Calificación enviada exitosamente.");
 
 			setIsRatingModalOpen(false);
 		} catch (err) {

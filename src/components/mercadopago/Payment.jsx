@@ -168,7 +168,7 @@ const Payment = ({
               setError('Error en el pago. Por favor intenta nuevamente.');
             }}
             onClose={() => {
-              console.log('Modal de pago cerrado');
+              // console.log('Modal de pago cerrado');
               setPreferenceId(null);
             }}
           />

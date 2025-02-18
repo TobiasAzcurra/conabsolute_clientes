@@ -43,9 +43,9 @@ export const getOrderById = async (orderId, fecha) => {
 
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-	console.log(
-		`🔍 Buscando el pedido ID ${orderId} en la fecha ${day}/${month}/${year}`
-	);
+	// console.log(
+	// 	`🔍 Buscando el pedido ID ${orderId} en la fecha ${day}/${month}/${year}`
+	// );
 
 	try {
 		const docSnapshot = await getDoc(ordersDocRef);
@@ -58,10 +58,10 @@ export const getOrderById = async (orderId, fecha) => {
 			);
 
 			if (pedidoEncontrado) {
-				console.log(
-					`✅ Pedido encontrado en ${day}/${month}/${year}:`,
-					pedidoEncontrado
-				);
+				// console.log(
+				// 	`✅ Pedido encontrado en ${day}/${month}/${year}:`,
+				// 	pedidoEncontrado
+				// );
 				return pedidoEncontrado;
 			} else {
 				console.warn(
@@ -97,9 +97,9 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-	console.log(
-		`📡 Escuchando cambios en el pedido ID ${orderId} para la fecha ${day}/${month}/${year}`
-	);
+	// console.log(
+	// 	`📡 Escuchando cambios en el pedido ID ${orderId} para la fecha ${day}/${month}/${year}`
+	// );
 
 	// Escuchar cambios en el documento del día actual
 	return onSnapshot(
@@ -116,7 +116,7 @@ export const ReadOrdersForTodayById = (orderId, callback) => {
 
 				// Llamar a la función de devolución de llamada con el pedido filtrado, si se encuentra
 				if (pedidoFiltrado) {
-					console.log("📦 Pedido actualizado recibido:", pedidoFiltrado);
+					// console.log("📦 Pedido actualizado recibido:", pedidoFiltrado);
 					callback(pedidoFiltrado);
 				} else {
 					console.warn(
@@ -157,9 +157,9 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 	// Referencia al documento del día actual dentro de la colección del mes actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-	console.log(
-		`📡 Escuchando pedidos para el número de teléfono ${phoneNumber} en la fecha ${day}/${month}/${year}`
-	);
+	// console.log(
+	// 	`📡 Escuchando pedidos para el número de teléfono ${phoneNumber} en la fecha ${day}/${month}/${year}`
+	// );
 
 	// Escuchar cambios en el documento del día actual
 	return onSnapshot(
@@ -173,10 +173,10 @@ export const ListenOrdersForTodayByPhoneNumber = (phoneNumber, callback) => {
 					(pedido) => pedido.telefono === phoneNumber && !pedido.canceled
 				);
 
-				console.log(
-					`📦 Pedidos filtrados para el número ${phoneNumber}:`,
-					pedidosFiltrados
-				);
+				// console.log(
+				// 	`📦 Pedidos filtrados para el número ${phoneNumber}:`,
+				// 	pedidosFiltrados
+				// );
 
 				callback(pedidosFiltrados); // Devuelve un array de pedidos filtrados
 			} else {
@@ -210,7 +210,7 @@ export const cancelOrder = async (orderId) => {
 	// Referencia al documento del día actual
 	const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-	console.log(`🚫 Iniciando cancelación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`);
+	// console.log(`🚫 Iniciando cancelación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`);
 
 	try {
 		await runTransaction(firestore, async (transaction) => {
@@ -232,7 +232,7 @@ export const cancelOrder = async (orderId) => {
 
 			// 2. Procesar los cupones si existen
 			if (couponCodes.length > 0) {
-				console.log("📝 Procesando cupones del pedido:", couponCodes);
+				// console.log("📝 Procesando cupones del pedido:", couponCodes);
 
 				// Obtener todos los documentos de vouchers una sola vez
 				const vouchersSnapshot = await getDocs(collection(firestore, "vouchers"));
@@ -248,7 +248,7 @@ export const cancelOrder = async (orderId) => {
 					for (const codigo of couponCodes) {
 						const codigoIndex = codigosActualizados.findIndex(c => c.codigo === codigo);
 						if (codigoIndex !== -1) {
-							console.log(`🔄 Actualizando estado del cupón ${codigo} a disponible`);
+							// console.log(`🔄 Actualizando estado del cupón ${codigo} a disponible`);
 							codigosActualizados[codigoIndex] = {
 								...codigosActualizados[codigoIndex],
 								estado: "disponible"
@@ -266,7 +266,7 @@ export const cancelOrder = async (orderId) => {
 				// Realizar todas las actualizaciones de vouchers en la misma transacción
 				for (const [voucherRef, updatedCodigos] of vouchersMap.entries()) {
 					transaction.update(voucherRef, { codigos: updatedCodigos });
-					console.log(`✅ Actualizando documento de vouchers con ${updatedCodigos.length} códigos`);
+					// console.log(`✅ Actualizando documento de vouchers con ${updatedCodigos.length} códigos`);
 				}
 			}
 
@@ -285,9 +285,9 @@ export const cancelOrder = async (orderId) => {
 				pedidos: pedidosActualizados
 			});
 
-			console.log(`✅ Pedido ID ${orderId} marcado como cancelado a las ${cancelTime}`);
+			// console.log(`✅ Pedido ID ${orderId} marcado como cancelado a las ${cancelTime}`);
 			if (couponCodes.length > 0) {
-				console.log(`✅ ${couponCodes.length} cupones restaurados a estado disponible:`, couponCodes);
+				// console.log(`✅ ${couponCodes.length} cupones restaurados a estado disponible:`, couponCodes);
 			}
 		});
 
@@ -331,16 +331,16 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 	const firestore = getFirestore();
 	const orders = [];
 
-	console.log('🔍 Iniciando búsqueda para el teléfono:', phoneNumber);
+	// console.log('🔍 Iniciando búsqueda para el teléfono:', phoneNumber);
 
 	try {
 		const datePaths = generateDatePaths(3);
-		console.log(`📅 Buscando en ${datePaths.length} días`);
+		// console.log(`📅 Buscando en ${datePaths.length} días`);
 
 		// Query each date path
 		for (const { path, formattedDate } of datePaths) {
 			const pedidosRef = doc(firestore, path);
-			console.log(`📄 Consultando: ${path}`);
+			// console.log(`📄 Consultando: ${path}`);
 
 			const pedidosDoc = await getDoc(pedidosRef);
 
@@ -361,14 +361,14 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 					});
 
 					if (matchingOrders.length > 0) {
-						console.log(`✅ Encontrados ${matchingOrders.length} pedidos en ${formattedDate}`);
+						// console.log(`✅ Encontrados ${matchingOrders.length} pedidos en ${formattedDate}`);
 					}
 				}
 			}
 		}
 
-		console.log('\n📊 Resumen de búsqueda:');
-		console.log(`🔍 Total de pedidos encontrados: ${orders.length}`);
+		// console.log('\n📊 Resumen de búsqueda:');
+		// console.log(`🔍 Total de pedidos encontrados: ${orders.length}`);
 
 		// Sort orders by date (most recent first)
 		const sortedOrders = orders.sort((a, b) => {
@@ -380,9 +380,9 @@ export const searchOrdersByPhone = async (phoneNumber) => {
 		});
 
 		// Log found orders
-		console.log('✅ Pedidos encontrados:');
+		// console.log('✅ Pedidos encontrados:');
 		sortedOrders.forEach(order => {
-			console.log(`📝 Pedido ${order.id} - Fecha: ${order.fecha} - Total: $${order.total}`);
+			// console.log(`📝 Pedido ${order.id} - Fecha: ${order.fecha} - Total: $${order.total}`);
 		});
 
 		return sortedOrders;

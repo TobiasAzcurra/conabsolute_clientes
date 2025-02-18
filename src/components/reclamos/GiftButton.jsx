@@ -13,7 +13,7 @@ const generateRandomCode = () => {
 };
 
 const generateVouchersAndUpdateOrder = async (orderData) => {
-    console.log("Starting voucher generation with order data:", orderData);
+    // console.log("Starting voucher generation with order data:", orderData);
 
     if (!orderData || !orderData.id || !orderData.fecha) {
         console.error("Invalid order data:", orderData);
@@ -30,11 +30,11 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
     const [day, month, year] = orderData.fecha.split("/");
     const ordersDocRef = doc(firestore, "pedidos", year, month, day);
 
-    console.log(`Processing order from date: ${year}/${month}/${day}`);
+    // console.log(`Processing order from date: ${year}/${month}/${day}`);
 
     try {
         const result = await runTransaction(firestore, async (transaction) => {
-            console.log("Starting transaction...");
+            // console.log("Starting transaction...");
 
             // Check order document first to validate no existing gift
             const orderSnapshot = await transaction.get(ordersDocRef);
@@ -100,7 +100,7 @@ const generateVouchersAndUpdateOrder = async (orderData) => {
             return { success: true, vouchers: newVouchers };
         });
 
-        console.log("Transaction completed successfully:", result);
+        // console.log("Transaction completed successfully:", result);
         return result;
     } catch (error) {
         console.error("Transaction failed with error:", error);
@@ -131,12 +131,12 @@ const GiftButton = ({ orderData }) => {
             return;
         }
 
-        console.log("Gift button clicked with order data:", orderData);
+        // console.log("Gift button clicked with order data:", orderData);
         setLoading(true);
 
         try {
             const result = await generateVouchersAndUpdateOrder(orderData);
-            console.log("Voucher generation successful:", result);
+            // console.log("Voucher generation successful:", result);
             if (result && result.vouchers) {
                 setGeneratedVouchers(result.vouchers);
                 setShowModal(true);
