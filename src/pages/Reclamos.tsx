@@ -4,6 +4,7 @@ import { getFirestore, doc, runTransaction } from "firebase/firestore";
 import currencyFormat from '../helpers/currencyFormat';
 import arrow from '../assets/arrowIcon.png'
 import logo from '../assets/anheloTMblack.png'
+import LoadingPoints from '../components/LoadingPoints';
 
 const Reclamos = () => {
     const [formData, setFormData] = useState({
