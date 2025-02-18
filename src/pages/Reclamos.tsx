@@ -126,6 +126,7 @@ const Reclamos = () => {
             setSearchResults(orders);
             setSelectedOrder(null);
             setIsSearchMode(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
             console.error("Error al buscar pedidos:", error);
         } finally {
@@ -257,7 +258,7 @@ const Reclamos = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-                                className="text-black px-4 placeholder:text-gray-600 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
+                                className="px-4 rounded-full outline-none bg-gray-100 w-full flex justify-center  text-xs"
                             />
                             <button
                                 type="button"
@@ -282,7 +283,7 @@ const Reclamos = () => {
                                 required
                                 rows={4}
                                 placeholder="Que paso con tu pedido?"
-                                className="px-4 h-10 rounded-full bg-gray-100 border-2  flex justify-center  border-black text-sm"
+                                className="px-4 h-10 rounded-full outline-none bg-gray-100 border-2  flex justify-center  border-black text-sm"
                             />
                             <button
                                 type="submit"
