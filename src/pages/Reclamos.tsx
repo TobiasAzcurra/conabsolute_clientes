@@ -95,7 +95,7 @@ const Reclamos = () => {
 
             return true;
         } catch (error) {
-            console.error("❌ Error al registrar el reclamo:", error);
+            // console.error("❌ Error al registrar el reclamo:", error);
             throw error;
         }
     };
@@ -158,7 +158,7 @@ const Reclamos = () => {
             setIsSearchMode(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (error) {
-            console.error("Error al buscar pedidos:", error);
+            // console.error("Error al buscar pedidos:", error);
             setError('Error al buscar pedidos. Por favor intenta nuevamente.');
         } finally {
             setSearching(false);
@@ -288,7 +288,6 @@ const Reclamos = () => {
         );
     }
 
-    console.log('LocalStorage:', localStorage);
 
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
