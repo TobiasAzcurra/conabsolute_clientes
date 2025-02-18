@@ -187,7 +187,7 @@ const GiftButton = ({ orderData }) => {
                 title="Tu regalo!"
             >
                 <div className="flex flex-col space-y-4">
-                    <p className="text-center text-sm text-gray-600 ">
+                    <p className="text-center text-xs text-gray-500 ">
                         Aca hay 5 vouchers 2x1! Podes canjearlos en tus próximos pedidos en donde rellenas con los datos de envio.
                     </p>
 
