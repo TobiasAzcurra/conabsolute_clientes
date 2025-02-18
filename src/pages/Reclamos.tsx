@@ -176,7 +176,7 @@ const Reclamos = () => {
                 {ordersToShow.map((order) => (
                     <div
                         key={order.id}
-                        className={`bg-gray-100 p-4 rounded-3xl mx-4 border relative ${selectedOrder?.id === order.id ? 'border-black border-2 shadow-md' : 'border border-black border-opacity-30'
+                        className={`bg-gray-100 p-4 rounded-3xl mx-4 border relative ${selectedOrder?.id === order.id ? 'border-black border-2 ' : 'border border-black border-opacity-30'
                             } cursor-pointer transition-all`}
                         onClick={() => handleOrderSelect(order)}
                     >
