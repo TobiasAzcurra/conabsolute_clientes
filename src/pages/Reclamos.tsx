@@ -187,7 +187,7 @@ const Reclamos = () => {
     };
 
     const renderOrdersSection = () => {
-        if (!searchResults.length && hasSearched) {
+        if (!searchResults.length && hasSearched && !searching) {
             return (
                 <p className="text-black text-center text-xs">No se encontraron pedidos en los últimos 3 días.</p>
             );
