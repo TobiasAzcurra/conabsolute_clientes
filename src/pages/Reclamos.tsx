@@ -275,7 +275,8 @@ const Reclamos = () => {
                                 type="button"
                                 onClick={handleSearch}
                                 disabled={searching || formData.telefono.length < 8}
-                                className=" h-10 w-20 bg-black flex items-center justify-center border-l border-black rounded-r-full">
+                                className={`h-10 w-20 bg-black flex items-center justify-center border-l border-black rounded-r-full ${searching ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}>
                                 {searching ? (
                                     <LoadingPoints color='text-gray-100' />
                                 ) : (
