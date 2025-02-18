@@ -303,24 +303,45 @@ const Reclamos = () => {
 
                     {selectedOrder && (
                         <div className="flex flex-col px-4 mt-2">
-                            <input
-                                name="descripcion"
-                                value={formData.descripcion}
-                                onChange={handleChange}
-                                required
-                                rows={4}
-                                placeholder="Que paso con tu pedido?"
-                                className="px-4 h-10 rounded-full outline-none bg-gray-100 border-2  flex justify-center  border-black text-sm"
-                            />
-                            <input
-                                name="descripcion"
-                                value={formData.descripcion}
-                                onChange={handleChange}
-                                required
-                                rows={4}
-                                placeholder="Un alias por si hay que transferir"
-                                className="px-4 h-10 mt-2 rounded-full outline-none bg-gray-100 border-2  flex justify-center  border-black text-sm"
-                            />
+
+
+                            <div className="flex flex-row items-center pl-3 border-2 h-10 border-black rounded-full gap-2 w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6">
+                                    <path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0 1 12 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 0 1-3.476.383.39.39 0 0 0-.297.17l-2.755 4.133a.75.75 0 0 1-1.248 0l-2.755-4.133a.39.39 0 0 0-.297-.17 48.9 48.9 0 0 1-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97ZM6.75 8.25a.75.75 0 0 1 .75-.75h9a.75.75 0 0 1 0 1.5h-9a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H7.5Z" clip-rule="evenodd" />
+                                </svg>
+
+                                <input
+                                    name="descripcion"
+                                    value={formData.descripcion}
+                                    onChange={handleChange}
+                                    required
+                                    rows={4}
+                                    placeholder="Que paso con tu pedido?"
+                                    className="w-full  rounded-full outline-none bg- h-10  bg-transparent  flex justify-center   text-sm"
+                                />
+
+                            </div>
+                            <div className="flex flex-row mt-2 items-center pl-3 border-2 h-10 border-black rounded-full gap-2 w-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6">
+                                    <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+                                    <path fill-rule="evenodd" d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z" clip-rule="evenodd" />
+                                    <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
+                                </svg>
+
+                                <input
+                                    name="descripcion"
+                                    value={formData.descripcion}
+                                    onChange={handleChange}
+                                    required
+                                    rows={4}
+                                    placeholder="Un alias por si hay que transferir"
+                                    className="w-full  rounded-full outline-none bg- h-10  bg-transparent  flex justify-center   text-sm"
+                                />
+
+                            </div>
+
+
+
                             <button
                                 type="submit"
                                 disabled={loading || !selectedOrder}
