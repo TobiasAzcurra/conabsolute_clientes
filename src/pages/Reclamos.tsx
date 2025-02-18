@@ -256,7 +256,7 @@ const Reclamos = () => {
                                 value={formData.telefono}
                                 onChange={handleChange}
                                 required
-                                placeholder="Ingresa tu número de teléfono"
+                                placeholder="Busca tu pedido con tu telefono ej: 3585168275"
                                 className="text-black px-4 placeholder:text-gray-600 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
                             />
                             <button

@@ -293,16 +293,7 @@ const AppRouter = () => {
 							</div>
 						</div>
 
-						{/* Explicación del formato, renderizado condicionalmente */}
-						{showExplanation && (
-							<div className="bg-black md:w-[500px] shadow-black h-16 flex items-center justify-center absolute z-50 top-[62px] font-coolvetica rounded-lg px-4 left-4 right-4 md:left-auto opacity-80 md:right-auto">
-								<p className="text-center w-full text-xs text-gray-100 font-medium">
-									Ingresa tu número con el código de área sin espacios ni
-									símbolos. Ej:
-									<span className="font-bold opacity-100"> 3584306832</span>
-								</p>
-							</div>
-						)}
+
 					</div>
 					<Carrusel />
 					<div className="top-[215px] inset-0 absolute">
