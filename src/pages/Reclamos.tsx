@@ -3,6 +3,7 @@ import { searchOrdersByPhone } from '../firebase/getPedido';
 import { getFirestore, doc, runTransaction } from "firebase/firestore";
 import currencyFormat from '../helpers/currencyFormat';
 import arrow from '../assets/arrowIcon.png'
+import logo from '../assets/anheloTMblack.png'
 
 const Reclamos = () => {
     const [formData, setFormData] = useState({
@@ -246,6 +247,11 @@ const Reclamos = () => {
 
     return (
         <div className="bg-gray-100 py-4 min-h-screen justify-center font-coolvetica flex flex-col">
+            <img
+                src={logo}
+                className={`w-2/3 mb-4 flex mx-auto ${selectedOrder ? 'mt-12' : 'mt-12'}`}
+                alt=""
+            />
             <div className="flex items-center flex-col">
                 <form onSubmit={handleSubmit} className="w-full max-w-md">
                     {isSearchMode && (
@@ -258,7 +264,7 @@ const Reclamos = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-                                className="px-4 rounded-full outline-none bg-gray-100 w-full flex justify-center  text-xs"
+                                className="px-4 h-10 rounded-l-full outline-none bg-transparent w-full flex justify-center  text-xs"
                             />
                             <button
                                 type="button"
