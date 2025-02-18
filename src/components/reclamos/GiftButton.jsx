@@ -204,7 +204,7 @@ const GiftButton = ({ orderData }) => {
                     </div>
 
                     <p className="text-center text-xs text-gray-500 mt-4">
-                        Recuerda guardar estos códigos, los necesitarás para tus próximos pedidos.
+                        Guardar estos códigos en algun lado, no los pierdas!
                     </p>
                 </div>
             </AppleModal>
