@@ -1,5 +1,3 @@
-// AppRouter.jsx
-
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Section from "./components/shopping/section";
 import RouterMenu from "./common/RouterMenu";
@@ -13,8 +11,7 @@ import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import React, { useEffect, useState } from "react";
-import OrderChecker from "./components/OrderChecker"
-
+import OrderChecker from "./components/OrderChecker";
 import Pedido from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
@@ -23,7 +20,7 @@ import SuccessPage from "./pages/menu/SuccessPage";
 import Reclamos from "./pages/Reclamos";
 import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
-import { getOrderById } from "./firebase/getPedido"; // Importamos la función getOrderById
+import { getOrderById } from "./firebase/getPedido";
 
 const burgersArray = Object.values(burgers);
 const combosArray = Object.values(combos);
@@ -39,6 +36,11 @@ const AppRouter = () => {
 	const navigate = useNavigate();
 	const [selectedItem, setSelectedItem] = useState("");
 	const [showExplanation, setShowExplanation] = useState(false);
+	const [isSearching, setIsSearching] = useState(false);
+
+	// States for autosuggest
+	const [showSuggestion, setShowSuggestion] = useState(false);
+	const [previousPhone, setPreviousPhone] = useState('');
 
 	// Estados para la calificación
 	const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
@@ -46,15 +48,43 @@ const AppRouter = () => {
 	const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
 	const [additionalProducts, setAdditionalProducts] = useState([]);
 	const [isRatingLoading, setIsRatingLoading] = useState(false);
-
-	// Estado para controlar si la animación ha terminado
 	const [animationCompleted, setAnimationCompleted] = useState(false);
-
-	// Estado para almacenar el pedido pendiente
 	const [pendingOrder, setPendingOrder] = useState(null);
 
 	const handleItemClick = (name) => {
 		setSelectedItem(name);
+	};
+
+	// Load previous phone from localStorage
+	useEffect(() => {
+		const storedPhone = localStorage.getItem('customerPhone');
+		if (storedPhone) {
+			setPreviousPhone(storedPhone);
+		}
+	}, []);
+
+	const handleInputFocus = () => {
+		const storedPhone = localStorage.getItem('customerPhone');
+		if (storedPhone && !phoneNumber) {
+			setPreviousPhone(storedPhone);
+			setShowSuggestion(true);
+		}
+	};
+
+	const handleInputBlur = () => {
+		setTimeout(() => setShowSuggestion(false), 300);
+	};
+
+	const handlePhoneChange = (e) => {
+		setPhoneNumber(e.target.value);
+		if (e.target.value) {
+			setShowSuggestion(false);
+		}
+	};
+
+	const handleSuggestionClick = () => {
+		setPhoneNumber(previousPhone);
+		setShowSuggestion(false);
 	};
 
 	useEffect(() => {
@@ -72,29 +102,18 @@ const AppRouter = () => {
 		}
 	}, [pathname]);
 
-	// Mostrar Carrusel y NavMenu solo cuando la ruta es /menu o una de sus subrutas, pero no contiene un ID adicional
 	const shouldShowCarruselAndNavMenu =
 		pathname.startsWith("/menu") &&
 		!pathname.match(/\/menu\/(burgers|combos|bebidas|papas)\/.+/);
-
-	// Función para manejar el evento al presionar Enter
-	const handleKeyDown = async (e) => {
-		if (e.key === "Enter") {
-			if (phoneNumber.trim() === "") {
-				alert("Por favor, ingresa un número de teléfono válido.");
-				return;
-			}
-
-			navigate("/pedido", { state: { phoneNumber } });
-		}
-	};
 
 	const handleSearch = () => {
 		if (phoneNumber.trim() === "") {
 			alert("Por favor, ingresa un número de teléfono válido.");
 			return;
 		}
+		setIsSearching(true);
 		navigate("/pedido", { state: { phoneNumber } });
+		setIsSearching(false);
 	};
 
 	const computeAdditionalProducts = (order) => {
@@ -122,24 +141,18 @@ const AppRouter = () => {
 
 		const shouldIncludePapasAnhelo = order.detallePedido.some((producto) => {
 			const nombreLimpio = producto.burger.trim().toLowerCase();
-			// console.log("🍔 Verificando producto:", nombreLimpio);
 
 			if (
 				requiredPrefixes.some((prefix) =>
 					nombreLimpio.startsWith(prefix.toLowerCase())
 				)
 			) {
-				// console.log("✅ Producto requiere Papas Anhelo:", nombreLimpio);
 				return true;
 			}
 
 			const excluded = excludedPrefixes.some((prefix) =>
 				nombreLimpio.startsWith(prefix.toLowerCase())
 			);
-			// console.log(
-			// 	excluded ? "❌ Producto excluido:" : "✅ Producto válido:",
-			// 	nombreLimpio
-			// );
 
 			return !excluded;
 		});
@@ -151,12 +164,8 @@ const AppRouter = () => {
 				(producto) =>
 					producto.burger.toLowerCase() === "papas anhelo ®".toLowerCase()
 			);
-			// console.log("🍟 Verificación Papas Anhelo:", {
-			// 	isAlreadyInOrder,
-			// });
 
 			if (!isAlreadyInOrder) {
-				// console.log("✅ Agregando Papas Anhelo a productos adicionales");
 				computedAdditionalProducts.push("Papas Anhelo ®");
 			}
 		}
@@ -165,10 +174,6 @@ const AppRouter = () => {
 	};
 
 	useEffect(() => {
-		// console.log(
-		// 	"🔍 Verificando si hay una calificación pendiente en localStorage."
-		// );
-
 		const checkPendingRating = async () => {
 			const pendingRating = localStorage.getItem("pendingRating");
 			if (pendingRating) {
@@ -177,33 +182,16 @@ const AppRouter = () => {
 				setSelectedOrderId(selectedOrderId);
 				setSelectedOrderProducts(selectedOrderProducts);
 
-				// console.log(
-				// 	`📦 Calificación pendiente encontrada para el pedido ID ${selectedOrderId}.`
-				// );
-
 				if (!fecha) {
 					console.error("❌ Fecha no encontrada en la calificación pendiente.");
 					return;
 				}
 
 				try {
-					// console.log(
-					// 	`🔄 Obteniendo el pedido ID ${selectedOrderId} para la fecha ${fecha}`
-					// );
 					const order = await getOrderById(selectedOrderId, fecha);
 					if (order) {
-						// console.log("📥 Pedido obtenido desde Firebase:", order);
-
-						// Recompute additionalProducts
 						const computedAdditionalProducts = computeAdditionalProducts(order);
 						setAdditionalProducts(computedAdditionalProducts);
-
-						// console.log(
-						// 	"📥 Productos adicionales:",
-						// 	computedAdditionalProducts
-						// );
-
-						// Set the pending order and open the modal
 						setPendingOrder(order);
 						setIsRatingModalOpen(true);
 					} else {
@@ -212,8 +200,6 @@ const AppRouter = () => {
 				} catch (error) {
 					console.error("❌ Error al obtener el pedido:", error);
 				}
-			} else {
-				// console.log("ℹ️ No hay calificaciones pendientes en localStorage.");
 			}
 		};
 
@@ -231,7 +217,6 @@ const AppRouter = () => {
 		setIsRatingLoading(true);
 
 		try {
-			// Use the fetched order's date
 			const fecha = pendingOrder.fecha;
 
 			if (!fecha) {
@@ -239,19 +224,8 @@ const AppRouter = () => {
 				throw new Error("Fecha del pedido no disponible.");
 			}
 
-			// console.log("📝 Enviando calificación para el pedido:", {
-			// 	fecha,
-			// 	selectedOrderId,
-			// 	ratings,
-			// });
-
 			await updateRatingForOrder(fecha, selectedOrderId, ratings);
-
-			// Elimina la calificación pendiente del localStorage
 			localStorage.removeItem("pendingRating");
-
-			// console.log("✅ Calificación enviada exitosamente.");
-
 			setIsRatingModalOpen(false);
 		} catch (err) {
 			console.error("❌ Error al enviar la calificación:", err);
@@ -268,32 +242,55 @@ const AppRouter = () => {
 		<div className="flex flex-col">
 			<OrderChecker />
 
-			{/* Mostrar NavMenu y Carrusel solo en las rutas específicas */}
 			{shouldShowCarruselAndNavMenu && (
 				<div className="relative mb-[90px]">
-					<div className="flex justify-center w-full">
-						{/* Search by phonenumber */}
-						<div className="bg-opacity-60  border border-gray-100 md:w-[500px] shadow-black h-10 flex items-center absolute z-50 top-4 rounded-full pl-4 left-4 right-4  md:left-auto md:right-auto backdrop-blur-sm">
-							<div className="flex items-center w-full">
+					<div className="flex justify-center w-full ">
+						{/* Search by phonenumber with autosuggest */}
+						<div className="bg-opacity-60 border border-gray-100 shadow-black h-10 flex items-center absolute z-50 top-4 right-4 left-4 rounded-full  w-auto backdrop-blur-sm">
+							<div className="flex items-center w-full relative">
 								<input
-									type="text"
+									type="tel"
 									value={phoneNumber}
-									onChange={(e) => setPhoneNumber(e.target.value)}
-									onKeyDown={handleKeyDown}
+									onChange={handlePhoneChange}
+									onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+									onFocus={handleInputFocus}
+									onBlur={handleInputBlur}
 									placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-									className="text-gray-100 placeholder:text-gray-100 font-coolvetica font-light text-xs bg-transparent outline-none w-full"
+									className="text-gray-100 font-light pl-4 placeholder:text-gray-100 font-coolvetica text-xs bg-transparent outline-none w-full"
 								/>
-								<button onClick={handleSearch} className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full">
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5">
-										<path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clip-rule="evenodd" />
-									</svg>
+								<button
+									onClick={handleSearch}
+									disabled={isSearching || phoneNumber.length < 8}
+									className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full"
+								>
 
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5">
+										<path fillRule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 0 13.5 6.75 6.75 0 0 0 0-13.5ZM2.25 10.5a8.25 8.25 0 1 1 14.59 5.28l4.69 4.69a.75.75 0 1 1-1.06 1.06l-4.69-4.69A8.25 8.25 0 0 1 2.25 10.5Z" clipRule="evenodd" />
+									</svg>
 								</button>
 
+								{/* Autosuggest dropdown */}
+								{/* {showSuggestion && previousPhone && ( */}
+								<div className="absolute font-coolvetica left-0 right-0 top-12 h-10 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
+									<button
+										onClick={handleSuggestionClick}
+										className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center "
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" className="h-4 text-gray-400 mr-1" viewBox="0 0 24 24" fill="currentColor">
+											<path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
+										</svg>
+										<p className='text-gray-400 text-xs font-light  mr-2'>
+											Ultima vez:
+										</p>
+										<p className=" text-sm">
+
+											{previousPhone}
+										</p>
+									</button>
+								</div>
+								{/* )} */}
 							</div>
 						</div>
-
-
 					</div>
 					<Carrusel />
 					<div className="top-[215px] inset-0 absolute">
@@ -304,6 +301,7 @@ const AppRouter = () => {
 					</div>
 				</div>
 			)}
+
 			<Routes>
 				{/* Rutas definidas aquí */}
 				<Route
