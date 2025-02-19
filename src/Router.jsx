@@ -271,7 +271,7 @@ const AppRouter = () => {
 
 								{/* Autosuggest dropdown */}
 								{showSuggestion && previousPhone && (
-									<div className="absolute font-coolvetica left-0 right-0 top-12 h-10 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
+									<div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
 										<button
 											onClick={handleSuggestionClick}
 											className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center "
