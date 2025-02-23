@@ -37,6 +37,7 @@ const Pedido = () => {
     const [showFullAddress, setShowFullAddress] = useState(false);
     const [isEditTimeModalOpen, setIsEditTimeModalOpen] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [isPaymentLoading, setIsPaymentLoading] = useState(false);
     const [message, setMessage] = useState(null);
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -331,10 +332,14 @@ const Pedido = () => {
         window.open(whatsappUrl, "_blank");
     };
 
-    const handleTransferenciaClick = async (total, telefono, orderId) => {
-        setLoading(true); // Mostrar un estado de carga si lo deseas
-        setError(null);   // Limpiar errores previos
-        setMessage(null); // Limpiar mensajes previos
+    const handleTransferenciaClick = async (event, total, telefono, orderId) => {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log("🎬 Iniciando handleTransferenciaClick");
+
+        setIsPaymentLoading(true); // Usar el estado específico
+        setError(null);
+        setMessage(null);
 
         try {
             const firestore = getFirestore();
@@ -342,12 +347,11 @@ const Pedido = () => {
                 day: "2-digit",
                 month: "2-digit",
                 year: "numeric",
-            }); // Formato "22/02/2025"
+            });
             const [dia, mes, anio] = fechaActual.split("/");
             const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
             const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
-            // Ejecutar la transacción para actualizar el pedido
             await runTransaction(firestore, async (transaction) => {
                 const docSnapshot = await transaction.get(pedidoDocRef);
                 if (!docSnapshot.exists()) {
@@ -364,29 +368,25 @@ const Pedido = () => {
                     throw new Error("Pedido no encontrado en la base de datos.");
                 }
 
-                // Modificar el pedido: cambiar metodoPago y agregar facturado si no existe
                 pedidosDelDia[pedidoIndex] = {
                     ...pedidosDelDia[pedidoIndex],
                     metodoPago: "mercadoPago",
                     facturado: pedidosDelDia[pedidoIndex].facturado !== undefined
                         ? pedidosDelDia[pedidoIndex].facturado
-                        : false, // Solo agregar si no existe
+                        : false,
                 };
 
-                // Actualizar el documento en Firestore
                 transaction.set(pedidoDocRef, {
                     ...existingData,
                     pedidos: pedidosDelDia,
                 });
             });
 
-            // Si la actualización es exitosa, proceder con WhatsApp
             const phoneNumber = "543584306832";
             const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, "_blank");
 
-            // Opcional: Actualizar el estado local para reflejar el cambio
             setPedidosPagados((prevPedidos) =>
                 prevPedidos.map((pedido) =>
                     pedido.id === orderId
@@ -401,7 +401,8 @@ const Pedido = () => {
             console.error("❌ Error al actualizar el pedido:", err);
             setError("Hubo un problema al actualizar el método de pago. Intenta de nuevo.");
         } finally {
-            setLoading(false);
+            setIsPaymentLoading(false); // Desactivar el estado específico
+            console.log("🏁 Finalizando handleTransferenciaClick");
         }
     };
 
@@ -880,24 +881,30 @@ const Pedido = () => {
 
                                             {/* pago virtual */}
                                             <div
-                                                className="bg-gray-300 text-blue-500 w-full text-blue-500 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
-                                                onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono, currentOrder.id)}
+                                                className="bg-gray-300 text-blue-500 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                                                onClick={(e) => handleTransferenciaClick(e, currentOrder.total, currentOrder.telefono, currentOrder.id)}
                                             >
                                                 <div className="flex items-center">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 24 24"
-                                                        fill="currentColor"
-                                                        className="h-5 mr-2"
-                                                    >
-                                                        <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                    Pagar virtualmente
+                                                    {isPaymentLoading ? (
+                                                        <LoadingPoints className="text-blue-500" />
+                                                    ) : (
+                                                        <>
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                                className="h-5 mr-2"
+                                                            >
+                                                                <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                                                                    clipRule="evenodd"
+                                                                />
+                                                            </svg>
+                                                            Pagar virtualmente
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -905,7 +912,7 @@ const Pedido = () => {
                                             {showSupportButton && (
                                                 <div
                                                     onClick={handleSupportClick}
-                                                    className="bg-black w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold mt-2 cursor-pointer transition-colors duration-300"
+                                                    className="bg-gray-300 w-full text-black font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold mt-2 cursor-pointer transition-colors duration-300"
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
