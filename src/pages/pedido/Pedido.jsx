@@ -331,12 +331,78 @@ const Pedido = () => {
         window.open(whatsappUrl, "_blank");
     };
 
-    const handleTransferenciaClick = (total, telefono) => {
-        // console.log("💬 Iniciando contacto con soporte");
-        const phoneNumber = "543584306832";
-        const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, "_blank");
+    const handleTransferenciaClick = async (total, telefono, orderId) => {
+        setLoading(true); // Mostrar un estado de carga si lo deseas
+        setError(null);   // Limpiar errores previos
+        setMessage(null); // Limpiar mensajes previos
+
+        try {
+            const firestore = getFirestore();
+            const fechaActual = currentTime.toLocaleDateString("es-AR", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+            }); // Formato "22/02/2025"
+            const [dia, mes, anio] = fechaActual.split("/");
+            const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+            const pedidoDocRef = doc(pedidosCollectionRef, dia);
+
+            // Ejecutar la transacción para actualizar el pedido
+            await runTransaction(firestore, async (transaction) => {
+                const docSnapshot = await transaction.get(pedidoDocRef);
+                if (!docSnapshot.exists()) {
+                    throw new Error("No se encontraron pedidos para la fecha actual.");
+                }
+
+                const existingData = docSnapshot.data();
+                const pedidosDelDia = existingData.pedidos || [];
+                const pedidoIndex = pedidosDelDia.findIndex(
+                    (pedido) => pedido.id === orderId
+                );
+
+                if (pedidoIndex === -1) {
+                    throw new Error("Pedido no encontrado en la base de datos.");
+                }
+
+                // Modificar el pedido: cambiar metodoPago y agregar facturado si no existe
+                pedidosDelDia[pedidoIndex] = {
+                    ...pedidosDelDia[pedidoIndex],
+                    metodoPago: "mercadoPago",
+                    facturado: pedidosDelDia[pedidoIndex].facturado !== undefined
+                        ? pedidosDelDia[pedidoIndex].facturado
+                        : false, // Solo agregar si no existe
+                };
+
+                // Actualizar el documento en Firestore
+                transaction.set(pedidoDocRef, {
+                    ...existingData,
+                    pedidos: pedidosDelDia,
+                });
+            });
+
+            // Si la actualización es exitosa, proceder con WhatsApp
+            const phoneNumber = "543584306832";
+            const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, "_blank");
+
+            // Opcional: Actualizar el estado local para reflejar el cambio
+            setPedidosPagados((prevPedidos) =>
+                prevPedidos.map((pedido) =>
+                    pedido.id === orderId
+                        ? { ...pedido, metodoPago: "mercadoPago", facturado: false }
+                        : pedido
+                )
+            );
+
+            setMessage("Método de pago actualizado. Redirigiendo a WhatsApp...");
+            setTimeout(() => setMessage(null), 3000);
+        } catch (err) {
+            console.error("❌ Error al actualizar el pedido:", err);
+            setError("Hubo un problema al actualizar el método de pago. Intenta de nuevo.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCompensationClick = (message) => {
@@ -726,31 +792,7 @@ const Pedido = () => {
                                                     )}
                                                 </div>
 
-                                                {currentOrder.direccion !== "" && (
-                                                    // <div className="flex flex-row gap-2">
-                                                    //     <svg
-                                                    //         xmlns="http://www.w3.org/2000/svg"
-                                                    //         viewBox="0 0 24 24"
-                                                    //         fill="currentColor"
-                                                    //         className="h-6"
-                                                    //     >
-                                                    //         <path
-                                                    //             fillRule="evenodd"
-                                                    //             d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
-                                                    //             clipRule="evenodd"
-                                                    //         />
-                                                    //     </svg>
-                                                    //     Deshabilitado de momento
-                                                    //     <p className="text-black font-coolvetica font-medium">
-                                                    //         Envio a cargo de:{" "}
-                                                    //         {currentOrder.cadete !== "NO ASIGNADO"
-                                                    //             ? currentOrder.cadete.charAt(0).toUpperCase() +
-                                                    //             currentOrder.cadete.slice(1).toLowerCase()
-                                                    //             : "Aun sin asignar"}
-                                                    //     </p>
-                                                    // </div>
-                                                    <></>
-                                                )}
+
                                                 <div className="flex flex-row gap-2 items-center">
                                                     {currentOrder.direccion === "" ? (
                                                         <img
@@ -814,23 +856,6 @@ const Pedido = () => {
                                                             ${currentOrder.total || "0.00"}
                                                         </p>
                                                     </div>
-
-                                                    {/* deshabilitado de momento */}
-                                                    {/* {!currentOrder.elaborado && (
-                                                    <button
-                                                        onClick={() => handleEditPaymentMethod(currentOrder.id)}
-                                                        className="rounded-full hover:bg-gray-100"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                            className="h-5 w-5"
-                                                        >
-                                                            <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z" />
-                                                        </svg>
-                                                    </button>
-                                                )} */}
                                                 </div>
                                             </div></div>
                                         {/* botones */}
@@ -856,17 +881,22 @@ const Pedido = () => {
                                             {/* pago virtual */}
                                             <div
                                                 className="bg-gray-300 text-blue-500 w-full text-blue-500 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
-                                                onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono)}
-
-
+                                                onClick={() => handleTransferenciaClick(currentOrder.total, currentOrder.telefono, currentOrder.id)}
                                             >
                                                 <div className="flex items-center">
-
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 mr-2">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="currentColor"
+                                                        className="h-5 mr-2"
+                                                    >
                                                         <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
-                                                        <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" clip-rule="evenodd" />
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                                                            clipRule="evenodd"
+                                                        />
                                                     </svg>
-
                                                     Pagar virtualmente
                                                 </div>
                                             </div>
