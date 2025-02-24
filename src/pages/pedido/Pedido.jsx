@@ -332,78 +332,12 @@ const Pedido = () => {
         window.open(whatsappUrl, "_blank");
     };
 
-    const handleTransferenciaClick = async (event, total, telefono, orderId) => {
-        event.preventDefault();
-        event.stopPropagation();
-        console.log("🎬 Iniciando handleTransferenciaClick");
+    const handleTransferenciaClick = async (total, telefono) => {
+        const phoneNumber = "543584306832";
+        const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
 
-        setIsPaymentLoading(true); // Usar el estado específico
-        setError(null);
-        setMessage(null);
-
-        try {
-            const firestore = getFirestore();
-            const fechaActual = currentTime.toLocaleDateString("es-AR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-            });
-            const [dia, mes, anio] = fechaActual.split("/");
-            const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
-            const pedidoDocRef = doc(pedidosCollectionRef, dia);
-
-            await runTransaction(firestore, async (transaction) => {
-                const docSnapshot = await transaction.get(pedidoDocRef);
-                if (!docSnapshot.exists()) {
-                    throw new Error("No se encontraron pedidos para la fecha actual.");
-                }
-
-                const existingData = docSnapshot.data();
-                const pedidosDelDia = existingData.pedidos || [];
-                const pedidoIndex = pedidosDelDia.findIndex(
-                    (pedido) => pedido.id === orderId
-                );
-
-                if (pedidoIndex === -1) {
-                    throw new Error("Pedido no encontrado en la base de datos.");
-                }
-
-                pedidosDelDia[pedidoIndex] = {
-                    ...pedidosDelDia[pedidoIndex],
-                    metodoPago: "mercadoPago",
-                    facturado: pedidosDelDia[pedidoIndex].facturado !== undefined
-                        ? pedidosDelDia[pedidoIndex].facturado
-                        : false,
-                };
-
-                transaction.set(pedidoDocRef, {
-                    ...existingData,
-                    pedidos: pedidosDelDia,
-                });
-            });
-
-            const phoneNumber = "543584306832";
-            const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
-            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, "_blank");
-
-            setPedidosPagados((prevPedidos) =>
-                prevPedidos.map((pedido) =>
-                    pedido.id === orderId
-                        ? { ...pedido, metodoPago: "mercadoPago", facturado: false }
-                        : pedido
-                )
-            );
-
-            setMessage("Método de pago actualizado. Redirigiendo a WhatsApp...");
-            setTimeout(() => setMessage(null), 3000);
-        } catch (err) {
-            console.error("❌ Error al actualizar el pedido:", err);
-            setError("Hubo un problema al actualizar el método de pago. Intenta de nuevo.");
-        } finally {
-            setIsPaymentLoading(false); // Desactivar el estado específico
-            console.log("🏁 Finalizando handleTransferenciaClick");
-        }
     };
 
     const handleCompensationClick = (message) => {
@@ -575,9 +509,9 @@ const Pedido = () => {
                 </div>
 
                 {loading && (
-                    <div className="flex flex-col items-center justify-center mt-8 px-4">
+                    <div className="flex flex-col items-center justify-center mt-2 px-8">
 
-                        <p className="text-black text-center font-coolvetica text-lg">
+                        <p className="text-black text-center font-coolvetica text-xs">
                             Estamos buscando tus pedidos,
                             Esto puede tomar unos segundos...
                         </p>
