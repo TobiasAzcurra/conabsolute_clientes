@@ -333,11 +333,14 @@ const Pedido = () => {
     };
 
     const handleTransferenciaClick = async (total, telefono) => {
+
+
         const phoneNumber = "543584306832";
         const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, "_blank");
 
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, "_blank");
     };
 
     const handleCompensationClick = (message) => {
@@ -816,7 +819,10 @@ const Pedido = () => {
                                             {/* pago virtual */}
                                             <div
                                                 className="bg-gray-300 text-blue-500 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
-                                                onClick={(e) => handleTransferenciaClick(e, currentOrder.total, currentOrder.telefono, currentOrder.id)}
+                                                onClick={(e) => {
+
+                                                    handleTransferenciaClick(currentOrder.total, currentOrder.telefono);
+                                                }}
                                             >
                                                 <div className="flex items-center">
                                                     {isPaymentLoading ? (
