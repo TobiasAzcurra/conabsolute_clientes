@@ -919,8 +919,9 @@ const Pedido = () => {
                 )}
 
                 {!loading && isInitialized && pedidosPagados.length === 0 && (
-                    <div className="flex flex-col items-center justify-center mt-4">
-                        <p className="text-gray-700">No se encontraron pedidos para hoy.</p>
+                    <div className="flex flex-col items-center justify-center mt-2 px-8">
+
+                        <p className="text-black text-center font-coolvetica text-xs">No se encontraron pedidos para hoy.</p>
                     </div>
                 )}
             </div>
