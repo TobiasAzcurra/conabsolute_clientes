@@ -336,7 +336,7 @@ const Pedido = () => {
 
 
         const phoneNumber = "543584306832";
-        const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: onlyanhelo3 a nombre de Tomas`;
+        const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: AbsoluteHSAS.mp a nombre de Absolute Holdings S.A.S.`;
 
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
