@@ -522,9 +522,9 @@ const Pedido = () => {
                     </div>
                 )}
 
-                {error && <div className="mt-4 text-red-600 font-medium">{error}</div>}
+                {error && <div className="mt-4 text-red-600 text-xs font-medium">{error}</div>}
                 {message && (
-                    <div className="mt-4 text-green-600 font-medium text-center">
+                    <div className="mt-4 text-green-600 text-xs  font-medium text-center">
                         {message}
                     </div>
                 )}{!loading && pedidosPagados.length > 0 && (
