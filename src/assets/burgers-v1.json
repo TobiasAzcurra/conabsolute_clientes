@@ -115,23 +115,6 @@
 		"price": 13360,
 		"type": "promo",
 		"category": "burger"
-	},
-	{
-		"description": "2 Triples smash burgers de nuestro blend de carnes, cheddar,  envuelto en un delicioso pan de papa Incluye dos porciones de papas. Por logistica, no se puede modificar",
-		"img": "promo2x1bcn.png",
-		"id": "PROMO2X1TRIPLE",
-		"name": "2x1 Triple Cheeseburger",
-		"price": 11860,
-		"type": "promo",
-		"category": "burger"
-	},
-	{
-		"description": "2 Doble smash burgers de nuestro blend de carnes, cheddar,  envuelto en un delicioso pan de papa Incluye dos porciones de papas. Por logistica, no se puede modificar",
-		"img": "promo2x1doble.png",
-		"id": "PROMO2X1DOBLE",
-		"name": "2x1 Doble Cheeseburger",
-		"price": 11370,
-		"type": "promo",
-		"category": "burger"
 	}
+
 ]
