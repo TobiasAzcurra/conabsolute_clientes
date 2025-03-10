@@ -9,31 +9,35 @@ import {
 export const validarVoucher = async (codigo) => {
 	const firestore = getFirestore();
 	const vouchersCollectionRef = collection(firestore, "vouchers");
-
+  
 	try {
-		const querySnapshot = await getDocs(vouchersCollectionRef);
-
-		for (const docSnapshot of querySnapshot.docs) {
-			const data = docSnapshot.data();
-			const codigos = data.codigos || [];
-
-			const codigoIndex = codigos.findIndex((c) => c.codigo === codigo);
-
-			if (codigoIndex !== -1) {
-				if (codigos[codigoIndex].estado === "usado") {
-					return { isValid: false, message: "El cupón ya ha sido usado" };
-				}
-				return { isValid: true, message: "¡Código válido!" };
-			}
+	  const querySnapshot = await getDocs(vouchersCollectionRef);
+  
+	  for (const docSnapshot of querySnapshot.docs) {
+		const data = docSnapshot.data();
+		const codigos = data.codigos || [];
+  
+		const codigoIndex = codigos.findIndex((c) => c.codigo === codigo);
+  
+		if (codigoIndex !== -1) {
+		  const voucher = codigos[codigoIndex];
+		  if (voucher.estado === "usado") {
+			return { isValid: false, message: "El cupón ya ha sido usado", gratis: false };
+		  }
+		  return { 
+			isValid: true, 
+			message: "¡Código válido!", 
+			gratis: voucher.gratis || false // Devolvemos el valor de gratis, con false como predeterminado
+		  };
 		}
-
-		return { isValid: false, message: "Cupón no encontrado" };
+	  }
+  
+	  return { isValid: false, message: "Cupón no encontrado", gratis: false };
 	} catch (error) {
-		console.error("Error al validar el voucher:", error);
-		throw error;
+	  console.error("Error al validar el voucher:", error);
+	  throw error;
 	}
-};
-
+  };
 export const canjearVouchers = async (codigos) => {
 	const firestore = getFirestore();
 	const vouchersCollectionRef = collection(firestore, "vouchers");

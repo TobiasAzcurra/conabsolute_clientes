@@ -1,30 +1,30 @@
-import { ErrorMessage, Field, Form, Formik } from 'formik';
-import MyTextInput from './MyTextInput';
-import validations from './validations';
-import handleSubmit from './handleSubmit';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { addLastCart, setEnvioExpress } from '../../redux/cart/cartSlice';
-import { useEffect, useState, useMemo } from 'react';
-import { MapDirection } from './MapDirection';
-import AppleErrorMessage from './AppleErrorMessage';
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import MyTextInput from "./MyTextInput";
+import validations from "./validations";
+import handleSubmit from "./handleSubmit";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
+import { useEffect, useState, useMemo } from "react";
+import { MapDirection } from "./MapDirection";
+import AppleErrorMessage from "./AppleErrorMessage";
 import {
   validarVoucher,
   canjearVouchers,
-} from '../../firebase/validateVoucher';
-import Payment from '../mercadopago/Payment';
-import currencyFormat from '../../helpers/currencyFormat';
-import { calculateDiscountedTotal } from '../../helpers/currencyFormat';
-import isologo from '../../assets/isologo.png';
+} from "../../firebase/validateVoucher";
+import Payment from "../mercadopago/Payment";
+import currencyFormat from "../../helpers/currencyFormat";
+import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
+import isologo from "../../assets/isologo.png";
 import {
   isWithinClosedDays,
   isWithinOrderTimeRange,
-} from '../../helpers/validate-hours';
-import LoadingPoints from '../LoadingPoints';
-import Toggle from '../Toggle';
-import AppleModal from '../AppleModal';
-import { listenToAltaDemanda } from '../../firebase/readConstants';
-import Tooltip from '../Tooltip';
+} from "../../helpers/validate-hours";
+import LoadingPoints from "../LoadingPoints";
+import Toggle from "../Toggle";
+import AppleModal from "../AppleModal";
+import { listenToAltaDemanda } from "../../firebase/readConstants";
+import Tooltip from "../Tooltip";
 
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000;
 const expressDeliveryFee = 2000;
@@ -34,30 +34,28 @@ const FormCustom = ({ cart, total }) => {
   const dispatch = useDispatch();
 
   const formValidations = validations(total + envio);
-  const [mapUrl, setUrl] = useState('');
+  const [mapUrl, setUrl] = useState("");
   const [validarUbi, setValidarUbi] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
-
   const [noEncontre, setNoEncontre] = useState(false);
 
-  // Estados para alta demanda
   const [altaDemanda, setAltaDemanda] = useState(null);
   const [showHighDemandModal, setShowHighDemandModal] = useState(false);
   const [pendingValues, setPendingValues] = useState(null);
 
   const [discountedTotal, setDiscountedTotal] = useState(total);
-  const [couponCodes, setCouponCodes] = useState(['']);
+  const [couponCodes, setCouponCodes] = useState([""]);
   const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
 
   const [descuento, setDescuento] = useState(0);
   const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
+  const [freeBurgerDiscount, setFreeBurgerDiscount] = useState(0);
   const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
 
-  const [voucherStatus, setVoucherStatus] = useState(['']);
-  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [voucherStatus, setVoucherStatus] = useState([""]);
+  const [showCouponInput, setShowCouponInput] = useState(true);
   const [showReservaInput, setShowReservaInput] = useState(false);
 
-  // Estados para MercadoPago
   const [preferenceId, setPreferenceId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -72,21 +70,16 @@ const FormCustom = ({ cart, total }) => {
     altaDemanda?.open || false
   );
 
-  // Escucha de alta demanda
   useEffect(() => {
     let unsubscribeAltaDemanda = null;
 
     const iniciarEscuchaAltaDemanda = async () => {
       try {
         unsubscribeAltaDemanda = listenToAltaDemanda((altaDemandaData) => {
-          // console.log(
-          //   '✨ Datos de Alta Demanda recibidos en Form:',
-          //   altaDemandaData
-          // );
           setAltaDemanda(altaDemandaData);
         });
       } catch (error) {
-        console.error('❌ Error al conectar con Alta Demanda:', error);
+        console.error("❌ Error al conectar con Alta Demanda:", error);
       }
     };
 
@@ -98,6 +91,7 @@ const FormCustom = ({ cart, total }) => {
       }
     };
   }, []);
+
   const handleExpressToggle = () => {
     const newValue = !isEnabled;
     setIsEnabled(newValue);
@@ -108,13 +102,15 @@ const FormCustom = ({ cart, total }) => {
     try {
       const validCoupons = couponCodes.filter(
         (code, index) =>
-          code.trim() !== '' && voucherStatus[index] === '¡Código válido!'
+          code.trim() !== "" &&
+          (voucherStatus[index] === "¡Código válido!" ||
+            voucherStatus[index] === "¡Código válido! (Hamburguesa gratis)")
       );
 
       if (validCoupons.length > 0) {
         const canjeSuccess = await canjearVouchers(validCoupons);
         if (!canjeSuccess) {
-          console.error('Error al canjear los cupones');
+          console.error("Error al canjear los cupones");
           return;
         }
       }
@@ -133,11 +129,11 @@ const FormCustom = ({ cart, total }) => {
         const adjustedHours = currentTime
           .getHours()
           .toString()
-          .padStart(2, '0');
+          .padStart(2, "0");
         const adjustedMinutes = currentTime
           .getMinutes()
           .toString()
-          .padStart(2, '0');
+          .padStart(2, "0");
         adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
       }
 
@@ -154,7 +150,7 @@ const FormCustom = ({ cart, total }) => {
         envio,
         mapUrl,
         couponCodes,
-        descuento,
+        descuento + freeBurgerDiscount,
         false,
         message,
         altaDemanda?.priceFactor || 1
@@ -164,40 +160,62 @@ const FormCustom = ({ cart, total }) => {
         navigate(`/success/${orderId}`);
         dispatch(addLastCart());
       } else {
-        console.error('Error al procesar la orden');
+        console.error("Error al procesar la orden");
       }
     } catch (error) {
-      console.error('Error al procesar el pedido:', error);
+      console.error("Error al procesar el pedido:", error);
     }
   };
 
   const getTotalBurgers = (cartToCheck = cart) => {
     if (!Array.isArray(cartToCheck)) {
-      console.error('Invalid cart passed to getTotalBurgers', cartToCheck);
+      console.error("Invalid cart passed to getTotalBurgers", cartToCheck);
       return 0;
     }
+    const { nonPromoProducts } = getPromoAndNonPromoProducts(cartToCheck);
+    return nonPromoProducts.reduce((sum, item) => {
+      if (item.category === "burger" || item.category === "burgers") {
+        return sum + item.quantity; // Asegúrate de multiplicar por la cantidad
+      }
+      return sum;
+    }, 0);
+  };
 
-    let totalBurgers = 0;
-    for (const item of cartToCheck) {
-      if (item.category === 'burger' || item.category === 'burgers') {
-        if (item.name.includes('2x1')) {
-          totalBurgers += item.quantity * 2;
-        } else {
-          totalBurgers += item.quantity;
+  const getBurgerPrices = (cartToCheck = cart) => {
+    if (!Array.isArray(cartToCheck)) return [];
+    const { nonPromoProducts } = getPromoAndNonPromoProducts(cartToCheck);
+    const burgerPrices = [];
+    nonPromoProducts.forEach((item) => {
+      if (item.category === "burger" || item.category === "burgers") {
+        for (let i = 0; i < item.quantity; i++) {
+          burgerPrices.push(item.price);
         }
       }
-    }
-    return totalBurgers;
+    });
+    return burgerPrices.sort((a, b) => a - b);
+  };
+
+  const getPromoAndNonPromoProducts = (cart) => {
+    const promoProducts = cart.filter((item) => item.type === "promo");
+    const nonPromoProducts = cart.filter((item) => item.type !== "promo");
+    return { promoProducts, nonPromoProducts };
   };
 
   const addCouponField = () => {
-    const totalBurgers = getTotalBurgers();
-    const maxCoupons = Math.floor(totalBurgers / 2);
+    const totalNonPromoBurgers = getTotalBurgers();
+    const freeVouchers = couponCodes.filter(
+      (code, i) => voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)"
+    ).length;
+    const normalVouchers = couponCodes.filter(
+      (code, i) => voucherStatus[i] === "¡Código válido!"
+    ).length;
+    const remainingCapacity =
+      totalNonPromoBurgers - freeVouchers - normalVouchers * 2;
 
-    if (couponCodes.length < maxCoupons) {
-      setCouponCodes([...couponCodes, '']);
-      setVoucherStatus([...voucherStatus, '']);
-      setIsValidating([...isValidating, false]);
+    if (remainingCapacity > 0) {
+      setCouponCodes((prev) => [...prev, ""]);
+      setVoucherStatus((prev) => [...prev, ""]);
+      setIsValidating((prev) => [...prev, false]);
     }
   };
 
@@ -207,26 +225,21 @@ const FormCustom = ({ cart, total }) => {
     setCouponCodes(updatedCoupons);
 
     const updatedVoucherStatus = [...voucherStatus];
+    const updatedValidating = [...isValidating];
+    if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push("");
+    if (updatedValidating.length <= index) updatedValidating.push(false);
 
     if (value.length < 5) {
-      updatedVoucherStatus[index] = 'Deben ser al menos 5 dígitos.';
+      updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
     } else if (value.length === 5) {
-      updatedVoucherStatus[index] = '';
+      updatedVoucherStatus[index] = "";
+      handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
     } else {
       updatedVoucherStatus[index] =
-        'El código debe tener exactamente 5 caracteres.';
+        "El código debe tener exactamente 5 caracteres.";
     }
     setVoucherStatus(updatedVoucherStatus);
-  };
-  const removeExcessCoupons = (maxCoupons) => {
-    const adjustedMaxCoupons = Math.max(maxCoupons, 1);
-    const newCouponCodes = couponCodes.slice(0, adjustedMaxCoupons);
-    const newVoucherStatus = voucherStatus.slice(0, adjustedMaxCoupons);
-    const newIsValidating = isValidating.slice(0, adjustedMaxCoupons);
-
-    setCouponCodes(newCouponCodes);
-    setVoucherStatus(newVoucherStatus);
-    setIsValidating(newIsValidating);
+    setIsValidating(updatedValidating);
   };
 
   const handleVoucherValidation = async (
@@ -235,6 +248,13 @@ const FormCustom = ({ cart, total }) => {
     updatedCoupons,
     setFieldValue
   ) => {
+    console.log("🚀 INICIO DE VALIDACIÓN DE VOUCHER", {
+      index,
+      value,
+      updatedCoupons,
+      carrito: cart,
+    });
+
     setIsValidating((prev) => {
       const updated = [...prev];
       updated[index] = true;
@@ -243,150 +263,310 @@ const FormCustom = ({ cart, total }) => {
 
     try {
       const totalBurgers = getTotalBurgers(cart);
+      const burgerPrices = getBurgerPrices(cart);
+      const { promoProducts, nonPromoProducts } =
+        getPromoAndNonPromoProducts(cart);
+
+      console.log("📊 ANÁLISIS DEL CARRITO", {
+        totalBurgers,
+        burgerPrices,
+        promoProducts,
+        nonPromoProducts,
+        totalEnCarrito: cart.length,
+      });
+
+      console.log("📊 ANÁLISIS DETALLADO DEL CARRITO", {
+        elementosEnCarrito: cart.length,
+        cantidadTotalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
+        cantidadBurgersRegulares: nonPromoProducts.reduce(
+          (sum, item) =>
+            item.category === "burger" || item.category === "burgers"
+              ? sum + item.quantity
+              : sum,
+          0
+        ),
+        cantidadBurgersPromo: promoProducts.reduce(
+          (sum, item) =>
+            item.category === "burger" || item.category === "burgers"
+              ? sum + item.quantity
+              : sum,
+          0
+        ),
+      });
 
       if (updatedCoupons.indexOf(value) !== index) {
         const updatedVoucherStatus = [...voucherStatus];
-        updatedVoucherStatus[index] = 'Este código ya fue ingresado.';
+        updatedVoucherStatus[index] = "Este código ya fue ingresado.";
         setVoucherStatus(updatedVoucherStatus);
+        console.log("Código duplicado detectado", { updatedVoucherStatus });
         return;
       }
-
-      const numCoupons = updatedCoupons.filter(
-        (code) => code.trim() !== ''
-      ).length;
-      if (totalBurgers < numCoupons * 2) {
-        const updatedVoucherStatus = [...voucherStatus];
-        updatedVoucherStatus[index] = `Necesitas al menos ${numCoupons * 2
-          } hamburguesas para canjear los vouchers.`;
-        setVoucherStatus(updatedVoucherStatus);
-        return;
-      }
-
-      const { promoProducts, nonPromoProducts } =
-        getPromoAndNonPromoProducts(cart);
 
       if (promoProducts.length > 0 && nonPromoProducts.length === 0) {
         const updatedVoucherStatus = [...voucherStatus];
         updatedVoucherStatus[index] =
-          'No se pueden aplicar vouchers a productos en promoción.';
+          "No se pueden aplicar vouchers a productos en promoción.";
         setVoucherStatus(updatedVoucherStatus);
+        console.log("Solo productos promocionales", { updatedVoucherStatus });
         return;
       }
 
-      if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
-        const updatedVoucherStatus = [...voucherStatus];
-        updatedVoucherStatus[index] =
-          'El cupón se aplica solo a productos no promocionales.';
-        setVoucherStatus(updatedVoucherStatus);
+      const { isValid, message, gratis } = await validarVoucher(value);
+      console.log("✅ RESULTADO DE VALIDACIÓN", {
+        isValid,
+        message,
+        tipoVoucher: gratis ? "GRATIS" : "2x1",
+      });
 
-        const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
-        const numNonPromoCoupons = updatedCoupons.filter(
-          (code) => code.trim() !== ''
-        ).length;
-        const hasEnoughNonPromoBurgers =
-          totalNonPromoBurgers >= numNonPromoCoupons * 2;
+      // Contar los vouchers gratis actuales
+      const freeVouchers = updatedCoupons.filter((code, i) => {
+        return (
+          code.trim() !== "" &&
+          voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)"
+        );
+      }).length;
 
-        if (!hasEnoughNonPromoBurgers) {
-          updatedVoucherStatus[index] = `Necesitas al menos ${numNonPromoCoupons * 2
-            } hamburguesas no promocionales para canjear los vouchers.`;
-          setVoucherStatus(updatedVoucherStatus);
-          return;
-        }
-      }
+      // Contar los vouchers 2x1 actuales
+      const normalVouchers = updatedCoupons.filter((code, i) => {
+        return code.trim() !== "" && voucherStatus[i] === "¡Código válido!";
+      }).length;
 
-      const { isValid, message } = await validarVoucher(value);
+      console.log("📝 CONTEO DE VOUCHERS ACTUALES", {
+        freeVouchers,
+        normalVouchers,
+        voucherStatus,
+        updatedCoupons,
+      });
+
       const updatedVoucherStatus = [...voucherStatus];
 
-      if (isValid) {
-        updatedVoucherStatus[index] = '¡Código válido!';
+      if (!isValid) {
+        updatedVoucherStatus[index] = message;
+        setVoucherStatus(updatedVoucherStatus);
+        console.log("Voucher no válido", { updatedVoucherStatus });
+        return;
+      }
+
+      // Si es voucher gratis
+      if (gratis) {
+        const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+        const totalFreeVouchers =
+          freeVouchers +
+          (updatedVoucherStatus[index] ===
+          "¡Código válido! (Hamburguesa gratis)"
+            ? 0
+            : 1);
+        console.log("🎁 PROCESANDO VOUCHER GRATIS", {
+          totalFreeVouchers,
+          totalNonPromoBurgers,
+          vouchersGratisActuales: freeVouchers,
+          nuevoVoucherGratis:
+            updatedVoucherStatus[index] !==
+            "¡Código válido! (Hamburguesa gratis)",
+        });
+
+        if (totalFreeVouchers > totalNonPromoBurgers) {
+          updatedVoucherStatus[index] =
+            "No hay suficientes hamburguesas no promocionales para aplicar todos los vouchers gratis.";
+          setVoucherStatus(updatedVoucherStatus);
+          console.log("No hay suficientes hamburguesas para voucher gratis", {
+            updatedVoucherStatus,
+          });
+          return;
+        }
+
+        updatedVoucherStatus[index] = "¡Código válido! (Hamburguesa gratis)";
+        setVoucherStatus(updatedVoucherStatus);
+        console.log("Voucher gratis válido", { updatedVoucherStatus });
+
+        const newFreeBurgerDiscount = burgerPrices
+          .slice(0, totalFreeVouchers)
+          .reduce((sum, price) => sum + price, 0);
+        setFreeBurgerDiscount(newFreeBurgerDiscount);
+        console.log("💰 DESCUENTO POR HAMBURGUESAS GRATIS", {
+          newFreeBurgerDiscount,
+          burgersSeleccionadas: burgerPrices.slice(0, totalFreeVouchers),
+          totalBurgerPrices: burgerPrices,
+        });
+
         const { newTotal, totalDescuento } = calculateDiscountedTotal(
           cart,
-          numCoupons
+          normalVouchers,
+          totalFreeVouchers
+        );
+        setDescuento(totalDescuento);
+
+        // Importante: newTotal ya incluye el descuento de hamburguesas gratis
+        setDiscountedTotal(newTotal);
+
+        console.log("Descuentos recalculados", {
+          newTotal,
+          totalDescuento,
+          freeBurgerDiscount: newFreeBurgerDiscount,
+          discountedTotal: newTotal,
+        });
+      }
+      // Si es voucher 2x1
+      else {
+        const numCoupons =
+          normalVouchers +
+          (updatedVoucherStatus[index] === "¡Código válido!" ? 0 : 1);
+        console.log("2️⃣✖️1️⃣ PROCESANDO VOUCHER 2x1", {
+          numCoupons,
+          normalVouchersActuales: normalVouchers,
+          nuevoVoucher2x1: updatedVoucherStatus[index] !== "¡Código válido!",
+          burgersPorParejas: numCoupons * 2,
+        });
+
+        if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
+          const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+          const hasEnoughNonPromoBurgers =
+            totalNonPromoBurgers >= numCoupons * 2;
+          console.log("Verificando hamburguesas no promocionales para 2x1", {
+            hasEnoughNonPromoBurgers,
+            required: numCoupons * 2,
+            totalNonPromoBurgers,
+          });
+
+          if (!hasEnoughNonPromoBurgers) {
+            updatedVoucherStatus[index] = `Necesitas al menos ${
+              numCoupons * 2
+            } hamburguesas no promocionales para canjear los vouchers 2x1.`;
+            setVoucherStatus(updatedVoucherStatus);
+            console.log(
+              "No hay suficientes hamburguesas no promocionales para 2x1",
+              { updatedVoucherStatus }
+            );
+            return;
+          }
+        }
+
+        if (totalBurgers < numCoupons * 2) {
+          updatedVoucherStatus[index] = `Necesitas al menos ${
+            numCoupons * 2
+          } hamburguesas para canjear los vouchers 2x1.`;
+          setVoucherStatus(updatedVoucherStatus);
+          console.log("No hay suficientes hamburguesas totales para 2x1", {
+            updatedVoucherStatus,
+          });
+          return;
+        }
+
+        updatedVoucherStatus[index] = "¡Código válido!";
+        setVoucherStatus(updatedVoucherStatus);
+        console.log("Voucher 2x1 válido", { updatedVoucherStatus });
+
+        const { newTotal, totalDescuento } = calculateDiscountedTotal(
+          cart,
+          numCoupons,
+          freeVouchers
         );
         if (descuentoForOneUnit === 0) {
           setDescuentoForOneUnit(totalDescuento / numCoupons);
         }
-        setDiscountedTotal(newTotal);
         setDescuento(totalDescuento);
-      } else {
-        updatedVoucherStatus[index] = message;
+        setDiscountedTotal(newTotal);
+        console.log("Descuentos 2x1 recalculados", {
+          newTotal,
+          totalDescuento,
+        });
       }
 
+      // Agregar un nuevo campo si es el último voucher válido y hay capacidad
+      const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+      if (
+        (updatedVoucherStatus[index] === "¡Código válido!" ||
+          updatedVoucherStatus[index] ===
+            "¡Código válido! (Hamburguesa gratis)") &&
+        index === updatedCoupons.length - 1 &&
+        updatedCoupons.length < totalNonPromoBurgers
+      ) {
+        addCouponField();
+      }
+
+      console.log("🧮 ESTADO FINAL DE DESCUENTOS", {
+        descuento,
+        freeBurgerDiscount,
+        totalOriginal: total,
+        totalConDescuento: discountedTotal,
+      });
+
+      console.log("Estado final de voucherStatus", { updatedVoucherStatus });
       setVoucherStatus(updatedVoucherStatus);
     } catch (error) {
-      console.error('Error validating voucher:', error);
+      console.error("❌ ERROR EN VALIDACIÓN DE VOUCHER:", error);
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = 'Error al validar el cupón.';
+      updatedVoucherStatus[index] = "Error al validar el cupón.";
       setVoucherStatus(updatedVoucherStatus);
+      console.log("Error en validación", { updatedVoucherStatus });
     } finally {
       setIsValidating((prev) => {
         const updated = [...prev];
         updated[index] = false;
         return updated;
       });
+      console.log("🏁 FIN DE VALIDACIÓN DE VOUCHER");
     }
   };
+
+  // Añade este effect al componente para monitorear los cambios de estado
+  useEffect(() => {
+    console.log("Estado de descuentos sincronizado:", {
+      descuento,
+      freeBurgerDiscount,
+      total,
+      discountedTotal,
+    });
+  }, [descuento, freeBurgerDiscount, total, discountedTotal]);
+
   useEffect(() => {
     let hasInvalidVoucher = false;
     let validCouponCount = 0;
 
     voucherStatus.forEach((v, index) => {
-      if (v !== '¡Código válido!') {
+      if (
+        v !== "¡Código válido!" &&
+        v !== "¡Código válido! (Hamburguesa gratis)"
+      ) {
         hasInvalidVoucher = true;
       } else {
         validCouponCount++;
       }
     });
 
-    if (hasInvalidVoucher && descuento !== 0) {
+    if (hasInvalidVoucher && (descuento !== 0 || freeBurgerDiscount !== 0)) {
       const newDescuento = descuentoForOneUnit * validCouponCount;
       setDescuento(newDescuento);
-      setDiscountedTotal(total - newDescuento);
+      setDiscountedTotal(total - newDescuento - freeBurgerDiscount);
     }
-  }, [voucherStatus, setDescuento, setDiscountedTotal, descuento, total, cart]);
+  }, [
+    voucherStatus,
+    setDescuento,
+    setDiscountedTotal,
+    descuento,
+    freeBurgerDiscount,
+    total,
+    cart,
+  ]);
 
   useEffect(() => {
     setDiscountedTotal(total);
   }, [total]);
 
-  useEffect(() => {
-    const validatePendingCoupons = async () => {
-      const pendingCoupons = couponCodes.filter(
-        (code, index) =>
-          code.trim().length === 5 && voucherStatus[index] !== '¡Código válido!'
-      );
-
-      if (pendingCoupons.length > 0) {
-        const lastIndex = couponCodes.findIndex(
-          (code, index) => code === pendingCoupons[pendingCoupons.length - 1]
-        );
-
-        await handleVoucherValidation(
-          lastIndex,
-          pendingCoupons[pendingCoupons.length - 1],
-          couponCodes,
-          setFieldValue
-        );
-      }
-    };
-
-    validatePendingCoupons();
-  }, [cart, couponCodes]);
-
-  const [selectedHora, setSelectedHora] = useState('');
+  const [selectedHora, setSelectedHora] = useState("");
 
   const handleChange = (event) => {
     setSelectedHora(event.target.value);
   };
 
   const adjustHora = (hora) => {
-    const [hours, minutes] = hora.split(':').map(Number);
+    const [hours, minutes] = hora.split(":").map(Number);
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
     date.setMinutes(date.getMinutes() - 30);
 
-    const adjustedHours = date.getHours().toString().padStart(2, '0');
-    const adjustedMinutes = date.getMinutes().toString().padStart(2, '0');
+    const adjustedHours = date.getHours().toString().padStart(2, "0");
+    const adjustedMinutes = date.getMinutes().toString().padStart(2, "0");
     const adjustedTime = `${adjustedHours}:${adjustedMinutes}`;
     return adjustedTime;
   };
@@ -397,14 +577,13 @@ const FormCustom = ({ cart, total }) => {
     const currentMinute = now.getMinutes();
 
     const allTimeSlots = [
-      '20:30',
-      '21:00',
-      '21:30',
-      '22:00',
-      '22:30',
-      '23:00',
-      '23:30',
-      // '00:00', De momento deshabilitado
+      "20:30",
+      "21:00",
+      "21:30",
+      "22:00",
+      "22:30",
+      "23:00",
+      "23:30",
     ];
 
     const nextSlotMinutes =
@@ -413,7 +592,7 @@ const FormCustom = ({ cart, total }) => {
     const nextSlotMinute = nextSlotMinutes % 60;
 
     return allTimeSlots.filter((timeSlot) => {
-      let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
+      let [slotHour, slotMinute] = timeSlot.split(":").map(Number);
       if (slotHour === 0) slotHour = 24;
       const slotTimeInMinutes = slotHour * 60 + slotMinute;
       const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
@@ -428,12 +607,13 @@ const FormCustom = ({ cart, total }) => {
       <Field
         as="select"
         name="hora"
-        className={`custom-select  text-xs font-light ${selectedHora === '' ? 'text-gray-400 ' : 'text-black'
-          }`}
+        className={`custom-select text-xs font-light ${
+          selectedHora === "" ? "text-gray-400" : "text-black"
+        }`}
         value={selectedHora}
         onChange={(e) => {
           handleChange(e);
-          setFieldValue('hora', e.target.value);
+          setFieldValue("hora", e.target.value);
         }}
       >
         <option value="" disabled>
@@ -476,12 +656,6 @@ const FormCustom = ({ cart, total }) => {
     return productsTotal + totalToppings;
   };
 
-  const getPromoAndNonPromoProducts = (cart) => {
-    const promoProducts = cart.filter((item) => item.type === 'promo');
-    const nonPromoProducts = cart.filter((item) => item.type !== 'promo');
-    return { promoProducts, nonPromoProducts };
-  };
-
   useEffect(() => {
     setIsOpenPaymentMethod(altaDemanda?.open || false);
   }, [altaDemanda]);
@@ -489,40 +663,39 @@ const FormCustom = ({ cart, total }) => {
   return (
     <div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
       <style>{`
-                .custom-select {
-                    appearance: none;
-                    -webkit-appearance: none;
-                    -moz-appearance: none;
-                    background: transparent;
-                    padding: 0;
-                    width: 100%;
-                    height: 40px;
-                    border: none;
-                    outline: none;
-                    font-size: 0.75rem;
-                }
-                .custom-select::placeholder {
-                    color: rgba(0, 0, 0, 0.5);
-                }
-            `}</style>
+        .custom-select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background: transparent;
+          padding: 0;
+          width: 100%;
+          height: 40px;
+          border: none;
+          outline: none;
+          font-size: 0.75rem;
+        }
+        .custom-select::placeholder {
+          color: rgba(0, 0, 0, 0.5);
+        }
+      `}</style>
       <Formik
         initialValues={{
           subTotal: discountedTotal,
-          phone: '',
-          deliveryMethod: 'delivery',
-          references: '',
-          paymentMethod: 'efectivo',
-          money: '',
-          address: '',
-          hora: '',
+          phone: "",
+          deliveryMethod: "delivery",
+          references: "",
+          paymentMethod: "efectivo",
+          money: "",
+          address: "",
+          hora: "",
           efectivoCantidad: 0,
           mercadopagoCantidad: 0,
-          aclaraciones: '',
+          aclaraciones: "",
         }}
         validationSchema={formValidations}
         onSubmit={async (values) => {
-
-          if (altaDemanda?.message && altaDemanda.message !== '') {
+          if (altaDemanda?.message && altaDemanda.message !== "") {
             setPendingValues(values);
             setShowMessageModal(true);
             return;
@@ -534,15 +707,15 @@ const FormCustom = ({ cart, total }) => {
           }
 
           if (!altaDemanda?.open) {
-            if (values.paymentMethod === 'mercadopago') {
-              setFieldValue('paymentMethod', 'efectivo');
+            if (values.paymentMethod === "mercadopago") {
+              setFieldValue("paymentMethod", "efectivo");
             }
-            setPendingValues({ ...values, paymentMethod: 'efectivo' });
+            setPendingValues({ ...values, paymentMethod: "efectivo" });
             openCloseModal();
             return;
           }
-          const isReserva = values.hora.trim() !== '';
 
+          const isReserva = values.hora.trim() !== "";
           if (!isReserva && altaDemanda?.isHighDemand) {
             setPendingValues(values);
             setShowHighDemandModal(true);
@@ -550,21 +723,17 @@ const FormCustom = ({ cart, total }) => {
           }
 
           if (!isWithinOrderTimeRange()) {
-            // console.log(
-            //   'La hora actual está fuera del rango permitido para pedidos'
-            // );
             openTimeRestrictedModal();
             return;
           }
 
-          if (values.paymentMethod === 'efectivo') {
+          if (values.paymentMethod === "efectivo") {
             await processPedido(values, isReserva);
-          } else if (values.paymentMethod === 'mercadopago') {
+          } else if (values.paymentMethod === "mercadopago") {
             // await processPedido(values, isReserva);
           }
         }}
       >
-
         {({
           getFieldProps,
           isSubmitting,
@@ -574,49 +743,20 @@ const FormCustom = ({ cart, total }) => {
           isValid,
         }) => {
           const calculateFinalTotal = () => {
-            let finalTotal = calculateProductsTotal() - descuento;
-            if (values.deliveryMethod === 'delivery') {
+            let finalTotal =
+              calculateProductsTotal() - descuento - freeBurgerDiscount;
+            if (values.deliveryMethod === "delivery") {
               finalTotal += envio;
             }
             if (isEnabled) {
               finalTotal += expressDeliveryFee;
             }
-            // console.log('isEnabled:', isEnabled);
             return finalTotal;
           };
 
-          useEffect(() => {
-            couponCodes.forEach((code, index) => {
-              if (
-                code.trim().length === 5 &&
-                voucherStatus[index] !== '¡Código válido!'
-              ) {
-                handleVoucherValidation(
-                  index,
-                  code,
-                  couponCodes,
-                  setFieldValue
-                );
-              }
-            });
-          }, [cart, couponCodes, setFieldValue]);
-
-          useEffect(() => {
-            setCouponCodes(['']);
-            setVoucherStatus(['']);
-            setIsValidating([false]);
-            setDescuento(0);
-            setDescuentoForOneUnit(0);
-          }, [cart]);
-
-          useEffect(() => {
-            // console.log('Descuento aplicado:', descuento);
-          }, [cart, total, discountedTotal, descuento]);
           return (
             <Form>
               <div className="flex flex-col mb-2">
-
-                {/* Datos para la entrega */}
                 <div className="flex justify-center flex-col mt-7 items-center">
                   <p className="text-2xl font-bold mb-2">
                     Datos para la entrega
@@ -624,12 +764,13 @@ const FormCustom = ({ cart, total }) => {
                   <div className="flex flex-row w-full gap-2 mb-4">
                     <button
                       type="button"
-                      className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg  ${values.deliveryMethod === 'delivery'
-                        ? 'bg-black text-gray-100'
-                        : 'bg-gray-300 text-black'
-                        }`}
+                      className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
+                        values.deliveryMethod === "delivery"
+                          ? "bg-black text-gray-100"
+                          : "bg-gray-300 text-black"
+                      }`}
                       onClick={() =>
-                        setFieldValue('deliveryMethod', 'delivery')
+                        setFieldValue("deliveryMethod", "delivery")
                       }
                     >
                       <svg
@@ -646,21 +787,23 @@ const FormCustom = ({ cart, total }) => {
                     </button>
                     <button
                       type="button"
-                      className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${values.deliveryMethod === 'takeaway'
-                        ? 'bg-black text-gray-100'
-                        : 'bg-gray-300 text-black'
-                        }`}
+                      className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
+                        values.deliveryMethod === "takeaway"
+                          ? "bg-black text-gray-100"
+                          : "bg-gray-300 text-black"
+                      }`}
                       onClick={() =>
-                        setFieldValue('deliveryMethod', 'takeaway')
+                        setFieldValue("deliveryMethod", "takeaway")
                       }
                     >
                       <div className="flex flex-row items-center gap-2">
                         <img
                           src={isologo}
-                          className={`h-4 ${values.deliveryMethod === 'takeaway'
-                            ? 'invert brightness-0'
-                            : 'brightness-0'
-                            }`}
+                          className={`h-4 ${
+                            values.deliveryMethod === "takeaway"
+                              ? "invert brightness-0"
+                              : "brightness-0"
+                          }`}
                           alt=""
                         />
                         <p className="font-bold text-">Retiro</p>
@@ -668,10 +811,8 @@ const FormCustom = ({ cart, total }) => {
                       <p className="font-light text-xs">por Buenos Aires 618</p>
                     </button>
                   </div>
-                  <div
-                    className={`w-full items-center rounded-3xl border-2 border-black transition-all duration-300`}
-                  >
-                    {values.deliveryMethod === 'delivery' && (
+                  <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300">
+                    {values.deliveryMethod === "delivery" && (
                       <>
                         <MapDirection
                           setUrl={setUrl}
@@ -679,12 +820,10 @@ const FormCustom = ({ cart, total }) => {
                           setNoEncontre={setNoEncontre}
                           setFieldValue={setFieldValue}
                         />
-
                         <ErrorMessage
                           name="address"
                           component={AppleErrorMessage}
                         />
-
                         {noEncontre && (
                           <div className="flex flex-row justify-between px-3 h-10 items-center">
                             <div className="flex flex-row gap-2">
@@ -709,7 +848,6 @@ const FormCustom = ({ cart, total }) => {
                             </div>
                           </div>
                         )}
-                        {/* Campo para referencias */}
                         <div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -719,7 +857,6 @@ const FormCustom = ({ cart, total }) => {
                           >
                             <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
                           </svg>
-
                           <MyTextInput
                             label="Referencias"
                             name="references"
@@ -731,8 +868,6 @@ const FormCustom = ({ cart, total }) => {
                         </div>
                       </>
                     )}
-
-                    {/* Campo para aclaraciones  */}
                     <div className="flex flex-row justify-between px-3 h-auto items-start border-y border-black border-opacity-20">
                       <div className="flex flex-row w-full items-center gap-2">
                         <svg
@@ -753,16 +888,15 @@ const FormCustom = ({ cart, total }) => {
                         />
                       </div>
                     </div>
-
-                    {/* Campo para los cupones */}
                     <div className="flex flex-col">
                       {couponCodes.map((coupon, index) => (
                         <div
                           key={index}
-                          className={`flex flex-col w-full transition-all duration-300 ${index !== 0
-                            ? 'border-t border-black border-opacity-20'
-                            : ''
-                            }`}
+                          className={`flex flex-col w-full transition-all duration-300 ${
+                            index !== 0
+                              ? "border-t border-black border-opacity-20"
+                              : ""
+                          }`}
                         >
                           <div className="flex flex-row gap-2 px-3 items-center">
                             <svg
@@ -772,19 +906,18 @@ const FormCustom = ({ cart, total }) => {
                               className="h-6"
                             >
                               <path
-                                fill-rule="evenodd"
+                                fillRule="evenodd"
                                 d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                                clip-rule="evenodd"
+                                clipRule="evenodd"
                               />
                             </svg>
-
                             <MyTextInput
                               name={`couponCode${index}`}
                               type="text"
                               placeholder={
                                 index === 0
-                                  ? '¿Tenes algun codigo de descuento?'
-                                  : '¿Tenes otro cupón?'
+                                  ? "¿Tenes algun codigo de descuento?"
+                                  : "¿Tenes otro cupón?"
                               }
                               value={couponCodes[index]}
                               onChange={(e) => {
@@ -796,7 +929,6 @@ const FormCustom = ({ cart, total }) => {
                               }}
                               className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                             />
-
                             {isValidating[index] ? (
                               <div
                                 className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
@@ -804,7 +936,9 @@ const FormCustom = ({ cart, total }) => {
                               >
                                 <span className="sr-only">Loading...</span>
                               </div>
-                            ) : voucherStatus[index] === '¡Código válido!' ? (
+                            ) : voucherStatus[index] === "¡Código válido!" ||
+                              voucherStatus[index] ===
+                                "¡Código válido! (Hamburguesa gratis)" ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -819,29 +953,21 @@ const FormCustom = ({ cart, total }) => {
                               </svg>
                             ) : null}
                           </div>
-
                           {voucherStatus[index] &&
-                            voucherStatus[index] !== '¡Código válido!' && (
+                            voucherStatus[index] !== "¡Código válido!" &&
+                            voucherStatus[index] !==
+                              "¡Código válido! (Hamburguesa gratis)" && (
                               <AppleErrorMessage voucher={true}>
                                 {voucherStatus[index]}
                               </AppleErrorMessage>
                             )}
-
-                          {voucherStatus[index] === '¡Código válido!' &&
-                            index === couponCodes.length - 1 &&
-                            couponCodes.length <
-                            Math.floor(getTotalBurgers() / 2) &&
-                            addCouponField()}
                         </div>
                       ))}
                     </div>
-
-                    {/* Campo para el número de teléfono */}
                     <div
-                      className={`flex flex-col border-t border-black border-opacity-20 items-center transition-all duration-300 ${values.deliveryMethod === 'delivery'
-                        ? ''
-                        : ''
-                        }`}
+                      className={`flex flex-col border-t border-black border-opacity-20 items-center transition-all duration-300 ${
+                        values.deliveryMethod === "delivery" ? "" : ""
+                      }`}
                     >
                       <div className="flex flex-row items-center pl-3 gap-2 w-full">
                         <svg
@@ -874,8 +1000,6 @@ const FormCustom = ({ cart, total }) => {
                         />
                       </div>
                     </div>
-
-                    {/* Campo para reservar hora */}
                     <div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
                       <div className="flex flex-row items-center gap-2">
                         <svg
@@ -904,180 +1028,23 @@ const FormCustom = ({ cart, total }) => {
                     </div>
                   </div>
                 </div>
-
-                {/* Método de pago y cupones */}
-                {/* <div className="flex justify-center flex-col mt-6 items-center">
-                  <p className="text-2xl font-bold mb-2">Método de pago</p>
-                  <div className="bg-gray-300 w-full flex items-center justify-center rounded-3xl p-4 mb-2">
-                    <div className="flex flex-row items-center gap-2 text-red-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="h-5 mr-2 flex-shrink-0"
-                      >
-                        <path fillRule="evenodd" d="M12 6.75a5.25 5.25 0 0 1 6.775-5.025.75.75 0 0 1 .313 1.248l-3.32 3.319c.063.475.276.934.641 1.299.365.365.824.578 1.3.64l3.318-3.319a.75.75 0 0 1 1.248.313 5.25 5.25 0 0 1-5.472 6.756c-1.018-.086-1.87.1-2.309.634L7.344 21.3A3.298 3.298 0 1 1 2.7 16.657l8.684-7.151c.533-.44.72-1.291.634-2.309A5.342 5.342 0 0 1 12 6.75ZM4.117 19.125a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75h-.008a.75.75 0 0 1-.75-.75v-.008Z" clipRule="evenodd" />
-                        <path d="m10.076 8.64-2.201-2.2V4.874a.75.75 0 0 0-.364-.643l-3.75-2.25a.75.75 0 0 0-.916.113l-.75.75a.75.75 0 0 0-.113.916l2.25 3.75a.75.75 0 0 0 .643.364h1.564l2.062 2.062 1.575-1.297Z" />
-                        <path fillRule="evenodd" d="m12.556 17.329 4.183 4.182a3.375 3.375 0 0 0 4.773-4.773l-3.306-3.305a6.803 6.803 0 0 1-1.53.043c-.394-.034-.682-.006-.867.042a.589.589 0 0 0-.167.063l-3.086 3.748Zm3.414-1.36a.75.75 0 0 1 1.06 0l1.875 1.876a.75.75 0 1 1-1.06 1.06L15.97 17.03a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-                      </svg>
-                      <p className="text-sm font-medium">
-                        Mercadopago se encuentra en mantenimiento. <br /> Si deseas abonar por transferencia realiza el pedido en efectivo y escribi al 3584306832 para pagar.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="w-full items-center rounded-3xl border-2 border-black">
-                    <div className="flex flex-row justify-between px-3 h-auto items-start border border-black rounded-t-3xl border-opacity-20">
-                      <div className="flex flex-row items-center gap-2">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="h-6 "
-                        >
-                          <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-                          <path
-                            fillRule="evenodd"
-                            d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-                            clipRule="evenodd"
-                          />
-                          <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-                        </svg>
-
-                        <Field
-                          as="select"
-                          name="paymentMethod"
-                          className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
-                          style={{
-                            WebkitAppearance: 'none',
-                            MozAppearance: 'none',
-                          }}
-                          onChange={(e) => {
-                            setFieldValue('paymentMethod', e.target.value);
-                          }}
-                        >
-                          <option value="efectivo">Efectivo</option> */}
-                {/* {isOpenPaymentMethod && (
-                            <option value="mercadopago">Mercado Pago</option>
-                          )} */}
-                {/* </Field>
-
-                        {!isOpenPaymentMethod && (
-                          <div className="absolute right-8">
-                            <Tooltip
-                              position="left"
-                              text="Clickea en pedir para ver una mejor explicacion de por que no te deja elegir otra opcion."
-                              duration={5000}
-                              className="cursor-pointer"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div> */}
-
-                {/* Campos de cupones */}
-                {/* <div className="flex flex-col">
-                      {couponCodes.map((coupon, index) => (
-                        <div
-                          key={index}
-                          className={`flex flex-col w-full transition-all duration-300 ${index !== 0
-                            ? 'border-t border-black border-opacity-20'
-                            : ''
-                            }`}
-                        >
-                          <div className="flex flex-row gap-2 px-3 items-center">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="h-6"
-                            >
-                              <path
-                                fill-rule="evenodd"
-                                d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                                clip-rule="evenodd"
-                              />
-                            </svg>
-
-                            <MyTextInput
-                              name={`couponCode${index}`}
-                              type="text"
-                              placeholder={
-                                index === 0
-                                  ? '¿Tenes algun cupón?'
-                                  : '¿Tenes otro cupón?'
-                              }
-                              value={couponCodes[index]}
-                              onChange={(e) => {
-                                handleCouponChange(
-                                  index,
-                                  e.target.value,
-                                  setFieldValue
-                                );
-                              }}
-                              className="bg-transparent font-light px-0 h-10 text-opacity-20 outline-none w-full"
-                            />
-
-                            {isValidating[index] ? (
-                              <div
-                                className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
-                                role="status"
-                              >
-                                <span className="sr-only">Loading...</span>
-                              </div>
-                            ) : voucherStatus[index] === '¡Código válido!' ? (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="green"
-                                className="h-6"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10.828 16.172a.75.75 0 0 1-1.06 0L5.47 11.875a.75.75 0 0 1 1.06-1.06l3.298 3.297 6.364-6.364a.75.75 0 1 1 1.06 1.06l-7.425 7.425Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ) : null}
-                          </div>
-
-                          {voucherStatus[index] &&
-                            voucherStatus[index] !== '¡Código válido!' && (
-                              <AppleErrorMessage voucher={true}>
-                                {voucherStatus[index]}
-                              </AppleErrorMessage>
-                            )}
-
-                          {voucherStatus[index] === '¡Código válido!' &&
-                            index === couponCodes.length - 1 &&
-                            couponCodes.length <
-                            Math.floor(getTotalBurgers() / 2) &&
-                            addCouponField()}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div> */}
-
-                {/* Resumen */}
                 <div className="flex justify-center flex-col mt-6 items-center">
                   <p className="text-2xl font-bold w-full text-center">
                     Resumen
                   </p>
                   <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
-                    <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
-                      <div className="flex flex-row items-center gap-2">
-                        <Tooltip
-                          text={`Si priorizas la <b>velocidad</b>, esta opcion es para vos: Tu pedido pasa al frente de la fila en cocinarse y, en caso de delivery, tu cadete sale solo con tu pedido. <br/> Si priorizas la <b>accesibilidad</b>, sin marcar esta opcion tu entrega sigue siendo lo mas eficiente posible.`}
-                          duration={10000}
-                          className="flex items-center"
-                        />
-                        <p className="font-coolvetica flex flex-row items-center gap-1">
-                          Lo mas rapido posible
-                          <p className="font-bold ">(+$2000)</p>
-                        </p>
-                      </div>
-                      <Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
+                    <div className="flex flex-row items-center gap-2">
+                      <Tooltip
+                        text={`Si priorizas la <b>velocidad</b>, esta opcion es para vos: Tu pedido pasa al frente de la fila en cocinarse y, en caso de delivery, tu cadete sale solo con tu pedido. <br/> Si priorizas la <b>accesibilidad</b>, sin marcar esta opcion tu entrega sigue siendo lo mas eficiente posible.`}
+                        duration={10000}
+                        className="flex items-center"
+                      />
+                      <p className="font-coolvetica flex flex-row items-center gap-1">
+                        Lo mas rapido posible
+                        <p className="font-bold ">(+$2000)</p>
+                      </p>
                     </div>
+                    <Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Productos</p>
@@ -1095,7 +1062,7 @@ const FormCustom = ({ cart, total }) => {
                       </p>
                     </div>
                     <p>
-                      {values.deliveryMethod === 'delivery'
+                      {values.deliveryMethod === "delivery"
                         ? currencyFormat(envio)
                         : currencyFormat(0)}
                     </p>
@@ -1112,7 +1079,7 @@ const FormCustom = ({ cart, total }) => {
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Descuentos</p>
-                    <p>-{currencyFormat(descuento)}</p>
+                    <p>-{currencyFormat(descuento + freeBurgerDiscount)}</p>
                   </div>
                   <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-screen">
                     <p className="text-2xl font-bold">Total</p>
@@ -1121,36 +1088,33 @@ const FormCustom = ({ cart, total }) => {
                     </p>
                   </div>
                 </div>
-
-                {/* Botón de envío */}
-                {values.paymentMethod === 'mercadopago' ? (
-                  <>
-                    <Payment
-                      cart={cart}
-                      values={values}
-                      discountedTotal={discountedTotal}
-                      envio={envio}
-                      mapUrl={mapUrl}
-                      couponCodes={couponCodes}
-                      calculateFinalTotal={calculateFinalTotal}
-                      isEnabled={isEnabled}
-                      isValid={isValid}
-                      submitForm={submitForm}
-                      altaDemanda={altaDemanda}
-                      shouldValidate={true}
-                    />
-                  </>
+                {values.paymentMethod === "mercadopago" ? (
+                  <Payment
+                    cart={cart}
+                    values={values}
+                    discountedTotal={discountedTotal}
+                    envio={envio}
+                    mapUrl={mapUrl}
+                    couponCodes={couponCodes}
+                    calculateFinalTotal={calculateFinalTotal}
+                    isEnabled={isEnabled}
+                    isValid={isValid}
+                    submitForm={submitForm}
+                    altaDemanda={altaDemanda}
+                    shouldValidate={true}
+                  />
                 ) : (
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-red-main text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
+                      isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
                     {isSubmitting ? (
                       <LoadingPoints color="text-gray-100" />
                     ) : (
-                      'Pedir'
+                      "Pedir"
                     )}
                   </button>
                 )}
@@ -1167,7 +1131,10 @@ const FormCustom = ({ cart, total }) => {
         onClose={closeTimeRestrictedModal}
         title="Está cerrado"
       >
-        <p className='font-medium text-center'>Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a 00:00 hs.</p>
+        <p className="font-medium text-center">
+          Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a
+          00:00 hs.
+        </p>
       </AppleModal>
 
       {/* sin stock */}
@@ -1176,7 +1143,9 @@ const FormCustom = ({ cart, total }) => {
         onClose={() => setShowOutOfStockModal(false)}
         title="Sin stock"
       >
-        <p className='font-medium text-center'>Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche </p>
+        <p className="font-medium text-center">
+          Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche{" "}
+        </p>
       </AppleModal>
 
       {/* pendiente de confirmar */}
@@ -1206,25 +1175,24 @@ const FormCustom = ({ cart, total }) => {
               }
             }
           } catch (error) {
-            console.error('Error al procesar el pedido pendiente:', error);
+            console.error("Error al procesar el pedido pendiente:", error);
           } finally {
             setIsModalConfirmLoading(false);
             closeCloseRestrictedModal();
           }
         }}
       >
-        <p className='font-medium text-center'>
+        <p className="font-medium text-center">
           Van +400 burgers ❤️‍🔥 En cocina están verificando si hay stock. Tu
           pedido estará pendiente de aprobación durante los próximos 3 a 5
           minutos, aceptas? <br />
-
         </p>
       </AppleModal>
 
       {/* esperas? */}
       <AppleModal
         isOpen={
-          showHighDemandModal && pendingValues?.paymentMethod === 'efectivo'
+          showHighDemandModal && pendingValues?.paymentMethod === "efectivo"
         }
         onClose={() => setShowHighDemandModal(false)}
         title="Alta Demanda"
@@ -1233,15 +1201,15 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== '';
+            const isReserva = pendingValues.hora.trim() !== "";
             await processPedido(pendingValues, isReserva);
           }
           setIsModalConfirmLoading(false);
           setShowHighDemandModal(false);
         }}
       >
-        <p className='font-medium text-center'>
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
+        <p className="font-medium text-center">
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
           {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
@@ -1256,8 +1224,9 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== '';
-            const orderId = await handleSubmit(  // Guardamos el orderId que retorna handleSubmit
+            const isReserva = pendingValues.hora.trim() !== "";
+            const orderId = await handleSubmit(
+              // Guardamos el orderId que retorna handleSubmit
               pendingValues,
               cart,
               discountedTotal,
@@ -1269,22 +1238,21 @@ const FormCustom = ({ cart, total }) => {
               altaDemanda?.message || ""
             );
 
-            if (orderId) {  // Si se creó la orden exitosamente
-              navigate(`/success/${orderId}`);  // Redirigimos
-              dispatch(addLastCart());  // Actualizamos el carrito
+            if (orderId) {
+              // Si se creó la orden exitosamente
+              navigate(`/success/${orderId}`); // Redirigimos
+              dispatch(addLastCart()); // Actualizamos el carrito
             }
           }
           setIsModalConfirmLoading(false);
           setShowMessageModal(false);
         }}
       >
-        <p className='font-medium text-center'>{altaDemanda?.message} <br />Tendras un boton para pedir tu compensacion ❤️‍🔥  Aceptas?</p>
+        <p className="font-medium text-center">
+          {altaDemanda?.message} <br />
+          Tendras un boton para pedir tu compensacion ❤️‍🔥 Aceptas?
+        </p>
       </AppleModal>
-
-
-
-
-
     </div>
   );
 };

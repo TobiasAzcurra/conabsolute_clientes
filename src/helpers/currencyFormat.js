@@ -61,7 +61,7 @@ export const calcularCostoHamburguesa = (materiales, ingredientes) => {
       costoTotal += costoIngrediente;
     } else {
       console.error(
-        `No se encontró el ingrediente ${nombre} en la lista de materiales.`,
+        `No se encontró el ingrediente ${nombre} en la lista de materiales.`
       );
     }
   }
@@ -69,68 +69,170 @@ export const calcularCostoHamburguesa = (materiales, ingredientes) => {
   return costoTotal;
 };
 
-export const calculateDiscountedTotal = (cart, numCupones) => {
-  // 1. Crear array de todas las hamburguesas individuales con sus precios
+export const getPromoAndNonPromoProducts = (cart) => {
+  const promoProducts = cart.filter((item) => item.type === "promo");
+  const nonPromoProducts = cart.filter((item) => item.type !== "promo");
+  return { promoProducts, nonPromoProducts };
+};
+
+export const calculateDiscountedTotal = (
+  cart,
+  numCoupons,
+  freeVouchers = 0
+) => {
+  console.log("🔢 INICIO CÁLCULO DE DESCUENTOS", { numCoupons, freeVouchers });
+
+  // Separar productos promocionales y no promocionales
+  const { promoProducts, nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+  console.log("🛒 PRODUCTOS SEPARADOS", {
+    totalProductos: cart.length,
+    productosPromo: promoProducts.length,
+    productosNoPromo: nonPromoProducts.length,
+  });
+
+  // 1. Crear array de todas las hamburguesas no promocionales con sus precios
   let allBurgers = [];
-  cart.forEach((item) => {
-    for (let i = 0; i < item.quantity; i++) {
-      allBurgers.push({
-        price: item.price,
-        toppingsPrice: item.toppings.reduce(
-          (sum, topping) => sum + topping.price,
-          0
-        ),
-      });
+  nonPromoProducts.forEach((item) => {
+    if (item.category === "burger" || item.category === "burgers") {
+      for (let i = 0; i < item.quantity; i++) {
+        allBurgers.push({
+          name: item.name,
+          price: item.price,
+          toppingsPrice: item.toppings.reduce(
+            (sum, topping) => sum + topping.price,
+            0
+          ),
+        });
+      }
     }
+  });
+
+  console.log("🍔 HAMBURGUESAS PARA DESCUENTO", {
+    totalBurgers: allBurgers.length,
+    burgers: allBurgers.map((b) => ({
+      nombre: b.name,
+      precio: b.price,
+      precioToppings: b.toppingsPrice,
+      total: b.price + b.toppingsPrice,
+    })),
   });
 
   // 2. Ordenar todas las hamburguesas de mayor a menor precio
   allBurgers.sort(
+    (a, b) => a.price + a.toppingsPrice - (b.price + b.toppingsPrice)
+  );
+
+  console.log("📊 HAMBURGUESAS ORDENADAS (de menor a mayor precio)", {
+    ordenDeMenorAMayor: allBurgers.map((b) => ({
+      nombre: b.name,
+      precioTotal: b.price + b.toppingsPrice,
+    })),
+  });
+
+  // 3. Calcular el total original antes de descuentos
+  const originalTotal = cart.reduce((sum, item) => {
+    const itemTotal =
+      item.price * item.quantity +
+      (item.toppings?.reduce((tSum, t) => tSum + t.price * item.quantity, 0) ||
+        0);
+    return sum + itemTotal;
+  }, 0);
+
+  console.log("💲 TOTAL ORIGINAL", { originalTotal });
+
+  // 4. Aplicar descuentos para vouchers gratis (a las hamburguesas más baratas)
+  const freeBurgerDiscount = allBurgers
+    .slice(0, freeVouchers)
+    .reduce((sum, burger) => sum + burger.price + burger.toppingsPrice, 0);
+
+  console.log("🎁 DESCUENTO POR HAMBURGUESAS GRATIS", {
+    freeBurgerDiscount,
+    burgersGratis: allBurgers.slice(0, freeVouchers).map((b) => ({
+      nombre: b.name,
+      precio: b.price,
+      toppings: b.toppingsPrice,
+      total: b.price + b.toppingsPrice,
+    })),
+  });
+
+  // 5. Aplicar descuentos 2x1 a las hamburguesas restantes
+  let newTotal = originalTotal - freeBurgerDiscount;
+  let processedBurgers = freeVouchers;
+  let appliedCoupons = 0;
+  let descuentos2x1 = [];
+
+  // Ordenar las hamburguesas restantes de mayor a menor precio para el 2x1
+  const remainingBurgers = allBurgers.slice(freeVouchers);
+  remainingBurgers.sort(
     (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice)
   );
 
-  // 3. Calcular el total original antes de descuentos
-  const originalTotal = allBurgers.reduce(
-    (sum, burger) => sum + burger.price + burger.toppingsPrice,
-    0
-  );
+  console.log("2️⃣✖️1️⃣ INICIO APLICACIÓN 2x1", {
+    newTotalAntes2x1: newTotal,
+    burgersLibres: remainingBurgers.length,
+    cuponesDisponibles: numCoupons,
+  });
 
-  // 4. Aplicar descuentos por pares
-  let newTotal = 0;
-  let processedBurgers = 0;
-  let appliedCoupons = 0;
+  while (appliedCoupons < numCoupons && remainingBurgers.length >= 2) {
+    // Tomar las dos hamburguesas de mayor precio
+    const burger1 = remainingBurgers.shift();
+    const burger2 = remainingBurgers.shift();
 
-  while (processedBurgers < allBurgers.length && appliedCoupons < numCupones) {
-    // Verificar si quedan al menos 2 hamburguesas para aplicar el 2x1
-    if (processedBurgers + 1 < allBurgers.length) {
-      // Tomar el par de hamburguesas actual
-      const burger1 = allBurgers[processedBurgers];
-      const burger2 = allBurgers[processedBurgers + 1];
-      
-      // Calcular el precio del par y dividirlo por 2 (verdadero 2x1)
-      const pairTotal = (burger1.price + burger1.toppingsPrice + 
-                        burger2.price + burger2.toppingsPrice) / 2;
-      newTotal += pairTotal;
-      
-      processedBurgers += 2; // Avanzar al siguiente par
-      appliedCoupons++; // Incrementar cupones usados
-    } else {
-      // Si queda una hamburguesa suelta, se paga completa
-      const burger = allBurgers[processedBurgers];
-      newTotal += burger.price + burger.toppingsPrice;
-      processedBurgers++;
-    }
+    // Calcular el precio del par y dividirlo por 2 (verdadero 2x1)
+    const pairTotal =
+      (burger1.price +
+        burger1.toppingsPrice +
+        burger2.price +
+        burger2.toppingsPrice) /
+      2;
+
+    console.log(`🔄 PAREJA ${appliedCoupons + 1} DE HAMBURGUESAS 2x1`, {
+      burger1: {
+        nombre: burger1.name,
+        precio: burger1.price,
+        toppings: burger1.toppingsPrice,
+        total: burger1.price + burger1.toppingsPrice,
+      },
+      burger2: {
+        nombre: burger2.name,
+        precio: burger2.price,
+        toppings: burger2.toppingsPrice,
+        total: burger2.price + burger2.toppingsPrice,
+      },
+      totalPareja:
+        burger1.price +
+        burger1.toppingsPrice +
+        burger2.price +
+        burger2.toppingsPrice,
+      descuento: pairTotal,
+    });
+
+    newTotal -= pairTotal; // Restar el descuento del par
+    descuentos2x1.push({
+      pareja: appliedCoupons + 1,
+      hamburguesas: [burger1, burger2],
+      descuento: pairTotal,
+    });
+
+    appliedCoupons++;
   }
 
-  // 5. Agregar el costo de las hamburguesas restantes sin descuento
-  for (let i = processedBurgers; i < allBurgers.length; i++) {
-    newTotal += allBurgers[i].price + allBurgers[i].toppingsPrice;
-  }
+  // Calcular el descuento total aplicado
+  const totalDescuento = originalTotal - newTotal - freeBurgerDiscount;
 
-  const totalDescuento = originalTotal - newTotal;
+  console.log("🏁 RESULTADO FINAL DESCUENTOS", {
+    totalOriginal: originalTotal,
+    descuentoGratis: freeBurgerDiscount,
+    descuento2x1: totalDescuento,
+    totalConDescuentos: newTotal,
+    cuponesGratisAplicados: freeVouchers,
+    cupones2x1Aplicados: appliedCoupons,
+    detalleDescuentos2x1: descuentos2x1,
+  });
 
   return {
     newTotal,
     totalDescuento,
+    freeBurgerDiscount,
   };
 };
