@@ -418,20 +418,41 @@ const FormCustom = ({ cart, total }) => {
           burgersPorParejas: numCoupons * 2,
         });
 
+        // Calcular hamburguesas disponibles después de aplicar vouchers gratis
+        const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+        const availableBurgers = totalNonPromoBurgers - freeVouchers;
+
+        console.log("🍔 HAMBURGUESAS DISPONIBLES PARA 2x1", {
+          totalNonPromoBurgers,
+          usadasPorVouchersGratis: freeVouchers,
+          disponiblesParaVouchers2x1: availableBurgers,
+        });
+
+        // Verificar si hay suficientes hamburguesas disponibles para este voucher 2x1
+        if (availableBurgers < numCoupons * 2) {
+          updatedVoucherStatus[index] = `Necesitas al menos ${
+            numCoupons * 2
+          } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchers} con vouchers gratis.`;
+          setVoucherStatus(updatedVoucherStatus);
+          console.log("No hay suficientes hamburguesas disponibles para 2x1", {
+            updatedVoucherStatus,
+          });
+          return;
+        }
+
         if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
-          const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
-          const hasEnoughNonPromoBurgers =
-            totalNonPromoBurgers >= numCoupons * 2;
+          const hasEnoughNonPromoBurgers = availableBurgers >= numCoupons * 2;
           console.log("Verificando hamburguesas no promocionales para 2x1", {
             hasEnoughNonPromoBurgers,
             required: numCoupons * 2,
             totalNonPromoBurgers,
+            disponibles: availableBurgers,
           });
 
           if (!hasEnoughNonPromoBurgers) {
             updatedVoucherStatus[index] = `Necesitas al menos ${
               numCoupons * 2
-            } hamburguesas no promocionales para canjear los vouchers 2x1.`;
+            } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchers} con vouchers gratis.`;
             setVoucherStatus(updatedVoucherStatus);
             console.log(
               "No hay suficientes hamburguesas no promocionales para 2x1",

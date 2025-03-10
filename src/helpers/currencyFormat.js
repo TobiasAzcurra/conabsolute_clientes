@@ -117,7 +117,7 @@ export const calculateDiscountedTotal = (
     })),
   });
 
-  // 2. Ordenar todas las hamburguesas de mayor a menor precio
+  // 2. Ordenar todas las hamburguesas de menor a mayor precio (para vouchers gratis)
   allBurgers.sort(
     (a, b) => a.price + a.toppingsPrice - (b.price + b.toppingsPrice)
   );
@@ -161,8 +161,11 @@ export const calculateDiscountedTotal = (
   let appliedCoupons = 0;
   let descuentos2x1 = [];
 
-  // Ordenar las hamburguesas restantes de mayor a menor precio para el 2x1
+  // Ordenar las hamburguesas restantes por precio para el 2x1
+  // Para 2x1, usamos las hamburguesas que no fueron usadas para free vouchers
   const remainingBurgers = allBurgers.slice(freeVouchers);
+
+  // Ordenamos de mayor a menor para 2x1 (diferente al orden para vouchers gratis)
   remainingBurgers.sort(
     (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice)
   );
@@ -171,8 +174,31 @@ export const calculateDiscountedTotal = (
     newTotalAntes2x1: newTotal,
     burgersLibres: remainingBurgers.length,
     cuponesDisponibles: numCoupons,
+    hamburguesas2x1: remainingBurgers.map((b) => ({
+      nombre: b.name,
+      precio: b.price + b.toppingsPrice,
+    })),
   });
 
+  // Verificar si hay suficientes hamburguesas para aplicar los vouchers 2x1
+  if (remainingBurgers.length < numCoupons * 2) {
+    console.log(
+      "⚠️ NO HAY SUFICIENTES HAMBURGUESAS PARA TODOS LOS VOUCHERS 2x1",
+      {
+        disponibles: remainingBurgers.length,
+        necesarias: numCoupons * 2,
+      }
+    );
+
+    // Ajustar la cantidad de cupones aplicables
+    const applicableCoupons = Math.floor(remainingBurgers.length / 2);
+    console.log(
+      `👉 Solo se aplicarán ${applicableCoupons} cupones 2x1 de los ${numCoupons} disponibles`
+    );
+    numCoupons = applicableCoupons;
+  }
+
+  // Aplicar los vouchers 2x1
   while (appliedCoupons < numCoupons && remainingBurgers.length >= 2) {
     // Tomar las dos hamburguesas de mayor precio
     const burger1 = remainingBurgers.shift();
@@ -217,13 +243,14 @@ export const calculateDiscountedTotal = (
     appliedCoupons++;
   }
 
-  // Calcular el descuento total aplicado
-  const totalDescuento = originalTotal - newTotal - freeBurgerDiscount;
+  // Calcular el descuento total aplicado por 2x1
+  const discount2x1 = descuentos2x1.reduce((sum, d) => sum + d.descuento, 0);
 
   console.log("🏁 RESULTADO FINAL DESCUENTOS", {
     totalOriginal: originalTotal,
     descuentoGratis: freeBurgerDiscount,
-    descuento2x1: totalDescuento,
+    descuento2x1: discount2x1,
+    descuentoTotal: freeBurgerDiscount + discount2x1,
     totalConDescuentos: newTotal,
     cuponesGratisAplicados: freeVouchers,
     cupones2x1Aplicados: appliedCoupons,
@@ -232,7 +259,7 @@ export const calculateDiscountedTotal = (
 
   return {
     newTotal,
-    totalDescuento,
+    totalDescuento: discount2x1,
     freeBurgerDiscount,
   };
 };
