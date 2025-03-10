@@ -5,7 +5,7 @@ import handleSubmit from "./handleSubmit";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { MapDirection } from "./MapDirection";
 import AppleErrorMessage from "./AppleErrorMessage";
 import {
@@ -680,6 +680,76 @@ const FormCustom = ({ cart, total }) => {
   useEffect(() => {
     setIsOpenPaymentMethod(altaDemanda?.open || false);
   }, [altaDemanda]);
+
+  const prevCartRef = useRef(null);
+
+  // Efecto para reiniciar vouchers cuando cambia el carrito
+  useEffect(() => {
+    console.log("🛒 DETECTADO CAMBIO EN EL CARRITO");
+
+    // Si no es la primera vez que se ejecuta el efecto
+    if (prevCartRef.current !== null) {
+      console.log("🔍 VERIFICANDO CAMBIOS EN EL CARRITO", {
+        cartAnteriorLength: prevCartRef.current.length,
+        cartActualLength: cart.length,
+        cambioDetectado:
+          JSON.stringify(prevCartRef.current) !== JSON.stringify(cart),
+      });
+
+      // Verificar si hay vouchers aplicados
+      const hayVouchersAplicados =
+        couponCodes.some((code) => code.trim() !== "") ||
+        descuento > 0 ||
+        freeBurgerDiscount > 0;
+
+      // Verificar si el carrito realmente cambió
+      const cartCambio =
+        JSON.stringify(prevCartRef.current) !== JSON.stringify(cart);
+
+      console.log("📝 ESTADO DE VOUCHERS", {
+        couponCodes,
+        voucherStatus,
+        descuento,
+        freeBurgerDiscount,
+        hayVouchersAplicados,
+        cartCambio,
+      });
+
+      if (hayVouchersAplicados && cartCambio) {
+        console.log("⚠️ REINICIANDO VOUCHERS DEBIDO A CAMBIOS EN EL CARRITO");
+
+        // Reiniciar todos los estados relacionados con vouchers
+        setCouponCodes([""]);
+        setVoucherStatus([""]);
+        setDescuento(0);
+        setFreeBurgerDiscount(0);
+        setDiscountedTotal(total);
+        setIsValidating([false]);
+        setDescuentoForOneUnit(0);
+
+        console.log("✅ VOUCHERS REINICIADOS", {
+          nuevosCouponCodes: [""],
+          nuevosVoucherStatus: [""],
+          nuevoDescuento: 0,
+          nuevoFreeBurgerDiscount: 0,
+          nuevoDiscountedTotal: total,
+        });
+
+        // Opcional: mostrar algún tipo de feedback al usuario
+        // Si estás usando react-hot-toast u otra librería de notificaciones:
+        // toast.info("Los cupones se han eliminado debido a cambios en tu carrito");
+      } else if (cartCambio) {
+        console.log("ℹ️ NO HAY VOUCHERS APLICADOS, NO ES NECESARIO REINICIAR");
+      } else {
+        console.log("🔄 NO SE DETECTARON CAMBIOS REALES EN EL CARRITO");
+      }
+    } else {
+      console.log("🔄 PRIMERA CARGA DEL CARRITO, NO HAY ACCIÓN REQUERIDA");
+    }
+
+    // Actualizar la referencia al carrito actual para la próxima comparación
+    prevCartRef.current = JSON.parse(JSON.stringify(cart));
+  }, [cart, couponCodes, descuento, freeBurgerDiscount, total]);
 
   return (
     <div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
