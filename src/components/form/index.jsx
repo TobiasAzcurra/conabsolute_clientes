@@ -233,13 +233,19 @@ const FormCustom = ({ cart, total }) => {
       updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
     } else if (value.length === 5) {
       updatedVoucherStatus[index] = "";
+
+      // Importante: actualizamos isValidating antes de llamar a handleVoucherValidation
+      updatedValidating[index] = true;
+      setIsValidating(updatedValidating);
+
+      // Luego llamamos a handleVoucherValidation
       handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
     } else {
       updatedVoucherStatus[index] =
         "El código debe tener exactamente 5 caracteres.";
     }
+
     setVoucherStatus(updatedVoucherStatus);
-    setIsValidating(updatedValidating);
   };
 
   const handleVoucherValidation = async (
@@ -255,9 +261,13 @@ const FormCustom = ({ cart, total }) => {
       carrito: cart,
     });
 
+    console.log("Estado isValidating ANTES:", isValidating);
+
+    // Establecer el estado de validación a true
     setIsValidating((prev) => {
       const updated = [...prev];
       updated[index] = true;
+      console.log("Nuevo estado isValidating que se va a establecer:", updated);
       return updated;
     });
 
@@ -519,14 +529,12 @@ const FormCustom = ({ cart, total }) => {
       const updatedVoucherStatus = [...voucherStatus];
       updatedVoucherStatus[index] = "Error al validar el cupón.";
       setVoucherStatus(updatedVoucherStatus);
-      console.log("Error en validación", { updatedVoucherStatus });
     } finally {
       setIsValidating((prev) => {
         const updated = [...prev];
         updated[index] = false;
         return updated;
       });
-      console.log("🏁 FIN DE VALIDACIÓN DE VOUCHER");
     }
   };
 
@@ -1020,9 +1028,16 @@ const FormCustom = ({ cart, total }) => {
                               }}
                               className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                             />
+                            {console.log(
+                              "Durante renderizado, isValidating[" +
+                                index +
+                                "] =",
+                              isValidating[index]
+                            )}
+
                             {isValidating[index] ? (
                               <div
-                                className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] text-black"
+                                className="inline-block h-4 w-4 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-black"
                                 role="status"
                               >
                                 <span className="sr-only">Loading...</span>
