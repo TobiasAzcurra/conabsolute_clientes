@@ -261,6 +261,22 @@ const FormCustom = ({ cart, total }) => {
       carrito: cart,
     });
 
+    // Log detallado de cada producto en el carrito
+    if (cart && cart.length > 0) {
+      cart.forEach((item, i) => {
+        console.log(`📦 PRODUCTO ${i + 1} EN CARRITO:`, {
+          nombre: item.name,
+          categoria: item.category,
+          tipo: item.type,
+          precio: item.price,
+          cantidad: item.quantity,
+          esSimpleOSatisfyer:
+            item.name.toLowerCase().includes("simple") ||
+            item.name.toLowerCase().includes("satisfyer"),
+        });
+      });
+    }
+
     console.log("Estado isValidating ANTES:", isValidating);
 
     // Establecer el estado de validación a true
@@ -274,6 +290,12 @@ const FormCustom = ({ cart, total }) => {
     try {
       const totalBurgers = getTotalBurgers(cart);
       const burgerPrices = getBurgerPrices(cart);
+
+      console.log("🍔 CONTEO DE HAMBURGUESAS:", {
+        totalBurgers,
+        burgerPrices,
+      });
+
       const { promoProducts, nonPromoProducts } =
         getPromoAndNonPromoProducts(cart);
 
@@ -321,12 +343,11 @@ const FormCustom = ({ cart, total }) => {
         return;
       }
 
-      const { isValid, message, gratis } = await validarVoucher(value);
-      console.log("✅ RESULTADO DE VALIDACIÓN", {
-        isValid,
-        message,
-        tipoVoucher: gratis ? "GRATIS" : "2x1",
-      });
+      console.log("⏳ LLAMANDO A validarVoucher CON CÓDIGO:", value);
+      const validationResult = await validarVoucher(value);
+      console.log("✅ RESULTADO DE VALIDACIÓN", validationResult);
+
+      const { isValid, message, gratis } = validationResult;
 
       // Contar los vouchers gratis actuales
       const freeVouchers = updatedCoupons.filter((code, i) => {
@@ -353,33 +374,80 @@ const FormCustom = ({ cart, total }) => {
       if (!isValid) {
         updatedVoucherStatus[index] = message;
         setVoucherStatus(updatedVoucherStatus);
-        console.log("Voucher no válido", { updatedVoucherStatus });
+        console.log("❌ VOUCHER NO VÁLIDO:", { message, updatedVoucherStatus });
         return;
       }
 
       // Si es voucher gratis
       if (gratis) {
-        const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
+        console.log("🎟️ PROCESANDO VOUCHER GRATIS");
+
+        // NUEVA VALIDACIÓN: Verificar si hay hamburguesas "simple" o "satisfyer" elegibles
+        const eligibleBurgers = nonPromoProducts.filter((item) => {
+          const lowerName = item.name.toLowerCase();
+          const isSimple = lowerName.includes("simple");
+          const isSatisfyer = lowerName.includes("satisfyer");
+
+          console.log(`🔍 Verificando elegibilidad de "${item.name}":`, {
+            categoria: item.category,
+            nombreEnMinúsculas: lowerName,
+            contieneSimple: isSimple,
+            contieneSatisfyer: isSatisfyer,
+            esElegible:
+              (item.category === "burger" || item.category === "burgers") &&
+              (isSimple || isSatisfyer),
+          });
+
+          return (
+            (item.category === "burger" || item.category === "burgers") &&
+            (isSimple || isSatisfyer)
+          );
+        });
+
+        console.log("🍔 HAMBURGUESAS ELEGIBLES ENCONTRADAS:", eligibleBurgers);
+
+        const totalElegibleBurgers = eligibleBurgers.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        );
+
+        console.log("🔢 RESUMEN DE HAMBURGUESAS ELEGIBLES:", {
+          hamburgesasElegibles: eligibleBurgers,
+          cantidadTotal: totalElegibleBurgers,
+        });
+
+        if (totalElegibleBurgers === 0) {
+          updatedVoucherStatus[index] =
+            "Para canjear un voucher gratis solo podes hacerlo en burgers de un solo medallon";
+          setVoucherStatus(updatedVoucherStatus);
+          console.log("⚠️ NO HAY HAMBURGUESAS ELEGIBLES PARA VOUCHER GRATIS", {
+            updatedVoucherStatus,
+          });
+          return;
+        }
+
         const totalFreeVouchers =
           freeVouchers +
           (updatedVoucherStatus[index] ===
           "¡Código válido! (Hamburguesa gratis)"
             ? 0
             : 1);
-        console.log("🎁 PROCESANDO VOUCHER GRATIS", {
-          totalFreeVouchers,
-          totalNonPromoBurgers,
+
+        console.log("🧮 CÁLCULO DE VOUCHERS GRATIS TOTALES:", {
           vouchersGratisActuales: freeVouchers,
           nuevoVoucherGratis:
             updatedVoucherStatus[index] !==
             "¡Código válido! (Hamburguesa gratis)",
+          totalVouchersGratis: totalFreeVouchers,
         });
 
-        if (totalFreeVouchers > totalNonPromoBurgers) {
+        if (totalFreeVouchers > totalElegibleBurgers) {
           updatedVoucherStatus[index] =
-            "No hay suficientes hamburguesas no promocionales para aplicar todos los vouchers gratis.";
+            "No hay suficientes hamburguesas simples para aplicar todos los vouchers gratis.";
           setVoucherStatus(updatedVoucherStatus);
-          console.log("No hay suficientes hamburguesas para voucher gratis", {
+          console.log("⚠️ INSUFICIENTES HAMBURGUESAS SIMPLES PARA VOUCHERS", {
+            vouchersGratis: totalFreeVouchers,
+            hamburguesasElegibles: totalElegibleBurgers,
             updatedVoucherStatus,
           });
           return;
@@ -387,54 +455,85 @@ const FormCustom = ({ cart, total }) => {
 
         updatedVoucherStatus[index] = "¡Código válido! (Hamburguesa gratis)";
         setVoucherStatus(updatedVoucherStatus);
-        console.log("Voucher gratis válido", { updatedVoucherStatus });
-
-        const newFreeBurgerDiscount = burgerPrices
-          .slice(0, totalFreeVouchers)
-          .reduce((sum, price) => sum + price, 0);
-        setFreeBurgerDiscount(newFreeBurgerDiscount);
-        console.log("💰 DESCUENTO POR HAMBURGUESAS GRATIS", {
-          newFreeBurgerDiscount,
-          burgersSeleccionadas: burgerPrices.slice(0, totalFreeVouchers),
-          totalBurgerPrices: burgerPrices,
+        console.log("✅ VOUCHER GRATIS VALIDADO CORRECTAMENTE", {
+          updatedVoucherStatus,
         });
 
-        const { newTotal, totalDescuento } = calculateDiscountedTotal(
+        console.log("💰 RECALCULANDO DESCUENTOS CON NUEVA CONFIGURACIÓN:", {
+          normalVouchers,
+          totalFreeVouchers,
+        });
+
+        const discountResult = calculateDiscountedTotal(
           cart,
           normalVouchers,
           totalFreeVouchers
         );
-        setDescuento(totalDescuento);
 
-        // Importante: newTotal ya incluye el descuento de hamburguesas gratis
-        setDiscountedTotal(newTotal);
+        console.log("📊 RESULTADO DEL CÁLCULO DE DESCUENTOS:", discountResult);
 
-        console.log("Descuentos recalculados", {
-          newTotal,
-          totalDescuento,
-          freeBurgerDiscount: newFreeBurgerDiscount,
-          discountedTotal: newTotal,
+        setFreeBurgerDiscount(discountResult.freeBurgerDiscount);
+        console.log("💰 DESCUENTO POR HAMBURGUESAS GRATIS ACTUALIZADO", {
+          nuevoDescuento: discountResult.freeBurgerDiscount,
+        });
+
+        setDescuento(discountResult.totalDescuento);
+        setDiscountedTotal(discountResult.newTotal);
+
+        console.log("🏁 DESCUENTOS FINALES RECALCULADOS", {
+          nuevoTotal: discountResult.newTotal,
+          descuento2x1: discountResult.totalDescuento,
+          descuentoGratis: discountResult.freeBurgerDiscount,
+          totalConDescuento: discountResult.newTotal,
         });
       }
       // Si es voucher 2x1
       else {
+        console.log("2️⃣✖️1️⃣ PROCESANDO VOUCHER 2x1");
+
         const numCoupons =
           normalVouchers +
           (updatedVoucherStatus[index] === "¡Código válido!" ? 0 : 1);
-        console.log("2️⃣✖️1️⃣ PROCESANDO VOUCHER 2x1", {
+
+        console.log("🧮 CONTEO TOTAL DE VOUCHERS 2x1:", {
           numCoupons,
           normalVouchersActuales: normalVouchers,
           nuevoVoucher2x1: updatedVoucherStatus[index] !== "¡Código válido!",
           burgersPorParejas: numCoupons * 2,
         });
 
-        // Calcular hamburguesas disponibles después de aplicar vouchers gratis
+        // Obtener todas las hamburguesas disponibles después de aplicar vouchers gratis
+        // Primero, filtrar las hamburguesas elegibles para vouchers gratis
+        const eligibleForFree = nonPromoProducts
+          .filter(
+            (item) =>
+              (item.category === "burger" || item.category === "burgers") &&
+              (item.name.toLowerCase().includes("simple") ||
+                item.name.toLowerCase().includes("satisfyer"))
+          )
+          .reduce((sum, item) => sum + item.quantity, 0);
+
+        console.log("🍔 HAMBURGUESAS ELEGIBLES PARA GRATIS:", {
+          cantidad: eligibleForFree,
+          detalles: nonPromoProducts.filter(
+            (item) =>
+              (item.category === "burger" || item.category === "burgers") &&
+              (item.name.toLowerCase().includes("simple") ||
+                item.name.toLowerCase().includes("satisfyer"))
+          ),
+        });
+
+        // Determinar cuántas hamburguesas elegibles se utilizarán para vouchers gratis
+        const freeVouchersToApply = Math.min(freeVouchers, eligibleForFree);
+
+        // Calcular las hamburguesas disponibles para 2x1 (excluyendo las usadas para gratis)
         const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
-        const availableBurgers = totalNonPromoBurgers - freeVouchers;
+        const availableBurgers = totalNonPromoBurgers - freeVouchersToApply;
 
         console.log("🍔 HAMBURGUESAS DISPONIBLES PARA 2x1", {
-          totalNonPromoBurgers,
-          usadasPorVouchersGratis: freeVouchers,
+          totalBurgersNoPromo: totalNonPromoBurgers,
+          elegiblesParaGratis: eligibleForFree,
+          usadasPorVouchersGratis: freeVouchersToApply,
           disponiblesParaVouchers2x1: availableBurgers,
         });
 
@@ -442,9 +541,9 @@ const FormCustom = ({ cart, total }) => {
         if (availableBurgers < numCoupons * 2) {
           updatedVoucherStatus[index] = `Necesitas al menos ${
             numCoupons * 2
-          } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchers} con vouchers gratis.`;
+          } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchersToApply} con vouchers gratis.`;
           setVoucherStatus(updatedVoucherStatus);
-          console.log("No hay suficientes hamburguesas disponibles para 2x1", {
+          console.log("⚠️ NO HAY SUFICIENTES HAMBURGUESAS PARA 2x1", {
             updatedVoucherStatus,
           });
           return;
@@ -452,7 +551,7 @@ const FormCustom = ({ cart, total }) => {
 
         if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
           const hasEnoughNonPromoBurgers = availableBurgers >= numCoupons * 2;
-          console.log("Verificando hamburguesas no promocionales para 2x1", {
+          console.log("🔍 VERIFICANDO HAMBURGUESAS NO PROMOCIONALES PARA 2x1", {
             hasEnoughNonPromoBurgers,
             required: numCoupons * 2,
             totalNonPromoBurgers,
@@ -462,10 +561,10 @@ const FormCustom = ({ cart, total }) => {
           if (!hasEnoughNonPromoBurgers) {
             updatedVoucherStatus[index] = `Necesitas al menos ${
               numCoupons * 2
-            } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchers} con vouchers gratis.`;
+            } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchersToApply} con vouchers gratis.`;
             setVoucherStatus(updatedVoucherStatus);
             console.log(
-              "No hay suficientes hamburguesas no promocionales para 2x1",
+              "⚠️ NO HAY SUFICIENTES HAMBURGUESAS NO PROMOCIONALES PARA 2x1",
               { updatedVoucherStatus }
             );
             return;
@@ -477,7 +576,7 @@ const FormCustom = ({ cart, total }) => {
             numCoupons * 2
           } hamburguesas para canjear los vouchers 2x1.`;
           setVoucherStatus(updatedVoucherStatus);
-          console.log("No hay suficientes hamburguesas totales para 2x1", {
+          console.log("⚠️ NO HAY SUFICIENTES HAMBURGUESAS TOTALES PARA 2x1", {
             updatedVoucherStatus,
           });
           return;
@@ -485,21 +584,39 @@ const FormCustom = ({ cart, total }) => {
 
         updatedVoucherStatus[index] = "¡Código válido!";
         setVoucherStatus(updatedVoucherStatus);
-        console.log("Voucher 2x1 válido", { updatedVoucherStatus });
+        console.log("✅ VOUCHER 2x1 VÁLIDO", { updatedVoucherStatus });
 
-        const { newTotal, totalDescuento } = calculateDiscountedTotal(
+        console.log("💰 RECALCULANDO DESCUENTOS CON VOUCHERS 2x1:", {
+          numCoupons,
+          freeVouchers,
+        });
+
+        const discountResult = calculateDiscountedTotal(
           cart,
           numCoupons,
           freeVouchers
         );
+
+        console.log(
+          "📊 RESULTADO DEL CÁLCULO DE DESCUENTOS 2x1:",
+          discountResult
+        );
+
         if (descuentoForOneUnit === 0) {
-          setDescuentoForOneUnit(totalDescuento / numCoupons);
+          setDescuentoForOneUnit(discountResult.totalDescuento / numCoupons);
+          console.log("💰 DESCUENTO POR UNIDAD ESTABLECIDO:", {
+            descuentoPorUnidad: discountResult.totalDescuento / numCoupons,
+          });
         }
-        setDescuento(totalDescuento);
-        setDiscountedTotal(newTotal);
-        console.log("Descuentos 2x1 recalculados", {
-          newTotal,
-          totalDescuento,
+
+        setDescuento(discountResult.totalDescuento);
+        setFreeBurgerDiscount(discountResult.freeBurgerDiscount);
+        setDiscountedTotal(discountResult.newTotal);
+
+        console.log("🏁 DESCUENTOS 2x1 RECALCULADOS", {
+          nuevoTotal: discountResult.newTotal,
+          descuento2x1: discountResult.totalDescuento,
+          descuentoGratis: discountResult.freeBurgerDiscount,
         });
       }
 
@@ -512,6 +629,7 @@ const FormCustom = ({ cart, total }) => {
         index === updatedCoupons.length - 1 &&
         updatedCoupons.length < totalNonPromoBurgers
       ) {
+        console.log("➕ AGREGANDO NUEVO CAMPO DE CUPÓN");
         addCouponField();
       }
 
@@ -522,7 +640,9 @@ const FormCustom = ({ cart, total }) => {
         totalConDescuento: discountedTotal,
       });
 
-      console.log("Estado final de voucherStatus", { updatedVoucherStatus });
+      console.log("📋 ESTADO FINAL DE VOUCHER STATUS", {
+        updatedVoucherStatus,
+      });
       setVoucherStatus(updatedVoucherStatus);
     } catch (error) {
       console.error("❌ ERROR EN VALIDACIÓN DE VOUCHER:", error);
@@ -535,6 +655,7 @@ const FormCustom = ({ cart, total }) => {
         updated[index] = false;
         return updated;
       });
+      console.log("🏁 FIN DE VALIDACIÓN DE VOUCHER");
     }
   };
 

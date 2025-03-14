@@ -80,7 +80,11 @@ export const calculateDiscountedTotal = (
   numCoupons,
   freeVouchers = 0
 ) => {
-  console.log("🔢 INICIO CÁLCULO DE DESCUENTOS", { numCoupons, freeVouchers });
+  console.log("🔢 INICIO CÁLCULO DE DESCUENTOS", {
+    numCoupons,
+    freeVouchers,
+    carrito: cart,
+  });
 
   // Separar productos promocionales y no promocionales
   const { promoProducts, nonPromoProducts } = getPromoAndNonPromoProducts(cart);
@@ -88,12 +92,26 @@ export const calculateDiscountedTotal = (
     totalProductos: cart.length,
     productosPromo: promoProducts.length,
     productosNoPromo: nonPromoProducts.length,
+    detalleNoPromo: nonPromoProducts,
   });
 
   // 1. Crear array de todas las hamburguesas no promocionales con sus precios
   let allBurgers = [];
   nonPromoProducts.forEach((item) => {
     if (item.category === "burger" || item.category === "burgers") {
+      const isEligibleForFree =
+        item.name.toLowerCase().includes("simple") ||
+        item.name.toLowerCase().includes("satisfyer");
+
+      console.log(`🍔 ANALIZANDO HAMBURGUESA: ${item.name}`, {
+        categoria: item.category,
+        tipo: item.type,
+        cantidad: item.quantity,
+        precio: item.price,
+        toppings: item.toppings,
+        elegibleParaVoucherGratis: isEligibleForFree,
+      });
+
       for (let i = 0; i < item.quantity; i++) {
         allBurgers.push({
           name: item.name,
@@ -102,6 +120,7 @@ export const calculateDiscountedTotal = (
             (sum, topping) => sum + topping.price,
             0
           ),
+          isEligibleForFree: isEligibleForFree,
         });
       }
     }
@@ -114,16 +133,34 @@ export const calculateDiscountedTotal = (
       precio: b.price,
       precioToppings: b.toppingsPrice,
       total: b.price + b.toppingsPrice,
+      elegibleParaGratis: b.isEligibleForFree,
     })),
   });
 
-  // 2. Ordenar todas las hamburguesas de menor a mayor precio (para vouchers gratis)
-  allBurgers.sort(
+  // Filtrar hamburguesas elegibles para vouchers gratis
+  const eligibleForFreeBurgers = allBurgers.filter(
+    (burger) => burger.isEligibleForFree
+  );
+
+  console.log("🍔 HAMBURGUESAS ELEGIBLES PARA VOUCHER GRATIS", {
+    total: eligibleForFreeBurgers.length,
+    elegibles: eligibleForFreeBurgers.map((b) => ({
+      nombre: b.name,
+      precio: b.price + b.toppingsPrice,
+    })),
+  });
+
+  if (freeVouchers > 0 && eligibleForFreeBurgers.length === 0) {
+    console.warn("⚠️ NO HAY HAMBURGUESAS ELEGIBLES PARA VOUCHERS GRATIS");
+  }
+
+  // 2. Ordenar hamburguesas elegibles de menor a mayor precio (para vouchers gratis)
+  eligibleForFreeBurgers.sort(
     (a, b) => a.price + a.toppingsPrice - (b.price + b.toppingsPrice)
   );
 
-  console.log("📊 HAMBURGUESAS ORDENADAS (de menor a mayor precio)", {
-    ordenDeMenorAMayor: allBurgers.map((b) => ({
+  console.log("📊 HAMBURGUESAS ELEGIBLES ORDENADAS (de menor a mayor precio)", {
+    ordenDeMenorAMayor: eligibleForFreeBurgers.map((b) => ({
       nombre: b.name,
       precioTotal: b.price + b.toppingsPrice,
     })),
@@ -140,35 +177,72 @@ export const calculateDiscountedTotal = (
 
   console.log("💲 TOTAL ORIGINAL", { originalTotal });
 
-  // 4. Aplicar descuentos para vouchers gratis (a las hamburguesas más baratas)
-  const freeBurgerDiscount = allBurgers
-    .slice(0, freeVouchers)
+  // 4. Aplicar descuentos para vouchers gratis (solo a hamburguesas elegibles)
+  // Si hay más vouchers que hamburguesas elegibles, limitamos a las disponibles
+  const applicableFreeBurgers = Math.min(
+    freeVouchers,
+    eligibleForFreeBurgers.length
+  );
+
+  console.log("🎫 APLICACIÓN DE VOUCHERS GRATIS", {
+    vouchersDisponibles: freeVouchers,
+    hamburguesasElegiblesDisponibles: eligibleForFreeBurgers.length,
+    vouchersAplicados: applicableFreeBurgers,
+  });
+
+  const freeBurgerDiscount = eligibleForFreeBurgers
+    .slice(0, applicableFreeBurgers)
     .reduce((sum, burger) => sum + burger.price + burger.toppingsPrice, 0);
 
   console.log("🎁 DESCUENTO POR HAMBURGUESAS GRATIS", {
     freeBurgerDiscount,
-    burgersGratis: allBurgers.slice(0, freeVouchers).map((b) => ({
-      nombre: b.name,
-      precio: b.price,
-      toppings: b.toppingsPrice,
-      total: b.price + b.toppingsPrice,
-    })),
+    burgersGratis: eligibleForFreeBurgers
+      .slice(0, applicableFreeBurgers)
+      .map((b) => ({
+        nombre: b.name,
+        precio: b.price,
+        toppings: b.toppingsPrice,
+        total: b.price + b.toppingsPrice,
+      })),
+    vouchersAplicados: applicableFreeBurgers,
+    vouchersSolicitados: freeVouchers,
   });
 
-  // 5. Aplicar descuentos 2x1 a las hamburguesas restantes
-  let newTotal = originalTotal - freeBurgerDiscount;
-  let processedBurgers = freeVouchers;
-  let appliedCoupons = 0;
-  let descuentos2x1 = [];
+  // 5. Marcar las hamburguesas ya usadas para vouchers gratis
+  const usedFreeBurgers = eligibleForFreeBurgers.slice(
+    0,
+    applicableFreeBurgers
+  );
 
-  // Ordenar las hamburguesas restantes por precio para el 2x1
-  // Para 2x1, usamos las hamburguesas que no fueron usadas para free vouchers
-  const remainingBurgers = allBurgers.slice(freeVouchers);
+  // 6. Obtener las hamburguesas restantes para 2x1 (excluyendo las usadas para vouchers gratis)
+  const remainingBurgers = [...allBurgers];
+
+  // Eliminar hamburguesas usadas para vouchers gratis
+  for (const freeBurger of usedFreeBurgers) {
+    const index = remainingBurgers.findIndex(
+      (b) =>
+        b.name === freeBurger.name &&
+        b.price === freeBurger.price &&
+        b.toppingsPrice === freeBurger.toppingsPrice
+    );
+
+    if (index !== -1) {
+      console.log(
+        `🔄 ELIMINANDO HAMBURGUESA USADA PARA VOUCHER GRATIS: ${remainingBurgers[index].name}`
+      );
+      remainingBurgers.splice(index, 1);
+    }
+  }
 
   // Ordenamos de mayor a menor para 2x1 (diferente al orden para vouchers gratis)
   remainingBurgers.sort(
     (a, b) => b.price + b.toppingsPrice - (a.price + a.toppingsPrice)
   );
+
+  // 7. Aplicar descuentos 2x1 a las hamburguesas restantes
+  let newTotal = originalTotal - freeBurgerDiscount;
+  let appliedCoupons = 0;
+  let descuentos2x1 = [];
 
   console.log("2️⃣✖️1️⃣ INICIO APLICACIÓN 2x1", {
     newTotalAntes2x1: newTotal,
@@ -252,7 +326,7 @@ export const calculateDiscountedTotal = (
     descuento2x1: discount2x1,
     descuentoTotal: freeBurgerDiscount + discount2x1,
     totalConDescuentos: newTotal,
-    cuponesGratisAplicados: freeVouchers,
+    cuponesGratisAplicados: applicableFreeBurgers,
     cupones2x1Aplicados: appliedCoupons,
     detalleDescuentos2x1: descuentos2x1,
   });
