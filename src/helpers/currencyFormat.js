@@ -99,9 +99,7 @@ export const calculateDiscountedTotal = (
   let allBurgers = [];
   nonPromoProducts.forEach((item) => {
     if (item.category === "burger" || item.category === "burgers") {
-      const isEligibleForFree =
-        item.name.toLowerCase().includes("simple") ||
-        item.name.toLowerCase().includes("satisfyer");
+      const isEligibleForFree = item.name.toLowerCase().includes("satisfyer");
 
       console.log(`🍔 ANALIZANDO HAMBURGUESA: ${item.name}`, {
         categoria: item.category,

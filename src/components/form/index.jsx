@@ -382,25 +382,23 @@ const FormCustom = ({ cart, total }) => {
       if (gratis) {
         console.log("🎟️ PROCESANDO VOUCHER GRATIS");
 
-        // NUEVA VALIDACIÓN: Verificar si hay hamburguesas "simple" o "satisfyer" elegibles
+        // NUEVA VALIDACIÓN: Verificar si hay hamburguesas  "satisfyer" elegibles
         const eligibleBurgers = nonPromoProducts.filter((item) => {
           const lowerName = item.name.toLowerCase();
-          const isSimple = lowerName.includes("simple");
           const isSatisfyer = lowerName.includes("satisfyer");
 
           console.log(`🔍 Verificando elegibilidad de "${item.name}":`, {
             categoria: item.category,
             nombreEnMinúsculas: lowerName,
-            contieneSimple: isSimple,
             contieneSatisfyer: isSatisfyer,
             esElegible:
               (item.category === "burger" || item.category === "burgers") &&
-              (isSimple || isSatisfyer),
+              isSatisfyer,
           });
 
           return (
             (item.category === "burger" || item.category === "burgers") &&
-            (isSimple || isSatisfyer)
+            isSatisfyer
           );
         });
 
@@ -418,7 +416,7 @@ const FormCustom = ({ cart, total }) => {
 
         if (totalElegibleBurgers === 0) {
           updatedVoucherStatus[index] =
-            "Para canjear un voucher gratis solo podes hacerlo en burgers de un solo medallon";
+            "Para canjear un voucher gratis solo podes hacerlo con hamburguesas Satisfyer";
           setVoucherStatus(updatedVoucherStatus);
           console.log("⚠️ NO HAY HAMBURGUESAS ELEGIBLES PARA VOUCHER GRATIS", {
             updatedVoucherStatus,
