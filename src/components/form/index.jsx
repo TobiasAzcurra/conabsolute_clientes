@@ -268,12 +268,61 @@ const FormCustom = ({ cart, total }) => {
     const updatedCoupons = [...couponCodes];
     const oldValue = updatedCoupons[index]; // Guardar el valor anterior
     updatedCoupons[index] = value;
-    setCouponCodes(updatedCoupons);
 
-    const updatedVoucherStatus = [...voucherStatus];
-    const updatedValidating = [...isValidating];
-    if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push("");
-    if (updatedValidating.length <= index) updatedValidating.push(false);
+    // Verificar si estamos ingresando el código especial
+    if (value.toUpperCase() === "AUTODROMOXANHELO") {
+      console.log(
+        "🌟 CÓDIGO ESPECIAL AUTODROMOXANHELO - LIMPIANDO OTROS CÓDIGOS"
+      );
+
+      // Crear un nuevo array con un solo elemento que es el código especial
+      const newCoupons = [""];
+      newCoupons[0] = value;
+
+      // Limpiar todos los estados relacionados con otros códigos
+      setCouponCodes(newCoupons);
+      setVoucherStatus([""]); // Lo actualizaremos más adelante
+      setIsValidating([false]);
+      setDescuento(0);
+      setFreeBurgerDiscount(0);
+
+      // Verificar si hay productos promocionales
+      const { promoProducts } = getPromoAndNonPromoProducts(cart);
+
+      // Crear un nuevo estado para el voucher
+      const newVoucherStatus = [""];
+
+      if (promoProducts.length > 0) {
+        newVoucherStatus[0] =
+          "El código 'AUTODROMOXANHELO' no puede aplicarse a productos en promoción.";
+        setHasSpecialCode(false);
+      } else {
+        // Aplicar el código especial
+        newVoucherStatus[0] = "¡Código válido! (50% descuento)";
+        setHasSpecialCode(true);
+
+        // Calcular el descuento del 50%
+        const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+        let nonPromoTotal = 0;
+        nonPromoProducts.forEach((item) => {
+          const basePrice = item.price * item.quantity;
+          let toppingsPrice = 0;
+          item.toppings.forEach((topping) => {
+            toppingsPrice += topping.price * item.quantity;
+          });
+          nonPromoTotal += basePrice + toppingsPrice;
+        });
+
+        const specialDiscount = Math.round(nonPromoTotal * 0.5);
+        // No necesitamos actualizar descuento aquí ya que lo manejamos en processPedido
+      }
+
+      setVoucherStatus(newVoucherStatus);
+      return;
+    }
+
+    // Si no es el código especial, procedemos con la lógica normal
+    setCouponCodes(updatedCoupons);
 
     // Verificar si el usuario está borrando el código especial
     if (
@@ -282,45 +331,18 @@ const FormCustom = ({ cart, total }) => {
     ) {
       console.log("🔄 ELIMINANDO CÓDIGO ESPECIAL");
       setHasSpecialCode(false);
+      const updatedVoucherStatus = [...voucherStatus];
       updatedVoucherStatus[index] = "";
       setVoucherStatus(updatedVoucherStatus);
       return;
     }
 
-    // Verificar si es el código especial
-    if (value.toUpperCase() === "AUTODROMOXANHELO") {
-      // Verificar si hay otros códigos válidos
-      const otherValidCodes = couponCodes.filter(
-        (code, i) =>
-          i !== index &&
-          code.trim() !== "" &&
-          (voucherStatus[i] === "¡Código válido!" ||
-            voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)" ||
-            voucherStatus[i] === "¡Código válido! (50% descuento)")
-      );
+    // Resto de la lógica existente para códigos normales...
+    const updatedVoucherStatus = [...voucherStatus];
+    const updatedValidating = [...isValidating];
+    if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push("");
+    if (updatedValidating.length <= index) updatedValidating.push(false);
 
-      if (otherValidCodes.length > 0) {
-        updatedVoucherStatus[index] =
-          "Para canjear el código 'AUTODROMOXANHELO' debes borrar los demás códigos.";
-      } else {
-        // Verificar si hay productos promocionales
-        const { promoProducts } = getPromoAndNonPromoProducts(cart);
-
-        if (promoProducts.length > 0) {
-          updatedVoucherStatus[index] =
-            "El código 'AUTODROMOXANHELO' no puede aplicarse a productos en promoción.";
-        } else {
-          // Aplicar el código especial
-          updatedVoucherStatus[index] = "¡Código válido! (50% descuento)";
-          setHasSpecialCode(true);
-        }
-      }
-
-      setVoucherStatus(updatedVoucherStatus);
-      return;
-    }
-
-    // Código existente para los vouchers normales
     if (value.length < 5) {
       updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
     } else if (value.length === 5) {
@@ -1342,6 +1364,15 @@ const FormCustom = ({ cart, total }) => {
                               <AppleErrorMessage voucher={true}>
                                 {voucherStatus[index]}
                               </AppleErrorMessage>
+                            )}
+                          {/* Nuevo mensaje informativo para el código AUTODROMOXANHELO */}
+                          {couponCodes[index].toUpperCase() ===
+                            "AUTODROMOXANHELO" &&
+                            hasSpecialCode && (
+                              <div className="bg-green-500 text-white text-[10px] text-center p-4 py-1 ">
+                                Este código aplica un 50% de descuento y no
+                                puede canjearse junto a más códigos
+                              </div>
                             )}
                         </div>
                       ))}
