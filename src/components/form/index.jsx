@@ -51,6 +51,8 @@ const FormCustom = ({ cart, total }) => {
   const [descuentoForOneUnit, setDescuentoForOneUnit] = useState(0);
   const [freeBurgerDiscount, setFreeBurgerDiscount] = useState(0);
   const [isModalConfirmLoading, setIsModalConfirmLoading] = useState(false);
+  // Añadir este estado junto a los otros estados al inicio del componente FormCustom
+  const [hasSpecialCode, setHasSpecialCode] = useState(false);
 
   const [voucherStatus, setVoucherStatus] = useState([""]);
   const [showCouponInput, setShowCouponInput] = useState(true);
@@ -104,7 +106,8 @@ const FormCustom = ({ cart, total }) => {
         (code, index) =>
           code.trim() !== "" &&
           (voucherStatus[index] === "¡Código válido!" ||
-            voucherStatus[index] === "¡Código válido! (Hamburguesa gratis)")
+            voucherStatus[index] === "¡Código válido! (Hamburguesa gratis)" ||
+            voucherStatus[index] === "¡Código válido! (50% descuento)")
       );
 
       if (validCoupons.length > 0) {
@@ -219,8 +222,22 @@ const FormCustom = ({ cart, total }) => {
     }
   };
 
+  useEffect(() => {
+    // Verificar si el código especial ya no está presente en ningún campo
+    const hasAutodromo = couponCodes.some(
+      (code) => code.toUpperCase() === "AUTODROMOXANHELO"
+    );
+
+    // Si hasSpecialCode es true pero el código ya no está presente, resetearlo
+    if (hasSpecialCode && !hasAutodromo) {
+      console.log("🔄 CÓDIGO ESPECIAL YA NO ESTÁ PRESENTE, RESETEANDO ESTADO");
+      setHasSpecialCode(false);
+    }
+  }, [couponCodes, hasSpecialCode]);
+
   const handleCouponChange = (index, value, setFieldValue) => {
     const updatedCoupons = [...couponCodes];
+    const oldValue = updatedCoupons[index]; // Guardar el valor anterior
     updatedCoupons[index] = value;
     setCouponCodes(updatedCoupons);
 
@@ -229,16 +246,60 @@ const FormCustom = ({ cart, total }) => {
     if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push("");
     if (updatedValidating.length <= index) updatedValidating.push(false);
 
+    // Verificar si el usuario está borrando el código especial
+    if (
+      oldValue.toUpperCase() === "AUTODROMOXANHELO" &&
+      value.toUpperCase() !== "AUTODROMOXANHELO"
+    ) {
+      console.log("🔄 ELIMINANDO CÓDIGO ESPECIAL");
+      setHasSpecialCode(false);
+      updatedVoucherStatus[index] = "";
+      setVoucherStatus(updatedVoucherStatus);
+      return;
+    }
+
+    // Verificar si es el código especial
+    if (value.toUpperCase() === "AUTODROMOXANHELO") {
+      // Verificar si hay otros códigos válidos
+      const otherValidCodes = couponCodes.filter(
+        (code, i) =>
+          i !== index &&
+          code.trim() !== "" &&
+          (voucherStatus[i] === "¡Código válido!" ||
+            voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)" ||
+            voucherStatus[i] === "¡Código válido! (50% descuento)")
+      );
+
+      if (otherValidCodes.length > 0) {
+        updatedVoucherStatus[index] =
+          "Para canjear el código 'AUTODROMOXANHELO' debes borrar los demás códigos.";
+      } else {
+        // Verificar si hay productos promocionales
+        const { promoProducts } = getPromoAndNonPromoProducts(cart);
+
+        if (promoProducts.length > 0) {
+          updatedVoucherStatus[index] =
+            "El código 'AUTODROMOXANHELO' no puede aplicarse a productos en promoción.";
+        } else {
+          // Aplicar el código especial
+          updatedVoucherStatus[index] = "¡Código válido! (50% descuento)";
+          setHasSpecialCode(true);
+        }
+      }
+
+      setVoucherStatus(updatedVoucherStatus);
+      return;
+    }
+
+    // Código existente para los vouchers normales
     if (value.length < 5) {
       updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
     } else if (value.length === 5) {
       updatedVoucherStatus[index] = "";
 
-      // Importante: actualizamos isValidating antes de llamar a handleVoucherValidation
       updatedValidating[index] = true;
       setIsValidating(updatedValidating);
 
-      // Luego llamamos a handleVoucherValidation
       handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
     } else {
       updatedVoucherStatus[index] =
@@ -862,6 +923,8 @@ const FormCustom = ({ cart, total }) => {
           nuevoDiscountedTotal: total,
         });
 
+        setHasSpecialCode(false);
+
         // Opcional: mostrar algún tipo de feedback al usuario
         // Si estás usando react-hot-toast u otra librería de notificaciones:
         // toast.info("Los cupones se han eliminado debido a cambios en tu carrito");
@@ -961,14 +1024,43 @@ const FormCustom = ({ cart, total }) => {
           isValid,
         }) => {
           const calculateFinalTotal = () => {
-            let finalTotal =
-              calculateProductsTotal() - descuento - freeBurgerDiscount;
+            let finalTotal = calculateProductsTotal();
+
+            // Aplicar descuento del código especial (50%)
+            if (hasSpecialCode) {
+              // Calcular solo con productos no promocionales
+              const { promoProducts, nonPromoProducts } =
+                getPromoAndNonPromoProducts(cart);
+
+              // Calcular total de productos no promocionales
+              let nonPromoTotal = 0;
+              nonPromoProducts.forEach((item) => {
+                // Precio base * cantidad
+                const basePrice = item.price * item.quantity;
+                // Toppings * cantidad
+                let toppingsPrice = 0;
+                item.toppings.forEach((topping) => {
+                  toppingsPrice += topping.price * item.quantity;
+                });
+
+                nonPromoTotal += basePrice + toppingsPrice;
+              });
+
+              // Aplicar descuento del 50%
+              finalTotal -= Math.round(nonPromoTotal * 0.5);
+            } else {
+              // Descuentos normales para vouchers estándar
+              finalTotal -= descuento + freeBurgerDiscount;
+            }
+
+            // Añadir costos de envío y express si corresponde
             if (values.deliveryMethod === "delivery") {
               finalTotal += envio;
             }
             if (isEnabled) {
               finalTotal += expressDeliveryFee;
             }
+
             return finalTotal;
           };
 
@@ -1163,7 +1255,9 @@ const FormCustom = ({ cart, total }) => {
                               </div>
                             ) : voucherStatus[index] === "¡Código válido!" ||
                               voucherStatus[index] ===
-                                "¡Código válido! (Hamburguesa gratis)" ? (
+                                "¡Código válido! (Hamburguesa gratis)" ||
+                              voucherStatus[index] ===
+                                "¡Código válido! (50% descuento)" ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -1178,6 +1272,7 @@ const FormCustom = ({ cart, total }) => {
                               </svg>
                             ) : null}
                           </div>
+
                           {voucherStatus[index] &&
                             voucherStatus[index] !== "¡Código válido!" &&
                             voucherStatus[index] !==
