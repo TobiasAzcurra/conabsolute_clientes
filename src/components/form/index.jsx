@@ -1309,8 +1309,9 @@ const FormCustom = ({ cart, total }) => {
                             ) : voucherStatus[index] === "¡Código válido!" ||
                               voucherStatus[index] ===
                                 "¡Código válido! (Hamburguesa gratis)" ||
-                              voucherStatus[index] ===
-                                "¡Código válido! (50% descuento)" ? (
+                              (couponCodes[index].toUpperCase() ===
+                                "AUTODROMOXANHELO" &&
+                                hasSpecialCode) ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
@@ -1329,7 +1330,15 @@ const FormCustom = ({ cart, total }) => {
                           {voucherStatus[index] &&
                             voucherStatus[index] !== "¡Código válido!" &&
                             voucherStatus[index] !==
-                              "¡Código válido! (Hamburguesa gratis)" && (
+                              "¡Código válido! (Hamburguesa gratis)" &&
+                            voucherStatus[index] !==
+                              "¡Código válido! (50% descuento)" &&
+                            !(
+                              couponCodes[index]
+                                .toUpperCase()
+                                .includes("AUTODROMO") &&
+                              voucherStatus[index] === "Cupón no encontrado"
+                            ) && (
                               <AppleErrorMessage voucher={true}>
                                 {voucherStatus[index]}
                               </AppleErrorMessage>
