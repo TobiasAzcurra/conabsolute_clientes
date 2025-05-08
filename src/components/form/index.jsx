@@ -114,7 +114,7 @@ const FormCustom = ({ cart, total }) => {
         const canjeSuccess = await canjearVouchers(validCoupons);
         if (!canjeSuccess) {
           console.error("Error al canjear los cupones");
-          return;
+          // return;
         }
       }
 
@@ -146,6 +146,35 @@ const FormCustom = ({ cart, total }) => {
         envioExpress: isEnabled ? expressDeliveryFee : 0,
       };
 
+      // Calcular el descuento correcto
+      let totalDiscount = descuento + freeBurgerDiscount;
+
+      // Si hay código especial, usar su descuento en lugar del normal
+      if (hasSpecialCode) {
+        console.log("🔢 Calculando descuento especial para AUTODROMOXANHELO");
+        // Calcular solo con productos no promocionales
+        const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+
+        // Calcular total de productos no promocionales
+        let nonPromoTotal = 0;
+        nonPromoProducts.forEach((item) => {
+          // Precio base * cantidad
+          const basePrice = item.price * item.quantity;
+          // Toppings * cantidad
+          let toppingsPrice = 0;
+          item.toppings.forEach((topping) => {
+            toppingsPrice += topping.price * item.quantity;
+          });
+
+          nonPromoTotal += basePrice + toppingsPrice;
+        });
+
+        totalDiscount = Math.round(nonPromoTotal * 0.5);
+        console.log("💰 Descuento especial calculado:", totalDiscount);
+      }
+
+      console.log("📊 Enviando pedido con descuento:", totalDiscount);
+
       const orderId = await handleSubmit(
         updatedValues,
         cart,
@@ -153,7 +182,7 @@ const FormCustom = ({ cart, total }) => {
         envio,
         mapUrl,
         couponCodes,
-        descuento + freeBurgerDiscount,
+        totalDiscount, // Aquí usamos el descuento total correcto
         false,
         message,
         altaDemanda?.priceFactor || 1
@@ -941,6 +970,30 @@ const FormCustom = ({ cart, total }) => {
     prevCartRef.current = JSON.parse(JSON.stringify(cart));
   }, [cart, couponCodes, descuento, freeBurgerDiscount, total]);
 
+  const calculateSpecialDiscount = () => {
+    if (!hasSpecialCode) return 0;
+
+    // Calcular solo con productos no promocionales
+    const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+
+    // Calcular total de productos no promocionales
+    let nonPromoTotal = 0;
+    nonPromoProducts.forEach((item) => {
+      // Precio base * cantidad
+      const basePrice = item.price * item.quantity;
+      // Toppings * cantidad
+      let toppingsPrice = 0;
+      item.toppings.forEach((topping) => {
+        toppingsPrice += topping.price * item.quantity;
+      });
+
+      nonPromoTotal += basePrice + toppingsPrice;
+    });
+
+    // Calcular descuento del 50%
+    return Math.round(nonPromoTotal * 0.5);
+  };
+
   return (
     <div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
       <style>{`
@@ -1003,10 +1056,10 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
-          if (!isWithinOrderTimeRange()) {
-            openTimeRestrictedModal();
-            return;
-          }
+          // if (!isWithinOrderTimeRange()) {
+          //   openTimeRestrictedModal();
+          //   return;
+          // }
 
           if (values.paymentMethod === "efectivo") {
             await processPedido(values, isReserva);
@@ -1399,7 +1452,14 @@ const FormCustom = ({ cart, total }) => {
                   </div>
                   <div className="flex flex-row justify-between w-full">
                     <p>Descuentos</p>
-                    <p>-{currencyFormat(descuento + freeBurgerDiscount)}</p>
+                    <p>
+                      -
+                      {currencyFormat(
+                        hasSpecialCode
+                          ? calculateSpecialDiscount()
+                          : descuento + freeBurgerDiscount
+                      )}
+                    </p>
                   </div>
                   <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-screen">
                     <p className="text-2xl font-bold">Total</p>
