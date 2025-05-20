@@ -118,7 +118,7 @@
   },
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciónes de papas. Por logistica, no se puede modificar",
-    "img": "classic.png",
+    "img": "2x1classic.png",
     "id": "PROMO2X1CLASSIC",
     "name": "2x1 Anhelo Classic",
     "price": 11790,
@@ -127,7 +127,7 @@
   },
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon y salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciones de papas. Por logistica, no se puede modificar",
-    "img": "baconCheeseburger.png",
+    "img": "2x1baconCheeseburger.png",
     "id": "PROMO2X1BCNCHEESEBURGER",
     "name": "2x1 BCN Cheeseburger",
     "price": 11460,
@@ -138,7 +138,7 @@
 
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon, cebolla caramelizada y salsa barbecue envuelto en un delicioso pan de papa. Incluye dos porciones de papas. Por logistica, no se puede modificar.",
-    "img": "bbqBcnCheeseburger.png",
+    "img": "2x1bbqBcnCheeseburger.png",
 
     "name": "2x1 BBQ BCN Cheeseburger",
     "price": 11470,
@@ -149,7 +149,7 @@
 
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon, huevo frito y  salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciones de papas. Por logistica, no se puede modificar",
-    "img": "easterEgg.png",
+    "img": "2x1easterEgg.png",
 
     "id": "PROMO2X1EASTEREGG",
     "name": "2x1 Easter Egg",
@@ -160,7 +160,7 @@
   },
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, cebolla caramelizada y salsa de champiñones envuelto en un delicioso pan de papa. Incluye 2 porciones de papas. Por logistica, no se puede modificar",
-    "img": "marioInspired.png",
+    "img": "2x1marioInspired.png",
     "id": "PROMO2X1MARIOINSPIRED",
     "name": "2x1 Mario Inspired",
     "price": 11550,
