@@ -1078,10 +1078,10 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
-          // if (!isWithinOrderTimeRange()) {
-          //   openTimeRestrictedModal();
-          //   return;
-          // }
+          if (!isWithinOrderTimeRange()) {
+            openTimeRestrictedModal();
+            return;
+          }
 
           if (values.paymentMethod === "efectivo") {
             await processPedido(values, isReserva);
