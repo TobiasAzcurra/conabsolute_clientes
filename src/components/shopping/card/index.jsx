@@ -7,6 +7,18 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { listenToAltaDemanda } from "../../../firebase/readConstants";
 
 const Card = ({ name, description, price, img, path, id, category, type }) => {
+  // Console log del producto completo
+  console.log("Producto recibido en Card:", {
+    name,
+    description,
+    price,
+    img,
+    path,
+    id,
+    category,
+    type,
+  });
+
   const [rating, setRating] = useState(0);
   const [priceFactor, setPriceFactor] = useState(1);
 
@@ -17,6 +29,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
     return () => unsubscribe();
   }, []);
+
   useEffect(() => {
     const fetchRating = async () => {
       try {
@@ -125,6 +138,32 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
+
+  const productIngredients = {
+    // Promociones 2x1
+    "2x1 Cuadruple Cheeseburger": [""],
+    "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
+    "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
+    "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
+    "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
+    "2x1 Mario Inspired": ["mayonesa", "mario"],
+
+    // Satisfyers
+    "Satisfyer Easter Egg": ["anhelo", "huevo", "bacon"],
+    "Satisfyer BCN Cheeseburger": ["anhelo", "bacon"],
+    "Satisfyer ANHELO Classic": ["anhelo", "tomate", "lechuga"],
+
+    // Hamburguesas principales
+    "Simple Cheeseburger": [""],
+    "Doble Cheeseburger": [""],
+    "Triple Cheeseburger": [""],
+    "Cuadruple Cheeseburger": [""],
+    "ANHELO Classic": ["anhelo", "tomate", "lechuga"],
+    "BCN Cheeseburger": ["anhelo", "bacon"],
+    "BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
+    "Easter Egg": ["anhelo", "huevo", "bacon"],
+    "Mario Inspired": ["mayonesa", "mario"],
+  };
 
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
