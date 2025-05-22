@@ -139,6 +139,7 @@
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, bacon, cebolla caramelizada y salsa barbecue envuelto en un delicioso pan de papa. Incluye dos porciones de papas. Por logistica, no se puede modificar.",
     "img": "2x1bbqBcnCheeseburger.png",
+    "id": "PROMO2X1BBQBCNCHEESEBURGER",
 
     "name": "2x1 BBQ BCN Cheeseburger",
     "price": 11470,
