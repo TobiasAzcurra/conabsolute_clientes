@@ -175,7 +175,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
       <div className="absolute right-3.5 top-2.5 z-40">
         {hasUnavailableIngredients() ? (
-          <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 mb-4 gap-2 mt-2">
+          <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
