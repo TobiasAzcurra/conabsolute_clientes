@@ -1,5 +1,19 @@
-import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { Unsubscribe } from 'firebase/auth';
+import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
+import { Unsubscribe } from "firebase/auth";
+
+// Interfaz para itemsOut
+export interface ItemsOutProps {
+  anhelo: boolean;
+  bacon: boolean;
+  bbq: boolean;
+  caramelizada: boolean;
+  huevo: boolean;
+  ketchup: boolean;
+  lechuga: boolean;
+  mario: boolean;
+  mayonesa: boolean;
+  tomate: boolean;
+}
 
 // Interfaces para tipar los datos
 export interface AltaDemandaProps {
@@ -10,6 +24,7 @@ export interface AltaDemandaProps {
   out: boolean;
   message: string;
   priceFactor: number;
+  itemsOut: ItemsOutProps;
 }
 
 // Función para leer una sola vez
@@ -17,7 +32,7 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
   // console.log('Iniciando lectura de Alta Demanda...');
   const firestore = getFirestore();
   try {
-    const docRef = doc(firestore, 'constantes', 'altaDemanda');
+    const docRef = doc(firestore, "constantes", "altaDemanda");
     // console.log('Referencia al documento creada');
 
     const docSnap = await getDoc(docRef);
@@ -31,17 +46,16 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
         highDemandStartTime: data.highDemandStartTime.toDate(),
         isHighDemand: data.isHighDemand,
         open: data.open,
-        out: data.out,  // Incluir out aquí también
+        out: data.out, // Incluir out aquí también
         message: data.message,
-        priceFactor: data.priceFactor
-
+        priceFactor: data.priceFactor,
       };
     } else {
       // console.log('No se encontró el documento de Alta Demanda');
       return null;
     }
   } catch (error) {
-    console.error('Error al leer Alta Demanda:', error);
+    console.error("Error al leer Alta Demanda:", error);
     throw error;
   }
 };
@@ -52,7 +66,7 @@ export const listenToAltaDemanda = (
 ): Unsubscribe => {
   // console.log('Iniciando escucha de cambios en Alta Demanda...');
   const firestore = getFirestore();
-  const docRef = doc(firestore, 'constantes', 'altaDemanda');
+  const docRef = doc(firestore, "constantes", "altaDemanda");
 
   return onSnapshot(
     docRef,
@@ -67,18 +81,17 @@ export const listenToAltaDemanda = (
             : null,
           isHighDemand: data.isHighDemand,
           open: data.open,
-          out: data.out,  // Incluir out en el callback
+          out: data.out, // Incluir out en el callback
           message: data.message,
-          priceFactor: data.priceFactor
-
-
+          priceFactor: data.priceFactor,
+          itemsOut: data.itemsOut || {},
         });
       } else {
         // console.log('El documento de Alta Demanda no existe');
       }
     },
     (error) => {
-      console.error('Error en la escucha de Alta Demanda:', error);
+      console.error("Error en la escucha de Alta Demanda:", error);
     }
   );
 };

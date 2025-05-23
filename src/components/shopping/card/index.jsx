@@ -21,10 +21,12 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
   const [rating, setRating] = useState(0);
   const [priceFactor, setPriceFactor] = useState(1);
+  const [itemsOut, setItemsOut] = useState({});
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
       setPriceFactor(altaDemanda.priceFactor);
+      setItemsOut(altaDemanda.itemsOut);
     });
 
     return () => unsubscribe();
@@ -164,6 +166,8 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
     "Easter Egg": ["anhelo", "huevo", "bacon"],
     "Mario Inspired": ["mayonesa", "mario"],
   };
+
+  console.log("acaa", itemsOut);
 
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
