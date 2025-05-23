@@ -146,6 +146,27 @@ const DetailCard = ({ products, type }) => {
     );
   };
 
+  // Función para mapear nombres de toppings a keys de Firebase
+  const mapToppingToFirebaseKey = (toppingName) => {
+    const mapping = {
+      Bacon: "bacon",
+      Lechuga: "lechuga",
+      Tomate: "tomate",
+      "Cebolla caramelizada": "caramelizada",
+      "Salsa ANHELO": "anhelo",
+      Mayonesa: "mayonesa",
+      Ketchup: "ketchup",
+      "Salsa barbecue": "bbq",
+    };
+    return mapping[toppingName] || toppingName.toLowerCase();
+  };
+
+  // Función para verificar si un topping está disponible
+  const isToppingAvailable = (toppingName) => {
+    const firebaseKey = mapToppingToFirebaseKey(toppingName);
+    return itemsOut[firebaseKey] !== false; // true si está disponible o undefined
+  };
+
   return (
     <div>
       <div className="flex flex-col ">
@@ -160,53 +181,84 @@ const DetailCard = ({ products, type }) => {
           {/* Select para elegir toppings */}
           {product.type === "originals" && (
             <div className="flex flex-col mt-2 items-center">
-              {toppingsArray.map((topping) => (
-                <label
-                  key={topping.name}
-                  className="flex items-center mb-2 cursor-pointer"
-                >
-                  {/* Checkbox oculto */}
-                  <input
-                    type="checkbox"
-                    value={topping.name}
-                    onChange={handleToppingChange}
-                    className="hidden peer"
-                    checked={dataTopping.some((t) => t.name === topping.name)}
-                  />
-                  {/* Checkbox personalizado */}
-                  <span
-                    className="relative w-6 h-6 mr-3 border border-gray-400 rounded-full flex-shrink-0 
-                                               peer-checked:bg-black peer-checked:border-transparent 
-                                               transition-colors duration-200 ease-in-out
-                                               
-                                               
-                                               flex items-center justify-center"
+              {toppingsArray.map((topping) => {
+                const isAvailable = isToppingAvailable(topping.name);
+
+                return (
+                  <label
+                    key={topping.name}
+                    className={`flex items-center mb-2 cursor-pointer ${
+                      !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    {/* Icono de check, visible solo cuando está seleccionado */}
-                    {dataTopping.some((t) => t.name === topping.name) && (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-4 h-4 text-gray-100"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </span>
-                  {/* Texto del topping */}
-                  <p className="font-bold font-coolvetica text-black text-xs">
-                    {capitalizeWords(topping.name)}:{" "}
-                    {topping.price === 0
-                      ? "Gratis"
-                      : currencyFormat(topping.price)}
-                  </p>
-                </label>
-              ))}
+                    {/* Checkbox oculto */}
+                    <input
+                      type="checkbox"
+                      value={topping.name}
+                      onChange={handleToppingChange}
+                      className="hidden peer"
+                      checked={dataTopping.some((t) => t.name === topping.name)}
+                      disabled={!isAvailable} // Deshabilitar si no está disponible
+                    />
+                    {/* Checkbox personalizado */}
+                    <span
+                      className={`relative w-6 h-6 mr-3 border border-gray-400 rounded-full flex-shrink-0 
+                       ${
+                         isAvailable
+                           ? "peer-checked:bg-black peer-checked:border-transparent"
+                           : "bg-gray-300 border-gray-300"
+                       } 
+                       transition-colors duration-200 ease-in-out
+                       flex items-center justify-center`}
+                    >
+                      {/* Icono de check, visible solo cuando está seleccionado */}
+                      {dataTopping.some((t) => t.name === topping.name) &&
+                        isAvailable && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-4 h-4 text-gray-100"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M19.916 4.626a.75.75 0 0 1 .208 1.04l-9 13.5a.75.75 0 0 1-1.154.114l-6-6a.75.75 0 0 1 1.06-1.06l5.353 5.353 8.493-12.74a.75.75 0 0 1 1.04-.207Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      {/* Icono de X para ingredientes no disponibles */}
+                      {!isAvailable && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-4 h-4 text-gray-500"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </span>
+                    {/* Texto del topping */}
+                    <p
+                      className={`font-bold font-coolvetica text-black text-xs ${
+                        !isAvailable ? "line-through text-gray-500" : ""
+                      }`}
+                    >
+                      {capitalizeWords(topping.name)}:{" "}
+                      {!isAvailable
+                        ? "Agotado por hoy"
+                        : topping.price === 0
+                        ? "Gratis"
+                        : currencyFormat(topping.price)}
+                    </p>
+                  </label>
+                );
+              })}
             </div>
           )}
           <div className="w-full h-[300px] mt-8 flex items-center justify-center">
