@@ -246,7 +246,12 @@ const AppRouter = () => {
         <div className="relative mb-[90px]">
           <div className="flex justify-center w-full ">
             {/* Search by phonenumber with autosuggest */}
-            <div className="bg-opacity-60 border border-gray-100 shadow-black h-10 flex items-center absolute z-50 top-4 right-4 left-4 rounded-full  w-auto backdrop-blur-sm">
+
+            {/* Fondo con gradiente detrás del search bar */}
+            <div className="fixed inset-x-0 top-0 z-[55] h-10 bg-gradient-to-b from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
+
+            {/* Search bar con posición fija */}
+            <div className="bg-opacity-60 border border-gray-100 shadow-black h-10 flex items-center fixed z-[60] top-4 right-4 left-4 rounded-full w-auto backdrop-blur-sm">
               <div className="flex items-center w-full relative">
                 <input
                   type="tel"
@@ -282,7 +287,7 @@ const AppRouter = () => {
                   <div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
                     <button
                       onClick={handleSuggestionClick}
-                      className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center "
+                      className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -296,10 +301,10 @@ const AppRouter = () => {
                           clipRule="evenodd"
                         />
                       </svg>
-                      <p className="text text-xs font-light  mr-2">
+                      <p className="text text-xs font-light mr-2">
                         Ultimo pedido:
                       </p>
-                      <p className=" text-sm">{previousPhone}</p>
+                      <p className="text-sm">{previousPhone}</p>
                     </button>
                   </div>
                 )}
