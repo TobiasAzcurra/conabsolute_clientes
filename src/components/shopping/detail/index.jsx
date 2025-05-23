@@ -222,7 +222,7 @@ const DetailCard = ({ products, type }) => {
           <div className="flex flex-col items-center mb-8 mt-8 gap-2">
             {/* Pasa el producto al QuickAddToCart */}
             {hasUnavailableIngredients() ? (
-              <div className="bg-red-main -mt-4 -mb-5 flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-3xl p-4 text-4xl">
+              <div className="bg-red-main -mt-4 -mb-5 flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"

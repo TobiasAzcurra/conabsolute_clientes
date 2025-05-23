@@ -262,7 +262,7 @@ const QuickAddToCart = ({
         </motion.div>
       ) : isMenuProductPage && quantity === 0 && !isOrderItem ? (
         <button
-          className="bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-3xl p-4 text-4xl"
+          className="bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl"
           onClick={startAddingProcess}
         >
           <svg
