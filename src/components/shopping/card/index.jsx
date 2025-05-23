@@ -7,18 +7,6 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { listenToAltaDemanda } from "../../../firebase/readConstants";
 
 const Card = ({ name, description, price, img, path, id, category, type }) => {
-  // Console log del producto completo
-  console.log("Producto recibido en Card:", {
-    name,
-    description,
-    price,
-    img,
-    path,
-    id,
-    category,
-    type,
-  });
-
   const [rating, setRating] = useState(0);
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
@@ -167,7 +155,21 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
     "Mario Inspired": ["mayonesa", "mario"],
   };
 
-  console.log("acaa", itemsOut);
+  // Función para verificar si el producto tiene ingredientes agotados
+  const hasUnavailableIngredients = () => {
+    const ingredients = productIngredients[name] || [];
+    // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
+    if (
+      ingredients.length === 0 ||
+      (ingredients.length === 1 && ingredients[0] === "")
+    ) {
+      return false;
+    }
+    // Verificar si algún ingrediente está agotado (false)
+    return ingredients.some(
+      (ingredient) => ingredient !== "" && itemsOut[ingredient] === false
+    );
+  };
 
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
@@ -208,22 +210,24 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-xl   font-medium ">{capitalizeWords(name)}</h5>
-            <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 mb-4 gap-2 mt-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                class="h-5 text-white"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                  clip-rule="evenodd"
-                />
-              </svg>
+            {hasUnavailableIngredients() && (
+              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 mb-4 gap-2 mt-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  class="h-5 text-white"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
 
-              <p>Agotado</p>
-            </div>
+                <p>Agotado</p>
+              </div>
+            )}
           </div>
           <p className="text-center text-xs font-light text-opacity-30 text-black">
             {description}
