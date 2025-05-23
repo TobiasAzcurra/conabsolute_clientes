@@ -146,9 +146,6 @@ const DetailCard = ({ products, type }) => {
     );
   };
 
-  console.log("acaa", product);
-  console.log("acaa2", hasUnavailableIngredients());
-
   return (
     <div>
       <div className="flex flex-col ">
