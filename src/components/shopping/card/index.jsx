@@ -174,18 +174,37 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
       <div className="absolute right-3.5 top-2.5 z-40">
-        <QuickAddToCart
-          product={{
-            name,
-            description,
-            price: adjustedPrice,
-            img,
-            path,
-            id,
-            category,
-            type,
-          }}
-        />
+        {hasUnavailableIngredients() ? (
+          <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 mb-4 gap-2 mt-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="h-6 "
+            >
+              <path
+                fill-rule="evenodd"
+                d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+
+            <p className="font-coolvetica text-xs">Agotado</p>
+          </div>
+        ) : (
+          <QuickAddToCart
+            product={{
+              name,
+              description,
+              price: adjustedPrice,
+              img,
+              path,
+              id,
+              category,
+              type,
+            }}
+          />
+        )}
       </div>
 
       <Link to={`/menu/${path}/${id}`} className="w-full">
@@ -210,24 +229,6 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-xl   font-medium ">{capitalizeWords(name)}</h5>
-            {hasUnavailableIngredients() && (
-              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 mb-4 gap-2 mt-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  class="h-5 text-white"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 10 5Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-
-                <p>Agotado</p>
-              </div>
-            )}
           </div>
           <p className="text-center text-xs font-light text-opacity-30 text-black">
             {description}
