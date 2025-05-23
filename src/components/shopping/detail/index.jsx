@@ -1,18 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import toppings from '../../../assets/toppings-v1.json';
-import { addItem } from '../../../redux/cart/cartSlice';
-import currencyFormat from '../../../helpers/currencyFormat';
-import ArrowBack from '../../back';
-import logo from '../../../assets/anheloTMwhite.png';
-import satisfyerPic from '../../../assets/satisfyerPic.png';
-import masterpiecesPic from '../../../assets/djPic.png';
-import originalsPic from '../../../assets/masterpiecesPic.png';
-import friesPic from '../../../assets/friesPic.png';
-import QuickAddToCart from '../card/quickAddToCart';
-import VideoSlider from './VideoSlider';
-import { listenToAltaDemanda } from '../../../firebase/readConstants';
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import toppings from "../../../assets/toppings-v1.json";
+import { addItem } from "../../../redux/cart/cartSlice";
+import currencyFormat from "../../../helpers/currencyFormat";
+import ArrowBack from "../../back";
+import logo from "../../../assets/anheloTMwhite.png";
+import satisfyerPic from "../../../assets/satisfyerPic.png";
+import masterpiecesPic from "../../../assets/djPic.png";
+import originalsPic from "../../../assets/masterpiecesPic.png";
+import friesPic from "../../../assets/friesPic.png";
+import QuickAddToCart from "../card/quickAddToCart";
+import VideoSlider from "./VideoSlider";
+import { listenToAltaDemanda } from "../../../firebase/readConstants";
 
 const toppingPrice = 300;
 const toppingsArray = Object.values(toppings);
@@ -27,12 +27,14 @@ const DetailCard = ({ products, type }) => {
   const [dataTopping, setDataTopping] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [altaDemanda, setAltaDemanda] = useState(null);
+  const [itemsOut, setItemsOut] = useState({});
   const cart = useSelector((state) => state.cartState.cart);
 
   // Escucha cambios en alta demanda
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemandaData) => {
       setAltaDemanda(altaDemandaData);
+      setItemsOut(altaDemandaData.itemsOut); // Usar altaDemandaData directamente
     });
 
     return () => unsubscribe();
@@ -85,13 +87,13 @@ const DetailCard = ({ products, type }) => {
 
   const getImageForType = (type) => {
     switch (type) {
-      case 'satisfyer':
+      case "satisfyer":
         return satisfyerPic;
-      case 'our':
+      case "our":
         return masterpiecesPic;
-      case 'originals':
+      case "originals":
         return originalsPic;
-      case 'papas':
+      case "papas":
         return friesPic;
       default:
         return masterpiecesPic;
@@ -99,8 +101,53 @@ const DetailCard = ({ products, type }) => {
   };
 
   const getObjectPositionForType = (type) => {
-    return type === 'originals' ? 'object-center' : 'object-bottom';
+    return type === "originals" ? "object-center" : "object-bottom";
   };
+
+  const productIngredients = {
+    // Promociones 2x1
+    "2x1 Cuadruple Cheeseburger": [""],
+    "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
+    "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
+    "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
+    "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
+    "2x1 Mario Inspired": ["mayonesa", "mario"],
+
+    // Satisfyers
+    "Satisfyer Easter Egg": ["anhelo", "huevo", "bacon"],
+    "Satisfyer BCN Cheeseburger": ["anhelo", "bacon"],
+    "Satisfyer ANHELO Classic": ["anhelo", "tomate", "lechuga"],
+
+    // Hamburguesas principales
+    "Simple Cheeseburger": [""],
+    "Doble Cheeseburger": [""],
+    "Triple Cheeseburger": [""],
+    "Cuadruple Cheeseburger": [""],
+    "ANHELO Classic": ["anhelo", "tomate", "lechuga"],
+    "BCN Cheeseburger": ["anhelo", "bacon"],
+    "BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
+    "Easter Egg": ["anhelo", "huevo", "bacon"],
+    "Mario Inspired": ["mayonesa", "mario"],
+  };
+
+  // Función para verificar si el producto tiene ingredientes agotados
+  const hasUnavailableIngredients = () => {
+    const ingredients = productIngredients[product.name] || []; // Cambiar name por product.name
+    // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
+    if (
+      ingredients.length === 0 ||
+      (ingredients.length === 1 && ingredients[0] === "")
+    ) {
+      return false;
+    }
+    // Verificar si algún ingrediente está agotado (false)
+    return ingredients.some(
+      (ingredient) => ingredient !== "" && itemsOut[ingredient] === false
+    );
+  };
+
+  console.log("acaa", product);
+  console.log("acaa2", hasUnavailableIngredients());
 
   return (
     <div>
@@ -114,7 +161,7 @@ const DetailCard = ({ products, type }) => {
             {product.description}
           </p>
           {/* Select para elegir toppings */}
-          {product.type === 'originals' && (
+          {product.type === "originals" && (
             <div className="flex flex-col mt-2 items-center">
               {toppingsArray.map((topping) => (
                 <label
@@ -156,9 +203,9 @@ const DetailCard = ({ products, type }) => {
                   </span>
                   {/* Texto del topping */}
                   <p className="font-bold font-coolvetica text-black text-xs">
-                    {capitalizeWords(topping.name)}:{' '}
+                    {capitalizeWords(topping.name)}:{" "}
                     {topping.price === 0
-                      ? 'Gratis'
+                      ? "Gratis"
                       : currencyFormat(topping.price)}
                   </p>
                 </label>
@@ -174,20 +221,39 @@ const DetailCard = ({ products, type }) => {
           </div>
           <div className="flex flex-col items-center mb-8 mt-8 gap-2">
             {/* Pasa el producto al QuickAddToCart */}
-            <QuickAddToCart
-              product={product}
-              toppings={dataTopping}
-              calculatedPrice={totalPrice} // Agregar esta prop
-            />
+            {hasUnavailableIngredients() ? (
+              <div className="bg-red-main -mt-4 -mb-5 flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-3xl p-4 text-4xl">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="h-6"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Agotado
+              </div>
+            ) : (
+              <QuickAddToCart
+                product={product}
+                toppings={dataTopping}
+                calculatedPrice={totalPrice} // Agregar esta prop
+              />
+            )}
+
             <p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
-              Por <strong>{currencyFormat(totalPrice)}</strong>.{' '}
-              {product.type === 'satisfyer'
-                ? 'La versión accesible de Anhelo, para que puedas pedir más en todo momento.'
-                : product.type === 'originals'
-                  ? 'Anhelo, creado por vos. Tu burger ideal.'
-                  : product.type === 'our'
-                    ? 'Nuestras mejores combinaciones. Obras de arte.'
-                    : ''}
+              Por <strong>{currencyFormat(totalPrice)}</strong>.{" "}
+              {product.type === "satisfyer"
+                ? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
+                : product.type === "originals"
+                ? "Anhelo, creado por vos. Tu burger ideal."
+                : product.type === "our"
+                ? "Nuestras mejores combinaciones. Obras de arte."
+                : ""}
             </p>
           </div>
         </div>
@@ -208,7 +274,7 @@ const DetailCard = ({ products, type }) => {
                 <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black to-transparent"></div>
               </div>
               <p className="text-end text-gray-100/50 text-xs font-coolvetica pt-2 pr-4">
-                Si esta <span className="text-gray-100">dedicacion</span>{' '}
+                Si esta <span className="text-gray-100">dedicacion</span>{" "}
                 ponemos en la pagina,
                 <br />
                 imaginate en las <span className="text-gray-100">burgers.</span>
@@ -217,7 +283,7 @@ const DetailCard = ({ products, type }) => {
             {/* Reels */}
             <div className="flex flex-col ">
               <p className="text-2xl mt-6 pl-4 md:pl-0 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-                <span className="opacity-50">Por que todos quedan</span>{' '}
+                <span className="opacity-50">Por que todos quedan</span>{" "}
                 pidiendo más:
               </p>
 
