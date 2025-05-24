@@ -107,15 +107,7 @@
     "img": "satisfyerClassic.png",
     "category": "burger"
   },
-  {
-    "description": "2 Cuadruple smash burgers de nuestro blend de carnes, cheddar,  envuelto en un delicioso pan de papa Incluye dos porciones de papas. Por logistica, no se puede modificar",
-    "img": "promo2x1bcn.png",
-    "id": "PROMO2X1CUADRUPLE",
-    "name": "2x1 Cuadruple Cheeseburger",
-    "price": 13360,
-    "type": "promo",
-    "category": "burger"
-  },
+
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciónes de papas. Por logistica, no se puede modificar",
     "img": "2x1classic.png",

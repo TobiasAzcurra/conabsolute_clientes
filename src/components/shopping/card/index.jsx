@@ -131,7 +131,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
   const productIngredients = {
     // Promociones 2x1
-    "2x1 Cuadruple Cheeseburger": [""],
+    // "2x1 Cuadruple Cheeseburger": [""],
     "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
     "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
     "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
