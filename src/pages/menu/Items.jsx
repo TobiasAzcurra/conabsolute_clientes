@@ -34,6 +34,7 @@ const Items = ({
     "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
     "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
     "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
+    "2x1 Anhelo Yummy": ["anhelo", "yummy"],
     "2x1 Mario Inspired": ["mayonesa", "mario"],
 
     // Satisfyers

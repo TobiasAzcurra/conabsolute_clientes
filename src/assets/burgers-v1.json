@@ -107,6 +107,15 @@
     "img": "satisfyerClassic.png",
     "category": "burger"
   },
+  {
+    "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, salsa yummy y salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciónes de papas. Por logistica, no se puede modificar",
+    "img": "2x1YUMMY.png",
+    "id": "PROMO2X1YUMMY",
+    "name": "2x1 Anhelo Yummy",
+    "price": 11790,
+    "type": "promo",
+    "category": "burger"
+  },
 
   {
     "description": "2 Doble smash burger de nuestro blend de carnes, cheddar, tomate, lechuga y salsa ANHELO envuelto en un delicioso pan de papa. Incluye dos porciónes de papas. Por logistica, no se puede modificar",

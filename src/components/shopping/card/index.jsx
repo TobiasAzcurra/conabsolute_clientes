@@ -73,6 +73,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
       "Easter Egg": "70%",
       "Mario Inspired": "45%",
       "2x1 BCN Cheeseburger": "85%",
+      "2x1 Anhelo Yummy": "95%",
       "Papas Anhelo ®": "50%",
       "Papas con Cheddar ®": "50%",
       "Pote Cheddar": "50%",
@@ -134,6 +135,8 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
     // "2x1 Cuadruple Cheeseburger": [""],
     "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
     "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
+
+    "2x1 Anhelo Yummy": ["anhelo", "yummy"],
     "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
     "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
     "2x1 Mario Inspired": ["mayonesa", "mario"],
