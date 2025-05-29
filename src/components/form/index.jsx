@@ -29,6 +29,38 @@ import Tooltip from "../Tooltip";
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000;
 const expressDeliveryFee = 2000;
 
+// NUEVAS CONSTANTES Y FUNCIONES PARA CÓDIGOS ESPECIALES
+const SPECIAL_CODES = ["AUTODROMOXANHELO", "ANHELOUSD"];
+
+// Función helper para verificar si un código es especial
+const isSpecialCode = (code) => {
+  return SPECIAL_CODES.includes(code.toUpperCase());
+};
+
+// Función helper para obtener información del código especial
+const getSpecialCodeInfo = (code) => {
+  const upperCode = code.toUpperCase();
+
+  switch (upperCode) {
+    case "AUTODROMOXANHELO":
+      return {
+        discount: 0.5, // 50%
+        message:
+          "Este código aplica un 50% de descuento y no puede canjearse junto a más códigos",
+        validMessage: "¡Código válido! (50% descuento)",
+      };
+    case "ANHELOUSD":
+      return {
+        discount: 0.5, // 30% por ejemplo
+        message:
+          "Este código aplica un 50% de descuento y no puede canjearse junto a más códigos",
+        validMessage: "¡Código válido! (50% descuento)",
+      };
+    default:
+      return null;
+  }
+};
+
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -151,26 +183,36 @@ const FormCustom = ({ cart, total }) => {
 
       // Si hay código especial, usar su descuento en lugar del normal
       if (hasSpecialCode) {
-        console.log("🔢 Calculando descuento especial para AUTODROMOXANHELO");
-        // Calcular solo con productos no promocionales
-        const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+        // Encontrar qué código especial está siendo usado
+        const currentSpecialCode = couponCodes.find((code) =>
+          isSpecialCode(code)
+        );
+        if (currentSpecialCode) {
+          const specialCodeInfo = getSpecialCodeInfo(currentSpecialCode);
+          console.log(
+            `🔢 Calculando descuento especial para ${currentSpecialCode.toUpperCase()}`
+          );
 
-        // Calcular total de productos no promocionales
-        let nonPromoTotal = 0;
-        nonPromoProducts.forEach((item) => {
-          // Precio base * cantidad
-          const basePrice = item.price * item.quantity;
-          // Toppings * cantidad
-          let toppingsPrice = 0;
-          item.toppings.forEach((topping) => {
-            toppingsPrice += topping.price * item.quantity;
+          // Calcular solo con productos no promocionales
+          const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
+
+          // Calcular total de productos no promocionales
+          let nonPromoTotal = 0;
+          nonPromoProducts.forEach((item) => {
+            // Precio base * cantidad
+            const basePrice = item.price * item.quantity;
+            // Toppings * cantidad
+            let toppingsPrice = 0;
+            item.toppings.forEach((topping) => {
+              toppingsPrice += topping.price * item.quantity;
+            });
+
+            nonPromoTotal += basePrice + toppingsPrice;
           });
 
-          nonPromoTotal += basePrice + toppingsPrice;
-        });
-
-        totalDiscount = Math.round(nonPromoTotal * 0.5);
-        console.log("💰 Descuento especial calculado:", totalDiscount);
+          totalDiscount = Math.round(nonPromoTotal * specialCodeInfo.discount);
+          console.log("💰 Descuento especial calculado:", totalDiscount);
+        }
       }
 
       console.log("📊 Enviando pedido con descuento:", totalDiscount);
@@ -252,13 +294,11 @@ const FormCustom = ({ cart, total }) => {
   };
 
   useEffect(() => {
-    // Verificar si el código especial ya no está presente en ningún campo
-    const hasAutodromo = couponCodes.some(
-      (code) => code.toUpperCase() === "AUTODROMOXANHELO"
-    );
+    // Verificar si algún código especial ya no está presente en ningún campo
+    const hasAnySpecialCode = couponCodes.some((code) => isSpecialCode(code));
 
-    // Si hasSpecialCode es true pero el código ya no está presente, resetearlo
-    if (hasSpecialCode && !hasAutodromo) {
+    // Si hasSpecialCode es true pero ningún código especial está presente, resetearlo
+    if (hasSpecialCode && !hasAnySpecialCode) {
       console.log("🔄 CÓDIGO ESPECIAL YA NO ESTÁ PRESENTE, RESETEANDO ESTADO");
       setHasSpecialCode(false);
     }
@@ -269,10 +309,11 @@ const FormCustom = ({ cart, total }) => {
     const oldValue = updatedCoupons[index]; // Guardar el valor anterior
     updatedCoupons[index] = value;
 
-    // Verificar si estamos ingresando el código especial
-    if (value.toUpperCase() === "AUTODROMOXANHELO") {
+    // Verificar si estamos ingresando un código especial
+    if (isSpecialCode(value)) {
+      const specialCodeInfo = getSpecialCodeInfo(value);
       console.log(
-        "🌟 CÓDIGO ESPECIAL AUTODROMOXANHELO - LIMPIANDO OTROS CÓDIGOS"
+        `🌟 CÓDIGO ESPECIAL ${value.toUpperCase()} - LIMPIANDO OTROS CÓDIGOS`
       );
 
       // Crear un nuevo array con un solo elemento que es el código especial
@@ -293,15 +334,14 @@ const FormCustom = ({ cart, total }) => {
       const newVoucherStatus = [""];
 
       if (promoProducts.length > 0) {
-        newVoucherStatus[0] =
-          "El código 'AUTODROMOXANHELO' no puede aplicarse a productos en promoción.";
+        newVoucherStatus[0] = `El código '${value.toUpperCase()}' no puede aplicarse a productos en promoción.`;
         setHasSpecialCode(false);
       } else {
         // Aplicar el código especial
-        newVoucherStatus[0] = "¡Código válido! (50% descuento)";
+        newVoucherStatus[0] = specialCodeInfo.validMessage;
         setHasSpecialCode(true);
 
-        // Calcular el descuento del 50%
+        // Calcular el descuento correspondiente
         const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
         let nonPromoTotal = 0;
         nonPromoProducts.forEach((item) => {
@@ -313,22 +353,24 @@ const FormCustom = ({ cart, total }) => {
           nonPromoTotal += basePrice + toppingsPrice;
         });
 
-        const specialDiscount = Math.round(nonPromoTotal * 0.5);
-        // No necesitamos actualizar descuento aquí ya que lo manejamos en processPedido
+        const specialDiscount = Math.round(
+          nonPromoTotal * specialCodeInfo.discount
+        );
+        console.log(
+          `💰 Descuento especial calculado para ${value.toUpperCase()}:`,
+          specialDiscount
+        );
       }
 
       setVoucherStatus(newVoucherStatus);
       return;
     }
 
-    // Si no es el código especial, procedemos con la lógica normal
+    // Si no es código especial, procedemos con la lógica normal
     setCouponCodes(updatedCoupons);
 
-    // Verificar si el usuario está borrando el código especial
-    if (
-      oldValue.toUpperCase() === "AUTODROMOXANHELO" &&
-      value.toUpperCase() !== "AUTODROMOXANHELO"
-    ) {
+    // Verificar si el usuario está borrando un código especial
+    if (isSpecialCode(oldValue) && !isSpecialCode(value)) {
       console.log("🔄 ELIMINANDO CÓDIGO ESPECIAL");
       setHasSpecialCode(false);
       const updatedVoucherStatus = [...voucherStatus];
@@ -995,6 +1037,13 @@ const FormCustom = ({ cart, total }) => {
   const calculateSpecialDiscount = () => {
     if (!hasSpecialCode) return 0;
 
+    // Encontrar qué código especial está siendo usado
+    const currentSpecialCode = couponCodes.find((code) => isSpecialCode(code));
+    if (!currentSpecialCode) return 0;
+
+    const specialCodeInfo = getSpecialCodeInfo(currentSpecialCode);
+    if (!specialCodeInfo) return 0;
+
     // Calcular solo con productos no promocionales
     const { nonPromoProducts } = getPromoAndNonPromoProducts(cart);
 
@@ -1012,8 +1061,8 @@ const FormCustom = ({ cart, total }) => {
       nonPromoTotal += basePrice + toppingsPrice;
     });
 
-    // Calcular descuento del 50%
-    return Math.round(nonPromoTotal * 0.5);
+    // Calcular descuento según el porcentaje del código
+    return Math.round(nonPromoTotal * specialCodeInfo.discount);
   };
 
   return (
@@ -1331,8 +1380,7 @@ const FormCustom = ({ cart, total }) => {
                             ) : voucherStatus[index] === "¡Código válido!" ||
                               voucherStatus[index] ===
                                 "¡Código válido! (Hamburguesa gratis)" ||
-                              (couponCodes[index].toUpperCase() ===
-                                "AUTODROMOXANHELO" &&
+                              (isSpecialCode(couponCodes[index]) &&
                                 hasSpecialCode) ? (
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -1358,7 +1406,7 @@ const FormCustom = ({ cart, total }) => {
                             !(
                               couponCodes[index]
                                 .toUpperCase()
-                                .includes("AUTODROMO") &&
+                                .includes("AUTODROMO" || "ANHELO") &&
                               voucherStatus[index] === "Cupón no encontrado"
                             ) && (
                               <AppleErrorMessage voucher={true}>
@@ -1367,13 +1415,13 @@ const FormCustom = ({ cart, total }) => {
                             )}
                           {/* Nuevo mensaje informativo para el código AUTODROMOXANHELO */}
                           {couponCodes[index].toUpperCase() ===
-                            "AUTODROMOXANHELO" &&
-                            hasSpecialCode && (
+                            "AUTODROMOXANHELO" ||
+                            ("ANHELOUSD" && hasSpecialCode && (
                               <div className="bg-green-500 text-white text-[10px] text-center p-4 py-1 ">
                                 Este código aplica un 50% de descuento y no
                                 puede canjearse junto a más códigos
                               </div>
-                            )}
+                            ))}
                         </div>
                       ))}
                     </div>
