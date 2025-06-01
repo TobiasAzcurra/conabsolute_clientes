@@ -13,6 +13,7 @@ export interface ItemsOutProps {
   mario: boolean;
   mayonesa: boolean;
   tomate: boolean;
+  yummy: boolean;
 }
 
 // Interfaces para tipar los datos
