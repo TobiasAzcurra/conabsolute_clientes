@@ -333,7 +333,12 @@ const Card = ({
                 {currencyFormat(adjustedPrice)}
               </span>
             )}
-            <div className="flex flex-col items-end">
+            <div className="flex flex-col gap-1 items-end">
+              <div className="flex flex-row gap-1">
+                <div className="bg-red-500 border border-gray-300 h-4 w-4 rounded-full"></div>
+                <div className="bg-white border border-gray-300 h-4 w-4 rounded-full"></div>
+                <div className="bg-black border border-gray-300 h-4 w-4 rounded-full"></div>
+              </div>
               <p className="font-medium text-xs text-gray-500">
                 2u. disponibles
               </p>
