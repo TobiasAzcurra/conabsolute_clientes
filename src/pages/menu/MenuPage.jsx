@@ -39,7 +39,7 @@ const MenuPage = ({ onAnimationEnd }) => {
   useEffect(() => {
     // Navegar después de la animación completa
     const timer = setTimeout(() => {
-      navigate("/menu/mates");
+      // navigate("/menu/mates");
       if (onAnimationEnd) {
         onAnimationEnd();
       }
@@ -92,20 +92,20 @@ const MenuPage = ({ onAnimationEnd }) => {
         }
       }
 
-      @keyframes bombillaEffect {
-        0% {
-          transform: translateX(-50%) scaleX(1);
-          opacity: 0.7;
-        }
-        50% {
-          transform: translateX(-50%) scaleX(1.1);
-          opacity: 1;
-        }
-        100% {
-          transform: translateX(-50%) scaleX(1);
-          opacity: 0.8;
-        }
-      }
+     @keyframes bombillaEffect {
+  0% {
+    transform: translateX(-50%) rotate(15deg) scaleX(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateX(-50%) rotate(15deg) scaleX(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) rotate(15deg) scaleX(1);
+    opacity: 0.8;
+  }
+}
 
       @keyframes mateBubbles {
         0% {
@@ -174,21 +174,22 @@ const MenuPage = ({ onAnimationEnd }) => {
       }
 
       /* Bombilla simulada */
-      .bombilla-effect {
-        position: absolute;
-        top: 30vh;
-        left: 50%;
-        width: 8px;
-        height: 13vh;
-        background: linear-gradient(to bottom, 
-          rgba(192, 192, 192, 0.8) 0%,
-          rgba(169, 169, 169, 0.9) 50%,
-          rgba(128, 128, 128, 0.7) 100%);
-        border-radius: 4px;
-        animation: bombillaEffect 4s  0s forwards;
-        z-index: 2;
-        filter: blur(1px);
-      }
+     .bombilla-effect {
+  position: absolute;
+  top: 30vh;
+  left: 50%;
+  width: 8px;
+  height: 13vh;
+  background: linear-gradient(to bottom, 
+    rgba(192, 192, 192, 0.8) 0%,
+    rgba(169, 169, 169, 0.9) 50%,
+    rgba(128, 128, 128, 0.7) 100%);
+  border-radius: 4px;
+  transform-origin: bottom center; /* Punto de rotación en la base */
+  animation: bombillaEffect 4s 0s forwards;
+  z-index: 2;
+  filter: blur(1px);
+}
 
       /* Burbujas del mate */
       .mate-bubble {
