@@ -7,27 +7,82 @@ const Section = ({ products = [], path }) => {
   const cart = useSelector((state) => state.cartState.cart);
   const containerRef = useRef(null);
 
+  // Función para normalizar los productos de Firebase al formato esperado
+  const normalizeProduct = (product) => {
+    console.log(`🔄 Normalizando producto:`, product);
+
+    // Estructura de Firebase: { id, categoria, data: { name, price, img }, stock }
+    const normalized = {
+      id: product.id,
+      name: product.data?.name || product.name || "Producto sin nombre",
+      description: product.data?.description || product.description || "",
+      price: product.data?.price || product.price || 0,
+      img: product.data?.img || product.img || "",
+      category: product.categoria || product.category || path,
+      rating: product.rating || 0,
+      type: product.type || "regular",
+      // Pasar el objeto data completo para el componente Card
+      data: product.data || product,
+    };
+
+    console.log(`✅ Producto normalizado:`, {
+      id: normalized.id,
+      name: normalized.name,
+      price: normalized.price,
+      hasImage: !!normalized.img,
+      imageUrl: normalized.img,
+    });
+
+    return normalized;
+  };
+
+  // Normalizar todos los productos
+  const normalizedProducts = products.map(normalizeProduct);
+
   let originalsBurgers = [];
   let ourCollection = [];
   let satisfyer = [];
   let promo = [];
 
   if (items.burgers === path) {
-    promo = products.filter((product) => product.type.includes("promo"));
-    originalsBurgers = products.filter((product) =>
+    // Filtrar por tipo para burgers (manteniendo la lógica original)
+    promo = normalizedProducts.filter((product) =>
+      product.type.includes("promo")
+    );
+    originalsBurgers = normalizedProducts.filter((product) =>
       product.type.includes("originals")
     );
-    ourCollection = products.filter((product) => product.type.includes("our"));
-    satisfyer = products.filter((product) =>
+    ourCollection = normalizedProducts.filter((product) =>
+      product.type.includes("our")
+    );
+    satisfyer = normalizedProducts.filter((product) =>
       product.type.includes("satisfyer")
     );
   } else {
-    ourCollection = products;
+    // Para otras categorías, usar todos los productos normalizados
+    ourCollection = normalizedProducts;
   }
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Componente Card helper para evitar repetición de código
+  const renderCard = (product, index) => (
+    <Card
+      key={product.id || index}
+      img={product.img}
+      name={product.name}
+      category={product.category}
+      description={product.description}
+      price={product.price}
+      path={path}
+      id={product.id}
+      rating={product.rating}
+      type={product.type}
+      data={product.data} // 🔥 IMPORTANTE: Pasar el objeto data
+    />
+  );
 
   return (
     <div className="relative">
@@ -40,20 +95,7 @@ const Section = ({ products = [], path }) => {
                   Promos
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center ">
-                  {promo.map((product, i) => (
-                    <Card
-                      key={i}
-                      img={product.img}
-                      name={product.name}
-                      category={product.category}
-                      description={product.description}
-                      price={product.price}
-                      path={path}
-                      id={product.id}
-                      rating={product.rating}
-                      type={product.type} // Agregar la propiedad 'type' aquí
-                    />
-                  ))}
+                  {promo.map((product, i) => renderCard(product, i))}
                 </div>
               </div>
             )}
@@ -63,20 +105,7 @@ const Section = ({ products = [], path }) => {
                   Satisfyers
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center ">
-                  {satisfyer.map((product, i) => (
-                    <Card
-                      key={i}
-                      category={product.category}
-                      img={product.img}
-                      rating={product.rating}
-                      name={product.name}
-                      description={product.description}
-                      price={product.price}
-                      path={path}
-                      id={product.id}
-                      type={product.type} // Agregar la propiedad 'type' aquí
-                    />
-                  ))}
+                  {satisfyer.map((product, i) => renderCard(product, i))}
                 </div>
               </div>
             )}
@@ -86,20 +115,7 @@ const Section = ({ products = [], path }) => {
                   Originals
                 </p>
                 <div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center ">
-                  {originalsBurgers.map((product, i) => (
-                    <Card
-                      key={i}
-                      category={product.category}
-                      img={product.img}
-                      rating={product.rating}
-                      name={product.name}
-                      description={product.description}
-                      price={product.price}
-                      path={path}
-                      id={product.id}
-                      type={product.type} // Agregar la propiedad 'type' aquí
-                    />
-                  ))}
+                  {originalsBurgers.map((product, i) => renderCard(product, i))}
                 </div>
               </div>
             )}
@@ -109,41 +125,15 @@ const Section = ({ products = [], path }) => {
                   Masterpieces
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                  {ourCollection.map((product, i) => (
-                    <Card
-                      key={i}
-                      category={product.category}
-                      img={product.img}
-                      rating={product.rating}
-                      name={product.name}
-                      description={product.description}
-                      price={product.price}
-                      path={path}
-                      id={product.id}
-                      type={product.type} // Agregar la propiedad 'type' aquí
-                    />
-                  ))}
+                  {ourCollection.map((product, i) => renderCard(product, i))}
                 </div>
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col md:flex-row gap-4 justify-items-center md:justify-center mb-8 mt-10 px-4">
-            {products.length > 0 ? (
-              products.map((product, i) => (
-                <Card
-                  key={i}
-                  category={product.category}
-                  img={product.img}
-                  rating={product.rating}
-                  name={product.name}
-                  description={product.description}
-                  price={product.price}
-                  path={path}
-                  id={product.id}
-                  type={product.type} // Agregar la propiedad 'type' aquí
-                />
-              ))
+            {normalizedProducts.length > 0 ? (
+              normalizedProducts.map((product, i) => renderCard(product, i))
             ) : (
               <span className="font-coolvetica text-xs text-center">
                 Aun no hay productos en esta categoria

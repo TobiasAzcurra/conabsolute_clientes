@@ -97,7 +97,7 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
         <Items
           selectedItem={selectedItem}
           img={"/menu/yerbaPortada.jpeg"}
-          name="Yerba"
+          name="Yerbas"
           handleItemClick={handleItemClick}
         />
         <Items
