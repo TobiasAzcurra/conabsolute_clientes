@@ -22,6 +22,7 @@ const Card = ({
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [availableUnits, setAvailableUnits] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(null); // Estado para el color seleccionado
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -224,6 +225,20 @@ const Card = ({
 
   const imageSrc = getImageSrc();
 
+  // Función para manejar el click en los círculos de color
+  const handleColorClick = (colorIndex, event) => {
+    event.preventDefault(); // Prevenir navegación del Link
+    event.stopPropagation(); // Evitar que el evento se propague
+    setSelectedColor(colorIndex);
+  };
+
+  // Colores disponibles
+  const colors = [
+    { bg: "bg-red-500", name: "rojo" },
+    { bg: "bg-white", name: "blanco" },
+    { bg: "bg-black", name: "negro" },
+  ];
+
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
       <div className="absolute right-3.5 top-2.5 z-40">
@@ -341,9 +356,20 @@ const Card = ({
             )}
             <div className="flex flex-col gap-1 items-end">
               <div className="flex flex-row gap-1">
-                <div className="bg-red-500 border border-gray-300 h-4 w-4 rounded-full"></div>
-                <div className="bg-white border border-gray-300 h-4 w-4 rounded-full"></div>
-                <div className="bg-black border border-gray-300 h-4 w-4 rounded-full"></div>
+                {colors.map((color, index) => (
+                  <div
+                    key={index}
+                    className={`${
+                      color.bg
+                    } h-4 w-4 rounded-full cursor-pointer transition-all duration-200 ${
+                      selectedColor === index
+                        ? "border-4 border-gray-500"
+                        : "border border-gray-300"
+                    }`}
+                    onClick={(e) => handleColorClick(index, e)}
+                    title={`Seleccionar color ${color.name}`}
+                  />
+                ))}
               </div>
               <p className="font-medium text-xs text-gray-500">
                 {availableUnits}u. disponibles
