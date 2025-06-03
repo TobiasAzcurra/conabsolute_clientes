@@ -317,7 +317,7 @@ const Card = ({
           <p className="text-center text-xs font-light text-opacity-30 text-black">
             {description}
           </p>
-          <div className="flex w-full mt-4 items-left justify-between mb-6">
+          <div className="flex w-full mt-4 items-center justify-center mb-6">
             {type === "promo" ? (
               <div className="flex flex-row gap-2 items-baseline">
                 <span className="font-bold text-4xl text-black">
@@ -331,16 +331,6 @@ const Card = ({
               <span className="font-bold text-4xl text-black">
                 {currencyFormat(adjustedPrice)}
               </span>
-            )}
-            {!excludedNames.includes(name) && rating > 0 && (
-              <div className="flex  items-center  gap-4">
-                <div className="flex items-center  mb-0.5 gap-0.5">
-                  {renderStars(rating)}
-                </div>
-                <div className="text-sm bg-red-main text-gray-100 h-6 flex items-center text-center justify-center w-9 font-light rounded-md ">
-                  {rating.toFixed(1)}
-                </div>
-              </div>
             )}
           </div>
         </div>
