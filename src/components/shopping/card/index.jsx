@@ -6,7 +6,17 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { listenToAltaDemanda } from "../../../firebase/readConstants";
 
-const Card = ({ name, description, price, img, path, id, category, type }) => {
+const Card = ({
+  name,
+  description,
+  price,
+  img,
+  path,
+  id,
+  category,
+  type,
+  data,
+}) => {
   const [rating, setRating] = useState(0);
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
@@ -127,6 +137,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
   };
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
 
@@ -174,6 +185,38 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
     );
   };
 
+  // Función para obtener la URL de la imagen
+  const getImageSrc = () => {
+    // 🔥 CLAVE: Priorizar la imagen de Firebase Storage
+
+    // 1. Primero verificar si hay imagen en data.img (Firebase Storage URL)
+    if (data?.img && data.img.startsWith("https://")) {
+      console.log(
+        `🖼️ Usando imagen de Firebase Storage para ${name}:`,
+        data.img
+      );
+      return data.img;
+    }
+
+    // 2. Si hay img directamente en el objeto (también de Firebase)
+    if (img && img.startsWith("https://")) {
+      console.log(`🖼️ Usando imagen directa de Firebase para ${name}:`, img);
+      return img;
+    }
+
+    // 3. Fallback a imagen local (para productos legacy)
+    if (img && !img.startsWith("https://")) {
+      console.log(`📁 Usando imagen local para ${name}:`, `/menu/${img}`);
+      return `/menu/${img}`;
+    }
+
+    // 4. Imagen por defecto si no hay nada
+    console.warn(`⚠️ No se encontró imagen para ${name}, usando placeholder`);
+    return "/placeholder-product.jpg";
+  };
+
+  const imageSrc = getImageSrc();
+
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
       <div className="absolute right-3.5 top-2.5 z-40">
@@ -183,12 +226,12 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              class="h-6 "
+              className="h-6 "
             >
               <path
-                fill-rule="evenodd"
+                fillRule="evenodd"
                 d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                clip-rule="evenodd"
+                clipRule="evenodd"
               />
             </svg>
 
@@ -200,7 +243,7 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
               name,
               description,
               price: adjustedPrice,
-              img,
+              img: imageSrc, // Pasar la URL correcta
               path,
               id,
               category,
@@ -212,26 +255,64 @@ const Card = ({ name, description, price, img, path, id, category, type }) => {
 
       <Link to={`/menu/${path}/${id}`} className="w-full">
         <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
-          {!isLoaded && (
+          {!isLoaded && !imageError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse">
               <span className="text-gray-400 text-sm">Cargando...</span>
             </div>
           )}
+
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
+              <div className="text-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-gray-500 mx-auto mb-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="text-gray-500 text-xs">Sin imagen</span>
+              </div>
+            </div>
+          )}
+
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
+
           <img
             className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
-              isLoaded ? "opacity-100" : "opacity-0"
+              isLoaded && !imageError ? "opacity-100" : "opacity-0"
             }`}
             style={{ objectPosition: `center ${imgPosition}` }}
-            src={`/menu/${img}`}
-            alt={name}
-            onLoad={() => setIsLoaded(true)}
+            src={imageSrc}
+            alt={name || "Producto"}
+            onLoad={() => {
+              console.log(`✅ Imagen cargada exitosamente para ${name}`);
+              setIsLoaded(true);
+              setImageError(false);
+            }}
+            onError={(e) => {
+              console.error(
+                `❌ Error al cargar imagen para ${name}:`,
+                imageSrc
+              );
+              setImageError(true);
+              setIsLoaded(false);
+            }}
           />
         </div>
 
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
-            <h5 className=" text-xl   font-medium ">{capitalizeWords(name)}</h5>
+            <h5 className=" text-xl   font-medium  text-center">
+              {capitalizeWords(name || "Producto sin nombre")}
+            </h5>
           </div>
           <p className="text-center text-xs font-light text-opacity-30 text-black">
             {description}
