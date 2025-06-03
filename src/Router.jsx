@@ -4,10 +4,7 @@ import RouterMenu from "./common/RouterMenu";
 import Carrusel from "./components/Carrusel";
 import NavMenu from "./components/NavMenu";
 // Reemplazamos las importaciones de JSON por la función de Firebase
-import {
-  getProductsByClient,
-  getProductsByCategory,
-} from "./firebase/getProducts";
+import { getProductsByClient } from "./firebase/getProducts";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
@@ -308,14 +305,7 @@ const AppRouter = () => {
 
   // Mostrar loader mientras se cargan los productos
   if (isLoadingProducts) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="font-coolvetica text-gray-600">Cargando productos...</p>
-        </div>
-      </div>
-    );
+    return <div></div>;
   }
 
   return (
