@@ -10,6 +10,7 @@ import CartCard from "./CartCard";
 import carrusel from "../../../assets/carrusel3.jpg";
 import MovingRibbon from "../MovingRibbon";
 import FormCustom from "../../form";
+import LoadingPoints from "../../LoadingPoints";
 
 export const items = {
   mates: "mates",
@@ -202,12 +203,7 @@ const CartItems = () => {
 
         {isLoadingProducts ? (
           <div className="flex justify-center items-center w-full h-32">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
-              <p className="font-coolvetica text-gray-600 text-sm">
-                Cargando productos...
-              </p>
-            </div>
+            <LoadingPoints />
           </div>
         ) : availableProducts.length > 0 ? (
           <div
