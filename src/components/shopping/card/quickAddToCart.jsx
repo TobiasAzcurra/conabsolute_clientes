@@ -29,15 +29,36 @@ const QuickAddToCart = ({
   const { cart } = useSelector((state) => state.cartState);
   const location = useLocation();
 
-  if (!product.category) {
+  // 🔥 Normalizar el producto para asegurar compatibilidad
+  const normalizedProduct = {
+    ...product,
+    name: product.name || product.data?.name || "Producto sin nombre",
+    price: product.price || product.data?.price || 0,
+    img: product.img || product.data?.img || "",
+    category:
+      product.category ||
+      product.categoria ||
+      product.data?.categoria ||
+      "default",
+    type: product.type || "regular",
+  };
+
+  console.log(`🛒 QuickAddToCart recibió producto:`, {
+    original: product,
+    normalized: normalizedProduct,
+  });
+
+  if (!normalizedProduct.category || normalizedProduct.category === "default") {
     console.warn(
-      "El producto no tiene una categoría definida. Se usará 'default'.",
-      product
+      "⚠️ El producto no tiene una categoría definida. Se usará 'default'.",
+      normalizedProduct
     );
   }
 
   const effectiveToppings =
-    toppings && toppings.length > 0 ? toppings : product.toppings || [];
+    toppings && toppings.length > 0
+      ? toppings
+      : normalizedProduct.toppings || [];
 
   const compareToppings = (toppings1, toppings2) => {
     if (!toppings1 || !toppings2) return false;
@@ -50,14 +71,14 @@ const QuickAddToCart = ({
   const cartItem = !isOrderItem
     ? cart.find(
         (item) =>
-          item.name === product.name &&
-          item.category === (product.category || "default") &&
+          item.name === normalizedProduct.name &&
+          item.category === normalizedProduct.category &&
           compareToppings(item.toppings, effectiveToppings)
       )
     : null;
 
   const initialQuantity = isOrderItem
-    ? initialOrderQuantity || product.quantity
+    ? initialOrderQuantity || normalizedProduct.quantity
     : cartItem
     ? cartItem.quantity
     : 0;
@@ -70,13 +91,13 @@ const QuickAddToCart = ({
 
   useEffect(() => {
     if (isOrderItem) {
-      setQuantity(initialOrderQuantity || product.quantity);
-      quantityRef.current = initialOrderQuantity || product.quantity;
+      setQuantity(initialOrderQuantity || normalizedProduct.quantity);
+      quantityRef.current = initialOrderQuantity || normalizedProduct.quantity;
     } else {
       setQuantity(cartItem ? cartItem.quantity : 0);
       quantityRef.current = cartItem ? cartItem.quantity : 0;
     }
-  }, [cartItem, initialOrderQuantity, isOrderItem, product.quantity]);
+  }, [cartItem, initialOrderQuantity, isOrderItem, normalizedProduct.quantity]);
 
   useEffect(() => {
     return () => {
@@ -90,6 +111,9 @@ const QuickAddToCart = ({
     setQuantity((prevQuantity) => {
       const newQuantity = prevQuantity + 1;
       quantityRef.current = newQuantity;
+      console.log(
+        `➕ Incrementando ${normalizedProduct.name} a ${newQuantity}`
+      );
       return newQuantity;
     });
   };
@@ -99,13 +123,16 @@ const QuickAddToCart = ({
       setQuantity((prevQuantity) => {
         const newQuantity = prevQuantity - 1;
         quantityRef.current = newQuantity;
+        console.log(
+          `➖ Decrementando ${normalizedProduct.name} a ${newQuantity}`
+        );
         return newQuantity;
       });
     }
   };
 
   const startAddingProcess = async () => {
-    // console.log("🔵 Starting add process");
+    console.log(`🔵 Iniciando proceso de agregar: ${normalizedProduct.name}`);
     setIsEditing(true);
     setIsAdding(true);
 
@@ -117,11 +144,11 @@ const QuickAddToCart = ({
       try {
         if (isPedidoComponente && currentOrder?.id) {
           // Si el producto ya existe en el pedido, usamos updateOrderItemQuantity
-          if (product.orderIndex !== undefined) {
+          if (normalizedProduct.orderIndex !== undefined) {
             await updateOrderItemQuantity(
               currentOrder.id,
               obtenerFechaActual(),
-              product.orderIndex,
+              normalizedProduct.orderIndex,
               quantityRef.current
             );
           } else {
@@ -133,7 +160,7 @@ const QuickAddToCart = ({
 
               // Find the product data
               const productData = productsData.find(
-                (p) => p.data.name === product.name
+                (p) => p.data.name === normalizedProduct.name
               )?.data;
 
               // Calculate the cost using the existing helper function
@@ -161,7 +188,7 @@ const QuickAddToCart = ({
 
               // Prepare the product with costs
               const productWithCosts = {
-                ...product,
+                ...normalizedProduct,
                 toppings: effectiveToppings,
                 costoBurger:
                   (costoBurger + costoToppings) * quantityRef.current,
@@ -180,30 +207,37 @@ const QuickAddToCart = ({
             if (cartItem) {
               const itemIndex = cart.findIndex(
                 (item) =>
-                  item.name === product.name &&
+                  item.name === normalizedProduct.name &&
                   compareToppings(item.toppings, effectiveToppings)
+              );
+              console.log(
+                `🗑️ Removiendo ${normalizedProduct.name} del carrito`
               );
               dispatch(removeItem(itemIndex));
             }
           } else if (quantityRef.current >= 1) {
             if (cartItem) {
               const updatePayload = {
-                name: product.name,
-                category: product.category || "default",
+                name: normalizedProduct.name,
+                category: normalizedProduct.category,
                 toppings: effectiveToppings,
                 quantity: quantityRef.current,
               };
+              console.log(
+                `🔄 Actualizando cantidad de ${normalizedProduct.name} a ${quantityRef.current}`
+              );
               dispatch(updateItemQuantity(updatePayload));
             } else {
               const newItem = {
-                name: product.name,
-                price: calculatedPrice || product.price, // Usar el precio calculado si está disponible
-                img: product.img,
+                name: normalizedProduct.name,
+                price: calculatedPrice || normalizedProduct.price,
+                img: normalizedProduct.img,
                 toppings: effectiveToppings,
                 quantity: quantityRef.current,
-                category: product.category || "default",
-                type: product.type || "default",
+                category: normalizedProduct.category,
+                type: normalizedProduct.type,
               };
+              console.log(`✅ Agregando nuevo item al carrito:`, newItem);
               dispatch(addItem(newItem));
             }
           }
@@ -220,14 +254,17 @@ const QuickAddToCart = ({
       }
     }, 2000);
   };
+
   const isCarritoPage = location.pathname === "/carrito";
   const shouldAnimateBothSides =
-    /^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(location.pathname) ||
-    animateFromCenter;
+    /^\/menu\/(mates|termos|bombillas|yerbas|canastas|burgers|bebidas|papas)\/[^\/]+$/.test(
+      location.pathname
+    ) || animateFromCenter;
 
-  const isMenuProductPage = /^\/menu\/(burgers|bebidas|papas)\/[^\/]+$/.test(
-    location.pathname
-  );
+  const isMenuProductPage =
+    /^\/menu\/(mates|termos|bombillas|yerbas|canastas|burgers|bebidas|papas)\/[^\/]+$/.test(
+      location.pathname
+    );
 
   return (
     <div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">

@@ -18,17 +18,20 @@ const Section = ({ products = [], path }) => {
       description: product.data?.description || product.description || "",
       price: product.data?.price || product.price || 0,
       img: product.data?.img || product.img || "",
-      category: product.categoria || product.category || path,
+      category: product.categoria || product.category || path, // 🔥 Mapear categoria → category
       rating: product.rating || 0,
       type: product.type || "regular",
       // Pasar el objeto data completo para el componente Card
       data: product.data || product,
+      // Mantener categoria también por compatibilidad
+      categoria: product.categoria || product.category || path,
     };
 
     console.log(`✅ Producto normalizado:`, {
       id: normalized.id,
       name: normalized.name,
       price: normalized.price,
+      category: normalized.category,
       hasImage: !!normalized.img,
       imageUrl: normalized.img,
     });
