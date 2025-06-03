@@ -6,66 +6,66 @@ import { useLocation, useNavigate } from "react-router-dom";
 import "animate.css/animate.min.css";
 
 export const items = {
-	burgers: "burgers",
-	combos: "combos",
-	papas: "papas",
-	bebidas: "bebidas",
+  burgers: "burgers",
+  combos: "combos",
+  papas: "papas",
+  bebidas: "bebidas",
 };
 
 const MenuPage = ({ onAnimationEnd }) => {
-	const { pathname } = useLocation();
-	const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
-	const [selectedItem, setSelectedItem] = useState("");
-	const [locationMenu, setLocationMenu] = useState(true);
-	const [isFirstAnimation, setIsFirstAnimation] = useState(true);
-	const [isSecondAnimation, setIsSecondAnimation] = useState(true);
+  const [selectedItem, setSelectedItem] = useState("");
+  const [locationMenu, setLocationMenu] = useState(true);
+  const [isFirstAnimation, setIsFirstAnimation] = useState(true);
+  const [isSecondAnimation, setIsSecondAnimation] = useState(true);
 
-	const handleItemClick = (item) => {
-		setSelectedItem(item);
-	};
+  const handleItemClick = (item) => {
+    setSelectedItem(item);
+  };
 
-	useEffect(() => {
-		const pathParts = pathname.split("/");
-		const lastPart = pathParts[pathParts.length - 1];
+  useEffect(() => {
+    const pathParts = pathname.split("/");
+    const lastPart = pathParts[pathParts.length - 1];
 
-		if (selectedItem === "PROMOCIONES") {
-			setSelectedItem("PROMOCIONES");
-		} else {
-			setSelectedItem(lastPart);
-		}
+    if (selectedItem === "PROMOCIONES") {
+      setSelectedItem("PROMOCIONES");
+    } else {
+      setSelectedItem(lastPart);
+    }
 
-		setLocationMenu(pathname.startsWith("/menu/"));
-	}, [pathname, selectedItem]);
+    setLocationMenu(pathname.startsWith("/menu/"));
+  }, [pathname, selectedItem]);
 
-	useEffect(() => {
-		// Cambia a la segunda parte después de que termine la primera animación
-		if (isFirstAnimation) {
-			const timer = setTimeout(() => {
-				setIsFirstAnimation(false);
-			}, 1000); // Duración de la primera animación en milisegundos
-			return () => clearTimeout(timer);
-		}
-	}, [isFirstAnimation]);
+  useEffect(() => {
+    // Cambia a la segunda parte después de que termine la primera animación
+    if (isFirstAnimation) {
+      const timer = setTimeout(() => {
+        setIsFirstAnimation(false);
+      }, 1000); // Duración de la primera animación en milisegundos
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstAnimation]);
 
-	useEffect(() => {
-		// Cambia a redireccionar después de que termine la segunda animación
-		if (!isFirstAnimation && isSecondAnimation) {
-			const timer = setTimeout(() => {
-				setIsSecondAnimation(false);
-				navigate("/menu/burgers"); // Redirige a /menu/burgers después de que termine la segunda animación
-				if (onAnimationEnd) {
-					onAnimationEnd(); // Notificar al Router que la animación ha terminado
-				}
-			}, 4000); // Duración de la segunda animación en milisegundos
-			return () => clearTimeout(timer);
-		}
-	}, [isFirstAnimation, isSecondAnimation, navigate, onAnimationEnd]);
+  useEffect(() => {
+    // Cambia a redireccionar después de que termine la segunda animación
+    if (!isFirstAnimation && isSecondAnimation) {
+      const timer = setTimeout(() => {
+        setIsSecondAnimation(false);
+        navigate("/menu/mates"); // Redirige a /menu/burgers después de que termine la segunda animación
+        if (onAnimationEnd) {
+          onAnimationEnd(); // Notificar al Router que la animación ha terminado
+        }
+      }, 4000); // Duración de la segunda animación en milisegundos
+      return () => clearTimeout(timer);
+    }
+  }, [isFirstAnimation, isSecondAnimation, navigate, onAnimationEnd]);
 
-	// Inyecta estilos en el encabezado del documento
-	useEffect(() => {
-		const style = document.createElement("style");
-		style.innerHTML = `
+  // Inyecta estilos en el encabezado del documento
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
       @keyframes moveRightToLeft {
         0% {
           transform: translateX(100vw) scale(6);
@@ -125,40 +125,40 @@ const MenuPage = ({ onAnimationEnd }) => {
         /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4)); */
       }
     `;
-		document.head.appendChild(style);
-		return () => {
-			document.head.removeChild(style);
-		};
-	}, []);
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
-	return (
-		<div
-			className={`${
-				isFirstAnimation
-					? "breathing-gradient-first"
-					: "breathing-gradient-second"
-			} flex items-center justify-center h-screen`}
-		>
-			{isFirstAnimation ? (
-				// Primera animación: Logo moviéndose de derecha a izquierda
-				<div className="moving-logo-container">
-					<img className="moving-logo logo-glow" src={logo} alt="ANHELO" />
-				</div>
-			) : isSecondAnimation ? (
-				// Segunda parte: Contenido existente con animación de aparición
-				<div className="text-center">
-					<img
-						className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow logo-glow"
-						src={logo}
-						alt="ANHELO"
-					/>
-					<p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-2s">
-						Vas a pedir más.
-					</p>
-				</div>
-			) : null}
-		</div>
-	);
+  return (
+    <div
+      className={`${
+        isFirstAnimation
+          ? "breathing-gradient-first"
+          : "breathing-gradient-second"
+      } flex items-center justify-center h-screen`}
+    >
+      {isFirstAnimation ? (
+        // Primera animación: Logo moviéndose de derecha a izquierda
+        <div className="moving-logo-container">
+          <img className="moving-logo logo-glow" src={logo} alt="ANHELO" />
+        </div>
+      ) : isSecondAnimation ? (
+        // Segunda parte: Contenido existente con animación de aparición
+        <div className="text-center">
+          <img
+            className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow logo-glow"
+            src={logo}
+            alt="ANHELO"
+          />
+          <p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-2s">
+            Vas a pedir más.
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 export default MenuPage;
