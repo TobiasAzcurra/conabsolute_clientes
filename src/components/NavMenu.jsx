@@ -68,8 +68,8 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
 
   return (
     <div>
-      <p className="text-gray-100 text-center text-2xl mb-3 font-bold font-coolvetica">
-        Elegí
+      <p className="text-gray-100  px-4 text-2xl mb-3 font-medium font-coolvetica">
+        ¿Salen unos mates?
       </p>
       <nav
         ref={navRef}
