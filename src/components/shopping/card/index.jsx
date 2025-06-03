@@ -318,7 +318,7 @@ const Card = ({
           <p className="text-center text-xs font-light text-opacity-30 text-black">
             {description}
           </p>
-          <div className="flex w-full mt-4 items-center justify-center mb-6">
+          <div className="flex w-full mt-4 items-center  justify-between mb-6">
             {type === "promo" ? (
               <div className="flex flex-row gap-2 items-baseline">
                 <span className="font-bold text-4xl text-black">
@@ -333,6 +333,11 @@ const Card = ({
                 {currencyFormat(adjustedPrice)}
               </span>
             )}
+            <div className="flex flex-col items-end">
+              <p className="font-medium text-xs text-gray-500">
+                2u. disponibles
+              </p>
+            </div>
           </div>
         </div>
       </Link>
