@@ -6,46 +6,45 @@ import carrusel2 from "../assets/carrusel2.jpg";
 import carrusel3 from "../assets/carrusel3.jpg";
 import carrusel4 from "../assets/carrusel4.jpg";
 import carrusel5 from "../assets/carrusel5.jpg";
-import carrusel6 from "../assets/carrusel6.jpg";
 
 const Carrusel = () => {
-	const location = useLocation();
-	const isDesktop = useMediaQuery({ minWidth: 1024 });
-	const [currentIndex, setCurrentIndex] = useState(0);
+  const location = useLocation();
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-	const images = isDesktop
-		? [carrusel1, carrusel2, carrusel5, carrusel6]
-		: [carrusel1, carrusel2, carrusel3, carrusel4, carrusel5, carrusel6];
+  const images = isDesktop
+    ? [carrusel1, carrusel2, carrusel5]
+    : [carrusel1, carrusel2, carrusel3, carrusel4, carrusel5];
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-		}, 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 1000);
 
-		return () => clearInterval(interval);
-	}, [images.length]);
+    return () => clearInterval(interval);
+  }, [images.length]);
 
-	const isCarritoPage = location.pathname === "/carrito";
+  const isCarritoPage = location.pathname === "/carrito";
 
-	return (
-		<div className="w-full h-[300px] overflow-hidden relative">
-			<img
-				src={images[currentIndex]}
-				alt={`Carrusel ${currentIndex + 1}`}
-				className={`object-cover w-full h-full ${
-					isCarritoPage ? "brightness-50" : ""
-				}`}
-			/>
-			{!isCarritoPage && (
-				<>
-					{/* Degradado desde abajo */}
-					<div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent opacity-50"></div>
-					{/* Degradado desde arriba */}
-					<div className="absolute opacity-30 top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent"></div>
-				</>
-			)}
-		</div>
-	);
+  return (
+    <div className="w-full h-[300px] overflow-hidden relative">
+      <img
+        src={images[currentIndex]}
+        alt={`Carrusel ${currentIndex + 1}`}
+        className={`object-cover w-full h-full ${
+          isCarritoPage ? "brightness-50" : ""
+        }`}
+      />
+      {!isCarritoPage && (
+        <>
+          {/* Degradado desde abajo */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black to-transparent opacity-50"></div>
+          {/* Degradado desde arriba */}
+          <div className="absolute opacity-30 top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-black to-transparent"></div>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default Carrusel;
