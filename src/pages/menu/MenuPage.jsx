@@ -1,7 +1,7 @@
 // MenuPage.jsx
 
 import React, { useEffect, useState } from "react";
-import logo from "../../assets/anheloTMwhite.png";
+import logo from "../../assets/Logo APM-07.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import "animate.css/animate.min.css";
 
@@ -18,8 +18,6 @@ const MenuPage = ({ onAnimationEnd }) => {
 
   const [selectedItem, setSelectedItem] = useState("");
   const [locationMenu, setLocationMenu] = useState(true);
-  const [isFirstAnimation, setIsFirstAnimation] = useState(true);
-  const [isSecondAnimation, setIsSecondAnimation] = useState(true);
 
   const handleItemClick = (item) => {
     setSelectedItem(item);
@@ -39,90 +37,236 @@ const MenuPage = ({ onAnimationEnd }) => {
   }, [pathname, selectedItem]);
 
   useEffect(() => {
-    // Cambia a la segunda parte después de que termine la primera animación
-    if (isFirstAnimation) {
-      const timer = setTimeout(() => {
-        setIsFirstAnimation(false);
-      }, 1000); // Duración de la primera animación en milisegundos
-      return () => clearTimeout(timer);
-    }
-  }, [isFirstAnimation]);
+    // Navegar después de la animación completa
+    const timer = setTimeout(() => {
+      navigate("/menu/mates");
+      if (onAnimationEnd) {
+        onAnimationEnd();
+      }
+    }, 5000); // Duración total de la animación
 
-  useEffect(() => {
-    // Cambia a redireccionar después de que termine la segunda animación
-    if (!isFirstAnimation && isSecondAnimation) {
-      const timer = setTimeout(() => {
-        setIsSecondAnimation(false);
-        navigate("/menu/mates"); // Redirige a /menu/burgers después de que termine la segunda animación
-        if (onAnimationEnd) {
-          onAnimationEnd(); // Notificar al Router que la animación ha terminado
-        }
-      }, 4000); // Duración de la segunda animación en milisegundos
-      return () => clearTimeout(timer);
-    }
-  }, [isFirstAnimation, isSecondAnimation, navigate, onAnimationEnd]);
+    return () => clearTimeout(timer);
+  }, [navigate, onAnimationEnd]);
 
   // Inyecta estilos en el encabezado del documento
   useEffect(() => {
     const style = document.createElement("style");
     style.innerHTML = `
-      @keyframes moveRightToLeft {
+      @keyframes skyMovement {
         0% {
-          transform: translateX(100vw) scale(6);
-        }
-        100% {
-          transform: translateX(-50vw) scale(6);
-        }
-      }
-
-      @keyframes gradientAnimation {
-        0% {
-          background-position: 0% 20%;
+          background-position: 0% 50%;
         }
         50% {
-          background-position: 20% 50%;
+          background-position: 100% 50%;
         }
         100% {
-          background-position: 50% 50%;
+          background-position: 0% 50%;
         }
       }
 
-      .moving-logo-container {
+      @keyframes mateSlurp {
+        0% {
+          height: 33vh;
+          opacity: 0.9;
+          transform: translateX(-50%) translateY(0);
+        }
+        30% {
+          height: 25vh;
+          opacity: 1;
+          transform: translateX(-50%) translateY(3vh);
+        }
+        60% {
+          height: 15vh;
+          opacity: 0.8;
+          transform: translateX(-50%) translateY(8vh);
+        }
+        90% {
+          height: 3vh;
+          opacity: 0.6;
+          transform: translateX(-50%) translateY(15vh);
+        }
+        100% {
+          height: 0vh;
+          opacity: 0;
+          transform: translateX(-50%) translateY(18vh);
+        }
+      }
+
+      @keyframes bombillaEffect {
+        0% {
+          transform: translateX(-50%) scaleX(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: translateX(-50%) scaleX(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(-50%) scaleX(1);
+          opacity: 0.8;
+        }
+      }
+
+      @keyframes mateBubbles {
+        0% {
+          transform: translateY(0) scale(0);
+          opacity: 0;
+        }
+        20% {
+          transform: translateY(-10px) scale(1);
+          opacity: 0.8;
+        }
+        80% {
+          transform: translateY(-40px) scale(1.2);
+          opacity: 0.6;
+        }
+        100% {
+          transform: translateY(-60px) scale(0);
+          opacity: 0;
+        }
+      }
+
+      @keyframes logoAppear {
+        0% {
+          transform: translate(-50%, -50%) scale(0.5);
+          opacity: 0;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 0.8;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes sloganAppear {
+        0% {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* Fondo celeste con movimiento suave */
+      .sky-background {
+        background: linear-gradient(135deg, #87CEEB 0%, #87CEFA 25%, #B0E0E6 50%, #ADD8E6 75%, #E0F6FF 100%);
+        background-size: 300% 300%;
+        animation: skyMovement 10s ease-in-out infinite;
         position: relative;
-        width: 100%;
-        height: 100%;
         overflow: hidden;
       }
 
-      .moving-logo {
+      /* Efecto de mate siendo bebido */
+      .mate-liquid {
+        position: absolute;
+        top: 30vh;
+        left: 50%;
+        width: 120px;
+        background: linear-gradient(to bottom, 
+          rgba(34, 139, 34, 0.9) 0%, 
+          rgba(107, 142, 35, 1) 15%, 
+          rgba(154, 205, 50, 0.9) 30%, 
+          rgba(144, 238, 144, 0.8) 50%, 
+          rgba(34, 139, 34, 0.7) 70%, 
+          rgba(0, 100, 0, 0.5) 85%,
+          rgba(0, 80, 0, 0.3) 100%);
+        border-radius: 60px;
+        animation: mateSlurp 4s ease-in-out 1.5s forwards;
+        z-index: 1;
+        filter: blur(6px);
+        box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+      }
+
+      /* Bombilla simulada */
+      .bombilla-effect {
+        position: absolute;
+        top: 30vh;
+        left: 50%;
+        width: 8px;
+        height: 20vh;
+        background: linear-gradient(to bottom, 
+          rgba(192, 192, 192, 0.8) 0%,
+          rgba(169, 169, 169, 0.9) 50%,
+          rgba(128, 128, 128, 0.7) 100%);
+        border-radius: 4px;
+        animation: bombillaEffect 4s ease-in-out 1.5s forwards;
+        z-index: 2;
+        filter: blur(1px);
+      }
+
+      /* Burbujas del mate */
+      .mate-bubble {
+        position: absolute;
+        background: rgba(144, 238, 144, 0.7);
+        border-radius: 50%;
+        animation: mateBubbles 3s ease-out infinite;
+        z-index: 2;
+      }
+
+      .mate-bubble:nth-child(1) {
+        left: 48%;
+        top: 20vh;
+        width: 12px;
+        height: 12px;
+        animation-delay: 0.5s;
+      }
+
+      .mate-bubble:nth-child(2) {
+        left: 52%;
+        top: 25vh;
+        width: 8px;
+        height: 8px;
+        animation-delay: 1s;
+      }
+
+      .mate-bubble:nth-child(3) {
+        left: 49%;
+        top: 18vh;
+        width: 6px;
+        height: 6px;
+        animation-delay: 1.5s;
+      }
+
+      .mate-bubble:nth-child(4) {
+        left: 51%;
+        top: 22vh;
+        width: 10px;
+        height: 10px;
+        animation-delay: 2s;
+      }
+
+      /* Logo centrado */
+      .logo-container {
         position: absolute;
         top: 50%;
-        left: 100%;
-        transform: translate(-50%, -50%) scale(4);
-        animation: moveRightToLeft 1s linear forwards;
-        will-change: transform;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        animation: logoAppear 1s ease-out 0s forwards;
+        opacity: 0;
       }
 
-      /* Primer degradado */
-      .breathing-gradient-first {
-        background: linear-gradient(100deg, #000000 0%, #200000 25%, #ff0000 100%, #000000 75%, #000000 100%);
-        background-size: 200% 200%;
-        animation: gradientAnimation 6s ease infinite;
+      /* Slogan */
+      .slogan {
+        position: absolute;
+        bottom: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        animation: sloganAppear 1.5s ease-out 3s forwards;
+        opacity: 0;
       }
 
-      /* Segundo degradado (vertical) */
-      .breathing-gradient-second {
-        background: linear-gradient(to bottom, #000000 0%, #000000 50%, #ff0000 100%);
-        background-size: 200% 200%;
-        animation: gradientAnimation 6s ease infinite;
-      }
-
-      /* Clase para el resplandor suave del logo */
+      /* Resplandor suave para el logo */
       .logo-glow {
-        /* Utiliza drop-shadow para resplandor alrededor de las letras */
-        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.6));
-        /* Opcional: Añade múltiples drop-shadows para un resplandor más intenso */
-        /* filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px rgba(255, 255, 255, 0.4)); */
+        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.9)) 
+                 drop-shadow(0 0 25px rgba(135, 206, 235, 0.5))
+                 drop-shadow(0 0 35px rgba(135, 206, 250, 0.3));
       }
     `;
     document.head.appendChild(style);
@@ -132,31 +276,23 @@ const MenuPage = ({ onAnimationEnd }) => {
   }, []);
 
   return (
-    <div
-      className={`${
-        isFirstAnimation
-          ? "breathing-gradient-first"
-          : "breathing-gradient-second"
-      } flex items-center justify-center h-screen`}
-    >
-      {isFirstAnimation ? (
-        // Primera animación: Logo moviéndose de derecha a izquierda
-        <div className="moving-logo-container">
-          <img className="moving-logo logo-glow" src={logo} alt="ANHELO" />
-        </div>
-      ) : isSecondAnimation ? (
-        // Segunda parte: Contenido existente con animación de aparición
-        <div className="text-center">
-          <img
-            className="mb-1 w-72 animate__animated animate__fadeInUp animate__slow logo-glow"
-            src={logo}
-            alt="ANHELO"
-          />
-          <p className="text-gray-100 text-sm font-semibold animate__animated animate__fadeInUp font-coolvetica animate__slow animate__delay-2s">
-            Vas a pedir más.
-          </p>
-        </div>
-      ) : null}
+    <div className="sky-background flex items-center justify-center h-screen">
+      {/* Efecto de bombilla */}
+      <div className="bombilla-effect"></div>
+
+      {/* Efecto de mate siendo bebido */}
+      <div className="mate-liquid"></div>
+
+      {/* Burbujas del mate */}
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+
+      {/* Logo centrado que aparece después */}
+      <div className="logo-container z-50">
+        <img className="w-full" src={logo} alt="APM" />
+      </div>
     </div>
   );
 };
