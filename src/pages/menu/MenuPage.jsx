@@ -201,7 +201,7 @@ const MenuPage = ({ onAnimationEnd }) => {
       }
 
       .mate-bubble:nth-child(1) {
-        left: 48%;
+        left: 58%;
         top: 50vh;
         width: 24px;
         height: 24px;
@@ -209,7 +209,7 @@ const MenuPage = ({ onAnimationEnd }) => {
       }
 
       .mate-bubble:nth-child(2) {
-        left: 52%;
+        left: 62%;
         top: 25vh;
         width: 8px;
         height: 8px;
@@ -217,7 +217,7 @@ const MenuPage = ({ onAnimationEnd }) => {
       }
 
       .mate-bubble:nth-child(3) {
-        left: 49%;
+        left: 59%;
         top: 18vh;
         width: 6px;
         height: 6px;
@@ -225,7 +225,7 @@ const MenuPage = ({ onAnimationEnd }) => {
       }
 
       .mate-bubble:nth-child(4) {
-        left: 51%;
+        left: 61%;
         top: 22vh;
         width: 10px;
         height: 10px;
@@ -242,6 +242,70 @@ const MenuPage = ({ onAnimationEnd }) => {
         animation: logoAppear 1s ease-out 0s forwards;
         opacity: 0;
       }
+        /* Burbujas adicionales del mate */
+.mate-bubble:nth-child(5) {
+  left: 57%;
+  top: 30vh;
+  width: 12px;
+  height: 12px;
+  animation-delay: 0.8s;
+}
+
+.mate-bubble:nth-child(6) {
+  left: 63%;
+  top: 30vh;
+  width: 6px;
+  height: 6px;
+  animation-delay: 1.2s;
+}
+
+.mate-bubble:nth-child(7) {
+  left: 60.5%;
+  top: 30vh;
+  width: 8px;
+  height: 8px;
+  animation-delay: 1.8s;
+}
+
+.mate-bubble:nth-child(8) {
+  left: 59.5%;
+  top: 30vh;
+  width: 10px;
+  height: 10px;
+  animation-delay: 2.3s;
+}
+
+.mate-bubble:nth-child(9) {
+  left: 61.5%;
+  top: 30vh;
+  width: 5px;
+  height: 5px;
+  animation-delay: 0.3s;
+}
+
+.mate-bubble:nth-child(10) {
+  left: 58.5%;
+  top: 30vh;
+  width: 7px;
+  height: 7px;
+  animation-delay: 1.6s;
+}
+
+.mate-bubble:nth-child(11) {
+  left: 62.5%;
+  top: 30vh;
+  width: 9px;
+  height: 9px;
+  animation-delay: 2.8s;
+}
+
+.mate-bubble:nth-child(12) {
+  left: 57.5%;
+  top: 30vh;
+  width: 4px;
+  height: 4px;
+  animation-delay: 0.6s;
+}
       
     `;
     document.head.appendChild(style);
@@ -259,6 +323,18 @@ const MenuPage = ({ onAnimationEnd }) => {
       <div className="mate-liquid"></div>
 
       {/* Burbujas del mate */}
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
+      <div className="mate-bubble"></div>
       <div className="mate-bubble"></div>
       <div className="mate-bubble"></div>
       <div className="mate-bubble"></div>
