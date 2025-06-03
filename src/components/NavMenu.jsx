@@ -1,6 +1,5 @@
+import { useEffect, useRef } from "react";
 import Items from "../pages/menu/Items";
-import box from "../assets/box.png";
-import fries from "../assets/fries.png";
 
 export const items = {
   burgers: "burgers",
@@ -10,12 +9,39 @@ export const items = {
 };
 
 const NavMenu = ({ selectedItem, handleItemClick }) => {
+  const navRef = useRef(null);
+
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    let scrollAmount = 0;
+    const speed = 0.5; // velocidad del scroll (ajustable)
+    const maxScroll = nav.scrollWidth - nav.clientWidth;
+
+    const scroll = () => {
+      if (scrollAmount >= maxScroll) {
+        scrollAmount = 0; // reinicia al comienzo
+        nav.scrollLeft = 0;
+      } else {
+        scrollAmount += speed;
+        nav.scrollLeft = scrollAmount;
+      }
+      requestAnimationFrame(scroll);
+    };
+
+    scroll();
+  }, []);
+
   return (
     <div>
       <p className="text-gray-100 text-center text-2xl mb-3 font-bold font-coolvetica">
         Elegí
       </p>
-      <nav className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide">
+      <nav
+        ref={navRef}
+        className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide"
+      >
         <Items
           selectedItem={selectedItem}
           img={"/menu/matePortada.jpeg"}
