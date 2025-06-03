@@ -1242,7 +1242,11 @@ const FormCustom = ({ cart, total }) => {
                         />
                         <p className="font-bold text-">Retiro</p>
                       </div>
-                      <p className="font-light text-xs">por Buenos Aires 618</p>
+                      <p className="font-light text-xs">
+                        por Mitre 614, Río Cuarto
+                        <br />
+                        Córdoba, Argentina
+                      </p>
                     </button>
                   </div>
                   <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300">
