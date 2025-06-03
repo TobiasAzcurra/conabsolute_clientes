@@ -1,13 +1,6 @@
 import { useEffect, useRef } from "react";
 import Items from "../pages/menu/Items";
 
-export const items = {
-  burgers: "burgers",
-  combos: "combos",
-  papas: "papas",
-  bebidas: "bebidas",
-};
-
 const NavMenu = ({ selectedItem, handleItemClick }) => {
   const navRef = useRef(null);
   const animationRef = useRef(null);
