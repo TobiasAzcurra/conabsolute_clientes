@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { listenToAltaDemanda } from "../../firebase/readConstants";
+import { useEffect } from "react";
 
 const Items = ({
   selectedItem,
@@ -10,11 +11,11 @@ const Items = ({
   currentOrder,
   handleItemClick,
   isPedidoComponente = false,
-  isCart = false,
 }) => {
+  // Importamos useLocation para obtener la ruta actual
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
-  const [imageError, setImageError] = useState(false);
+
   const location = useLocation();
 
   useEffect(() => {
@@ -28,6 +29,7 @@ const Items = ({
 
   const productIngredients = {
     // Promociones 2x1
+    // "2x1 Cuadruple Cheeseburger": [""],
     "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
     "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
     "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
@@ -54,44 +56,40 @@ const Items = ({
 
   // Función para verificar si el producto tiene ingredientes agotados
   const hasUnavailableIngredients = () => {
-    const ingredients = productIngredients[selectedItem?.name || name] || [];
+    const ingredients = productIngredients[selectedItem.name] || []; // Cambiar name por product.name
+    // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
     if (
       ingredients.length === 0 ||
       (ingredients.length === 1 && ingredients[0] === "")
     ) {
       return false;
     }
+    // Verificar si algún ingrediente está agotado (false)
     return ingredients.some(
       (ingredient) => ingredient !== "" && itemsOut[ingredient] === false
     );
   };
 
-  const adjustedPrice = selectedItem?.price
-    ? Math.ceil((selectedItem.price * priceFactor) / 100) * 100
-    : 0;
+  const adjustedPrice =
+    Math.ceil((selectedItem?.price * priceFactor) / 100) * 100;
 
-  // Normalizar el producto para QuickAddToCart
+  // Cuando pasamos el producto a QuickAddToCart, incluimos el precio ajustado
   const adjustedProduct = {
     ...selectedItem,
-    name: selectedItem?.name || name || "Producto sin nombre",
     price: adjustedPrice,
-    img: img, // Ya viene procesada desde CartItems
-    category: selectedItem?.category || selectedItem?.categoria || "default",
-    type: selectedItem?.type || "regular",
-    data: selectedItem?.data || selectedItem,
   };
 
-  // Función para capitalizar cada palabra
+  // Función para capitalizar cada palabra con solo la primera letra en mayúscula
   const capitalizeWords = (str) => {
-    if (!str) return "";
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  // Verificaciones de estado
+  // Verificamos si estamos en la ruta /carrito
   const isCarrito = location.pathname === "/carrito";
+  // Determinamos si este item está seleccionado
   const isSelected = selectedItem === name;
 
-  // Estilos condicionales
+  // Ajustamos las clases de los estilos dependiendo de si está seleccionado
   const borderStyle = isSelected
     ? "border-2 border-black border-opacity-100"
     : "border border-black border-opacity-20";
@@ -102,88 +100,22 @@ const Items = ({
       : "min-w-[110px] max-w-[200px]"
   }`;
 
-  // 🔥 Función para manejar la URL de imagen correctamente
-  const getImageSrc = () => {
-    // Si img ya es una URL completa (Firebase Storage), usarla directamente
-    if (img && img.startsWith("https://")) {
-      console.log(`🖼️ Items usando Firebase Storage para ${name}:`, img);
-      return img;
-    }
-
-    // Si img ya tiene el prefijo /menu/, usarla tal como está
-    if (img && img.startsWith("/menu/")) {
-      console.log(
-        `📁 Items usando imagen local con prefijo para ${name}:`,
-        img
-      );
-      return img;
-    }
-
-    // Si img no tiene prefijo pero no es URL de Firebase, agregarle /menu/
-    if (img && !img.startsWith("https://") && !img.startsWith("/")) {
-      const localImg = `/menu/${img}`;
-      console.log(`📁 Items agregando prefijo local para ${name}:`, localImg);
-      return localImg;
-    }
-
-    // Si img ya es una ruta absoluta local, usarla directamente
-    if (img) {
-      console.log(`📄 Items usando imagen como está para ${name}:`, img);
-      return img;
-    }
-
-    // Fallback
-    console.warn(`⚠️ Items: No hay imagen para ${name}, usando placeholder`);
-    return "/placeholder-product.jpg";
-  };
-
-  const imageSrc = getImageSrc();
+  // Ajustamos la fuente de la imagen solo si estamos en /carrito
+  let imageSrc = img;
+  if (isCarrito) {
+    imageSrc =
+      img.startsWith("/menu/") || img.startsWith("http") ? img : `/menu/${img}`;
+  }
 
   const content = (
     <>
       <div className="h-[70px] w-full rounded-t-3xl overflow-hidden bg-gradient-to-b from-gray-100 via-gray-100 to-gray-300 relative flex justify-center">
-        {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-300 z-10">
-            <div className="text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-gray-500 mx-auto mb-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span className="text-gray-500 text-xs">Sin imagen</span>
-            </div>
-          </div>
-        )}
-
         <img
-          className={`object-cover absolute h-full w-full transition-opacity duration-300 ${
-            imageError ? "opacity-0" : "opacity-100"
-          }`}
+          className="object-cover absolute  h-full w-full"
           src={imageSrc}
-          alt={name || "Producto"}
-          onLoad={() => {
-            console.log(`✅ Items: Imagen cargada para ${name}`);
-            setImageError(false);
-          }}
-          onError={(e) => {
-            console.error(
-              `❌ Items: Error cargando imagen para ${name}:`,
-              imageSrc
-            );
-            setImageError(true);
-          }}
+          alt={name}
         />
       </div>
-
       <div
         className={`font-coolvetica text-center ${
           isCarrito || isPedidoComponente
@@ -192,13 +124,13 @@ const Items = ({
         }`}
       >
         <h5 className="mt-1 text-xs font-medium tracking-tight">
-          {capitalizeWords(name || selectedItem?.name || "Producto")}
+          {capitalizeWords(name)}
         </h5>
 
-        {(isCarrito || isCart) && selectedItem && (
+        {isCarrito && selectedItem && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
-              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 gap-2">
+              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
                 <p className="font-coolvetica text-xs">Agotado</p>
               </div>
             ) : (
@@ -209,11 +141,10 @@ const Items = ({
             )}
           </div>
         )}
-
         {isPedidoComponente && selectedItem && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
-              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10 gap-2">
+              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
                 <p className="font-coolvetica text-xs">Agotado</p>
               </div>
             ) : (
@@ -230,18 +161,16 @@ const Items = ({
     </>
   );
 
-  if (isCarrito || isPedidoComponente || isCart) {
-    // Cuando estás en /carrito o es un item del carrito, renderizar como div
+  if (isCarrito || isPedidoComponente) {
+    // Cuando estás en /carrito, renderizamos un <div> en lugar de un <Link>
     return <div className={className}>{content}</div>;
   } else {
-    // Comportamiento normal con Link
+    // Comportamiento normal cuando no estás en /carrito
     return (
       <Link
         className={className}
-        to={`/menu/${
-          selectedItem?.categoria || selectedItem?.category || "productos"
-        }/${selectedItem?.id || name}`}
-        onClick={() => handleItemClick && handleItemClick(name)}
+        to={`/menu/${name}`}
+        onClick={() => handleItemClick(name)}
       >
         {content}
       </Link>
