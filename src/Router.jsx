@@ -11,7 +11,6 @@ import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
 import React, { useEffect, useState } from "react";
-import OrderChecker from "./components/OrderChecker";
 import Pedido from "./pages/pedido/Pedido";
 import Feedback from "./components/mercadopago/Feedback";
 import { useSelector } from "react-redux";
@@ -240,8 +239,6 @@ const AppRouter = () => {
 
   return (
     <div className="flex flex-col">
-      <OrderChecker />
-
       {shouldShowCarruselAndNavMenu && (
         <div className="relative mb-[90px]">
           <div className="flex justify-center w-full ">
@@ -330,20 +327,24 @@ const AppRouter = () => {
           }
         />
         <Route
-          path="/menu/burgers"
-          element={<Section path={"burgers"} products={burgersArray} />}
+          path="/menu/mates"
+          element={<Section path={"mates"} products={burgersArray} />}
         />
         <Route
-          path="/menu/combos"
-          element={<Section path={"combos"} products={combosArray} />}
+          path="/menu/termos"
+          element={<Section path={"termos"} products={combosArray} />}
         />
         <Route
-          path="/menu/bebidas"
-          element={<Section path={"bebidas"} products={drinksArray} />}
+          path="/menu/bombillas"
+          element={<Section path={"bombillas"} products={drinksArray} />}
         />
         <Route
-          path="/menu/papas"
-          element={<Section path={"papas"} products={papasArray} />}
+          path="/menu/yerba"
+          element={<Section path={"yerba"} products={papasArray} />}
+        />{" "}
+        <Route
+          path="/menu/canastas"
+          element={<Section path={"canastas"} products={papasArray} />}
         />
         {/* Rutas de detalles */}
         <Route
