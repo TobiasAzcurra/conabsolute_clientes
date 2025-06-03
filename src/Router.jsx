@@ -3,10 +3,11 @@ import Section from "./components/shopping/section";
 import RouterMenu from "./common/RouterMenu";
 import Carrusel from "./components/Carrusel";
 import NavMenu from "./components/NavMenu";
-import burgers from "./assets/burgers-v1.json";
-import combos from "./assets/combos.json";
-import papas from "./assets/papas-v1.json";
-import drinks from "./assets/drinks-v1.json";
+// Reemplazamos las importaciones de JSON por la función de Firebase
+import {
+  getProductsByClient,
+  getProductsByCategory,
+} from "./firebase/getProducts";
 import DetailCard from "./components/shopping/detail";
 import CartItems from "./components/shopping/cart";
 import OrderForm from "./pages/order";
@@ -21,11 +22,6 @@ import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 import { getOrderById } from "./firebase/getPedido";
 
-const burgersArray = Object.values(burgers);
-const combosArray = Object.values(combos);
-const papasArray = Object.values(papas);
-const drinksArray = Object.values(drinks);
-
 const AppRouter = () => {
   const { pathname } = useLocation();
   const [pathLocation, setPathLocation] = useState("");
@@ -36,6 +32,17 @@ const AppRouter = () => {
   const [selectedItem, setSelectedItem] = useState("");
   const [showExplanation, setShowExplanation] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Estados para productos de Firebase
+  const [productos, setProductos] = useState({
+    mates: [],
+    termos: [],
+    bombillas: [],
+    yerbas: [],
+    canastas: [],
+    todos: [],
+  });
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   // States for autosuggest
   const [showSuggestion, setShowSuggestion] = useState(false);
@@ -49,6 +56,64 @@ const AppRouter = () => {
   const [isRatingLoading, setIsRatingLoading] = useState(false);
   const [animationCompleted, setAnimationCompleted] = useState(false);
   const [pendingOrder, setPendingOrder] = useState(null);
+
+  // Cargar productos de Firebase al inicializar el componente
+  useEffect(() => {
+    const loadProductsFromFirebase = async () => {
+      try {
+        setIsLoadingProducts(true);
+        console.log("🔄 Cargando productos desde Firebase...");
+
+        const productosData = await getProductsByClient();
+
+        // Estructurar los productos según las categorías que usa la app
+        const productosEstructurados = {
+          mates: productosData.porCategoria.mates || [],
+          termos: productosData.porCategoria.termos || [],
+          bombillas: productosData.porCategoria.bombillas || [],
+          yerbas: productosData.porCategoria.yerbas || [],
+          canastas: productosData.porCategoria.canastas || [],
+          todos: productosData.todos || [],
+        };
+
+        setProductos(productosEstructurados);
+
+        console.log("✅ Productos cargados exitosamente:");
+        console.log("📦 Productos estructurados:", productosEstructurados);
+
+        // Mostrar estadísticas detalladas
+        Object.entries(productosEstructurados).forEach(([categoria, items]) => {
+          if (categoria !== "todos" && items.length > 0) {
+            console.log(
+              `🏷️ ${categoria.toUpperCase()}: ${items.length} productos`
+            );
+            items.forEach((producto, index) => {
+              console.log(
+                `  ${index + 1}. ${producto.data?.name || "Sin nombre"} - $${
+                  producto.data?.price || 0
+                }`
+              );
+            });
+          }
+        });
+      } catch (error) {
+        console.error("❌ Error al cargar productos desde Firebase:", error);
+        // En caso de error, mantener arrays vacíos
+        setProductos({
+          mates: [],
+          termos: [],
+          bombillas: [],
+          yerbas: [],
+          canastas: [],
+          todos: [],
+        });
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    loadProductsFromFirebase();
+  }, []);
 
   const handleItemClick = (name) => {
     setSelectedItem(name);
@@ -95,7 +160,11 @@ const AppRouter = () => {
     } else {
       setPathLocation(lastPart);
 
-      if (["burgers", "combos", "bebidas", "papas"].includes(lastPart)) {
+      if (
+        ["mates", "termos", "bombillas", "yerbas", "canastas"].includes(
+          lastPart
+        )
+      ) {
         setSelectedItem(lastPart);
       }
     }
@@ -103,7 +172,7 @@ const AppRouter = () => {
 
   const shouldShowCarruselAndNavMenu =
     pathname.startsWith("/menu") &&
-    !pathname.match(/\/menu\/(burgers|combos|bebidas|papas)\/.+/);
+    !pathname.match(/\/menu\/(mates|termos|bombillas|yerbas|canastas)\/.+/);
 
   const handleSearch = () => {
     if (phoneNumber.trim() === "") {
@@ -237,6 +306,18 @@ const AppRouter = () => {
     }
   };
 
+  // Mostrar loader mientras se cargan los productos
+  if (isLoadingProducts) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="font-coolvetica text-gray-600">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col">
       {shouldShowCarruselAndNavMenu && (
@@ -319,7 +400,7 @@ const AppRouter = () => {
       )}
 
       <Routes>
-        {/* Rutas definidas aquí */}
+        {/* Rutas definidas aquí - ahora usando productos de Firebase */}
         <Route
           path="/"
           element={
@@ -328,40 +409,50 @@ const AppRouter = () => {
         />
         <Route
           path="/menu/mates"
-          element={<Section path={"mates"} products={burgersArray} />}
+          element={<Section path={"mates"} products={productos.mates} />}
         />
         <Route
           path="/menu/termos"
-          element={<Section path={"termos"} products={combosArray} />}
+          element={<Section path={"termos"} products={productos.termos} />}
         />
         <Route
           path="/menu/bombillas"
-          element={<Section path={"bombillas"} products={drinksArray} />}
+          element={
+            <Section path={"bombillas"} products={productos.bombillas} />
+          }
         />
         <Route
-          path="/menu/yerba"
-          element={<Section path={"yerba"} products={papasArray} />}
-        />{" "}
+          path="/menu/yerbas"
+          element={<Section path={"yerbas"} products={productos.yerbas} />}
+        />
         <Route
           path="/menu/canastas"
-          element={<Section path={"canastas"} products={papasArray} />}
+          element={<Section path={"canastas"} products={productos.canastas} />}
         />
         {/* Rutas de detalles */}
         <Route
-          path="/menu/burgers/:id"
-          element={<DetailCard products={burgersArray} type={"burgers"} />}
+          path="/menu/mates/:id"
+          element={<DetailCard products={productos.mates} type={"mates"} />}
         />
         <Route
-          path="/menu/combos/:id"
-          element={<DetailCard products={combosArray} type={"combos"} />}
+          path="/menu/termos/:id"
+          element={<DetailCard products={productos.termos} type={"termos"} />}
         />
         <Route
-          path="/menu/bebidas/:id"
-          element={<DetailCard products={drinksArray} type={"bebidas"} />}
+          path="/menu/bombillas/:id"
+          element={
+            <DetailCard products={productos.bombillas} type={"bombillas"} />
+          }
         />
         <Route
-          path="/menu/papas/:id"
-          element={<DetailCard products={papasArray} type={"papas"} />}
+          path="/menu/yerbas/:id"
+          element={<DetailCard products={productos.yerbas} type={"yerbas"} />}
+        />
+        <Route
+          path="/menu/canastas/:id"
+          element={
+            <DetailCard products={productos.canastas} type={"canastas"} />
+          }
         />
         {/* Otras rutas */}
         <Route path="/carrito" element={<CartItems />} />
@@ -406,7 +497,7 @@ const AppRouter = () => {
         title="¡Califica tu pedido anterior!"
         isRatingModal={true}
         orderProducts={pendingOrder ? pendingOrder.detallePedido : []}
-        additionalProducts={additionalProducts} // This now has the correct data
+        additionalProducts={additionalProducts}
         onConfirm={handleRateOrder}
         isLoading={isRatingLoading}
       >
