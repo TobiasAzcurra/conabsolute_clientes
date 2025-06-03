@@ -39,7 +39,7 @@ const MenuPage = ({ onAnimationEnd }) => {
   useEffect(() => {
     // Navegar después de la animación completa
     const timer = setTimeout(() => {
-      navigate("/menu/mates");
+      // navigate("/menu/mates");
       if (onAnimationEnd) {
         onAnimationEnd();
       }
@@ -66,22 +66,22 @@ const MenuPage = ({ onAnimationEnd }) => {
 
       @keyframes mateSlurp {
         0% {
-          height: 33vh;
+          height: 15vh;
           opacity: 0.9;
           transform: translateX(-50%) translateY(0);
         }
         30% {
-          height: 25vh;
+          height: 10vh;
           opacity: 1;
           transform: translateX(-50%) translateY(3vh);
         }
         60% {
-          height: 15vh;
+          height: 5vh;
           opacity: 0.8;
           transform: translateX(-50%) translateY(8vh);
         }
         90% {
-          height: 3vh;
+          height: 2vh;
           opacity: 0.6;
           transform: translateX(-50%) translateY(15vh);
         }
@@ -141,16 +141,7 @@ const MenuPage = ({ onAnimationEnd }) => {
         }
       }
 
-      @keyframes sloganAppear {
-        0% {
-          transform: translateY(20px);
-          opacity: 0;
-        }
-        100% {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
+     
 
       /* Fondo celeste con movimiento suave */
       .sky-background {
@@ -164,9 +155,9 @@ const MenuPage = ({ onAnimationEnd }) => {
       /* Efecto de mate siendo bebido */
       .mate-liquid {
         position: absolute;
-        top: 30vh;
+        top: 45vh;
         left: 50%;
-        width: 120px;
+        width: 160px;
         background: linear-gradient(to bottom, 
           rgba(34, 139, 34, 0.9) 0%, 
           rgba(107, 142, 35, 1) 15%, 
@@ -176,7 +167,7 @@ const MenuPage = ({ onAnimationEnd }) => {
           rgba(0, 100, 0, 0.5) 85%,
           rgba(0, 80, 0, 0.3) 100%);
         border-radius: 60px;
-        animation: mateSlurp 4s ease-in-out 1.5s forwards;
+        animation: mateSlurp 4s ease-in-out 0s forwards;
         z-index: 1;
         filter: blur(6px);
         box-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
@@ -188,13 +179,13 @@ const MenuPage = ({ onAnimationEnd }) => {
         top: 30vh;
         left: 50%;
         width: 8px;
-        height: 20vh;
+        height: 13vh;
         background: linear-gradient(to bottom, 
           rgba(192, 192, 192, 0.8) 0%,
           rgba(169, 169, 169, 0.9) 50%,
           rgba(128, 128, 128, 0.7) 100%);
         border-radius: 4px;
-        animation: bombillaEffect 4s ease-in-out 1.5s forwards;
+        animation: bombillaEffect 4s  0s forwards;
         z-index: 2;
         filter: blur(1px);
       }
@@ -210,9 +201,9 @@ const MenuPage = ({ onAnimationEnd }) => {
 
       .mate-bubble:nth-child(1) {
         left: 48%;
-        top: 20vh;
-        width: 12px;
-        height: 12px;
+        top: 50vh;
+        width: 24px;
+        height: 24px;
         animation-delay: 0.5s;
       }
 
@@ -250,24 +241,7 @@ const MenuPage = ({ onAnimationEnd }) => {
         animation: logoAppear 1s ease-out 0s forwards;
         opacity: 0;
       }
-
-      /* Slogan */
-      .slogan {
-        position: absolute;
-        bottom: 25%;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10;
-        animation: sloganAppear 1.5s ease-out 3s forwards;
-        opacity: 0;
-      }
-
-      /* Resplandor suave para el logo */
-      .logo-glow {
-        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.9)) 
-                 drop-shadow(0 0 25px rgba(135, 206, 235, 0.5))
-                 drop-shadow(0 0 35px rgba(135, 206, 250, 0.3));
-      }
+      
     `;
     document.head.appendChild(style);
     return () => {
