@@ -21,6 +21,7 @@ const Card = ({
   const [rating, setRating] = useState(0);
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
+  const [availableUnits, setAvailableUnits] = useState(0);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -30,6 +31,11 @@ const Card = ({
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    // Generate random number between 1 and 20 for available units
+    setAvailableUnits(Math.floor(Math.random() * 20) + 1);
+  }, [id]); // Use id as dependency to ensure consistency per product
 
   useEffect(() => {
     const fetchRating = async () => {
@@ -340,7 +346,7 @@ const Card = ({
                 <div className="bg-black border border-gray-300 h-4 w-4 rounded-full"></div>
               </div>
               <p className="font-medium text-xs text-gray-500">
-                2u. disponibles
+                {availableUnits}u. disponibles
               </p>
             </div>
           </div>
