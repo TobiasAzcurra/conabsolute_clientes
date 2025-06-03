@@ -39,7 +39,7 @@ const MenuPage = ({ onAnimationEnd }) => {
   useEffect(() => {
     // Navegar después de la animación completa
     const timer = setTimeout(() => {
-      // navigate("/menu/mates");
+      navigate("/menu/mates");
       if (onAnimationEnd) {
         onAnimationEnd();
       }
