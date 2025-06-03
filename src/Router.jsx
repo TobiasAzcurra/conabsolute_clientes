@@ -18,6 +18,7 @@ import Reclamos from "./pages/Reclamos";
 import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 import { getOrderById } from "./firebase/getPedido";
+import logo from "./assets/Logo APM-07.png";
 
 const AppRouter = () => {
   const { pathname } = useLocation();
@@ -380,6 +381,12 @@ const AppRouter = () => {
             </div>
           </div>
           <Carrusel />
+          <img
+            src={logo}
+            className="h-20 top-[100px] left-1/2 -translate-x-1/2 absolute"
+            alt=""
+          />
+
           <div className="top-[215px] inset-0 absolute">
             <NavMenu
               selectedItem={selectedItem}
