@@ -38,7 +38,7 @@ export default {
         random: "463px",
       },
       colors: {
-        "red-main": "#396FB7",
+        "blue-apm": "#396FB7",
       },
       keyframes: {
         shimmer: {
