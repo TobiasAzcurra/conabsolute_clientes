@@ -378,7 +378,7 @@ const Card = ({
               </div>
               <p className="font-medium text-xs text-gray-500">
                 {showConsultStock
-                  ? "Consultar disponibilidad de stock"
+                  ? "*Consultar disponibilidad de stock"
                   : `${availableUnits}u. disponibles`}
               </p>
             </div>
