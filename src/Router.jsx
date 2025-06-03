@@ -378,7 +378,7 @@ const AppRouter = () => {
                 ¿Te perdiste? Esta no te la esperabas,
               </p>
               <p className="font-bold text-xs text-center">
-                elegí arriba alguna burger.
+                elegí arriba algun producto.
               </p>
             </div>
           }
