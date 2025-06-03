@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { listenToAltaDemanda } from "../../../firebase/readConstants";
+import LoadingPoints from "../../LoadingPoints";
 
 const Card = ({
   name,
@@ -256,8 +257,8 @@ const Card = ({
       <Link to={`/menu/${path}/${id}`} className="w-full">
         <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-200 animate-pulse">
-              <span className="text-gray-400 text-sm">Cargando...</span>
+            <div className="h-full w-full items-center justify-center flex">
+              <LoadingPoints />
             </div>
           )}
 
