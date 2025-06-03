@@ -198,7 +198,7 @@ const CartItems = () => {
 
       <div className="flex justify-center flex-col mt-6 items-start w-full">
         <p className="text-2xl font-bold mx-auto mb-2">
-          Agrega. No te vas arrepientas
+          Agrega. Inverti en tu felicidad
         </p>
 
         {isLoadingProducts ? (
