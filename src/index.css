@@ -64,10 +64,6 @@
   width: 0.5rem;
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #ff0000;
-}
-
 ::-webkit-scrollbar-thumb:hover {
   background-color: black;
 }
@@ -83,7 +79,6 @@ input[type="number"]::-moz-number-spin-box {
 }
 
 @layer components {
-
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
