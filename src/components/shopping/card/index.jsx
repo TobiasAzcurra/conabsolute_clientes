@@ -23,6 +23,7 @@ const Card = ({
   const [itemsOut, setItemsOut] = useState({});
   const [availableUnits, setAvailableUnits] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null); // Estado para el color seleccionado
+  const [showConsultStock, setShowConsultStock] = useState(false);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -36,6 +37,10 @@ const Card = ({
   useEffect(() => {
     // Generate random number between 1 and 20 for available units
     setAvailableUnits(Math.floor(Math.random() * 20) + 1);
+
+    // Decide randomly if this product should show "consultar disponibilidad de stock"
+    // 1 out of 3 times (33.33% chance)
+    setShowConsultStock(Math.random() < 1 / 3);
   }, [id]); // Use id as dependency to ensure consistency per product
 
   useEffect(() => {
@@ -372,7 +377,9 @@ const Card = ({
                 ))}
               </div>
               <p className="font-medium text-xs text-gray-500">
-                {availableUnits}u. disponibles
+                {showConsultStock
+                  ? "Consultar disponibilidad de stock"
+                  : `${availableUnits}u. disponibles`}
               </p>
             </div>
           </div>
