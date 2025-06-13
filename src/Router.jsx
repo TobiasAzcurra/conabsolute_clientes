@@ -19,6 +19,7 @@ import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 import { getOrderById } from "./firebase/getPedido";
 import logo from "./assets/Logo APM-07.png";
+import EmpresaRouter from "./EmpresaRouter";
 
 const AppRouter = () => {
   const { pathname } = useLocation();
@@ -75,9 +76,6 @@ const AppRouter = () => {
         };
 
         setProductos(productosEstructurados);
-
-        console.log("✅ Productos cargados exitosamente:");
-        console.log("📦 Productos estructurados:", productosEstructurados);
 
         // Mostrar estadísticas detalladas
         Object.entries(productosEstructurados).forEach(([categoria, items]) => {
@@ -472,6 +470,8 @@ const AppRouter = () => {
             </div>
           }
         />
+        {/* NUEVA RUTA EMPRESAS */}
+        <Route path="/:slug/*" element={<EmpresaRouter />} />
       </Routes>
 
       {/* Mostrar el carrito flotante si hay productos en el carrito y no está en rutas excluidas */}
