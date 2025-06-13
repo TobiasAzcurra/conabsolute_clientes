@@ -5,9 +5,9 @@ import {
   getDocs,
   doc,
   getDoc,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
-const CLIENT_ID = "e2dbff1c-e6ec-43c9-bbe4-06c0dc3eb347"; // ID del cliente "A puro mate"
+const CLIENT_ID = 'e2dbff1c-e6ec-43c9-bbe4-06c0dc3eb347'; // ID del cliente "A puro mate"
 
 // Función para obtener todos los productos del cliente
 export const getProductsByClient = async () => {
@@ -17,9 +17,9 @@ export const getProductsByClient = async () => {
     // Referencia a la colección de productos del cliente específico
     const productosRef = collection(
       firestore,
-      "absoluteClientes",
+      'absoluteClientes',
       CLIENT_ID,
-      "productos"
+      'productos'
     );
 
     // Obtener todos los documentos de la colección
@@ -35,32 +35,32 @@ export const getProductsByClient = async () => {
       productos.push(productData);
     });
 
-    console.log("📦 Productos obtenidos de Firebase:", productos);
+    console.log('📦 Productos obtenidos de Firebase:', productos);
     console.log(`📊 Total de productos: ${productos.length}`);
 
     // Agrupar productos por categoría para facilitar su uso
     const productosPorCategoria = {
       mates: productos.filter(
-        (p) => p.categoria === "mates" || p.categoria === "mate"
+        (p) => p.categoria === 'mates' || p.categoria === 'mate'
       ),
       termos: productos.filter(
-        (p) => p.categoria === "termos" || p.categoria === "termo"
+        (p) => p.categoria === 'termos' || p.categoria === 'termo'
       ),
       bombillas: productos.filter(
-        (p) => p.categoria === "bombillas" || p.categoria === "bombilla"
+        (p) => p.categoria === 'bombillas' || p.categoria === 'bombilla'
       ),
       yerbas: productos.filter(
-        (p) => p.categoria === "yerbas" || p.categoria === "yerba"
+        (p) => p.categoria === 'yerbas' || p.categoria === 'yerba'
       ),
       canastas: productos.filter(
-        (p) => p.categoria === "canastas" || p.categoria === "canasta"
+        (p) => p.categoria === 'canastas' || p.categoria === 'canasta'
       ),
       accesorios: productos.filter(
-        (p) => p.categoria === "accesorios" || p.categoria === "accesorio"
+        (p) => p.categoria === 'accesorios' || p.categoria === 'accesorio'
       ),
     };
 
-    console.log("🗂️ Productos por categoría:", productosPorCategoria);
+    console.log('🗂️ Productos por categoría:', productosPorCategoria);
 
     // Mostrar estadísticas por categoría
     Object.entries(productosPorCategoria).forEach(([categoria, items]) => {
@@ -68,7 +68,7 @@ export const getProductsByClient = async () => {
         console.log(`📋 ${categoria.toUpperCase()}: ${items.length} productos`);
         items.forEach((item) => {
           console.log(
-            `  - ${item.data?.name || "Sin nombre"} - $${item.data?.price || 0}`
+            `  - ${item.data?.name || 'Sin nombre'} - $${item.data?.price || 0}`
           );
         });
       }
@@ -79,9 +79,51 @@ export const getProductsByClient = async () => {
       porCategoria: productosPorCategoria,
     };
   } catch (error) {
-    console.error("❌ Error al obtener productos de Firebase:", error);
+    console.error('❌ Error al obtener productos de Firebase:', error);
     throw error;
   }
+};
+
+// Nueva funcion para obtener todsos los productos del cliente
+export const getProductsByClientV2 = async (slug) => {
+  const firestore = getFirestore();
+
+  const clientesSnap = await getDocs(collection(firestore, 'absoluteClientes'));
+  const clientes = [];
+  clientesSnap.forEach((d) => {
+    clientes.push({ id: d.id, ...d.data() });
+  });
+
+  const empresaDocRef = doc(firestore, 'absoluteClientes', slug);
+  const empresaDocSnap = await getDoc(empresaDocRef);
+
+  const productosRef = collection(
+    firestore,
+    'absoluteClientes',
+    slug,
+    'productos'
+  );
+  const querySnapshot = await getDocs(productosRef);
+
+  const productos = [];
+  querySnapshot.forEach((doc) => {
+    productos.push({ id: doc.id, ...doc.data() });
+  });
+
+  const productosPorCategoria = {};
+  productos.forEach((p) => {
+    const cat =
+      p.category?.toLowerCase() || p.categoryName?.toLowerCase() || 'otros';
+    if (!productosPorCategoria[cat]) {
+      productosPorCategoria[cat] = [];
+    }
+    productosPorCategoria[cat].push(p);
+  });
+
+  return {
+    todos: productos,
+    porCategoria: productosPorCategoria,
+  };
 };
 
 // Función para obtener un producto específico por ID
@@ -91,9 +133,9 @@ export const getProductById = async (productId) => {
   try {
     const productRef = doc(
       firestore,
-      "absoluteClientes",
+      'absoluteClientes',
       CLIENT_ID,
-      "productos",
+      'productos',
       productId
     );
     const productSnap = await getDoc(productRef);
@@ -103,14 +145,14 @@ export const getProductById = async (productId) => {
         id: productSnap.id,
         ...productSnap.data(),
       };
-      console.log("🔍 Producto específico obtenido:", productData);
+      console.log('🔍 Producto específico obtenido:', productData);
       return productData;
     } else {
-      console.log("❌ No se encontró el producto con ID:", productId);
+      console.log('❌ No se encontró el producto con ID:', productId);
       return null;
     }
   } catch (error) {
-    console.error("❌ Error al obtener producto específico:", error);
+    console.error('❌ Error al obtener producto específico:', error);
     throw error;
   }
 };
