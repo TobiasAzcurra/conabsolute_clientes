@@ -112,8 +112,7 @@ export const getProductsByClientV2 = async (slug) => {
 
   const productosPorCategoria = {};
   productos.forEach((p) => {
-    const cat =
-      p.category?.toLowerCase() || p.categoryName?.toLowerCase() || 'otros';
+    const cat = (p.categoryName || p.category)?.toLowerCase() || 'otros';
     if (!productosPorCategoria[cat]) {
       productosPorCategoria[cat] = [];
     }
