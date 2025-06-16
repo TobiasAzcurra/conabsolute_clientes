@@ -18,7 +18,7 @@ const SearchBar = ({
   };
 
   return (
-    <div className="fixed z-[60] top-4 right-4 left-4 w-auto h-10 rounded-full backdrop-blur-sm bg-gradient-to-b from-black/50 to-transparent border border-gray-100 bg-opacity-60 flex items-center shadow-black px-2">
+    <div className="fixed z-[60] top-4 right-4 left-4 w-auto h-10 rounded-full backdrop-blur-sm border border-gray-100 bg-opacity-60 flex items-center shadow-black">
       <input
         type="tel"
         value={phoneNumber}
@@ -27,11 +27,11 @@ const SearchBar = ({
         onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
         onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
         placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-        className="text-gray-100 font-light pl-2 placeholder:text-gray-100 font-coolvetica text-xs bg-transparent outline-none w-full"
+        className="text-gray-100 font-light px-4 placeholder:text-gray-100 font-coolvetica text-xs bg-transparent outline-none w-full"
       />
       <button
         onClick={handleSearch}
-        className="bg-gray-100 h-8 w-16 flex items-center justify-center rounded-full"
+        className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
