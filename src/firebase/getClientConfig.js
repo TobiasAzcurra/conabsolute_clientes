@@ -7,3 +7,9 @@ export const getClientIntro = async (slug) => {
   const snapshot = await getDoc(ref);
   return snapshot.exists() ? snapshot.data() : null;
 };
+
+export const getClientData = async (slug) => {
+  const ref = doc(db, 'absoluteClientes', slug);
+  const snapshot = await getDoc(ref);
+  return snapshot.exists() ? snapshot.data() : null;
+};
