@@ -11,6 +11,7 @@ import { getClientIntro } from './firebase/getClientConfig';
 import Section from './components/shopping/section';
 import DetailCard from './components/shopping/detail';
 import ClientLayout from './layouts/ClientLayout';
+import CartItems from './components/shopping/cart';
 
 const EmpresaRouter = () => {
   const { slug } = useParams();
@@ -80,6 +81,7 @@ const EmpresaRouter = () => {
         ))}
 
         {/* <Route path="pedido" element={<PedidoScreen />} /> */}
+        <Route path='carrito' element={<CartItems />} />
 
         <Route
           path="*"
