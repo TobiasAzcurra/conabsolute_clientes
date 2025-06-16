@@ -1,36 +1,37 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import MyTextInput from "./MyTextInput";
-import validations from "./validations";
-import handleSubmit from "./handleSubmit";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
-import { useEffect, useState, useMemo, useRef } from "react";
-import { MapDirection } from "./MapDirection";
-import AppleErrorMessage from "./AppleErrorMessage";
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import MyTextInput from './MyTextInput';
+import validations from './validations';
+import handleSubmit from './handleSubmit';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addLastCart, setEnvioExpress } from '../../redux/cart/cartSlice';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { MapDirection } from './MapDirection';
+import AppleErrorMessage from './AppleErrorMessage';
 import {
   validarVoucher,
   canjearVouchers,
-} from "../../firebase/validateVoucher";
-import Payment from "../mercadopago/Payment";
-import currencyFormat from "../../helpers/currencyFormat";
-import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
-import isologo from "../../assets/isologo.png";
+} from '../../firebase/validateVoucher';
+import Payment from '../mercadopago/Payment';
+import currencyFormat from '../../helpers/currencyFormat';
+import { calculateDiscountedTotal } from '../../helpers/currencyFormat';
+import isologo from '../../assets/isologo.png';
 import {
   isWithinClosedDays,
   isWithinOrderTimeRange,
-} from "../../helpers/validate-hours";
-import LoadingPoints from "../LoadingPoints";
-import Toggle from "../Toggle";
-import AppleModal from "../AppleModal";
-import { listenToAltaDemanda } from "../../firebase/readConstants";
-import Tooltip from "../Tooltip";
+} from '../../helpers/validate-hours';
+import LoadingPoints from '../LoadingPoints';
+import Toggle from '../Toggle';
+import AppleModal from '../AppleModal';
+import { listenToAltaDemanda } from '../../firebase/readConstants';
+import Tooltip from '../Tooltip';
+import useClientData from '../../hooks/useClientData';
 
 const envio = parseInt(import.meta.env.VITE_ENVIO) || 2000;
 const expressDeliveryFee = 2000;
 
 // NUEVAS CONSTANTES Y FUNCIONES PARA CÓDIGOS ESPECIALES
-const SPECIAL_CODES = ["AUTODROMOXANHELO", "ANHELOUSD"];
+const SPECIAL_CODES = ['AUTODROMOXANHELO', 'ANHELOUSD'];
 
 // Función helper para verificar si un código es especial
 const isSpecialCode = (code) => {
@@ -42,19 +43,19 @@ const getSpecialCodeInfo = (code) => {
   const upperCode = code.toUpperCase();
 
   switch (upperCode) {
-    case "AUTODROMOXANHELO":
+    case 'AUTODROMOXANHELO':
       return {
         discount: 0.5, // 50%
         message:
-          "Este código aplica un 50% de descuento y no puede canjearse junto a más códigos",
-        validMessage: "¡Código válido! (50% descuento)",
+          'Este código aplica un 50% de descuento y no puede canjearse junto a más códigos',
+        validMessage: '¡Código válido! (50% descuento)',
       };
-    case "ANHELOUSD":
+    case 'ANHELOUSD':
       return {
         discount: 0.5, // 30% por ejemplo
         message:
-          "Este código aplica un 50% de descuento y no puede canjearse junto a más códigos",
-        validMessage: "¡Código válido! (50% descuento)",
+          'Este código aplica un 50% de descuento y no puede canjearse junto a más códigos',
+        validMessage: '¡Código válido! (50% descuento)',
       };
     default:
       return null;
@@ -65,8 +66,11 @@ const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const { slug } = useParams();
+  const { clientData } = useClientData(slug);
+
   const formValidations = validations(total + envio);
-  const [mapUrl, setUrl] = useState("");
+  const [mapUrl, setUrl] = useState('');
   const [validarUbi, setValidarUbi] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
@@ -76,7 +80,7 @@ const FormCustom = ({ cart, total }) => {
   const [pendingValues, setPendingValues] = useState(null);
 
   const [discountedTotal, setDiscountedTotal] = useState(total);
-  const [couponCodes, setCouponCodes] = useState([""]);
+  const [couponCodes, setCouponCodes] = useState(['']);
   const [showOutOfStockModal, setShowOutOfStockModal] = useState(false);
 
   const [descuento, setDescuento] = useState(0);
@@ -86,7 +90,7 @@ const FormCustom = ({ cart, total }) => {
   // Añadir este estado junto a los otros estados al inicio del componente FormCustom
   const [hasSpecialCode, setHasSpecialCode] = useState(false);
 
-  const [voucherStatus, setVoucherStatus] = useState([""]);
+  const [voucherStatus, setVoucherStatus] = useState(['']);
   const [showCouponInput, setShowCouponInput] = useState(true);
   const [showReservaInput, setShowReservaInput] = useState(false);
 
@@ -113,7 +117,7 @@ const FormCustom = ({ cart, total }) => {
           setAltaDemanda(altaDemandaData);
         });
       } catch (error) {
-        console.error("❌ Error al conectar con Alta Demanda:", error);
+        console.error('❌ Error al conectar con Alta Demanda:', error);
       }
     };
 
@@ -132,20 +136,20 @@ const FormCustom = ({ cart, total }) => {
     dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
   };
 
-  const processPedido = async (values, isReserva, message = "") => {
+  const processPedido = async (values, isReserva, message = '') => {
     try {
       const validCoupons = couponCodes.filter(
         (code, index) =>
-          code.trim() !== "" &&
-          (voucherStatus[index] === "¡Código válido!" ||
-            voucherStatus[index] === "¡Código válido! (Hamburguesa gratis)" ||
-            voucherStatus[index] === "¡Código válido! (50% descuento)")
+          code.trim() !== '' &&
+          (voucherStatus[index] === '¡Código válido!' ||
+            voucherStatus[index] === '¡Código válido! (Hamburguesa gratis)' ||
+            voucherStatus[index] === '¡Código válido! (50% descuento)')
       );
 
       if (validCoupons.length > 0) {
         const canjeSuccess = await canjearVouchers(validCoupons);
         if (!canjeSuccess) {
-          console.error("Error al canjear los cupones");
+          console.error('Error al canjear los cupones');
           // return;
         }
       }
@@ -164,11 +168,11 @@ const FormCustom = ({ cart, total }) => {
         const adjustedHours = currentTime
           .getHours()
           .toString()
-          .padStart(2, "0");
+          .padStart(2, '0');
         const adjustedMinutes = currentTime
           .getMinutes()
           .toString()
-          .padStart(2, "0");
+          .padStart(2, '0');
         adjustedHora = `${adjustedHours}:${adjustedMinutes}`;
       }
 
@@ -211,11 +215,11 @@ const FormCustom = ({ cart, total }) => {
           });
 
           totalDiscount = Math.round(nonPromoTotal * specialCodeInfo.discount);
-          console.log("💰 Descuento especial calculado:", totalDiscount);
+          console.log('💰 Descuento especial calculado:', totalDiscount);
         }
       }
 
-      console.log("📊 Enviando pedido con descuento:", totalDiscount);
+      console.log('📊 Enviando pedido con descuento:', totalDiscount);
 
       const orderId = await handleSubmit(
         updatedValues,
@@ -234,21 +238,21 @@ const FormCustom = ({ cart, total }) => {
         navigate(`/success/${orderId}`);
         dispatch(addLastCart());
       } else {
-        console.error("Error al procesar la orden");
+        console.error('Error al procesar la orden');
       }
     } catch (error) {
-      console.error("Error al procesar el pedido:", error);
+      console.error('Error al procesar el pedido:', error);
     }
   };
 
   const getTotalBurgers = (cartToCheck = cart) => {
     if (!Array.isArray(cartToCheck)) {
-      console.error("Invalid cart passed to getTotalBurgers", cartToCheck);
+      console.error('Invalid cart passed to getTotalBurgers', cartToCheck);
       return 0;
     }
     const { nonPromoProducts } = getPromoAndNonPromoProducts(cartToCheck);
     return nonPromoProducts.reduce((sum, item) => {
-      if (item.category === "burger" || item.category === "burgers") {
+      if (item.category === 'burger' || item.category === 'burgers') {
         return sum + item.quantity; // Asegúrate de multiplicar por la cantidad
       }
       return sum;
@@ -260,7 +264,7 @@ const FormCustom = ({ cart, total }) => {
     const { nonPromoProducts } = getPromoAndNonPromoProducts(cartToCheck);
     const burgerPrices = [];
     nonPromoProducts.forEach((item) => {
-      if (item.category === "burger" || item.category === "burgers") {
+      if (item.category === 'burger' || item.category === 'burgers') {
         for (let i = 0; i < item.quantity; i++) {
           burgerPrices.push(item.price);
         }
@@ -270,25 +274,25 @@ const FormCustom = ({ cart, total }) => {
   };
 
   const getPromoAndNonPromoProducts = (cart) => {
-    const promoProducts = cart.filter((item) => item.type === "promo");
-    const nonPromoProducts = cart.filter((item) => item.type !== "promo");
+    const promoProducts = cart.filter((item) => item.type === 'promo');
+    const nonPromoProducts = cart.filter((item) => item.type !== 'promo');
     return { promoProducts, nonPromoProducts };
   };
 
   const addCouponField = () => {
     const totalNonPromoBurgers = getTotalBurgers();
     const freeVouchers = couponCodes.filter(
-      (code, i) => voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)"
+      (code, i) => voucherStatus[i] === '¡Código válido! (Hamburguesa gratis)'
     ).length;
     const normalVouchers = couponCodes.filter(
-      (code, i) => voucherStatus[i] === "¡Código válido!"
+      (code, i) => voucherStatus[i] === '¡Código válido!'
     ).length;
     const remainingCapacity =
       totalNonPromoBurgers - freeVouchers - normalVouchers * 2;
 
     if (remainingCapacity > 0) {
-      setCouponCodes((prev) => [...prev, ""]);
-      setVoucherStatus((prev) => [...prev, ""]);
+      setCouponCodes((prev) => [...prev, '']);
+      setVoucherStatus((prev) => [...prev, '']);
       setIsValidating((prev) => [...prev, false]);
     }
   };
@@ -299,7 +303,7 @@ const FormCustom = ({ cart, total }) => {
 
     // Si hasSpecialCode es true pero ningún código especial está presente, resetearlo
     if (hasSpecialCode && !hasAnySpecialCode) {
-      console.log("🔄 CÓDIGO ESPECIAL YA NO ESTÁ PRESENTE, RESETEANDO ESTADO");
+      console.log('🔄 CÓDIGO ESPECIAL YA NO ESTÁ PRESENTE, RESETEANDO ESTADO');
       setHasSpecialCode(false);
     }
   }, [couponCodes, hasSpecialCode]);
@@ -317,12 +321,12 @@ const FormCustom = ({ cart, total }) => {
       );
 
       // Crear un nuevo array con un solo elemento que es el código especial
-      const newCoupons = [""];
+      const newCoupons = [''];
       newCoupons[0] = value;
 
       // Limpiar todos los estados relacionados con otros códigos
       setCouponCodes(newCoupons);
-      setVoucherStatus([""]); // Lo actualizaremos más adelante
+      setVoucherStatus(['']); // Lo actualizaremos más adelante
       setIsValidating([false]);
       setDescuento(0);
       setFreeBurgerDiscount(0);
@@ -331,7 +335,7 @@ const FormCustom = ({ cart, total }) => {
       const { promoProducts } = getPromoAndNonPromoProducts(cart);
 
       // Crear un nuevo estado para el voucher
-      const newVoucherStatus = [""];
+      const newVoucherStatus = [''];
 
       if (promoProducts.length > 0) {
         newVoucherStatus[0] = `El código '${value.toUpperCase()}' no puede aplicarse a productos en promoción.`;
@@ -371,10 +375,10 @@ const FormCustom = ({ cart, total }) => {
 
     // Verificar si el usuario está borrando un código especial
     if (isSpecialCode(oldValue) && !isSpecialCode(value)) {
-      console.log("🔄 ELIMINANDO CÓDIGO ESPECIAL");
+      console.log('🔄 ELIMINANDO CÓDIGO ESPECIAL');
       setHasSpecialCode(false);
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "";
+      updatedVoucherStatus[index] = '';
       setVoucherStatus(updatedVoucherStatus);
       return;
     }
@@ -382,13 +386,13 @@ const FormCustom = ({ cart, total }) => {
     // Resto de la lógica existente para códigos normales...
     const updatedVoucherStatus = [...voucherStatus];
     const updatedValidating = [...isValidating];
-    if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push("");
+    if (updatedVoucherStatus.length <= index) updatedVoucherStatus.push('');
     if (updatedValidating.length <= index) updatedValidating.push(false);
 
     if (value.length < 5) {
-      updatedVoucherStatus[index] = "Deben ser al menos 5 dígitos.";
+      updatedVoucherStatus[index] = 'Deben ser al menos 5 dígitos.';
     } else if (value.length === 5) {
-      updatedVoucherStatus[index] = "";
+      updatedVoucherStatus[index] = '';
 
       updatedValidating[index] = true;
       setIsValidating(updatedValidating);
@@ -396,7 +400,7 @@ const FormCustom = ({ cart, total }) => {
       handleVoucherValidation(index, value, updatedCoupons, setFieldValue);
     } else {
       updatedVoucherStatus[index] =
-        "El código debe tener exactamente 5 caracteres.";
+        'El código debe tener exactamente 5 caracteres.';
     }
 
     setVoucherStatus(updatedVoucherStatus);
@@ -408,7 +412,7 @@ const FormCustom = ({ cart, total }) => {
     updatedCoupons,
     setFieldValue
   ) => {
-    console.log("🚀 INICIO DE VALIDACIÓN DE VOUCHER", {
+    console.log('🚀 INICIO DE VALIDACIÓN DE VOUCHER', {
       index,
       value,
       updatedCoupons,
@@ -425,19 +429,19 @@ const FormCustom = ({ cart, total }) => {
           precio: item.price,
           cantidad: item.quantity,
           esSimpleOSatisfyer:
-            item.name.toLowerCase().includes("simple") ||
-            item.name.toLowerCase().includes("satisfyer"),
+            item.name.toLowerCase().includes('simple') ||
+            item.name.toLowerCase().includes('satisfyer'),
         });
       });
     }
 
-    console.log("Estado isValidating ANTES:", isValidating);
+    console.log('Estado isValidating ANTES:', isValidating);
 
     // Establecer el estado de validación a true
     setIsValidating((prev) => {
       const updated = [...prev];
       updated[index] = true;
-      console.log("Nuevo estado isValidating que se va a establecer:", updated);
+      console.log('Nuevo estado isValidating que se va a establecer:', updated);
       return updated;
     });
 
@@ -445,7 +449,7 @@ const FormCustom = ({ cart, total }) => {
       const totalBurgers = getTotalBurgers(cart);
       const burgerPrices = getBurgerPrices(cart);
 
-      console.log("🍔 CONTEO DE HAMBURGUESAS:", {
+      console.log('🍔 CONTEO DE HAMBURGUESAS:', {
         totalBurgers,
         burgerPrices,
       });
@@ -453,7 +457,7 @@ const FormCustom = ({ cart, total }) => {
       const { promoProducts, nonPromoProducts } =
         getPromoAndNonPromoProducts(cart);
 
-      console.log("📊 ANÁLISIS DEL CARRITO", {
+      console.log('📊 ANÁLISIS DEL CARRITO', {
         totalBurgers,
         burgerPrices,
         promoProducts,
@@ -461,19 +465,19 @@ const FormCustom = ({ cart, total }) => {
         totalEnCarrito: cart.length,
       });
 
-      console.log("📊 ANÁLISIS DETALLADO DEL CARRITO", {
+      console.log('📊 ANÁLISIS DETALLADO DEL CARRITO', {
         elementosEnCarrito: cart.length,
         cantidadTotalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
         cantidadBurgersRegulares: nonPromoProducts.reduce(
           (sum, item) =>
-            item.category === "burger" || item.category === "burgers"
+            item.category === 'burger' || item.category === 'burgers'
               ? sum + item.quantity
               : sum,
           0
         ),
         cantidadBurgersPromo: promoProducts.reduce(
           (sum, item) =>
-            item.category === "burger" || item.category === "burgers"
+            item.category === 'burger' || item.category === 'burgers'
               ? sum + item.quantity
               : sum,
           0
@@ -482,41 +486,41 @@ const FormCustom = ({ cart, total }) => {
 
       if (updatedCoupons.indexOf(value) !== index) {
         const updatedVoucherStatus = [...voucherStatus];
-        updatedVoucherStatus[index] = "Este código ya fue ingresado.";
+        updatedVoucherStatus[index] = 'Este código ya fue ingresado.';
         setVoucherStatus(updatedVoucherStatus);
-        console.log("Código duplicado detectado", { updatedVoucherStatus });
+        console.log('Código duplicado detectado', { updatedVoucherStatus });
         return;
       }
 
       if (promoProducts.length > 0 && nonPromoProducts.length === 0) {
         const updatedVoucherStatus = [...voucherStatus];
         updatedVoucherStatus[index] =
-          "No se pueden aplicar vouchers a productos en promoción.";
+          'No se pueden aplicar vouchers a productos en promoción.';
         setVoucherStatus(updatedVoucherStatus);
-        console.log("Solo productos promocionales", { updatedVoucherStatus });
+        console.log('Solo productos promocionales', { updatedVoucherStatus });
         return;
       }
 
-      console.log("⏳ LLAMANDO A validarVoucher CON CÓDIGO:", value);
+      console.log('⏳ LLAMANDO A validarVoucher CON CÓDIGO:', value);
       const validationResult = await validarVoucher(value);
-      console.log("✅ RESULTADO DE VALIDACIÓN", validationResult);
+      console.log('✅ RESULTADO DE VALIDACIÓN', validationResult);
 
       const { isValid, message, gratis } = validationResult;
 
       // Contar los vouchers gratis actuales
       const freeVouchers = updatedCoupons.filter((code, i) => {
         return (
-          code.trim() !== "" &&
-          voucherStatus[i] === "¡Código válido! (Hamburguesa gratis)"
+          code.trim() !== '' &&
+          voucherStatus[i] === '¡Código válido! (Hamburguesa gratis)'
         );
       }).length;
 
       // Contar los vouchers 2x1 actuales
       const normalVouchers = updatedCoupons.filter((code, i) => {
-        return code.trim() !== "" && voucherStatus[i] === "¡Código válido!";
+        return code.trim() !== '' && voucherStatus[i] === '¡Código válido!';
       }).length;
 
-      console.log("📝 CONTEO DE VOUCHERS ACTUALES", {
+      console.log('📝 CONTEO DE VOUCHERS ACTUALES', {
         freeVouchers,
         normalVouchers,
         voucherStatus,
@@ -528,51 +532,51 @@ const FormCustom = ({ cart, total }) => {
       if (!isValid) {
         updatedVoucherStatus[index] = message;
         setVoucherStatus(updatedVoucherStatus);
-        console.log("❌ VOUCHER NO VÁLIDO:", { message, updatedVoucherStatus });
+        console.log('❌ VOUCHER NO VÁLIDO:', { message, updatedVoucherStatus });
         return;
       }
 
       // Si es voucher gratis
       if (gratis) {
-        console.log("🎟️ PROCESANDO VOUCHER GRATIS");
+        console.log('🎟️ PROCESANDO VOUCHER GRATIS');
 
         // NUEVA VALIDACIÓN: Verificar si hay hamburguesas  "satisfyer" elegibles
         const eligibleBurgers = nonPromoProducts.filter((item) => {
           const lowerName = item.name.toLowerCase();
-          const isSatisfyer = lowerName.includes("satisfyer");
+          const isSatisfyer = lowerName.includes('satisfyer');
 
           console.log(`🔍 Verificando elegibilidad de "${item.name}":`, {
             categoria: item.category,
             nombreEnMinúsculas: lowerName,
             contieneSatisfyer: isSatisfyer,
             esElegible:
-              (item.category === "burger" || item.category === "burgers") &&
+              (item.category === 'burger' || item.category === 'burgers') &&
               isSatisfyer,
           });
 
           return (
-            (item.category === "burger" || item.category === "burgers") &&
+            (item.category === 'burger' || item.category === 'burgers') &&
             isSatisfyer
           );
         });
 
-        console.log("🍔 HAMBURGUESAS ELEGIBLES ENCONTRADAS:", eligibleBurgers);
+        console.log('🍔 HAMBURGUESAS ELEGIBLES ENCONTRADAS:', eligibleBurgers);
 
         const totalElegibleBurgers = eligibleBurgers.reduce(
           (sum, item) => sum + item.quantity,
           0
         );
 
-        console.log("🔢 RESUMEN DE HAMBURGUESAS ELEGIBLES:", {
+        console.log('🔢 RESUMEN DE HAMBURGUESAS ELEGIBLES:', {
           hamburgesasElegibles: eligibleBurgers,
           cantidadTotal: totalElegibleBurgers,
         });
 
         if (totalElegibleBurgers === 0) {
           updatedVoucherStatus[index] =
-            "Para canjear un voucher gratis solo podes hacerlo con hamburguesas Satisfyer";
+            'Para canjear un voucher gratis solo podes hacerlo con hamburguesas Satisfyer';
           setVoucherStatus(updatedVoucherStatus);
-          console.log("⚠️ NO HAY HAMBURGUESAS ELEGIBLES PARA VOUCHER GRATIS", {
+          console.log('⚠️ NO HAY HAMBURGUESAS ELEGIBLES PARA VOUCHER GRATIS', {
             updatedVoucherStatus,
           });
           return;
@@ -581,23 +585,23 @@ const FormCustom = ({ cart, total }) => {
         const totalFreeVouchers =
           freeVouchers +
           (updatedVoucherStatus[index] ===
-          "¡Código válido! (Hamburguesa gratis)"
+          '¡Código válido! (Hamburguesa gratis)'
             ? 0
             : 1);
 
-        console.log("🧮 CÁLCULO DE VOUCHERS GRATIS TOTALES:", {
+        console.log('🧮 CÁLCULO DE VOUCHERS GRATIS TOTALES:', {
           vouchersGratisActuales: freeVouchers,
           nuevoVoucherGratis:
             updatedVoucherStatus[index] !==
-            "¡Código válido! (Hamburguesa gratis)",
+            '¡Código válido! (Hamburguesa gratis)',
           totalVouchersGratis: totalFreeVouchers,
         });
 
         if (totalFreeVouchers > totalElegibleBurgers) {
           updatedVoucherStatus[index] =
-            "No hay suficientes hamburguesas simples para aplicar todos los vouchers gratis.";
+            'No hay suficientes hamburguesas simples para aplicar todos los vouchers gratis.';
           setVoucherStatus(updatedVoucherStatus);
-          console.log("⚠️ INSUFICIENTES HAMBURGUESAS SIMPLES PARA VOUCHERS", {
+          console.log('⚠️ INSUFICIENTES HAMBURGUESAS SIMPLES PARA VOUCHERS', {
             vouchersGratis: totalFreeVouchers,
             hamburguesasElegibles: totalElegibleBurgers,
             updatedVoucherStatus,
@@ -605,13 +609,13 @@ const FormCustom = ({ cart, total }) => {
           return;
         }
 
-        updatedVoucherStatus[index] = "¡Código válido! (Hamburguesa gratis)";
+        updatedVoucherStatus[index] = '¡Código válido! (Hamburguesa gratis)';
         setVoucherStatus(updatedVoucherStatus);
-        console.log("✅ VOUCHER GRATIS VALIDADO CORRECTAMENTE", {
+        console.log('✅ VOUCHER GRATIS VALIDADO CORRECTAMENTE', {
           updatedVoucherStatus,
         });
 
-        console.log("💰 RECALCULANDO DESCUENTOS CON NUEVA CONFIGURACIÓN:", {
+        console.log('💰 RECALCULANDO DESCUENTOS CON NUEVA CONFIGURACIÓN:', {
           normalVouchers,
           totalFreeVouchers,
         });
@@ -622,17 +626,17 @@ const FormCustom = ({ cart, total }) => {
           totalFreeVouchers
         );
 
-        console.log("📊 RESULTADO DEL CÁLCULO DE DESCUENTOS:", discountResult);
+        console.log('📊 RESULTADO DEL CÁLCULO DE DESCUENTOS:', discountResult);
 
         setFreeBurgerDiscount(discountResult.freeBurgerDiscount);
-        console.log("💰 DESCUENTO POR HAMBURGUESAS GRATIS ACTUALIZADO", {
+        console.log('💰 DESCUENTO POR HAMBURGUESAS GRATIS ACTUALIZADO', {
           nuevoDescuento: discountResult.freeBurgerDiscount,
         });
 
         setDescuento(discountResult.totalDescuento);
         setDiscountedTotal(discountResult.newTotal);
 
-        console.log("🏁 DESCUENTOS FINALES RECALCULADOS", {
+        console.log('🏁 DESCUENTOS FINALES RECALCULADOS', {
           nuevoTotal: discountResult.newTotal,
           descuento2x1: discountResult.totalDescuento,
           descuentoGratis: discountResult.freeBurgerDiscount,
@@ -641,16 +645,16 @@ const FormCustom = ({ cart, total }) => {
       }
       // Si es voucher 2x1
       else {
-        console.log("2️⃣✖️1️⃣ PROCESANDO VOUCHER 2x1");
+        console.log('2️⃣✖️1️⃣ PROCESANDO VOUCHER 2x1');
 
         const numCoupons =
           normalVouchers +
-          (updatedVoucherStatus[index] === "¡Código válido!" ? 0 : 1);
+          (updatedVoucherStatus[index] === '¡Código válido!' ? 0 : 1);
 
-        console.log("🧮 CONTEO TOTAL DE VOUCHERS 2x1:", {
+        console.log('🧮 CONTEO TOTAL DE VOUCHERS 2x1:', {
           numCoupons,
           normalVouchersActuales: normalVouchers,
-          nuevoVoucher2x1: updatedVoucherStatus[index] !== "¡Código válido!",
+          nuevoVoucher2x1: updatedVoucherStatus[index] !== '¡Código válido!',
           burgersPorParejas: numCoupons * 2,
         });
 
@@ -659,19 +663,19 @@ const FormCustom = ({ cart, total }) => {
         const eligibleForFree = nonPromoProducts
           .filter(
             (item) =>
-              (item.category === "burger" || item.category === "burgers") &&
-              (item.name.toLowerCase().includes("simple") ||
-                item.name.toLowerCase().includes("satisfyer"))
+              (item.category === 'burger' || item.category === 'burgers') &&
+              (item.name.toLowerCase().includes('simple') ||
+                item.name.toLowerCase().includes('satisfyer'))
           )
           .reduce((sum, item) => sum + item.quantity, 0);
 
-        console.log("🍔 HAMBURGUESAS ELEGIBLES PARA GRATIS:", {
+        console.log('🍔 HAMBURGUESAS ELEGIBLES PARA GRATIS:', {
           cantidad: eligibleForFree,
           detalles: nonPromoProducts.filter(
             (item) =>
-              (item.category === "burger" || item.category === "burgers") &&
-              (item.name.toLowerCase().includes("simple") ||
-                item.name.toLowerCase().includes("satisfyer"))
+              (item.category === 'burger' || item.category === 'burgers') &&
+              (item.name.toLowerCase().includes('simple') ||
+                item.name.toLowerCase().includes('satisfyer'))
           ),
         });
 
@@ -682,7 +686,7 @@ const FormCustom = ({ cart, total }) => {
         const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
         const availableBurgers = totalNonPromoBurgers - freeVouchersToApply;
 
-        console.log("🍔 HAMBURGUESAS DISPONIBLES PARA 2x1", {
+        console.log('🍔 HAMBURGUESAS DISPONIBLES PARA 2x1', {
           totalBurgersNoPromo: totalNonPromoBurgers,
           elegiblesParaGratis: eligibleForFree,
           usadasPorVouchersGratis: freeVouchersToApply,
@@ -695,7 +699,7 @@ const FormCustom = ({ cart, total }) => {
             numCoupons * 2
           } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchersToApply} con vouchers gratis.`;
           setVoucherStatus(updatedVoucherStatus);
-          console.log("⚠️ NO HAY SUFICIENTES HAMBURGUESAS PARA 2x1", {
+          console.log('⚠️ NO HAY SUFICIENTES HAMBURGUESAS PARA 2x1', {
             updatedVoucherStatus,
           });
           return;
@@ -703,7 +707,7 @@ const FormCustom = ({ cart, total }) => {
 
         if (promoProducts.length > 0 && nonPromoProducts.length > 0) {
           const hasEnoughNonPromoBurgers = availableBurgers >= numCoupons * 2;
-          console.log("🔍 VERIFICANDO HAMBURGUESAS NO PROMOCIONALES PARA 2x1", {
+          console.log('🔍 VERIFICANDO HAMBURGUESAS NO PROMOCIONALES PARA 2x1', {
             hasEnoughNonPromoBurgers,
             required: numCoupons * 2,
             totalNonPromoBurgers,
@@ -716,7 +720,7 @@ const FormCustom = ({ cart, total }) => {
             } hamburguesas no promocionales disponibles para canjear los vouchers 2x1. Ya usaste ${freeVouchersToApply} con vouchers gratis.`;
             setVoucherStatus(updatedVoucherStatus);
             console.log(
-              "⚠️ NO HAY SUFICIENTES HAMBURGUESAS NO PROMOCIONALES PARA 2x1",
+              '⚠️ NO HAY SUFICIENTES HAMBURGUESAS NO PROMOCIONALES PARA 2x1',
               { updatedVoucherStatus }
             );
             return;
@@ -728,17 +732,17 @@ const FormCustom = ({ cart, total }) => {
             numCoupons * 2
           } hamburguesas para canjear los vouchers 2x1.`;
           setVoucherStatus(updatedVoucherStatus);
-          console.log("⚠️ NO HAY SUFICIENTES HAMBURGUESAS TOTALES PARA 2x1", {
+          console.log('⚠️ NO HAY SUFICIENTES HAMBURGUESAS TOTALES PARA 2x1', {
             updatedVoucherStatus,
           });
           return;
         }
 
-        updatedVoucherStatus[index] = "¡Código válido!";
+        updatedVoucherStatus[index] = '¡Código válido!';
         setVoucherStatus(updatedVoucherStatus);
-        console.log("✅ VOUCHER 2x1 VÁLIDO", { updatedVoucherStatus });
+        console.log('✅ VOUCHER 2x1 VÁLIDO', { updatedVoucherStatus });
 
-        console.log("💰 RECALCULANDO DESCUENTOS CON VOUCHERS 2x1:", {
+        console.log('💰 RECALCULANDO DESCUENTOS CON VOUCHERS 2x1:', {
           numCoupons,
           freeVouchers,
         });
@@ -750,13 +754,13 @@ const FormCustom = ({ cart, total }) => {
         );
 
         console.log(
-          "📊 RESULTADO DEL CÁLCULO DE DESCUENTOS 2x1:",
+          '📊 RESULTADO DEL CÁLCULO DE DESCUENTOS 2x1:',
           discountResult
         );
 
         if (descuentoForOneUnit === 0) {
           setDescuentoForOneUnit(discountResult.totalDescuento / numCoupons);
-          console.log("💰 DESCUENTO POR UNIDAD ESTABLECIDO:", {
+          console.log('💰 DESCUENTO POR UNIDAD ESTABLECIDO:', {
             descuentoPorUnidad: discountResult.totalDescuento / numCoupons,
           });
         }
@@ -765,7 +769,7 @@ const FormCustom = ({ cart, total }) => {
         setFreeBurgerDiscount(discountResult.freeBurgerDiscount);
         setDiscountedTotal(discountResult.newTotal);
 
-        console.log("🏁 DESCUENTOS 2x1 RECALCULADOS", {
+        console.log('🏁 DESCUENTOS 2x1 RECALCULADOS', {
           nuevoTotal: discountResult.newTotal,
           descuento2x1: discountResult.totalDescuento,
           descuentoGratis: discountResult.freeBurgerDiscount,
@@ -775,31 +779,31 @@ const FormCustom = ({ cart, total }) => {
       // Agregar un nuevo campo si es el último voucher válido y hay capacidad
       const totalNonPromoBurgers = getTotalBurgers(nonPromoProducts);
       if (
-        (updatedVoucherStatus[index] === "¡Código válido!" ||
+        (updatedVoucherStatus[index] === '¡Código válido!' ||
           updatedVoucherStatus[index] ===
-            "¡Código válido! (Hamburguesa gratis)") &&
+            '¡Código válido! (Hamburguesa gratis)') &&
         index === updatedCoupons.length - 1 &&
         updatedCoupons.length < totalNonPromoBurgers
       ) {
-        console.log("➕ AGREGANDO NUEVO CAMPO DE CUPÓN");
+        console.log('➕ AGREGANDO NUEVO CAMPO DE CUPÓN');
         addCouponField();
       }
 
-      console.log("🧮 ESTADO FINAL DE DESCUENTOS", {
+      console.log('🧮 ESTADO FINAL DE DESCUENTOS', {
         descuento,
         freeBurgerDiscount,
         totalOriginal: total,
         totalConDescuento: discountedTotal,
       });
 
-      console.log("📋 ESTADO FINAL DE VOUCHER STATUS", {
+      console.log('📋 ESTADO FINAL DE VOUCHER STATUS', {
         updatedVoucherStatus,
       });
       setVoucherStatus(updatedVoucherStatus);
     } catch (error) {
-      console.error("❌ ERROR EN VALIDACIÓN DE VOUCHER:", error);
+      console.error('❌ ERROR EN VALIDACIÓN DE VOUCHER:', error);
       const updatedVoucherStatus = [...voucherStatus];
-      updatedVoucherStatus[index] = "Error al validar el cupón.";
+      updatedVoucherStatus[index] = 'Error al validar el cupón.';
       setVoucherStatus(updatedVoucherStatus);
     } finally {
       setIsValidating((prev) => {
@@ -807,13 +811,13 @@ const FormCustom = ({ cart, total }) => {
         updated[index] = false;
         return updated;
       });
-      console.log("🏁 FIN DE VALIDACIÓN DE VOUCHER");
+      console.log('🏁 FIN DE VALIDACIÓN DE VOUCHER');
     }
   };
 
   // Añade este effect al componente para monitorear los cambios de estado
   useEffect(() => {
-    console.log("Estado de descuentos sincronizado:", {
+    console.log('Estado de descuentos sincronizado:', {
       descuento,
       freeBurgerDiscount,
       total,
@@ -827,8 +831,8 @@ const FormCustom = ({ cart, total }) => {
 
     voucherStatus.forEach((v, index) => {
       if (
-        v !== "¡Código válido!" &&
-        v !== "¡Código válido! (Hamburguesa gratis)"
+        v !== '¡Código válido!' &&
+        v !== '¡Código válido! (Hamburguesa gratis)'
       ) {
         hasInvalidVoucher = true;
       } else {
@@ -855,20 +859,20 @@ const FormCustom = ({ cart, total }) => {
     setDiscountedTotal(total);
   }, [total]);
 
-  const [selectedHora, setSelectedHora] = useState("");
+  const [selectedHora, setSelectedHora] = useState('');
 
   const handleChange = (event) => {
     setSelectedHora(event.target.value);
   };
 
   const adjustHora = (hora) => {
-    const [hours, minutes] = hora.split(":").map(Number);
+    const [hours, minutes] = hora.split(':').map(Number);
     const date = new Date();
     date.setHours(hours, minutes, 0, 0);
     date.setMinutes(date.getMinutes() - 30);
 
-    const adjustedHours = date.getHours().toString().padStart(2, "0");
-    const adjustedMinutes = date.getMinutes().toString().padStart(2, "0");
+    const adjustedHours = date.getHours().toString().padStart(2, '0');
+    const adjustedMinutes = date.getMinutes().toString().padStart(2, '0');
     const adjustedTime = `${adjustedHours}:${adjustedMinutes}`;
     return adjustedTime;
   };
@@ -879,13 +883,13 @@ const FormCustom = ({ cart, total }) => {
     const currentMinute = now.getMinutes();
 
     const allTimeSlots = [
-      "20:30",
-      "21:00",
-      "21:30",
-      "22:00",
-      "22:30",
-      "23:00",
-      "23:30",
+      '20:30',
+      '21:00',
+      '21:30',
+      '22:00',
+      '22:30',
+      '23:00',
+      '23:30',
     ];
 
     const nextSlotMinutes =
@@ -894,7 +898,7 @@ const FormCustom = ({ cart, total }) => {
     const nextSlotMinute = nextSlotMinutes % 60;
 
     return allTimeSlots.filter((timeSlot) => {
-      let [slotHour, slotMinute] = timeSlot.split(":").map(Number);
+      let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
       if (slotHour === 0) slotHour = 24;
       const slotTimeInMinutes = slotHour * 60 + slotMinute;
       const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
@@ -910,12 +914,12 @@ const FormCustom = ({ cart, total }) => {
         as="select"
         name="hora"
         className={`custom-select text-xs font-light ${
-          selectedHora === "" ? "text-gray-400" : "text-black"
+          selectedHora === '' ? 'text-gray-400' : 'text-black'
         }`}
         value={selectedHora}
         onChange={(e) => {
           handleChange(e);
-          setFieldValue("hora", e.target.value);
+          setFieldValue('hora', e.target.value);
         }}
       >
         <option value="" disabled>
@@ -966,11 +970,11 @@ const FormCustom = ({ cart, total }) => {
 
   // Efecto para reiniciar vouchers cuando cambia el carrito
   useEffect(() => {
-    console.log("🛒 DETECTADO CAMBIO EN EL CARRITO");
+    console.log('🛒 DETECTADO CAMBIO EN EL CARRITO');
 
     // Si no es la primera vez que se ejecuta el efecto
     if (prevCartRef.current !== null) {
-      console.log("🔍 VERIFICANDO CAMBIOS EN EL CARRITO", {
+      console.log('🔍 VERIFICANDO CAMBIOS EN EL CARRITO', {
         cartAnteriorLength: prevCartRef.current.length,
         cartActualLength: cart.length,
         cambioDetectado:
@@ -979,7 +983,7 @@ const FormCustom = ({ cart, total }) => {
 
       // Verificar si hay vouchers aplicados
       const hayVouchersAplicados =
-        couponCodes.some((code) => code.trim() !== "") ||
+        couponCodes.some((code) => code.trim() !== '') ||
         descuento > 0 ||
         freeBurgerDiscount > 0;
 
@@ -987,7 +991,7 @@ const FormCustom = ({ cart, total }) => {
       const cartCambio =
         JSON.stringify(prevCartRef.current) !== JSON.stringify(cart);
 
-      console.log("📝 ESTADO DE VOUCHERS", {
+      console.log('📝 ESTADO DE VOUCHERS', {
         couponCodes,
         voucherStatus,
         descuento,
@@ -997,20 +1001,20 @@ const FormCustom = ({ cart, total }) => {
       });
 
       if (hayVouchersAplicados && cartCambio) {
-        console.log("⚠️ REINICIANDO VOUCHERS DEBIDO A CAMBIOS EN EL CARRITO");
+        console.log('⚠️ REINICIANDO VOUCHERS DEBIDO A CAMBIOS EN EL CARRITO');
 
         // Reiniciar todos los estados relacionados con vouchers
-        setCouponCodes([""]);
-        setVoucherStatus([""]);
+        setCouponCodes(['']);
+        setVoucherStatus(['']);
         setDescuento(0);
         setFreeBurgerDiscount(0);
         setDiscountedTotal(total);
         setIsValidating([false]);
         setDescuentoForOneUnit(0);
 
-        console.log("✅ VOUCHERS REINICIADOS", {
-          nuevosCouponCodes: [""],
-          nuevosVoucherStatus: [""],
+        console.log('✅ VOUCHERS REINICIADOS', {
+          nuevosCouponCodes: [''],
+          nuevosVoucherStatus: [''],
           nuevoDescuento: 0,
           nuevoFreeBurgerDiscount: 0,
           nuevoDiscountedTotal: total,
@@ -1022,12 +1026,12 @@ const FormCustom = ({ cart, total }) => {
         // Si estás usando react-hot-toast u otra librería de notificaciones:
         // toast.info("Los cupones se han eliminado debido a cambios en tu carrito");
       } else if (cartCambio) {
-        console.log("ℹ️ NO HAY VOUCHERS APLICADOS, NO ES NECESARIO REINICIAR");
+        console.log('ℹ️ NO HAY VOUCHERS APLICADOS, NO ES NECESARIO REINICIAR');
       } else {
-        console.log("🔄 NO SE DETECTARON CAMBIOS REALES EN EL CARRITO");
+        console.log('🔄 NO SE DETECTARON CAMBIOS REALES EN EL CARRITO');
       }
     } else {
-      console.log("🔄 PRIMERA CARGA DEL CARRITO, NO HAY ACCIÓN REQUERIDA");
+      console.log('🔄 PRIMERA CARGA DEL CARRITO, NO HAY ACCIÓN REQUERIDA');
     }
 
     // Actualizar la referencia al carrito actual para la próxima comparación
@@ -1087,20 +1091,20 @@ const FormCustom = ({ cart, total }) => {
       <Formik
         initialValues={{
           subTotal: discountedTotal,
-          phone: "",
-          deliveryMethod: "delivery",
-          references: "",
-          paymentMethod: "efectivo",
-          money: "",
-          address: "",
-          hora: "",
+          phone: '',
+          deliveryMethod: 'delivery',
+          references: '',
+          paymentMethod: 'efectivo',
+          money: '',
+          address: '',
+          hora: '',
           efectivoCantidad: 0,
           mercadopagoCantidad: 0,
-          aclaraciones: "",
+          aclaraciones: '',
         }}
         validationSchema={formValidations}
         onSubmit={async (values) => {
-          if (altaDemanda?.message && altaDemanda.message !== "") {
+          if (altaDemanda?.message && altaDemanda.message !== '') {
             setPendingValues(values);
             setShowMessageModal(true);
             return;
@@ -1112,15 +1116,15 @@ const FormCustom = ({ cart, total }) => {
           }
 
           if (!altaDemanda?.open) {
-            if (values.paymentMethod === "mercadopago") {
-              setFieldValue("paymentMethod", "efectivo");
+            if (values.paymentMethod === 'mercadopago') {
+              setFieldValue('paymentMethod', 'efectivo');
             }
-            setPendingValues({ ...values, paymentMethod: "efectivo" });
+            setPendingValues({ ...values, paymentMethod: 'efectivo' });
             openCloseModal();
             return;
           }
 
-          const isReserva = values.hora.trim() !== "";
+          const isReserva = values.hora.trim() !== '';
           if (!isReserva && altaDemanda?.isHighDemand) {
             setPendingValues(values);
             setShowHighDemandModal(true);
@@ -1132,9 +1136,9 @@ const FormCustom = ({ cart, total }) => {
             return;
           }
 
-          if (values.paymentMethod === "efectivo") {
+          if (values.paymentMethod === 'efectivo') {
             await processPedido(values, isReserva);
-          } else if (values.paymentMethod === "mercadopago") {
+          } else if (values.paymentMethod === 'mercadopago') {
             // await processPedido(values, isReserva);
           }
         }}
@@ -1178,7 +1182,7 @@ const FormCustom = ({ cart, total }) => {
             }
 
             // Añadir costos de envío y express si corresponde
-            if (values.deliveryMethod === "delivery") {
+            if (values.deliveryMethod === 'delivery') {
               finalTotal += envio;
             }
             if (isEnabled) {
@@ -1199,12 +1203,12 @@ const FormCustom = ({ cart, total }) => {
                     <button
                       type="button"
                       className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
-                        values.deliveryMethod === "delivery"
-                          ? "bg-black text-gray-100"
-                          : "bg-gray-300 text-black"
+                        values.deliveryMethod === 'delivery'
+                          ? 'bg-black text-gray-100'
+                          : 'bg-gray-300 text-black'
                       }`}
                       onClick={() =>
-                        setFieldValue("deliveryMethod", "delivery")
+                        setFieldValue('deliveryMethod', 'delivery')
                       }
                     >
                       <svg
@@ -1222,24 +1226,26 @@ const FormCustom = ({ cart, total }) => {
                     <button
                       type="button"
                       className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
-                        values.deliveryMethod === "takeaway"
-                          ? "bg-black text-gray-100"
-                          : "bg-gray-300 text-black"
+                        values.deliveryMethod === 'takeaway'
+                          ? 'bg-black text-gray-100'
+                          : 'bg-gray-300 text-black'
                       }`}
                       onClick={() =>
-                        setFieldValue("deliveryMethod", "takeaway")
+                        setFieldValue('deliveryMethod', 'takeaway')
                       }
                     >
                       <div className="flex flex-row items-center gap-2">
-                        <img
-                          src={isologo}
-                          className={`h-4 ${
-                            values.deliveryMethod === "takeaway"
-                              ? "invert brightness-0"
-                              : "brightness-0"
-                          }`}
-                          alt=""
-                        />
+                        {clientData?.logo && (
+                          <img
+                            src={clientData.logo}
+                            className={`h-4 ${
+                              values.deliveryMethod === 'takeaway'
+                                ? 'invert brightness-0'
+                                : 'brightness-0'
+                            }`}
+                            alt="logo"
+                          />
+                        )}
                         <p className="font-bold text-">Retiro</p>
                       </div>
                       <p className="font-light text-xs">
@@ -1250,7 +1256,7 @@ const FormCustom = ({ cart, total }) => {
                     </button>
                   </div>
                   <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300">
-                    {values.deliveryMethod === "delivery" && (
+                    {values.deliveryMethod === 'delivery' && (
                       <>
                         <MapDirection
                           setUrl={setUrl}
@@ -1332,8 +1338,8 @@ const FormCustom = ({ cart, total }) => {
                           key={index}
                           className={`flex flex-col w-full transition-all duration-300 ${
                             index !== 0
-                              ? "border-t border-black border-opacity-20"
-                              : ""
+                              ? 'border-t border-black border-opacity-20'
+                              : ''
                           }`}
                         >
                           <div className="flex flex-row gap-2 px-3 items-center">
@@ -1354,8 +1360,8 @@ const FormCustom = ({ cart, total }) => {
                               type="text"
                               placeholder={
                                 index === 0
-                                  ? "¿Tenes algun codigo de descuento?"
-                                  : "¿Tenes otro cupón?"
+                                  ? '¿Tenes algun codigo de descuento?'
+                                  : '¿Tenes otro cupón?'
                               }
                               value={couponCodes[index]}
                               onChange={(e) => {
@@ -1368,9 +1374,9 @@ const FormCustom = ({ cart, total }) => {
                               className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
                             />
                             {console.log(
-                              "Durante renderizado, isValidating[" +
+                              'Durante renderizado, isValidating[' +
                                 index +
-                                "] =",
+                                '] =',
                               isValidating[index]
                             )}
 
@@ -1381,9 +1387,9 @@ const FormCustom = ({ cart, total }) => {
                               >
                                 <span className="sr-only">Loading...</span>
                               </div>
-                            ) : voucherStatus[index] === "¡Código válido!" ||
+                            ) : voucherStatus[index] === '¡Código válido!' ||
                               voucherStatus[index] ===
-                                "¡Código válido! (Hamburguesa gratis)" ||
+                                '¡Código válido! (Hamburguesa gratis)' ||
                               (isSpecialCode(couponCodes[index]) &&
                                 hasSpecialCode) ? (
                               <svg
@@ -1402,16 +1408,16 @@ const FormCustom = ({ cart, total }) => {
                           </div>
 
                           {voucherStatus[index] &&
-                            voucherStatus[index] !== "¡Código válido!" &&
+                            voucherStatus[index] !== '¡Código válido!' &&
                             voucherStatus[index] !==
-                              "¡Código válido! (Hamburguesa gratis)" &&
+                              '¡Código válido! (Hamburguesa gratis)' &&
                             voucherStatus[index] !==
-                              "¡Código válido! (50% descuento)" &&
+                              '¡Código válido! (50% descuento)' &&
                             !(
                               couponCodes[index]
                                 .toUpperCase()
-                                .includes("AUTODROMO" || "ANHELO") &&
-                              voucherStatus[index] === "Cupón no encontrado"
+                                .includes('AUTODROMO' || 'ANHELO') &&
+                              voucherStatus[index] === 'Cupón no encontrado'
                             ) && (
                               <AppleErrorMessage voucher={true}>
                                 {voucherStatus[index]}
@@ -1419,8 +1425,8 @@ const FormCustom = ({ cart, total }) => {
                             )}
                           {/* Nuevo mensaje informativo para el código AUTODROMOXANHELO */}
                           {couponCodes[index].toUpperCase() ===
-                            "AUTODROMOXANHELO" ||
-                            ("ANHELOUSD" && hasSpecialCode && (
+                            'AUTODROMOXANHELO' ||
+                            ('ANHELOUSD' && hasSpecialCode && (
                               <div className="bg-green-500 text-white text-[10px] text-center p-4 py-1 ">
                                 Este código aplica un 50% de descuento y no
                                 puede canjearse junto a más códigos
@@ -1431,7 +1437,7 @@ const FormCustom = ({ cart, total }) => {
                     </div>
                     <div
                       className={`flex flex-col border-t border-black border-opacity-20 items-center transition-all duration-300 ${
-                        values.deliveryMethod === "delivery" ? "" : ""
+                        values.deliveryMethod === 'delivery' ? '' : ''
                       }`}
                     >
                       <div className="flex flex-row items-center pl-3 gap-2 w-full">
@@ -1527,7 +1533,7 @@ const FormCustom = ({ cart, total }) => {
                       </p>
                     </div>
                     <p>
-                      {values.deliveryMethod === "delivery"
+                      {values.deliveryMethod === 'delivery'
                         ? currencyFormat(envio)
                         : currencyFormat(0)}
                     </p>
@@ -1560,7 +1566,7 @@ const FormCustom = ({ cart, total }) => {
                     </p>
                   </div>
                 </div>
-                {values.paymentMethod === "mercadopago" ? (
+                {values.paymentMethod === 'mercadopago' ? (
                   <Payment
                     cart={cart}
                     values={values}
@@ -1580,13 +1586,13 @@ const FormCustom = ({ cart, total }) => {
                     type="submit"
                     disabled={isSubmitting}
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-blue-apm text-gray-100 rounded-3xl h-20 font-bold hover:bg-red-600 transition-colors duration-300 ${
-                      isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
                     {isSubmitting ? (
                       <LoadingPoints color="text-gray-100" />
                     ) : (
-                      "Pedir"
+                      'Pedir'
                     )}
                   </button>
                 )}
@@ -1616,7 +1622,7 @@ const FormCustom = ({ cart, total }) => {
         title="Sin stock"
       >
         <p className="font-medium text-center">
-          Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche{" "}
+          Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche{' '}
         </p>
       </AppleModal>
 
@@ -1647,24 +1653,20 @@ const FormCustom = ({ cart, total }) => {
               }
             }
           } catch (error) {
-            console.error("Error al procesar el pedido pendiente:", error);
+            console.error('Error al procesar el pedido pendiente:', error);
           } finally {
             setIsModalConfirmLoading(false);
             closeCloseRestrictedModal();
           }
         }}
       >
-        <p className="font-medium text-center">
-          Van +400 burgers ❤️‍🔥 En cocina están verificando si hay stock. Tu
-          pedido estará pendiente de aprobación durante los próximos 3 a 5
-          minutos, aceptas? <br />
-        </p>
+        <p className="font-medium text-center">Confirmar compra</p>
       </AppleModal>
 
       {/* esperas? */}
       <AppleModal
         isOpen={
-          showHighDemandModal && pendingValues?.paymentMethod === "efectivo"
+          showHighDemandModal && pendingValues?.paymentMethod === 'efectivo'
         }
         onClose={() => setShowHighDemandModal(false)}
         title="Alta Demanda"
@@ -1673,7 +1675,7 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== "";
+            const isReserva = pendingValues.hora.trim() !== '';
             await processPedido(pendingValues, isReserva);
           }
           setIsModalConfirmLoading(false);
@@ -1681,7 +1683,7 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p className="font-medium text-center">
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
           {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
@@ -1696,7 +1698,7 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== "";
+            const isReserva = pendingValues.hora.trim() !== '';
             const orderId = await handleSubmit(
               // Guardamos el orderId que retorna handleSubmit
               pendingValues,
@@ -1707,7 +1709,7 @@ const FormCustom = ({ cart, total }) => {
               couponCodes,
               descuento,
               false,
-              altaDemanda?.message || ""
+              altaDemanda?.message || ''
             );
 
             if (orderId) {
