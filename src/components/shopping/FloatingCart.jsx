@@ -1,8 +1,11 @@
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import currencyFormat from '../../helpers/currencyFormat';
 
 const FloatingCart = ({ totalQuantity, cart }) => {
+  const { slug } = useParams();
+
   const totalPrice = cart.reduce((acc, item) => {
     let itemTotal = item.price * item.quantity;
 
@@ -27,7 +30,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
       </div>
 
       <Link
-        to="/carrito"
+        to={`/${slug}/carrito`}
         className="bg-blue-apm mr-2 w-full items-center flex justify-center md:w-[500px] h-[62px] px-6 rounded-2xl"
       >
         <svg
