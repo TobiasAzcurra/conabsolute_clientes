@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { listenToAltaDemanda } from '../../../firebase/readConstants';
 import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
 
 const Card = ({
   name,
@@ -96,16 +97,7 @@ const Card = ({
   //   );
   // };
 
-  const getImageSrc = () => {
-    const imgSrc = data?.img || data?.image || img;
-    if (!imgSrc) return '/placeholder-product.jpg';
-    if (imgSrc.startsWith('https://') || imgSrc.startsWith('data:image/')) {
-      return imgSrc;
-    }
-    return `/menu/${imgSrc}`;
-  };
-
-  const imageSrc = getImageSrc();
+  const imageSrc = getImageSrc(data || img);
 
   // const handleColorClick = (colorIndex, event) => {
   //   event.preventDefault(); // Prevenir navegación del Link
@@ -199,9 +191,17 @@ const Card = ({
               {name || 'Producto sin nombre'}
             </h5>
           </div>
-          <p className="text-center text-xs font-light text-opacity-30 text-black">
-            {description}
-          </p>
+          {data?.cardDescription && (
+            <p className="text-center text-sm text-gray-600 font-coolvetica leading-tight mb-1">
+              {data.cardDescription}
+            </p>
+          )}
+
+          {description && (
+            <p className="text-center text-xs font-light text-opacity-30 text-black">
+              {description}
+            </p>
+          )}
           <div className="flex w-full mt-4 items-center  justify-between mb-6">
             {type === 'promo' ? (
               <div className="flex flex-row gap-2 items-baseline">
