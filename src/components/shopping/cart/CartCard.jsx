@@ -6,6 +6,7 @@ import {
 import currencyFormat from '../../../helpers/currencyFormat';
 import QuickAddToCart from '../card/quickAddToCart';
 import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
 
 const CartCard = ({
   item,
@@ -122,20 +123,9 @@ const CartCard = ({
     return (price || 0) + toppingsTotal;
   };
 
-  const getImageSrc = () => {
-    const imgSrc = item.data?.img || item.data?.image || img;
-    if (!imgSrc) return '/placeholder-product.jpg';
-    if (
-      typeof imgSrc === 'string' &&
-      (imgSrc.startsWith('https://') || imgSrc.startsWith('data:image/'))
-    ) {
-      return imgSrc;
-    }
-    return `/menu/${imgSrc}`;
-  };
-
   const totalPrice = calculateTotalPrice();
-  const imageSrc = getImageSrc();
+
+  const imageSrc = getImageSrc(item || img);
 
   return (
     <div className="relative">
