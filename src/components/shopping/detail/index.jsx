@@ -10,6 +10,7 @@ import QuickAddToCart from '../card/quickAddToCart';
 import VideoSlider from './VideoSlider';
 import { listenToAltaDemanda } from '../../../firebase/readConstants';
 import { getProductById } from '../../../firebase/getProducts';
+import { getImageSrc } from '../../../helpers/getImageSrc';
 
 const toppingPrice = 300;
 const toppingsArray = Object.values(toppings);
@@ -152,25 +153,20 @@ const DetailCard = ({ type }) => {
     return itemsOut[firebaseKey] !== false; // true si está disponible o undefined
   };
 
-  const getImageSrc = () => {
-    const imgSrc = product?.img || product?.image;
-    if (!imgSrc) return '/placeholder-product.jpg';
-    if (imgSrc.startsWith('https://') || imgSrc.startsWith('data:image/')) {
-      return imgSrc;
-    }
-    return `/menu/${imgSrc}`;
-  };
-
-  const imageSrc = getImageSrc();
+  const imageSrc = getImageSrc(product);
 
   return (
     <div>
       <div className="flex flex-col ">
-        <ArrowBack />
         <div className="flex flex-col pt-8 md:pt-6 justify-items-center items-center ">
           <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
             {capitalizeWords(product.name)}
           </h4>
+          {product.detailDescription && (
+            <p className="font-coolvetica text-sm mt-2 text-black text-center px-4 leading-tight">
+              {product.detailDescription}
+            </p>
+          )}
           <p className="font-coolvetica  px-4 text-xs w-full mt-1 font-bold text-center">
             {product.description}
           </p>
