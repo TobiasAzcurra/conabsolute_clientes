@@ -310,7 +310,7 @@ const AppRouter = () => {
   return (
     <div className="flex flex-col">
       {shouldShowCarruselAndNavMenu && (
-        <div className="relative mb-[90px]">
+        <div className="relative">
           <div className="flex justify-center w-full ">
             {/* Search by phonenumber with autosuggest */}
 

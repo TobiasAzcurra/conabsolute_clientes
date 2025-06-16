@@ -1,28 +1,28 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import toppings from "../../../assets/toppings-v1.json";
-import { addItem } from "../../../redux/cart/cartSlice";
-import currencyFormat from "../../../helpers/currencyFormat";
-import ArrowBack from "../../back";
-import logo from "../../../assets/anheloTMwhite.png";
-import satisfyerPic from "../../../assets/satisfyerPic.png";
-import masterpiecesPic from "../../../assets/djPic.png";
-import originalsPic from "../../../assets/masterpiecesPic.png";
-import friesPic from "../../../assets/friesPic.png";
-import QuickAddToCart from "../card/quickAddToCart";
-import VideoSlider from "./VideoSlider";
-import { listenToAltaDemanda } from "../../../firebase/readConstants";
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import toppings from '../../../assets/toppings-v1.json';
+import { addItem } from '../../../redux/cart/cartSlice';
+import currencyFormat from '../../../helpers/currencyFormat';
+import ArrowBack from '../../back';
+import logo from '../../../assets/anheloTMwhite.png';
+import QuickAddToCart from '../card/quickAddToCart';
+import VideoSlider from './VideoSlider';
+import { listenToAltaDemanda } from '../../../firebase/readConstants';
+import { getProductById } from '../../../firebase/getProducts';
 
 const toppingPrice = 300;
 const toppingsArray = Object.values(toppings);
 const toppingsFree = toppingsArray.filter((t) => t.price === 0);
 const toppings100 = toppingsArray.filter((t) => t.price === toppingPrice);
 
-const DetailCard = ({ products, type }) => {
-  const { id } = useParams();
+const DetailCard = ({ type }) => {
+  const location = useLocation();
+  const { id, slug } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [product, setProduct] = useState(location.state?.product || null);
+  const [loading, setLoading] = useState(!location.state?.product);
   const [disable, setDisable] = useState(false);
   const [dataTopping, setDataTopping] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -40,11 +40,21 @@ const DetailCard = ({ products, type }) => {
     return () => unsubscribe();
   }, []);
 
-  const product = products.find((p) => p.id === id);
-
-  if (!product) {
-    return <div>Producto no encontrado.</div>;
-  }
+  useEffect(() => {
+    if (!product && slug && id) {
+      console.log(`Cargando producto con slug: ${slug} y id: ${id}`);
+      getProductById(slug, id)
+        .then((data) => {
+          setProduct(data);
+          console.log(`✅ Producto cargado:`, data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          console.error('❌ Error cargando producto:', err);
+          setLoading(false);
+        });
+    }
+  }, [product, slug, id]);
 
   // Función para capitalizar cada palabra con solo la primera letra en mayúscula
   const capitalizeWords = (str) => {
@@ -72,96 +82,69 @@ const DetailCard = ({ products, type }) => {
     }
   };
 
-  // Calcula el precio total incluyendo toppings pagados y priceFactor
   const totalPrice = useMemo(() => {
-    const basePrice = product.price;
+    if (!product) return 0;
+    const basePrice = product.price || 0;
     const toppingsCost = dataTopping
       .filter((t) => t.price > 0)
       .reduce((acc, t) => acc + t.price, 0);
-
     const priceFactor = altaDemanda?.priceFactor || 1;
-
-    // Aplicamos la misma fórmula de redondeo que en los otros componentes
     return Math.ceil(((basePrice + toppingsCost) * priceFactor) / 100) * 100;
-  }, [product.price, dataTopping, altaDemanda?.priceFactor]);
+  }, [product, dataTopping, altaDemanda?.priceFactor]);
 
-  const getImageForType = (type) => {
-    switch (type) {
-      case "satisfyer":
-        return satisfyerPic;
-      case "our":
-        return masterpiecesPic;
-      case "originals":
-        return originalsPic;
-      case "papas":
-        return friesPic;
-      default:
-        return masterpiecesPic;
-    }
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mb-4" />
+        <p className="text-sm font-semibold text-gray-700">
+          Cargando producto...
+        </p>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="text-center mt-8 font-coolvetica text-black text-sm">
+        Producto no encontrado.
+      </div>
+    );
+  }
 
   const getObjectPositionForType = (type) => {
-    return type === "originals" ? "object-center" : "object-bottom";
+    return type === 'originals' ? 'object-center' : 'object-bottom';
   };
 
-  const productIngredients = {
-    // Promociones 2x1
-    // "2x1 Cuadruple Cheeseburger": [""],
-    "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
-    "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
-    "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
-    "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
-    "2x1 Anhelo Yummy": ["anhelo", "yummy"],
-
-    "2x1 Mario Inspired": ["mayonesa", "mario"],
-
-    // Satisfyers
-    "Satisfyer Easter Egg": ["anhelo", "huevo", "bacon"],
-    "Satisfyer BCN Cheeseburger": ["anhelo", "bacon"],
-    "Satisfyer ANHELO Classic": ["anhelo", "tomate", "lechuga"],
-
-    // Hamburguesas principales
-    "Simple Cheeseburger": [""],
-    "Doble Cheeseburger": [""],
-    "Triple Cheeseburger": [""],
-    "Cuadruple Cheeseburger": [""],
-    "ANHELO Classic": ["anhelo", "tomate", "lechuga"],
-    "BCN Cheeseburger": ["anhelo", "bacon"],
-    "BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
-    "Easter Egg": ["anhelo", "huevo", "bacon"],
-    "Mario Inspired": ["mayonesa", "mario"],
-  };
+  // product.ingredients?.some((i) => itemsOut[i] === false);
 
   // Función para verificar si el producto tiene ingredientes agotados
-  const hasUnavailableIngredients = () => {
-    const ingredients = productIngredients[product.name] || []; // Cambiar name por product.name
-    // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
-    if (
-      ingredients.length === 0 ||
-      (ingredients.length === 1 && ingredients[0] === "")
-    ) {
-      return false;
-    }
-    // Verificar si algún ingrediente está agotado (false)
-    return ingredients.some(
-      (ingredient) => ingredient !== "" && itemsOut[ingredient] === false
-    );
+  // const hasUnavailableIngredients = () => {
+  //   const ingredients = productIngredients[product.name] || []; // Cambiar name por product.name
+  //   // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
+  //   if (
+  //     ingredients.length === 0 ||
+  //     (ingredients.length === 1 && ingredients[0] === '')
+  //   ) {
+  //     return false;
+  //   }
+  //   // Verificar si algún ingrediente está agotado (false)
+  //   return ingredients.some(
+  //     (ingredient) => ingredient !== '' && itemsOut[ingredient] === false
+  //   );
+  // };
+
+  const getTypeDescription = (type) => {
+    const map = {
+      satisfyer:
+        'La versión accesible de Anhelo, para que puedas pedir más en todo momento.',
+      originals: 'Anhelo, creado por vos. Tu burger ideal.',
+      our: 'Nuestras mejores combinaciones. Obras de arte.',
+    };
+    return map[type] || '';
   };
 
   // Función para mapear nombres de toppings a keys de Firebase
-  const mapToppingToFirebaseKey = (toppingName) => {
-    const mapping = {
-      Bacon: "bacon",
-      Lechuga: "lechuga",
-      Tomate: "tomate",
-      "Cebolla caramelizada": "caramelizada",
-      "Salsa ANHELO": "anhelo",
-      Mayonesa: "mayonesa",
-      Ketchup: "ketchup",
-      "Salsa barbecue": "bbq",
-    };
-    return mapping[toppingName] || toppingName.toLowerCase();
-  };
+  const mapToppingToFirebaseKey = (t) => t.firebaseKey || t.name.toLowerCase();
 
   // Función para verificar si un topping está disponible
   const isToppingAvailable = (toppingName) => {
@@ -169,10 +152,21 @@ const DetailCard = ({ products, type }) => {
     return itemsOut[firebaseKey] !== false; // true si está disponible o undefined
   };
 
+  const getImageSrc = () => {
+    const imgSrc = product?.img || product?.image;
+    if (!imgSrc) return '/placeholder-product.jpg';
+    if (imgSrc.startsWith('https://') || imgSrc.startsWith('data:image/')) {
+      return imgSrc;
+    }
+    return `/menu/${imgSrc}`;
+  };
+
+  const imageSrc = getImageSrc();
+
   return (
     <div>
       <div className="flex flex-col ">
-        {/* <ArrowBack /> */}
+        <ArrowBack />
         <div className="flex flex-col pt-8 md:pt-6 justify-items-center items-center ">
           <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-black text-center px-4 leading-9 ">
             {capitalizeWords(product.name)}
@@ -181,7 +175,7 @@ const DetailCard = ({ products, type }) => {
             {product.description}
           </p>
           {/* Select para elegir toppings */}
-          {product.type === "originals" && (
+          {product.type === 'originals' && (
             <div className="flex flex-col mt-2 items-center">
               {toppingsArray.map((topping) => {
                 const isAvailable = isToppingAvailable(topping.name);
@@ -190,7 +184,7 @@ const DetailCard = ({ products, type }) => {
                   <label
                     key={topping.name}
                     className={`flex items-center mb-2 cursor-pointer ${
-                      !isAvailable ? "opacity-50 cursor-not-allowed" : ""
+                      !isAvailable ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
                     {/* Checkbox oculto */}
@@ -207,8 +201,8 @@ const DetailCard = ({ products, type }) => {
                       className={`relative w-6 h-6 mr-3 border border-gray-400 rounded-full flex-shrink-0 
                        ${
                          isAvailable
-                           ? "peer-checked:bg-black peer-checked:border-transparent"
-                           : "bg-gray-300 border-gray-300"
+                           ? 'peer-checked:bg-black peer-checked:border-transparent'
+                           : 'bg-gray-300 border-gray-300'
                        } 
                        transition-colors duration-200 ease-in-out
                        flex items-center justify-center`}
@@ -248,14 +242,14 @@ const DetailCard = ({ products, type }) => {
                     {/* Texto del topping */}
                     <p
                       className={`font-bold font-coolvetica text-black text-xs ${
-                        !isAvailable ? "line-through text-gray-500" : ""
+                        !isAvailable ? 'line-through text-gray-500' : ''
                       }`}
                     >
-                      {capitalizeWords(topping.name)}:{" "}
+                      {capitalizeWords(topping.name)}:{' '}
                       {!isAvailable
-                        ? "Agotado por hoy"
+                        ? 'Agotado por hoy'
                         : topping.price === 0
-                        ? "Gratis"
+                        ? 'Gratis'
                         : currencyFormat(topping.price)}
                     </p>
                   </label>
@@ -266,13 +260,12 @@ const DetailCard = ({ products, type }) => {
           <div className="w-full h-[300px] mt-8 flex items-center justify-center">
             <img
               className="max-w-full sm:w-full md:w-auto h-[300px] object-cover object-center"
-              src={`/menu/${product.img}`}
+              src={imageSrc}
               alt={product.name}
             />
           </div>
           <div className="flex flex-col items-center mb-8 mt-8 gap-2">
-            {/* Pasa el producto al QuickAddToCart */}
-            {hasUnavailableIngredients() ? (
+            {/* {hasUnavailableIngredients() ? (
               <div className="bg-red-main -mt-4 -mb-5 flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -294,63 +287,21 @@ const DetailCard = ({ products, type }) => {
                 toppings={dataTopping}
                 calculatedPrice={totalPrice} // Agregar esta prop
               />
-            )}
+            )} */}
 
             <p className="mt-4 px-4 text-center font-coolvetica text-xs text-black">
-              Por <strong>{currencyFormat(totalPrice)}</strong>.{" "}
-              {product.type === "satisfyer"
-                ? "La versión accesible de Anhelo, para que puedas pedir más en todo momento."
-                : product.type === "originals"
-                ? "Anhelo, creado por vos. Tu burger ideal."
-                : product.type === "our"
-                ? "Nuestras mejores combinaciones. Obras de arte."
-                : ""}
+              Por <strong>{currencyFormat(totalPrice)}</strong>.{' '}
+              {product.type === 'satisfyer'
+                ? 'La versión accesible de Anhelo, para que puedas pedir más en todo momento.'
+                : product.type === 'originals'
+                ? 'Anhelo, creado por vos. Tu burger ideal.'
+                : product.type === 'our'
+                ? 'Nuestras mejores combinaciones. Obras de arte.'
+                : ''}
             </p>
           </div>
         </div>
-        <div className="bg-black flex flex-col md:flex-row ">
-          <div className="md:flex md:flex-row md:mx-auto md:py-4 md:gap-8">
-            {/* imagen por cada tipo */}
-            <div className="flex flex-col  ">
-              <div className="relative w-full h-[300px] overflow-hidden">
-                <img
-                  src={getImageForType(
-                    product.type ? product.type : product.category
-                  )}
-                  className={`w-full h-full object-cover ${getObjectPositionForType(
-                    product.type ? product.type : product.category
-                  )}`}
-                  alt=""
-                />
-                <div className="absolute bottom-0 left-0 right-0 h-[30%] bg-gradient-to-t from-black to-transparent"></div>
-              </div>
-              <p className="text-end text-gray-100/50 text-xs font-coolvetica pt-2 pr-4">
-                Si esta <span className="text-gray-100">dedicacion</span>{" "}
-                ponemos en la pagina,
-                <br />
-                imaginate en las <span className="text-gray-100">burgers.</span>
-              </p>
-            </div>
-            {/* Reels */}
-            <div className="flex flex-col ">
-              <p className="text-2xl mt-6 pl-4 md:pl-0 pr-12 mb-4 text-left font-coolvetica text-gray-100 font-bold">
-                <span className="opacity-50">Por que todos quedan</span>{" "}
-                pidiendo más:
-              </p>
-
-              <VideoSlider />
-            </div>
-            {/* Logo */}
-            <div className="flex flex-col  mt-32 items-center mx-auto mb-16 md:my-auto justify-center">
-              <img src={logo} className="h-6 mb-1" alt="Logo de Anhelo" />
-              <p className="text-gray-100 font-bold text-xs font-coolvetica">
-                Vas a pedir más.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
-      {cart.length > 0 && <div className="w-full h-20 bg-black"></div>}
     </div>
   );
 };

@@ -35,9 +35,6 @@ export const getProductsByClient = async () => {
       productos.push(productData);
     });
 
-    console.log('📦 Productos obtenidos de Firebase:', productos);
-    console.log(`📊 Total de productos: ${productos.length}`);
-
     // Agrupar productos por categoría para facilitar su uso
     const productosPorCategoria = {
       mates: productos.filter(
@@ -59,8 +56,6 @@ export const getProductsByClient = async () => {
         (p) => p.categoria === 'accesorios' || p.categoria === 'accesorio'
       ),
     };
-
-    console.log('🗂️ Productos por categoría:', productosPorCategoria);
 
     // Mostrar estadísticas por categoría
     Object.entries(productosPorCategoria).forEach(([categoria, items]) => {
@@ -86,97 +81,94 @@ export const getProductsByClient = async () => {
 
 // Nueva funcion para obtener todsos los productos del cliente
 export const getProductsByClientV2 = async (slug) => {
-  const firestore = getFirestore();
+  const db = getFirestore();
+  const productosRef = collection(db, `absoluteClientes/${slug}/productos`);
+  const snapshot = await getDocs(productosRef);
 
-  const clientesSnap = await getDocs(collection(firestore, 'absoluteClientes'));
-  const clientes = [];
-  clientesSnap.forEach((d) => {
-    clientes.push({ id: d.id, ...d.data() });
-  });
+  const productos = await Promise.all(
+    snapshot.docs.map(async (docSnap) => {
+      const data = docSnap.data();
+      let categoryName = null;
 
-  const empresaDocRef = doc(firestore, 'absoluteClientes', slug);
-  const empresaDocSnap = await getDoc(empresaDocRef);
+      try {
+        if (data.category) {
+          if (typeof data.category === 'string') {
+            // Caso: categoría como string simple
+            categoryName = data.category.toLowerCase();
+          } else if (data.category.path) {
+            // Caso: categoría como referencia
+            const categoryRef = doc(db, data.category.path);
+            const catDoc = await getDoc(categoryRef);
+            if (catDoc.exists()) {
+              categoryName = catDoc.data()?.name?.toLowerCase() || null;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Error al obtener categoría:', e);
+      }
 
-  const productosRef = collection(
-    firestore,
-    'absoluteClientes',
-    slug,
-    'productos'
+      return {
+        id: docSnap.id,
+        ...data,
+        categoryName,
+      };
+    })
   );
-  const querySnapshot = await getDocs(productosRef);
 
-  const productos = [];
-  querySnapshot.forEach((doc) => {
-    productos.push({ id: doc.id, ...doc.data() });
-  });
+  const porCategoria = productos.reduce((acc, prod) => {
+    const key = prod.categoryName || 'sin-categoria';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(prod);
+    return acc;
+  }, {});
 
-  const productosPorCategoria = {};
-  productos.forEach((p) => {
-    const cat = (p.categoryName || p.category)?.toLowerCase() || 'otros';
-    if (!productosPorCategoria[cat]) {
-      productosPorCategoria[cat] = [];
-    }
-    productosPorCategoria[cat].push(p);
-  });
+  console.log('🔍 Productos parseados con categoría:', productos);
+  console.log('🔍 Categorías obtenidas:', Object.keys(porCategoria));
 
   return {
     todos: productos,
-    porCategoria: productosPorCategoria,
+    porCategoria,
   };
 };
 
 // Función para obtener un producto específico por ID
-export const getProductById = async (productId) => {
-  const firestore = getFirestore();
+export const getProductById = async (slug, id) => {
+  const db = getFirestore();
+  const productoRef = doc(db, `absoluteClientes/${slug}/productos/${id}`);
 
   try {
-    const productRef = doc(
-      firestore,
-      'absoluteClientes',
-      CLIENT_ID,
-      'productos',
-      productId
-    );
-    const productSnap = await getDoc(productRef);
-
-    if (productSnap.exists()) {
-      const productData = {
-        id: productSnap.id,
-        ...productSnap.data(),
+    const docSnap = await getDoc(productoRef);
+    if (docSnap.exists()) {
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
       };
-      console.log('🔍 Producto específico obtenido:', productData);
-      return productData;
     } else {
-      console.log('❌ No se encontró el producto con ID:', productId);
+      console.warn(`⚠️ Producto con ID ${id} no encontrado.`);
       return null;
     }
   } catch (error) {
-    console.error('❌ Error al obtener producto específico:', error);
+    console.error(`❌ Error al obtener producto con ID ${id}:`, error);
     throw error;
   }
-};
+}
 
-// Función para obtener productos por categoría específica
-export const getProductsByCategory = async (categoria) => {
-  try {
-    const productos = await getProductsByClient();
-    const productosFiltrados = productos.todos.filter(
-      (p) => p.categoria?.toLowerCase() === categoria.toLowerCase()
-    );
-
-    console.log(
-      `🏷️ Productos de categoría "${categoria}":`,
-      productosFiltrados
-    );
-    return productosFiltrados;
-  } catch (error) {
-    console.error(
-      `❌ Error al obtener productos de categoría ${categoria}:`,
-      error
-    );
-    throw error;
-  }
-};
+// export const getProductsByCategory = async (categoria) => {
+//   try {
+//     const productos = await getProductsByClient();
+//     const productosFiltrados = productos.todos.filter(
+//       (p) => p.categoria?.toLowerCase() === categoria.toLowerCase()
+//     );
+//     return productosFiltrados;
+//   } catch (error) {
+//     console.error(
+//       `❌ Error al obtener productos de categoría ${categoria}:`,
+//       error
+//     );
+//     throw error;
+//   }
+// };
 
 // Función para verificar el stock disponible de un producto
 export const getAvailableStock = (producto) => {

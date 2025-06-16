@@ -1,18 +1,39 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   addItem,
   updateItemQuantity,
   removeItem,
-} from "../../../redux/cart/cartSlice";
+} from '../../../redux/cart/cartSlice';
 import {
   addProductToOrder,
   ReadMateriales,
   ReadData,
-} from "../../../firebase/uploadOrder";
-import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
-import { motion } from "framer-motion";
+} from '../../../firebase/uploadOrder';
+import { calcularCostoHamburguesa } from '../../../helpers/currencyFormat';
+
+const normalizeProduct = (product) => ({
+  ...product,
+  name: product.name || product.data?.name || 'Producto sin nombre',
+  price: product.price || product.data?.price || 0,
+  img: product.img || product.data?.img || '',
+  category:
+    product.category ||
+    product.categoria ||
+    product.data?.categoria ||
+    'default',
+  type: product.type || 'regular',
+});
+
+const compareToppings = (toppings1, toppings2) => {
+  if (!toppings1 || !toppings2) return false;
+  if (toppings1.length !== toppings2.length) return false;
+  const sorted1 = [...toppings1].sort((a, b) => a.id - b.id);
+  const sorted2 = [...toppings2].sort((a, b) => a.id - b.id);
+  return JSON.stringify(sorted1) === JSON.stringify(sorted2);
+};
 
 const QuickAddToCart = ({
   product,
@@ -29,44 +50,9 @@ const QuickAddToCart = ({
   const { cart } = useSelector((state) => state.cartState);
   const location = useLocation();
 
-  // 🔥 Normalizar el producto para asegurar compatibilidad
-  const normalizedProduct = {
-    ...product,
-    name: product.name || product.data?.name || "Producto sin nombre",
-    price: product.price || product.data?.price || 0,
-    img: product.img || product.data?.img || "",
-    category:
-      product.category ||
-      product.categoria ||
-      product.data?.categoria ||
-      "default",
-    type: product.type || "regular",
-  };
-
-  console.log(`🛒 QuickAddToCart recibió producto:`, {
-    original: product,
-    normalized: normalizedProduct,
-  });
-
-  if (!normalizedProduct.category || normalizedProduct.category === "default") {
-    console.warn(
-      "⚠️ El producto no tiene una categoría definida. Se usará 'default'.",
-      normalizedProduct
-    );
-  }
-
+  const normalizedProduct = normalizeProduct(product);
   const effectiveToppings =
-    toppings && toppings.length > 0
-      ? toppings
-      : normalizedProduct.toppings || [];
-
-  const compareToppings = (toppings1, toppings2) => {
-    if (!toppings1 || !toppings2) return false;
-    if (toppings1.length !== toppings2.length) return false;
-    const sorted1 = [...toppings1].sort((a, b) => a.id - b.id);
-    const sorted2 = [...toppings2].sort((a, b) => a.id - b.id);
-    return JSON.stringify(sorted1) === JSON.stringify(sorted2);
-  };
+    toppings?.length > 0 ? toppings : normalizedProduct.toppings || [];
 
   const cartItem = !isOrderItem
     ? cart.find(
@@ -79,9 +65,7 @@ const QuickAddToCart = ({
 
   const initialQuantity = isOrderItem
     ? initialOrderQuantity || normalizedProduct.quantity
-    : cartItem
-    ? cartItem.quantity
-    : 0;
+    : cartItem?.quantity || 0;
 
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isAdding, setIsAdding] = useState(false);
@@ -90,60 +74,59 @@ const QuickAddToCart = ({
   const pendingUpdateRef = useRef(null);
 
   useEffect(() => {
-    if (isOrderItem) {
-      setQuantity(initialOrderQuantity || normalizedProduct.quantity);
-      quantityRef.current = initialOrderQuantity || normalizedProduct.quantity;
-    } else {
-      setQuantity(cartItem ? cartItem.quantity : 0);
-      quantityRef.current = cartItem ? cartItem.quantity : 0;
-    }
+    const newQty = isOrderItem
+      ? initialOrderQuantity || normalizedProduct.quantity
+      : cartItem?.quantity || 0;
+    setQuantity(newQty);
+    quantityRef.current = newQty;
   }, [cartItem, initialOrderQuantity, isOrderItem, normalizedProduct.quantity]);
 
-  useEffect(() => {
-    return () => {
-      if (pendingUpdateRef.current) {
-        clearTimeout(pendingUpdateRef.current);
-      }
-    };
-  }, []);
+  useEffect(() => () => clearTimeout(pendingUpdateRef.current), []);
 
-  const handleIncrement = () => {
-    setQuantity((prevQuantity) => {
-      const newQuantity = prevQuantity + 1;
-      quantityRef.current = newQuantity;
-      console.log(
-        `➕ Incrementando ${normalizedProduct.name} a ${newQuantity}`
-      );
-      return newQuantity;
+  const handleQuantityChange = (delta) => {
+    setQuantity((prev) => {
+      const updated = prev + delta;
+      quantityRef.current = updated;
+      return updated;
     });
   };
 
-  const handleDecrement = () => {
-    if (quantity > 0) {
-      setQuantity((prevQuantity) => {
-        const newQuantity = prevQuantity - 1;
-        quantityRef.current = newQuantity;
-        console.log(
-          `➖ Decrementando ${normalizedProduct.name} a ${newQuantity}`
+  const handleCartUpdate = () => {
+    const qty = quantityRef.current;
+    if (qty === 0 && cartItem) {
+      const itemIndex = cart.findIndex(
+        (item) =>
+          item.name === normalizedProduct.name &&
+          compareToppings(item.toppings, effectiveToppings)
+      );
+      dispatch(removeItem(itemIndex));
+    } else if (qty >= 1) {
+      const payload = {
+        name: normalizedProduct.name,
+        category: normalizedProduct.category,
+        toppings: effectiveToppings,
+        quantity: qty,
+      };
+      if (cartItem) dispatch(updateItemQuantity(payload));
+      else
+        dispatch(
+          addItem({
+            ...payload,
+            price: calculatedPrice || normalizedProduct.price,
+            img: normalizedProduct.img,
+            type: normalizedProduct.type,
+          })
         );
-        return newQuantity;
-      });
     }
   };
 
   const startAddingProcess = async () => {
-    console.log(`🔵 Iniciando proceso de agregar: ${normalizedProduct.name}`);
     setIsEditing(true);
     setIsAdding(true);
-
-    if (pendingUpdateRef.current) {
-      clearTimeout(pendingUpdateRef.current);
-    }
-
+    clearTimeout(pendingUpdateRef.current);
     pendingUpdateRef.current = setTimeout(async () => {
       try {
         if (isPedidoComponente && currentOrder?.id) {
-          // Si el producto ya existe en el pedido, usamos updateOrderItemQuantity
           if (normalizedProduct.orderIndex !== undefined) {
             await updateOrderItemQuantity(
               currentOrder.id,
@@ -151,103 +134,41 @@ const QuickAddToCart = ({
               normalizedProduct.orderIndex,
               quantityRef.current
             );
-          } else {
-            // Si es un producto nuevo, usamos addProductToOrder
-            if (quantityRef.current > 0) {
-              // Fetch materials and products data for cost calculation
-              const materialesData = await ReadMateriales();
-              const productsData = await ReadData();
-
-              // Find the product data
-              const productData = productsData.find(
-                (p) => p.data.name === normalizedProduct.name
-              )?.data;
-
-              // Calculate the cost using the existing helper function
-              const costoBurger = productData
-                ? calcularCostoHamburguesa(
-                    materialesData,
-                    productData.ingredients
-                  )
-                : 0;
-
-              // Calculate toppings cost
-              let costoToppings = 0;
-              if (effectiveToppings.length > 0) {
-                effectiveToppings.forEach((topping) => {
-                  const materialTopping = materialesData.find(
-                    (material) =>
-                      material.nombre.toLowerCase() ===
-                      topping.name.toLowerCase()
-                  );
-                  if (materialTopping) {
-                    costoToppings += materialTopping.costo;
-                  }
-                });
-              }
-
-              // Prepare the product with costs
-              const productWithCosts = {
+          } else if (quantityRef.current > 0) {
+            const materialesData = await ReadMateriales();
+            const productsData = await ReadData();
+            const productData = productsData.find(
+              (p) => p.data.name === normalizedProduct.name
+            )?.data;
+            const costoBurger = productData
+              ? calcularCostoHamburguesa(
+                  materialesData,
+                  productData.ingredients
+                )
+              : 0;
+            const costoToppings = effectiveToppings.reduce((sum, t) => {
+              const material = materialesData.find(
+                (m) => m.nombre.toLowerCase() === t.name.toLowerCase()
+              );
+              return sum + (material?.costo || 0);
+            }, 0);
+            await addProductToOrder(
+              currentOrder.id,
+              {
                 ...normalizedProduct,
                 toppings: effectiveToppings,
                 costoBurger:
                   (costoBurger + costoToppings) * quantityRef.current,
-              };
-
-              await addProductToOrder(
-                currentOrder.id,
-                productWithCosts,
-                quantityRef.current
-              );
-            }
+              },
+              quantityRef.current
+            );
           }
         } else if (!isOrderItem) {
-          // Lógica original del carrito
-          if (quantityRef.current === 0) {
-            if (cartItem) {
-              const itemIndex = cart.findIndex(
-                (item) =>
-                  item.name === normalizedProduct.name &&
-                  compareToppings(item.toppings, effectiveToppings)
-              );
-              console.log(
-                `🗑️ Removiendo ${normalizedProduct.name} del carrito`
-              );
-              dispatch(removeItem(itemIndex));
-            }
-          } else if (quantityRef.current >= 1) {
-            if (cartItem) {
-              const updatePayload = {
-                name: normalizedProduct.name,
-                category: normalizedProduct.category,
-                toppings: effectiveToppings,
-                quantity: quantityRef.current,
-              };
-              console.log(
-                `🔄 Actualizando cantidad de ${normalizedProduct.name} a ${quantityRef.current}`
-              );
-              dispatch(updateItemQuantity(updatePayload));
-            } else {
-              const newItem = {
-                name: normalizedProduct.name,
-                price: calculatedPrice || normalizedProduct.price,
-                img: normalizedProduct.img,
-                toppings: effectiveToppings,
-                quantity: quantityRef.current,
-                category: normalizedProduct.category,
-                type: normalizedProduct.type,
-              };
-              console.log(`✅ Agregando nuevo item al carrito:`, newItem);
-              dispatch(addItem(newItem));
-            }
-          }
+          handleCartUpdate();
         }
-
-        if (onOrderQuantityChange) {
-          onOrderQuantityChange(quantityRef.current);
-        }
+        if (onOrderQuantityChange) onOrderQuantityChange(quantityRef.current);
       } catch (error) {
-        console.error("❌ Error in startAddingProcess:", error);
+        console.error('Error al actualizar producto:', error);
       } finally {
         setIsAdding(false);
         setTimeout(() => setIsEditing(false), 300);
@@ -255,77 +176,88 @@ const QuickAddToCart = ({
     }, 2000);
   };
 
-  const isCarritoPage = location.pathname === "/carrito";
-  const shouldAnimateBothSides =
-    /^\/menu\/(mates|termos|bombillas|yerbas|canastas|burgers|bebidas|papas)\/[^\/]+$/.test(
-      location.pathname
-    ) || animateFromCenter;
-
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const isCarritoPage = pathParts.includes('carrito');
   const isMenuProductPage =
-    /^\/menu\/(mates|termos|bombillas|yerbas|canastas|burgers|bebidas|papas)\/[^\/]+$/.test(
-      location.pathname
-    );
+    pathParts.length === 4 &&
+    pathParts[1] === 'menu' &&
+    !!pathParts[2] &&
+    !!pathParts[3];
+
+  const shouldAnimateBothSides = isMenuProductPage || animateFromCenter;
 
   return (
     <div className="pt-0.5 w-[35px] h-[35px] text-center cursor-pointer flex items-center justify-center relative">
-      {isEditing ? (
-        <motion.div
-          initial={{ width: 35 }}
-          animate={{ width: isAdding ? 100 : 35 }}
-          transition={{ duration: 0.3 }}
-          className={`flex items-center absolute ${
-            shouldAnimateBothSides
-              ? "left-1/2 transform -translate-x-1/2"
-              : isCarritoPage || isPedidoComponente
-              ? "left-0"
-              : "right-0"
-          } top-0 flex-row rounded-3xl font-black border-black border-2 bg-gray-100`}
-        >
+      <AnimatePresence>
+        {isEditing ? (
+          <motion.div
+            key="edit-qty"
+            initial={{ opacity: 0, scale: 0.8, width: 35, originX: 1 }}
+            animate={{ opacity: 1, scale: 1, width: 105, originX: 1 }}
+            exit={{
+              width: 35,
+              originX: 1,
+              transition: { duration: 0.3 },
+            }}
+            transition={{ duration: 0.3 }}
+            className={`absolute flex items-center rounded-3xl border-black border-2 bg-gray-100 z-50 overflow-hidden
+              ${
+                shouldAnimateBothSides
+                  ? 'left-1/2 transform -translate-x-1/2'
+                  : isCarritoPage || isPedidoComponente
+                  ? 'left-0'
+                  : 'right-0'
+              }`}
+            style={{ height: 35 }}
+          >
+            <div
+              className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+              onClick={() => handleQuantityChange(-1)}
+            >
+              -
+            </div>
+            <div className="font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px]">
+              {quantity}
+            </div>
+            <div
+              className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+              onClick={() => handleQuantityChange(1)}
+            >
+              +
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+      {!isEditing &&
+        (isMenuProductPage && quantity === 0 && !isOrderItem ? (
+          <button
+            className="bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl"
+            onClick={startAddingProcess}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-6"
+            >
+              <path
+                fillRule="evenodd"
+                d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Agregar
+          </button>
+        ) : (
           <div
-            className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
-            onClick={handleDecrement}
+            className={`${
+              quantity > 0 ? 'bg-black border text-gray-100' : 'bg-gray-100'
+            } rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
+            onClick={startAddingProcess}
           >
-            -
+            {quantity > 0 ? quantity : '+'}
           </div>
-          <span className="font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px]">
-            {quantity}
-          </span>
-          <div
-            className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
-            onClick={handleIncrement}
-          >
-            +
-          </div>
-        </motion.div>
-      ) : isMenuProductPage && quantity === 0 && !isOrderItem ? (
-        <button
-          className="bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl"
-          onClick={startAddingProcess}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-6"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Agregar
-        </button>
-      ) : (
-        <div
-          className={`${
-            quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-100"
-          } rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
-          onClick={startAddingProcess}
-        >
-          {quantity > 0 ? quantity : "+"}
-        </div>
-      )}
+        ))}
     </div>
   );
 };

@@ -1,32 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useParams, Navigate } from 'react-router-dom';
-import { getProductsByClientV2 } from './firebase/getProducts';
+import {
+  Routes,
+  Route,
+  useParams,
+  Navigate,
+  useNavigate,
+} from 'react-router-dom';
+import { getCategoriesByClient } from './firebase/getCategories';
+import { getClientIntro } from './firebase/getClientConfig';
 import Section from './components/shopping/section';
 import DetailCard from './components/shopping/detail';
-import ClientLayout from './layouts/ClientLayout'; // nuevo layout
+import ClientLayout from './layouts/ClientLayout';
 
 const EmpresaRouter = () => {
   const { slug } = useParams();
-  const [productos, setProductos] = useState({});
+  const navigate = useNavigate();
+  const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [introConfig, setIntroConfig] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
+    const fetchCategories = async () => {
       try {
-        const data = await getProductsByClientV2(slug);
-        console.log('Productos cargados:', data);
-        setProductos(data?.porCategoria || {});
-      } catch (error) {
-        console.error('Error cargando productos para empresa:', error);
-        setProductos({});
+        const cats = await getCategoriesByClient(slug);
+        setCategorias(cats.map((cat) => cat.id));
+      } catch (err) {
+        console.error('❌ Error cargando categorías:', err);
+        setCategorias([]);
       } finally {
         setLoading(false);
       }
     };
 
     if (slug) {
-      fetchProducts();
+      fetchCategories();
+      getClientIntro(slug).then(setIntroConfig);
     }
   }, [slug]);
 
@@ -41,12 +49,13 @@ const EmpresaRouter = () => {
     );
   }
 
-  const categorias = Object.keys(productos);
+  const handleItemClick = (categoryId) => {
+    navigate(`/${slug}/menu/${categoryId}`);
+  };
 
   return (
-    <ClientLayout>
+    <ClientLayout handleItemClick={handleItemClick} introConfig={introConfig}>
       <Routes>
-        {/* Redirección automática al primer menú */}
         {categorias.length > 0 && (
           <Route
             index
@@ -58,9 +67,7 @@ const EmpresaRouter = () => {
           <Route
             key={categoria}
             path={`menu/${categoria}`}
-            element={
-              <Section path={categoria} products={productos[categoria]} />
-            }
+            element={<Section slug={slug} path={categoria} />}
           />
         ))}
 
@@ -68,13 +75,12 @@ const EmpresaRouter = () => {
           <Route
             key={`detail-${categoria}`}
             path={`menu/${categoria}/:id`}
-            element={
-              <DetailCard products={productos[categoria]} type={categoria} />
-            }
+            element={<DetailCard type={categoria} />}
           />
         ))}
 
-        {/* Ruta fallback por si no hay match */}
+        {/* <Route path="pedido" element={<PedidoScreen />} /> */}
+
         <Route
           path="*"
           element={
