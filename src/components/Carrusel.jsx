@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-// import { getClientConfig } from '../firebase/getClientConfig';
 
 const DEFAULT_INTERVAL = 3000;
 
