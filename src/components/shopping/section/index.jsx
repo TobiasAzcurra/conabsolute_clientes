@@ -27,6 +27,7 @@ const Section = ({ slug, path }) => {
       setLoading(true);
       try {
         const prods = await getProductsByCategory(slug, path);
+        console.log('Productos cargados:', prods);
         setProducts(prods.map(normalize));
       } catch (e) {
         console.error('❌ Error al cargar productos:', e);
