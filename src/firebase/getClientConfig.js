@@ -1,12 +1,15 @@
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
-export const getClientConfig = async (slug) => {
-  const firestore = getFirestore();
-  const docRef = doc(firestore, 'absoluteClientes', slug);
-  const docSnap = await getDoc(docRef);
+const db = getFirestore();
 
-  if (!docSnap.exists()) return null;
+export const getClientIntro = async (slug) => {
+  const ref = doc(db, 'absoluteClientes', slug, 'config', 'intro');
+  const snapshot = await getDoc(ref);
+  return snapshot.exists() ? snapshot.data() : null;
+};
 
-  const data = docSnap.data();
-  return data.config || null;
+export const getClientData = async (slug) => {
+  const ref = doc(db, 'absoluteClientes', slug);
+  const snapshot = await getDoc(ref);
+  return snapshot.exists() ? snapshot.data() : null;
 };

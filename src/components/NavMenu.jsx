@@ -1,9 +1,26 @@
-import { useEffect, useRef } from "react";
-import Items from "../pages/menu/Items";
+import { useEffect, useRef, useState } from 'react';
+import Items from '../pages/menu/Items';
+import { getCategoriesByClient } from '../firebase/getCategories';
+import { useParams } from 'react-router-dom';
 
 const NavMenu = ({ selectedItem, handleItemClick }) => {
+  const { slug } = useParams();
   const navRef = useRef(null);
   const animationRef = useRef(null);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await getCategoriesByClient(slug);
+        setCategories(cats);
+      } catch (err) {
+        console.error('❌ Error al obtener categorías:', err);
+      }
+    };
+
+    if (slug) fetchCategories();
+  }, [slug]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -11,12 +28,11 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
 
     let scrollAmount = 0;
     let isResetting = false;
-    const speed = 0.5; // velocidad del scroll (ajustable)
-    const resetDuration = 800; // duración de la animación de reinicio en ms
+    const speed = 0.5;
+    const resetDuration = 800;
 
     const scroll = () => {
       if (isResetting) {
-        // No hacer nada mientras se está ejecutando la animación de reinicio
         animationRef.current = requestAnimationFrame(scroll);
         return;
       }
@@ -24,7 +40,6 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
       const maxScroll = nav.scrollWidth - nav.clientWidth;
 
       if (scrollAmount >= maxScroll) {
-        // Iniciar animación de reinicio
         isResetting = true;
         const startTime = performance.now();
         const startScroll = nav.scrollLeft;
@@ -32,8 +47,6 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
         const resetAnimation = (currentTime) => {
           const elapsed = currentTime - startTime;
           const progress = Math.min(elapsed / resetDuration, 1);
-
-          // Función de easing para una animación más suave (ease-out)
           const easedProgress = 1 - Math.pow(1 - progress, 3);
 
           nav.scrollLeft = startScroll * (1 - easedProgress);
@@ -41,7 +54,6 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
           if (progress < 1) {
             requestAnimationFrame(resetAnimation);
           } else {
-            // Reiniciar valores para continuar el scroll automático
             scrollAmount = 0;
             isResetting = false;
             animationRef.current = requestAnimationFrame(scroll);
@@ -58,7 +70,6 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
 
     animationRef.current = requestAnimationFrame(scroll);
 
-    // Cleanup function
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -67,45 +78,24 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
   }, []);
 
   return (
-    <div>
-      <p className="text-gray-100  px-4 text-2xl mb-3 font-medium font-coolvetica">
+    <div className="relative z-[99]">
+      <p className="text-gray-100 px-4 text-2xl mb-3 font-medium font-coolvetica">
         ¿Salen unos mates?
       </p>
       <nav
         ref={navRef}
         className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide"
-        style={{ scrollBehavior: "auto" }} // Asegurar que no interfiera con nuestra animación personalizada
+        style={{ scrollBehavior: 'auto' }}
       >
-        <Items
-          selectedItem={selectedItem}
-          img={"/menu/matePortada.jpeg"}
-          name="Mates"
-          handleItemClick={handleItemClick}
-        />
-        <Items
-          selectedItem={selectedItem}
-          img={"/menu/termoPortada.jpeg"}
-          name="Termos"
-          handleItemClick={handleItemClick}
-        />
-        <Items
-          selectedItem={selectedItem}
-          img={"/menu/bombillaPortada.jpeg"}
-          name="Bombillas"
-          handleItemClick={handleItemClick}
-        />
-        <Items
-          selectedItem={selectedItem}
-          img={"/menu/yerbaPortada.jpeg"}
-          name="Yerbas"
-          handleItemClick={handleItemClick}
-        />
-        <Items
-          selectedItem={selectedItem}
-          img={"/menu/canastaPortada.jpeg"}
-          name="Canastas"
-          handleItemClick={handleItemClick}
-        />
+        {categories.map((cat) => (
+          <Items
+            key={cat.id}
+            selectedItem={selectedItem}
+            img={cat.image || '/menu/defaultPortada.jpeg'}
+            name={cat.id}
+            handleItemClick={handleItemClick}
+          />
+        ))}
       </nav>
     </div>
   );

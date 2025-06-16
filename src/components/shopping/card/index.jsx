@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import QuickAddToCart from "./quickAddToCart";
-import currencyFormat from "../../../helpers/currencyFormat";
-import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { listenToAltaDemanda } from "../../../firebase/readConstants";
-import LoadingPoints from "../../LoadingPoints";
+import React, { useState, useEffect } from 'react';
+import QuickAddToCart from './quickAddToCart';
+import currencyFormat from '../../../helpers/currencyFormat';
+import { Link, useParams } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { listenToAltaDemanda } from '../../../firebase/readConstants';
+import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
 
 const Card = ({
   name,
@@ -18,10 +19,10 @@ const Card = ({
   type,
   data,
 }) => {
-  const [rating, setRating] = useState(0);
+  const { slug } = useParams();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
-  const [availableUnits, setAvailableUnits] = useState(0);
+  // const [availableUnits, setAvailableUnits] = useState(0);
   const [selectedColor, setSelectedColor] = useState(null); // Estado para el color seleccionado
   const [showConsultStock, setShowConsultStock] = useState(false);
 
@@ -30,257 +31,108 @@ const Card = ({
       setPriceFactor(altaDemanda.priceFactor);
       setItemsOut(altaDemanda.itemsOut);
     });
-
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    // Generate random number between 1 and 20 for available units
-    setAvailableUnits(Math.floor(Math.random() * 20) + 1);
+  // const renderStars = (score) => {
+  //   const stars = [];
+  //   const fullStars = Math.floor(score);
+  //   const hasHalfStar = score - fullStars >= 0.5;
+  //   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
-    // Decide randomly if this product should show "consultar disponibilidad de stock"
-    // 1 out of 3 times (33.33% chance)
-    setShowConsultStock(Math.random() < 1 / 3);
-  }, [id]); // Use id as dependency to ensure consistency per product
+  //   for (let i = 0; i < fullStars; i++) {
+  //     stars.push(
+  //       <FontAwesomeIcon
+  //         key={`full-${i}`}
+  //         icon="star"
+  //         className="text-red-main h-3"
+  //         aria-label="Estrella completa"
+  //       />
+  //     );
+  //   }
 
-  useEffect(() => {
-    const fetchRating = async () => {
-      try {
-        const firestore = getFirestore();
-        const burgersRef = collection(firestore, "burgers");
-        const snapshot = await getDocs(burgersRef);
+  //   if (hasHalfStar) {
+  //     stars.push(
+  //       <FontAwesomeIcon
+  //         key="half"
+  //         icon="star-half-alt"
+  //         className="text-red-main h-3"
+  //         aria-label="Media estrella"
+  //       />
+  //     );
+  //   }
 
-        snapshot.docs.forEach((doc) => {
-          const burgerData = doc.data();
-          if (burgerData.name === name) {
-            // Si el rating es menor a 4, establecer 4 o 4.1
-            const actualRating = burgerData.rating || 0;
-            const adjustedRating =
-              actualRating < 4 ? (Math.random() > 0.5 ? 4 : 4.1) : actualRating;
-            setRating(adjustedRating);
-          }
-        });
-      } catch (error) {
-        console.error("Error al obtener ratings:", error);
-      }
-    };
+  //   for (let i = 0; i < emptyStars; i++) {
+  //     stars.push(
+  //       <FontAwesomeIcon
+  //         key={`empty-${i}`}
+  //         icon={['far', 'star']}
+  //         className="text-red-main h-3"
+  //         aria-label="Estrella vacía"
+  //       />
+  //     );
+  //   }
 
-    if (path === "burgers") {
-      fetchRating();
-    }
-  }, [name, path, id]);
-
-  const excludedNames = [
-    "Coca-Cola (310 ml.)",
-    "Fanta de naranja (310 ml.)",
-    "Sprite (310 ml.)",
-  ];
-
-  const capitalizeWords = (str) => {
-    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  const getImagePosition = (productName) => {
-    const imagePositions = {
-      "Satisfyer Easter Egg": "65%",
-      "Satisfyer BCN Cheeseburger": "40%",
-      "Satisfyer ANHELO Classic": "50%",
-      "Simple Cheeseburger": "70%",
-      "Doble Cheeseburger": "60%",
-      "Triple Cheeseburger": "40%",
-      "Cuadruple Cheeseburger": "35%",
-      "Crispy BCN": "65%",
-      "ANHELO Classic": "55%",
-      "BCN Cheeseburger": "65%",
-      "BBQ BCN Cheeseburger": "55%",
-      "Easter Egg": "70%",
-      "Mario Inspired": "45%",
-      "2x1 BCN Cheeseburger": "85%",
-      "2x1 Anhelo Yummy": "95%",
-      "Papas Anhelo ®": "50%",
-      "Papas con Cheddar ®": "50%",
-      "Pote Cheddar": "50%",
-    };
-
-    return imagePositions[productName] || "50%";
-  };
-
-  const imgPosition = getImagePosition(name);
-
-  const renderStars = (score) => {
-    const stars = [];
-    const fullStars = Math.floor(score);
-    const hasHalfStar = score - fullStars >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <FontAwesomeIcon
-          key={`full-${i}`}
-          icon="star"
-          className="text-red-main h-3"
-          aria-label="Estrella completa"
-        />
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <FontAwesomeIcon
-          key="half"
-          icon="star-half-alt"
-          className="text-red-main h-3"
-          aria-label="Media estrella"
-        />
-      );
-    }
-
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <FontAwesomeIcon
-          key={`empty-${i}`}
-          icon={["far", "star"]}
-          className="text-red-main h-3"
-          aria-label="Estrella vacía"
-        />
-      );
-    }
-
-    return stars;
-  };
+  //   return stars;
+  // };
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
 
-  const productIngredients = {
-    // Promociones 2x1
-    // "2x1 Cuadruple Cheeseburger": [""],
-    "2x1 Anhelo Classic": ["anhelo", "tomate", "lechuga"],
-    "2x1 BCN Cheeseburger": ["anhelo", "bacon"],
-
-    "2x1 Anhelo Yummy": ["anhelo", "yummy"],
-    "2x1 BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
-    "2x1 Easter Egg": ["anhelo", "huevo", "bacon"],
-    "2x1 Mario Inspired": ["mayonesa", "mario"],
-
-    // Satisfyers
-    "Satisfyer Easter Egg": ["anhelo", "huevo", "bacon"],
-    "Satisfyer BCN Cheeseburger": ["anhelo", "bacon"],
-    "Satisfyer ANHELO Classic": ["anhelo", "tomate", "lechuga"],
-
-    // Hamburguesas principales
-    "Simple Cheeseburger": [""],
-    "Doble Cheeseburger": [""],
-    "Triple Cheeseburger": [""],
-    "Cuadruple Cheeseburger": [""],
-    "ANHELO Classic": ["anhelo", "tomate", "lechuga"],
-    "BCN Cheeseburger": ["anhelo", "bacon"],
-    "BBQ BCN Cheeseburger": ["bacon", "bbq", "caramelizada"],
-    "Easter Egg": ["anhelo", "huevo", "bacon"],
-    "Mario Inspired": ["mayonesa", "mario"],
-  };
-
   // Función para verificar si el producto tiene ingredientes agotados
-  const hasUnavailableIngredients = () => {
-    const ingredients = productIngredients[name] || [];
-    // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
-    if (
-      ingredients.length === 0 ||
-      (ingredients.length === 1 && ingredients[0] === "")
-    ) {
-      return false;
-    }
-    // Verificar si algún ingrediente está agotado (false)
-    return ingredients.some(
-      (ingredient) => ingredient !== "" && itemsOut[ingredient] === false
-    );
-  };
+  // const hasUnavailableIngredients = () => {
+  //   const ingredients = productIngredients[name] || [];
+  //   // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
+  //   if (
+  //     ingredients.length === 0 ||
+  //     (ingredients.length === 1 && ingredients[0] === '')
+  //   ) {
+  //     return false;
+  //   }
+  //   // Verificar si algún ingrediente está agotado (false)
+  //   return ingredients.some(
+  //     (ingredient) => ingredient !== '' && itemsOut[ingredient] === false
+  //   );
+  // };
 
-  // Función para obtener la URL de la imagen
-  const getImageSrc = () => {
-    // 🔥 CLAVE: Priorizar la imagen de Firebase Storage
+  const imageSrc = getImageSrc(data || img);
 
-    // 1. Primero verificar si hay imagen en data.img (Firebase Storage URL)
-    if (data?.img && data.img.startsWith("https://")) {
-      console.log(
-        `🖼️ Usando imagen de Firebase Storage para ${name}:`,
-        data.img
-      );
-      return data.img;
-    }
+  // const handleColorClick = (colorIndex, event) => {
+  //   event.preventDefault(); // Prevenir navegación del Link
+  //   event.stopPropagation(); // Evitar que el evento se propague
+  //   setSelectedColor(colorIndex);
+  // };
 
-    // 2. Si hay img directamente en el objeto (también de Firebase)
-    if (img && img.startsWith("https://")) {
-      console.log(`🖼️ Usando imagen directa de Firebase para ${name}:`, img);
-      return img;
-    }
-
-    // 3. Fallback a imagen local (para productos legacy)
-    if (img && !img.startsWith("https://")) {
-      console.log(`📁 Usando imagen local para ${name}:`, `/menu/${img}`);
-      return `/menu/${img}`;
-    }
-
-    // 4. Imagen por defecto si no hay nada
-    console.warn(`⚠️ No se encontró imagen para ${name}, usando placeholder`);
-    return "/placeholder-product.jpg";
-  };
-
-  const imageSrc = getImageSrc();
-
-  // Función para manejar el click en los círculos de color
-  const handleColorClick = (colorIndex, event) => {
-    event.preventDefault(); // Prevenir navegación del Link
-    event.stopPropagation(); // Evitar que el evento se propague
-    setSelectedColor(colorIndex);
-  };
-
-  // Colores disponibles
-  const colors = [
-    { bg: "bg-red-500", name: "rojo" },
-    { bg: "bg-white", name: "blanco" },
-    { bg: "bg-black", name: "negro" },
-  ];
+  // const colors = [
+  //   { bg: 'bg-red-500', name: 'rojo' },
+  //   { bg: 'bg-white', name: 'blanco' },
+  //   { bg: 'bg-black', name: 'negro' },
+  // ];
 
   return (
     <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
       <div className="absolute right-3.5 top-2.5 z-40">
-        {hasUnavailableIngredients() ? (
-          <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6 "
-            >
-              <path
-                fillRule="evenodd"
-                d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                clipRule="evenodd"
-              />
-            </svg>
-
-            <p className="font-coolvetica text-xs">Agotado</p>
-          </div>
-        ) : (
-          <QuickAddToCart
-            product={{
-              name,
-              description,
-              price: adjustedPrice,
-              img: imageSrc, // Pasar la URL correcta
-              path,
-              id,
-              category,
-              type,
-            }}
-          />
-        )}
+        <QuickAddToCart
+          product={{
+            name,
+            description,
+            price: adjustedPrice,
+            img: imageSrc,
+            path,
+            id,
+            category,
+            type,
+          }}
+        />
       </div>
 
-      <Link to={`/menu/${path}/${id}`} className="w-full">
+      <Link
+        to={`/${slug}/menu/${path}/${id}`}
+        state={{ product: data }}
+        className="w-full"
+      >
         <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
@@ -313,12 +165,11 @@ const Card = ({
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
           <img
-            className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ objectPosition: `center ${imgPosition}` }}
             src={imageSrc}
-            alt={name || "Producto"}
+            alt={name || 'Producto'}
+            className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
+              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+            }`}
             onLoad={() => {
               console.log(`✅ Imagen cargada exitosamente para ${name}`);
               setIsLoaded(true);
@@ -334,18 +185,25 @@ const Card = ({
             }}
           />
         </div>
-
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-xl   font-medium  text-center">
-              {capitalizeWords(name || "Producto sin nombre")}
+              {name || 'Producto sin nombre'}
             </h5>
           </div>
-          <p className="text-center text-xs font-light text-opacity-30 text-black">
-            {description}
-          </p>
+          {data?.cardDescription && (
+            <p className="text-center text-sm text-gray-600 font-coolvetica leading-tight mb-1">
+              {data.cardDescription}
+            </p>
+          )}
+
+          {description && (
+            <p className="text-center text-xs font-light text-opacity-30 text-black">
+              {description}
+            </p>
+          )}
           <div className="flex w-full mt-4 items-center  justify-between mb-6">
-            {type === "promo" ? (
+            {type === 'promo' ? (
               <div className="flex flex-row gap-2 items-baseline">
                 <span className="font-bold text-4xl text-black">
                   {currencyFormat(adjustedPrice)}
@@ -359,7 +217,7 @@ const Card = ({
                 {currencyFormat(adjustedPrice)}
               </span>
             )}
-            <div className="flex flex-col gap-1 items-end">
+            {/* <div className="flex flex-col gap-1 items-end">
               <div className="flex flex-row gap-1">
                 {colors.map((color, index) => (
                   <div
@@ -368,8 +226,8 @@ const Card = ({
                       color.bg
                     } h-4 w-4 rounded-full cursor-pointer transition-all duration-200 ${
                       selectedColor === index
-                        ? "border-4 border-gray-500"
-                        : "border border-gray-300"
+                        ? 'border-4 border-gray-500'
+                        : 'border border-gray-300'
                     }`}
                     onClick={(e) => handleColorClick(index, e)}
                     title={`Seleccionar color ${color.name}`}
@@ -378,10 +236,10 @@ const Card = ({
               </div>
               <p className="font-medium text-xs text-gray-500">
                 {showConsultStock
-                  ? "*Consultar disponibilidad de stock"
+                  ? '*Consultar disponibilidad de stock'
                   : `${availableUnits}u. disponibles`}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </Link>

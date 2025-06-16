@@ -310,7 +310,7 @@ const AppRouter = () => {
   return (
     <div className="flex flex-col">
       {shouldShowCarruselAndNavMenu && (
-        <div className="relative mb-[90px]">
+        <div className="relative">
           <div className="flex justify-center w-full ">
             {/* Search by phonenumber with autosuggest */}
 
@@ -482,8 +482,8 @@ const AppRouter = () => {
         !pathname.startsWith("/pedido/") &&
         !pathname.startsWith("/success") && (
           <>
-            <div className="fixed inset-x-0 bottom-0 z-50 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
-            <FloatingCart totalQuantity={totalQuantity} cart={cart} />
+            {/* <div className="fixed inset-x-0 bottom-0 z-50 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" /> */}
+            {/* <FloatingCart totalQuantity={totalQuantity} cart={cart} /> */}
           </>
         )}
 
