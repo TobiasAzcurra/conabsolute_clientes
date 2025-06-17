@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
 import { useState } from "react";
 import { listenToAltaDemanda } from "../../firebase/readConstants";
@@ -15,6 +15,8 @@ const Items = ({
   // Importamos useLocation para obtener la ruta actual
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
+
+  const { slug } = useParams();
 
   const location = useLocation();
 
@@ -94,7 +96,7 @@ const Items = ({
     ? "border-2 border-black border-opacity-100"
     : "border border-black border-opacity-20";
 
-  const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-100 p-1 transition duration-300 text-black ${
+  const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
       ? "w-[110px]"
       : "min-w-[110px] max-w-[200px]"
@@ -109,7 +111,7 @@ const Items = ({
 
   const content = (
     <>
-      <div className="h-[70px] w-full rounded-t-3xl overflow-hidden bg-gradient-to-b from-gray-100 via-gray-100 to-gray-300 relative flex justify-center">
+      <div className="h-[70px] w-full rounded-t-[20px] overflow-hidden bg-gradient-to-b from-gray-100 via-gray-100 to-gray-300 relative flex justify-center">
         <img
           className="object-cover absolute  h-full w-full"
           src={imageSrc}
@@ -169,7 +171,7 @@ const Items = ({
     return (
       <Link
         className={className}
-        to={`/menu/${name}`}
+        to={`/${slug}/menu/${name}`}
         onClick={() => handleItemClick(name)}
       >
         {content}

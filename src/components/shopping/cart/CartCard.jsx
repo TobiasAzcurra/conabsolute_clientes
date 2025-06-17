@@ -6,6 +6,7 @@ import {
 import currencyFormat from "../../../helpers/currencyFormat";
 import QuickAddToCart from "../card/quickAddToCart";
 import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
 
 const CartCard = ({
   item,
@@ -122,60 +123,15 @@ const CartCard = ({
     return (price || 0) + toppingsTotal;
   };
 
-  // 🔥 Función para obtener la URL correcta de la imagen
-  const getImageSrc = () => {
-    // 1. Verificar si hay imagen y es de Firebase Storage
-    if (img && img.startsWith("https://")) {
-      console.log(
-        `🖼️ CartCard usando imagen de Firebase Storage para ${name}:`,
-        img
-      );
-      return img;
-    }
-
-    // 2. Si hay imagen pero es local (productos legacy)
-    if (img && !img.startsWith("https://")) {
-      console.log(
-        `📁 CartCard usando imagen local para ${name}:`,
-        `/menu/${img}`
-      );
-      return `/menu/${img}`;
-    }
-
-    // 3. Verificar si hay imagen en data del item (estructura de Firebase)
-    if (item.data?.img && item.data.img.startsWith("https://")) {
-      console.log(
-        `🖼️ CartCard usando imagen de data Firebase para ${name}:`,
-        item.data.img
-      );
-      return item.data.img;
-    }
-
-    // 4. Fallback a función getDefaultImage si existe
-    if (getDefaultImage) {
-      const defaultImg = getDefaultImage(item);
-      console.log(
-        `🎭 CartCard usando imagen por defecto para ${name}:`,
-        defaultImg
-      );
-      return defaultImg;
-    }
-
-    // 5. Imagen placeholder final
-    console.warn(
-      `⚠️ CartCard: No se encontró imagen para ${name}, usando placeholder`
-    );
-    return "/placeholder-product.jpg";
-  };
-
   const totalPrice = calculateTotalPrice();
-  const imageSrc = getImageSrc();
+
+  const imageSrc = getImageSrc(item || img);
 
   return (
     <div className="relative">
       <div
         className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
-          isDisabled ? "blur-sm cursor-not-allowed bg-gray-100" : ""
+          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50 " : ""
         }`}
       >
         <div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden relative">

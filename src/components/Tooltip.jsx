@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 
-const Tooltip = ({ text, duration = 10000, className = "", position = "right" }) => {
+const Tooltip = ({
+  text,
+  duration = 10000,
+  className = "",
+  position = "right",
+}) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const showTooltip = () => {
@@ -22,9 +27,10 @@ const Tooltip = ({ text, duration = 10000, className = "", position = "right" })
     `;
 
     // Position-specific classes
-    const positionClasses = position === "left" 
-      ? "right-0" // Align to the right edge of the container
-      : "left-0"; // Default - align to the left edge
+    const positionClasses =
+      position === "left"
+        ? "right-0" // Align to the right edge of the container
+        : "left-0"; // Default - align to the left edge
 
     // Visibility classes
     const visibilityClasses = isVisible
@@ -38,7 +44,8 @@ const Tooltip = ({ text, duration = 10000, className = "", position = "right" })
     <div className={`relative inline-block ${className}`}>
       {/* Tooltip */}
       <div className={getPositionClasses()}>
-        <div className="relative bg-black bg-opacity-50 backdrop-blur-sm 
+        <div
+          className="relative bg-black bg-opacity-50 backdrop-blur-sm 
           rounded-2xl shadow-lg border border-gray-200
           overflow-hidden"
         >
@@ -54,7 +61,7 @@ const Tooltip = ({ text, duration = 10000, className = "", position = "right" })
       {/* Info Icon */}
       <div
         onClick={showTooltip}
-        className="cursor-pointer hover:bg-gray-100 rounded-full transition-colors duration-200"
+        className="cursor-pointer hover:bg-gray-50  rounded-full transition-colors duration-200"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

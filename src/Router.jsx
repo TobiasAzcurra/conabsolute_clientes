@@ -19,6 +19,7 @@ import AppleModal from "./components/AppleModal";
 import { updateRatingForOrder } from "./firebase/uploadOrder";
 import { getOrderById } from "./firebase/getPedido";
 import logo from "./assets/Logo APM-07.png";
+import EmpresaRouter from "./EmpresaRouter";
 
 const AppRouter = () => {
   const { pathname } = useLocation();
@@ -75,9 +76,6 @@ const AppRouter = () => {
         };
 
         setProductos(productosEstructurados);
-
-        console.log("✅ Productos cargados exitosamente:");
-        console.log("📦 Productos estructurados:", productosEstructurados);
 
         // Mostrar estadísticas detalladas
         Object.entries(productosEstructurados).forEach(([categoria, items]) => {
@@ -312,7 +310,7 @@ const AppRouter = () => {
   return (
     <div className="flex flex-col">
       {shouldShowCarruselAndNavMenu && (
-        <div className="relative mb-[90px]">
+        <div className="relative">
           <div className="flex justify-center w-full ">
             {/* Search by phonenumber with autosuggest */}
 
@@ -335,7 +333,7 @@ const AppRouter = () => {
                 <button
                   onClick={handleSearch}
                   disabled={isSearching || phoneNumber.length < 8}
-                  className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full"
+                  className="bg-gray-50  h-10 w-20 flex items-center justify-center rounded-r-full"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -353,7 +351,7 @@ const AppRouter = () => {
 
                 {/* Autosuggest dropdown */}
                 {showSuggestion && previousPhone && (
-                  <div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
+                  <div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-50  shadow-lg rounded-full border border-gray-200 z-50">
                     <button
                       onClick={handleSuggestionClick}
                       className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center"
@@ -472,6 +470,8 @@ const AppRouter = () => {
             </div>
           }
         />
+        {/* NUEVA RUTA EMPRESAS */}
+        <Route path="/:slug/*" element={<EmpresaRouter />} />
       </Routes>
 
       {/* Mostrar el carrito flotante si hay productos en el carrito y no está en rutas excluidas */}
@@ -482,8 +482,8 @@ const AppRouter = () => {
         !pathname.startsWith("/pedido/") &&
         !pathname.startsWith("/success") && (
           <>
-            <div className="fixed inset-x-0 bottom-0 z-50 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
-            <FloatingCart totalQuantity={totalQuantity} cart={cart} />
+            {/* <div className="fixed inset-x-0 bottom-0 z-50 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" /> */}
+            {/* <FloatingCart totalQuantity={totalQuantity} cart={cart} /> */}
           </>
         )}
 

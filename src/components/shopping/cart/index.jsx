@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { addOneItem, removeOneItem } from "../../../redux/cart/cartSlice";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Items from "../../../pages/menu/Items";
 import box from "../../../assets/box.png";
@@ -11,6 +11,8 @@ import carrusel from "../../../assets/carrusel3.jpg";
 import MovingRibbon from "../MovingRibbon";
 import FormCustom from "../../form";
 import LoadingPoints from "../../LoadingPoints";
+import { getProductsByCategoryPosition } from "../../../firebase/getProductsByCategory";
+import { getImageSrc } from "../../../helpers/getImageSrc";
 
 export const items = {
   mates: "mates",
@@ -29,9 +31,20 @@ const CartItems = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
+  const { slug } = useParams();
 
   // Estados para productos de Firebase
   const [allProducts, setAllProducts] = useState([]);
+  const [isLoadingCategoryProducts, setIsLoadingCategoryProducts] =
+    useState(true);
+
+  // Estados nuevos para prods
+  const [productsByCategoryPosition, setProductsByCategoryPosition] = useState(
+    []
+  );
+  const [isLoadingProductsByCategory, setIsLoadingProductsByCategory] =
+    useState(true);
+
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
   const deleteItem = (i) => {
@@ -93,6 +106,26 @@ const CartItems = () => {
     };
 
     loadProducts();
+  }, []);
+
+  useEffect(() => {
+    const loadProductsByCategoryPosition = async () => {
+      try {
+        setIsLoadingCategoryProducts(true);
+        const products = await getProductsByCategoryPosition(slug);
+        setProductsByCategoryPosition(products);
+      } catch (error) {
+        console.error(
+          "❌ Error al cargar productos por categoría con position:",
+          error
+        );
+        setProductsByCategoryPosition([]);
+      } finally {
+        setIsLoadingCategoryProducts(false);
+      }
+    };
+
+    loadProductsByCategoryPosition();
   }, []);
 
   useEffect(() => {
@@ -163,12 +196,6 @@ const CartItems = () => {
     (product) => !cart.some((cartItem) => cartItem.name === product.name)
   );
 
-  console.log("🛒 CartItems render:", {
-    cartItems: cart.length,
-    availableProducts: availableProducts.length,
-    isLoading: isLoadingProducts,
-  });
-
   return (
     <div className="flex flex-col font-coolvetica overflow-x-hidden">
       <div className="flex justify-center flex-col mt-8 items-center w-full">
@@ -201,60 +228,47 @@ const CartItems = () => {
           Agrega. Inverti en tu felicidad
         </p>
 
-        {isLoadingProducts ? (
-          <div className="flex justify-center items-center w-full h-32">
-            <LoadingPoints />
-          </div>
-        ) : availableProducts.length > 0 ? (
-          <div
-            className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
-            style={{
-              maxHeight: "300px",
-              paddingBottom: "1rem",
-              scrollBehavior: "smooth",
-              WebkitOverflowScrolling: "touch",
-              width: "100%",
-            }}
-          >
-            <div className="flex gap-2" style={{ width: "max-content" }}>
-              {availableProducts.map((product, index) => {
-                // Determinar la URL de imagen correcta
-                let productImg;
-                if (product.img && product.img.startsWith("https://")) {
-                  // Imagen de Firebase Storage
-                  productImg = product.img;
-                } else if (product.img && !product.img.startsWith("https://")) {
-                  // Imagen local (legacy)
-                  productImg = `/menu/${product.img}`;
-                } else {
-                  // Usar imagen por defecto
-                  productImg = getDefaultImage(product);
-                }
-
-                console.log(`📷 Imagen para ${product.name}:`, productImg);
-
-                return (
-                  <Items
-                    key={product.id || index}
-                    selectedItem={product}
-                    img={productImg}
-                    name={product.name}
-                    handleItemClick={() => {}}
-                    isCart={true}
-                  />
-                );
-              })}
+        <div className="w-full mb-4">
+          {isLoadingCategoryProducts ? (
+            <div className="flex justify-center items-center w-full h-20">
+              <LoadingPoints />
             </div>
-          </div>
-        ) : (
-          <div className="flex justify-center items-center w-full h-32">
-            <p className="font-coolvetica text-gray-600 text-center">
-              {allProducts.length === 0
-                ? "No hay productos disponibles"
-                : "¡Todos los productos están en tu carrito!"}
-            </p>
-          </div>
-        )}
+          ) : productsByCategoryPosition.length > 0 ? (
+            <div
+              className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
+              style={{
+                maxHeight: "220px",
+                paddingBottom: "1rem",
+                scrollBehavior: "smooth",
+                WebkitOverflowScrolling: "touch",
+                width: "100%",
+              }}
+            >
+              <div className="flex gap-2" style={{ width: "max-content" }}>
+                {productsByCategoryPosition.map((product, index) => {
+                  const productImg = getImageSrc(product);
+
+                  return (
+                    <Items
+                      key={product.id || index}
+                      selectedItem={product}
+                      img={productImg}
+                      name={product.name}
+                      handleItemClick={() => {}}
+                      isCart={true}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-center items-center w-full h-20">
+              <p className="font-coolvetica text-gray-600 text-center">
+                No hay productos destacados disponibles
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       <FormCustom cart={cart} total={total} />
@@ -270,10 +284,10 @@ const CartItems = () => {
             height: 8px;
           }
           .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f3f4f6; /* bg-gray-100 */
+            background: #f3f4f6; /* bg-gray-50  */
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #f3f4f6; /* bg-gray-100 */
+            background: #f3f4f6; /* bg-gray-50  */
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: padding-box;
