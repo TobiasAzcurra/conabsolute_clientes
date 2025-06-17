@@ -9,7 +9,7 @@ const AppleErrorMessage = ({ children, voucher = false }) => {
   const isValidCode = children === "¡Código válido! (50% descuento)";
 
   // Use green background for valid code, red for errors
-  const bgColor = isValidCode ? "bg-green-500" : "bg-red-main";
+  const bgColor = isValidCode ? "bg-green-500" : "bg-red-500";
 
   return (
     <div

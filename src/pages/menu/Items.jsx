@@ -132,7 +132,7 @@ const Items = ({
         {isCarrito && selectedItem && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
-              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
+              <div className="bg-red-500 rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
                 <p className="font-coolvetica text-xs">Agotado</p>
               </div>
             ) : (
@@ -146,7 +146,7 @@ const Items = ({
         {isPedidoComponente && selectedItem && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
-              <div className="bg-red-main rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
+              <div className="bg-red-500 rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
                 <p className="font-coolvetica text-xs">Agotado</p>
               </div>
             ) : (
