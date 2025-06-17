@@ -333,7 +333,7 @@ const AppRouter = () => {
                 <button
                   onClick={handleSearch}
                   disabled={isSearching || phoneNumber.length < 8}
-                  className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full"
+                  className="bg-gray-50  h-10 w-20 flex items-center justify-center rounded-r-full"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -351,7 +351,7 @@ const AppRouter = () => {
 
                 {/* Autosuggest dropdown */}
                 {showSuggestion && previousPhone && (
-                  <div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
+                  <div className="absolute font-coolvetica left-0 right-0 top-12 h-10 shadow-black shadow-gray-900/40 bg-gray-50  shadow-lg rounded-full border border-gray-200 z-50">
                     <button
                       onClick={handleSuggestionClick}
                       className="w-full font-bold text-left px-4 h-10 rounded-md text-xs flex items-center"

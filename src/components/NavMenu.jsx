@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import Items from '../pages/menu/Items';
-import { getCategoriesByClient } from '../firebase/getCategories';
-import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import Items from "../pages/menu/Items";
+import { getCategoriesByClient } from "../firebase/getCategories";
+import { useParams } from "react-router-dom";
 
 const NavMenu = ({ selectedItem, handleItemClick }) => {
   const { slug } = useParams();
@@ -15,7 +15,7 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
         const cats = await getCategoriesByClient(slug);
         setCategories(cats);
       } catch (err) {
-        console.error('❌ Error al obtener categorías:', err);
+        console.error("❌ Error al obtener categorías:", err);
       }
     };
 
@@ -79,19 +79,19 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
 
   return (
     <div className="relative z-[99]">
-      <p className="text-gray-100 px-4 text-2xl mb-3 font-medium font-coolvetica">
+      <p className="text-gray-100 px-4 text-center text-2xl mb-3 font-medium font-coolvetica">
         ¿Salen unos mates?
       </p>
       <nav
         ref={navRef}
         className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide"
-        style={{ scrollBehavior: 'auto' }}
+        style={{ scrollBehavior: "auto" }}
       >
         {categories.map((cat) => (
           <Items
             key={cat.id}
             selectedItem={selectedItem}
-            img={cat.image || '/menu/defaultPortada.jpeg'}
+            img={cat.image || "/menu/defaultPortada.jpeg"}
             name={cat.id}
             handleItemClick={handleItemClick}
           />

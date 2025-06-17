@@ -1,30 +1,30 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   addItem,
   updateItemQuantity,
   removeItem,
-} from '../../../redux/cart/cartSlice';
+} from "../../../redux/cart/cartSlice";
 import {
   addProductToOrder,
   ReadMateriales,
   ReadData,
-} from '../../../firebase/uploadOrder';
-import { calcularCostoHamburguesa } from '../../../helpers/currencyFormat';
+} from "../../../firebase/uploadOrder";
+import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 
 const normalizeProduct = (product) => ({
   ...product,
-  name: product.name || product.data?.name || 'Producto sin nombre',
+  name: product.name || product.data?.name || "Producto sin nombre",
   price: product.price || product.data?.price || 0,
-  img: product.img || product.data?.img || '',
+  img: product.img || product.data?.img || "",
   category:
     product.category ||
     product.categoria ||
     product.data?.categoria ||
-    'default',
-  type: product.type || 'regular',
+    "default",
+  type: product.type || "regular",
 });
 
 const compareToppings = (toppings1, toppings2) => {
@@ -168,7 +168,7 @@ const QuickAddToCart = ({
         }
         if (onOrderQuantityChange) onOrderQuantityChange(quantityRef.current);
       } catch (error) {
-        console.error('Error al actualizar producto:', error);
+        console.error("Error al actualizar producto:", error);
       } finally {
         setIsAdding(false);
         setTimeout(() => setIsEditing(false), 300);
@@ -176,11 +176,11 @@ const QuickAddToCart = ({
     }, 2000);
   };
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const isCarritoPage = pathParts.includes('carrito');
+  const pathParts = location.pathname.split("/").filter(Boolean);
+  const isCarritoPage = pathParts.includes("carrito");
   const isMenuProductPage =
     pathParts.length === 4 &&
-    pathParts[1] === 'menu' &&
+    pathParts[1] === "menu" &&
     !!pathParts[2] &&
     !!pathParts[3];
 
@@ -200,13 +200,13 @@ const QuickAddToCart = ({
               transition: { duration: 0.3 },
             }}
             transition={{ duration: 0.3 }}
-            className={`absolute flex items-center rounded-3xl border-black border-2 bg-gray-100 z-50 overflow-hidden
+            className={`absolute flex items-center rounded-3xl border-black border-2 bg-gray-50  z-50 overflow-hidden
               ${
                 shouldAnimateBothSides
-                  ? 'left-1/2 transform -translate-x-1/2'
+                  ? "left-1/2 transform -translate-x-1/2"
                   : isCarritoPage || isPedidoComponente
-                  ? 'left-0'
-                  : 'right-0'
+                  ? "left-0"
+                  : "right-0"
               }`}
             style={{ height: 35 }}
           >
@@ -251,11 +251,11 @@ const QuickAddToCart = ({
         ) : (
           <div
             className={`${
-              quantity > 0 ? 'bg-black border text-gray-100' : 'bg-gray-100'
+              quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-50 "
             } rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
             onClick={startAddingProcess}
           >
-            {quantity > 0 ? quantity : '+'}
+            {quantity > 0 ? quantity : "+"}
           </div>
         ))}
     </div>

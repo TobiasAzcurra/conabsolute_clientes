@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 const SearchBar = ({
   phoneNumber,
@@ -23,7 +23,7 @@ const SearchBar = ({
         type="tel"
         value={phoneNumber}
         onChange={(e) => setPhoneNumber(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
         onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
         placeholder="Busca tu pedido con tu telefono ej: 3585168275"
@@ -31,7 +31,7 @@ const SearchBar = ({
       />
       <button
         onClick={handleSearch}
-        className="bg-gray-100 h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
+        className="bg-gray-50  h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +48,7 @@ const SearchBar = ({
       </button>
 
       {showSuggestion && previousPhone && (
-        <div className="absolute left-0 right-0 top-12 h-10 bg-gray-100 shadow-lg rounded-full border border-gray-200 z-50">
+        <div className="absolute left-0 right-0 top-12 h-10 bg-gray-50  shadow-lg rounded-full border border-gray-200 z-50">
           <button
             onClick={onSuggestionClick}
             className="w-full font-bold text-left px-4 h-10 text-xs flex items-center"

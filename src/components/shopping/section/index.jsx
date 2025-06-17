@@ -1,7 +1,8 @@
 // src/components/shopping/section/index.jsx
-import React, { useEffect, useRef, useState } from 'react';
-import Card from '../card';
-import { getProductsByCategory } from '../../../firebase/getProductsByCategory';
+import React, { useEffect, useRef, useState } from "react";
+import Card from "../card";
+import { getProductsByCategory } from "../../../firebase/getProductsByCategory";
+import LoadingPoints from "../../LoadingPoints";
 
 const Section = ({ slug, path }) => {
   const containerRef = useRef(null);
@@ -12,12 +13,12 @@ const Section = ({ slug, path }) => {
     const base = product.data || product;
     return {
       id: product.id,
-      name: base.name || 'Producto sin nombre',
+      name: base.name || "Producto sin nombre",
       price: base.price || 0,
-      img: base.img || base.image || '',
+      img: base.img || base.image || "",
       category: product.category || path,
-      description: base.description || '',
-      type: base.type || 'regular',
+      description: base.description || "",
+      type: base.type || "regular",
       data: base,
     };
   };
@@ -27,10 +28,10 @@ const Section = ({ slug, path }) => {
       setLoading(true);
       try {
         const prods = await getProductsByCategory(slug, path);
-        console.log('Productos cargados:', prods);
+        console.log("Productos cargados:", prods);
         setProducts(prods.map(normalize));
       } catch (e) {
-        console.error('❌ Error al cargar productos:', e);
+        console.error("❌ Error al cargar productos:", e);
         setProducts([]);
       } finally {
         setLoading(false);
@@ -47,9 +48,7 @@ const Section = ({ slug, path }) => {
       className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mt-8 mb-10"
     >
       {loading ? (
-        <p className="text-center font-coolvetica text-xs col-span-full">
-          Cargando productos...
-        </p>
+        <LoadingPoints />
       ) : products.length > 0 ? (
         products.map((p, i) => <Card key={p.id || i} {...p} path={path} />)
       ) : (

@@ -1,33 +1,33 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from "react";
 import {
   ReadOrdersForTodayById,
   ListenOrdersForTodayByPhoneNumber,
   cancelOrder,
-} from '../../firebase/getPedido';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import logo from '../../assets/Logo APM-07.png';
-import StickerCanvas from '../../components/StickerCanvas';
-import LoadingPoints from '../../components/LoadingPoints';
-import UpdatedPedidoSection from './UpdatedPedidoSection';
-import AppleModal from '../../components/AppleModal';
-import isologo from '../../assets/isologo.png';
+} from "../../firebase/getPedido";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import logo from "../../assets/Logo APM-07.png";
+import StickerCanvas from "../../components/StickerCanvas";
+import LoadingPoints from "../../components/LoadingPoints";
+import UpdatedPedidoSection from "./UpdatedPedidoSection";
+import AppleModal from "../../components/AppleModal";
+import isologo from "../../assets/isologo.png";
 import {
   getCadetePhone,
   updateRatingForOrder,
-} from '../../firebase/uploadOrder';
-import EditAddressModal from './EditAddressModal';
+} from "../../firebase/uploadOrder";
+import EditAddressModal from "./EditAddressModal";
 import {
   doc,
   runTransaction,
   collection,
   getFirestore,
-} from 'firebase/firestore';
-import Payment from '../../components/mercadopago/Payment';
-import useClientData from '../../hooks/useClientData';
+} from "firebase/firestore";
+import Payment from "../../components/mercadopago/Payment";
+import useClientData from "../../hooks/useClientData";
 
 const Pedido = () => {
   // console.log("🔄 Inicializando componente Pedido");
-  const { clientData } = useClientData('empresa2');
+  const { clientData } = useClientData("empresa2");
   const [order, setOrder] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,7 @@ const Pedido = () => {
   const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
   const [showFullAddress, setShowFullAddress] = useState(false);
   const [isEditTimeModalOpen, setIsEditTimeModalOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -92,8 +92,8 @@ const Pedido = () => {
       return null;
     }
 
-    const [dia, mes, anio] = fechaStr.split('/').map(Number);
-    const [horas, minutos] = horaStr.split(':').map(Number);
+    const [dia, mes, anio] = fechaStr.split("/").map(Number);
+    const [horas, minutos] = horaStr.split(":").map(Number);
 
     const orderDateTime = new Date(anio, mes - 1, dia, horas, minutos, 0, 0);
 
@@ -156,8 +156,8 @@ const Pedido = () => {
   };
 
   function sumarMinutos(hora, minutosASumar) {
-    if (!hora) return '';
-    const [horaStr, minutoStr] = hora.split(':');
+    if (!hora) return "";
+    const [horaStr, minutoStr] = hora.split(":");
     const horas = parseInt(horaStr, 10);
     const minutos = parseInt(minutoStr, 10);
 
@@ -165,8 +165,8 @@ const Pedido = () => {
     fecha.setHours(horas, minutos, 0, 0);
     fecha.setMinutes(fecha.getMinutes() + minutosASumar);
 
-    const nuevasHoras = fecha.getHours().toString().padStart(2, '0');
-    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, '0');
+    const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
+    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, "0");
 
     return `${nuevasHoras}:${nuevosMinutos}`;
   }
@@ -174,7 +174,7 @@ const Pedido = () => {
   const handleRateOrder = async (ratings) => {
     // console.log("📥 Iniciando proceso de calificación");
     if (!selectedOrderId) {
-      console.error('❌ Error: No hay Order ID seleccionado para calificar');
+      console.error("❌ Error: No hay Order ID seleccionado para calificar");
       return;
     }
 
@@ -187,16 +187,16 @@ const Pedido = () => {
         (order) => order.id === selectedOrderId
       );
       if (!currentOrder) {
-        throw new Error('Pedido no encontrado.');
+        throw new Error("Pedido no encontrado.");
       }
 
       const fecha = currentOrder.fecha;
       if (!fecha) {
-        throw new Error('Fecha del pedido no disponible.');
+        throw new Error("Fecha del pedido no disponible.");
       }
 
       await updateRatingForOrder(fecha, selectedOrderId, ratings);
-      localStorage.removeItem('pendingRating');
+      localStorage.removeItem("pendingRating");
 
       setPedidosPagados((prevPedidos) =>
         prevPedidos.map((pedido) =>
@@ -206,11 +206,11 @@ const Pedido = () => {
         )
       );
 
-      setMessage('¡Gracias por calificar tu pedido!');
+      setMessage("¡Gracias por calificar tu pedido!");
       setIsRatingModalOpen(false);
     } catch (err) {
-      console.error('❌ Error al enviar la calificación:', err);
-      setError('Hubo un problema al calificar el pedido. Inténtalo de nuevo.');
+      console.error("❌ Error al enviar la calificación:", err);
+      setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
     } finally {
       setIsRatingLoading(false);
       setSelectedOrderId(null);
@@ -220,24 +220,24 @@ const Pedido = () => {
 
   const handleUpdateTime = async () => {
     if (!newTime) {
-      setTimeError('Por favor selecciona una hora válida');
+      setTimeError("Por favor selecciona una hora válida");
       return;
     }
 
     setIsUpdatingTime(true);
-    setTimeError('');
+    setTimeError("");
 
     try {
       const firestore = getFirestore();
       const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split('/');
-      const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+      const [dia, mes, anio] = fechaActual.split("/");
+      const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
       const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe para la fecha especificada.');
+          throw new Error("El pedido no existe para la fecha especificada.");
         }
 
         const existingData = docSnapshot.data();
@@ -247,15 +247,15 @@ const Pedido = () => {
         );
 
         if (pedidoIndex === -1) {
-          throw new Error('Pedido no encontrado');
+          throw new Error("Pedido no encontrado");
         }
 
         // Ajustamos la hora según el método de entrega
         const pedido = pedidosDelDia[pedidoIndex];
-        const isDelivery = pedido.direccion !== '';
+        const isDelivery = pedido.direccion !== "";
 
         // Convertimos la hora seleccionada a minutos desde medianoche
-        const [hours, minutes] = newTime.split(':').map(Number);
+        const [hours, minutes] = newTime.split(":").map(Number);
         let totalMinutes = hours * 60 + minutes;
 
         // Restamos el tiempo de preparación/envío según corresponda
@@ -270,8 +270,8 @@ const Pedido = () => {
         const adjustedMinutes = totalMinutes % 60;
         const adjustedTime = `${String(adjustedHours).padStart(
           2,
-          '0'
-        )}:${String(adjustedMinutes).padStart(2, '0')}`;
+          "0"
+        )}:${String(adjustedMinutes).padStart(2, "0")}`;
 
         pedidosDelDia[pedidoIndex].hora = adjustedTime;
 
@@ -284,9 +284,9 @@ const Pedido = () => {
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('❌ Error al actualizar la hora:', error);
+      console.error("❌ Error al actualizar la hora:", error);
       setTimeError(
-        'Hubo un problema al actualizar la hora. Por favor intenta nuevamente.'
+        "Hubo un problema al actualizar la hora. Por favor intenta nuevamente."
       );
     } finally {
       setIsUpdatingTime(false);
@@ -311,8 +311,8 @@ const Pedido = () => {
 
       setMessage(
         tieneVouchers
-          ? 'El pedido fue cancelado exitosamente, tus vouchers están disponibles para que los canjees en tu próximo pedido!'
-          : 'El pedido fue cancelado exitosamente.'
+          ? "El pedido fue cancelado exitosamente, tus vouchers están disponibles para que los canjees en tu próximo pedido!"
+          : "El pedido fue cancelado exitosamente."
       );
 
       if (orderId) {
@@ -327,8 +327,8 @@ const Pedido = () => {
 
       setIsModalOpen(false);
     } catch (err) {
-      console.error('❌ Hubo un problema al cancelar el pedido:', err);
-      setError('Hubo un problema al cancelar el pedido. Inténtalo de nuevo.');
+      console.error("❌ Hubo un problema al cancelar el pedido:", err);
+      setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
     } finally {
       setIsDeleting(false);
       setSelectedOrderId(null);
@@ -343,34 +343,34 @@ const Pedido = () => {
 
   const handleSupportClick = () => {
     // console.log("💬 Iniciando contacto con soporte");
-    const phoneNumber = '543584306832';
+    const phoneNumber = "543584306832";
     const message =
-      'Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.';
+      "Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleTransferenciaClick = async (total, telefono) => {
-    const phoneNumber = '543584306832';
+    const phoneNumber = "543584306832";
     const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: AbsoluteHSAS.mp a nombre de Absolute Holdings S.A.S.`;
 
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
 
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleCompensationClick = (message) => {
     // console.log("💬 Iniciando contacto por compensación");
-    const phoneNumber = '543584306832';
+    const phoneNumber = "543584306832";
     const whatsappMessage = `Hola! Acepte mi pedido con esta condicion: ${message}, cual es mi compensacion?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       whatsappMessage
     )}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleEditAddress = (orderId) => {
@@ -380,7 +380,7 @@ const Pedido = () => {
 
   const handleAddressUpdateSuccess = (newAddress) => {
     // Opcional: Puedes mostrar un mensaje de éxito aquí
-    setMessage('¡Dirección actualizada exitosamente!');
+    setMessage("¡Dirección actualizada exitosamente!");
     setTimeout(() => setMessage(null), 3000);
   };
 
@@ -398,7 +398,7 @@ const Pedido = () => {
       setLoading(true);
       unsubscribeOrder = ReadOrdersForTodayById(orderId, (pedido) => {
         // console.log("📦 Order fetched by ID:", pedido);
-        if (pedido && typeof pedido.direccion === 'string') {
+        if (pedido && typeof pedido.direccion === "string") {
           if (pedido.entregado && !pedido.rating && !hasBeenRated) {
             setSelectedOrderProducts(pedido.detallePedido || []);
             setSelectedOrderId(pedido.id);
@@ -409,8 +409,8 @@ const Pedido = () => {
           // console.log("✅ Order set:", pedido);
         } else {
           setOrder(null);
-          setPhoneNumber('');
-          console.warn('⚠️ Order is null or direccion is not a string');
+          setPhoneNumber("");
+          console.warn("⚠️ Order is null or direccion is not a string");
         }
         setLoading(false);
       });
@@ -463,8 +463,8 @@ const Pedido = () => {
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
   }, []);
 
   const handleEditTime = (orderId) => {
@@ -473,13 +473,13 @@ const Pedido = () => {
   };
 
   const handleTimeUpdateSuccess = (newTime) => {
-    setMessage('¡Hora actualizada exitosamente!');
+    setMessage("¡Hora actualizada exitosamente!");
     setTimeout(() => setMessage(null), 3000);
   };
 
   function sumarMinutos(hora, minutosASumar) {
-    if (!hora) return '';
-    const [horaStr, minutoStr] = hora.split(':');
+    if (!hora) return "";
+    const [horaStr, minutoStr] = hora.split(":");
     const horas = parseInt(horaStr, 10);
     const minutos = parseInt(minutoStr, 10);
 
@@ -487,8 +487,8 @@ const Pedido = () => {
     fecha.setHours(horas, minutos, 0, 0);
     fecha.setMinutes(fecha.getMinutes() + minutosASumar);
 
-    const nuevasHoras = fecha.getHours().toString().padStart(2, '0');
-    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, '0');
+    const nuevasHoras = fecha.getHours().toString().padStart(2, "0");
+    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, "0");
 
     return `${nuevasHoras}:${nuevosMinutos}`;
   }
@@ -496,7 +496,7 @@ const Pedido = () => {
   return (
     <div
       ref={containerRef}
-      className="bg-gray-100 relative flex justify-between flex-col h-screen"
+      className="bg-gray-50  relative flex justify-between flex-col h-screen"
     >
       <style>
         {`
@@ -534,7 +534,7 @@ const Pedido = () => {
             src={isologo}
             className="w-2/3"
             alt="Logo"
-            style={{ filter: 'invert(1)' }}
+            style={{ filter: "invert(1)" }}
           />
         </div>
 
@@ -576,9 +576,9 @@ const Pedido = () => {
                 const retrasado = isDelayed(currentOrder);
                 const delayMinutes = getDelayTime(currentOrder);
                 const showSupportButton =
-                  retrasado && currentOrder.cadete === 'NO ASIGNADO';
+                  retrasado && currentOrder.cadete === "NO ASIGNADO";
                 const showCadeteCallButton =
-                  retrasado && currentOrder.cadete !== 'NO ASIGNADO';
+                  retrasado && currentOrder.cadete !== "NO ASIGNADO";
                 const showCancelButton = !currentOrder.elaborado || retrasado;
                 const hasButtons =
                   showSupportButton || showCadeteCallButton || showCancelButton;
@@ -587,8 +587,8 @@ const Pedido = () => {
                   <div
                     key={currentOrder.id}
                     className={`flex items-center flex-col w-full ${
-                      index !== 0 ? 'mt-4' : ''
-                    } ${index === pedidosPagados.length - 1 ? 'pb-4' : ''}`}
+                      index !== 0 ? "mt-4" : ""
+                    } ${index === pedidosPagados.length - 1 ? "pb-4" : ""}`}
                   >
                     {pedidosPagados.length > 1 && (
                       <h2 className="text-2xl w-full px-4 text-left font-bold font-coolvetica mb-10">
@@ -618,11 +618,11 @@ const Pedido = () => {
                                 <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                               </svg>
                             </>
-                          ) : currentOrder.direccion === '' ? (
+                          ) : currentOrder.direccion === "" ? (
                             <>
                               {(() => {
                                 const horaPedido = currentOrder.hora;
-                                const partesHora = horaPedido.split(':');
+                                const partesHora = horaPedido.split(":");
                                 const fechaActual = new Date();
                                 const fechaHoraPedido = new Date(
                                   fechaActual.getFullYear(),
@@ -639,15 +639,15 @@ const Pedido = () => {
                                     <div
                                       className={`w-1/2 h-2.5 rounded-full ${
                                         diferenciaEnMinutos <= 20
-                                          ? 'animated-loading'
-                                          : 'bg-black'
+                                          ? "animated-loading"
+                                          : "bg-black"
                                       }`}
                                     ></div>
                                     <div
                                       className={`w-1/2 h-2.5 rounded-full ${
                                         diferenciaEnMinutos > 20
-                                          ? 'animated-loading'
-                                          : 'bg-gray-100 border-opacity-20 border-black border-1 border'
+                                          ? "animated-loading"
+                                          : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                       }`}
                                     ></div>
                                   </>
@@ -659,8 +659,8 @@ const Pedido = () => {
                               <div
                                 className={`w-1/4 h-2.5 rounded-full ${
                                   !currentOrder.elaborado
-                                    ? 'animated-loading'
-                                    : 'bg-black'
+                                    ? "animated-loading"
+                                    : "bg-black"
                                 }`}
                               ></div>
                               <div
@@ -672,16 +672,16 @@ const Pedido = () => {
                                         currentOrder.hora,
                                         parseInt(
                                           currentOrder.tiempoElaborado.split(
-                                            ':'
+                                            ":"
                                           )[1]
                                         )
                                       );
                                     const [dia, mes, anio] = currentOrder.fecha
-                                      .split('/')
+                                      .split("/")
                                       .map(Number);
                                     const [horas, minutos] =
                                       horaPedidoConTiempoElaborado
-                                        .split(':')
+                                        .split(":")
                                         .map(Number);
                                     const fechaElaboracion = new Date(
                                       anio,
@@ -695,10 +695,10 @@ const Pedido = () => {
 
                                     return diffMinutes <= 15;
                                   })()
-                                    ? 'animated-loading'
+                                    ? "animated-loading"
                                     : currentOrder.elaborado
-                                    ? 'bg-black'
-                                    : 'bg-gray-100 border-opacity-20 border-black border-1 border'
+                                    ? "bg-black"
+                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                 }`}
                               ></div>
                               <div
@@ -710,16 +710,16 @@ const Pedido = () => {
                                         currentOrder.hora,
                                         parseInt(
                                           currentOrder.tiempoElaborado.split(
-                                            ':'
+                                            ":"
                                           )[1]
                                         )
                                       );
                                     const [dia, mes, anio] = currentOrder.fecha
-                                      .split('/')
+                                      .split("/")
                                       .map(Number);
                                     const [horas, minutos] =
                                       horaPedidoConTiempoElaborado
-                                        .split(':')
+                                        .split(":")
                                         .map(Number);
                                     const fechaElaboracion = new Date(
                                       anio,
@@ -733,8 +733,8 @@ const Pedido = () => {
 
                                     return diffMinutes > 15;
                                   })()
-                                    ? 'animated-loading'
-                                    : 'bg-gray-100 border-opacity-20 border-black border-1 border'
+                                    ? "animated-loading"
+                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                 }`}
                               ></div>
                             </>
@@ -742,29 +742,29 @@ const Pedido = () => {
                         </div>
                         <p className="text-black font-coolvetica font-bold text-left mt-2">
                           {currentOrder.pendingOfBeingAccepted
-                            ? 'Tu pedido está pendiente de aprobación...'
-                            : currentOrder.direccion === ''
+                            ? "Tu pedido está pendiente de aprobación..."
+                            : currentOrder.direccion === ""
                             ? (new Date() - new Date(currentOrder.hora)) /
                                 60000 <=
                               20
-                              ? 'Anhelo está preparando tu pedido...'
-                              : 'Esperando que retires tu pedido...'
+                              ? "Anhelo está preparando tu pedido..."
+                              : "Esperando que retires tu pedido..."
                             : !currentOrder.elaborado
-                            ? 'Anhelo está preparando tu pedido...'
+                            ? "Anhelo está preparando tu pedido..."
                             : (() => {
                                 const horaPedidoConTiempoElaborado =
                                   sumarMinutos(
                                     currentOrder.hora,
                                     parseInt(
-                                      currentOrder.tiempoElaborado.split(':')[1]
+                                      currentOrder.tiempoElaborado.split(":")[1]
                                     )
                                   );
                                 const [dia, mes, anio] = currentOrder.fecha
-                                  .split('/')
+                                  .split("/")
                                   .map(Number);
                                 const [horas, minutos] =
                                   horaPedidoConTiempoElaborado
-                                    .split(':')
+                                    .split(":")
                                     .map(Number);
                                 const fechaElaboracion = new Date(
                                   anio,
@@ -777,8 +777,8 @@ const Pedido = () => {
                                   (new Date() - fechaElaboracion) / 60000;
 
                                 return diffMinutes <= 15
-                                  ? 'Tu cadete está llegando a Anhelo...'
-                                  : 'En camino... Atención, te va a llamar tu cadete.';
+                                  ? "Tu cadete está llegando a Anhelo..."
+                                  : "En camino... Atención, te va a llamar tu cadete.";
                               })()}
                         </p>
                       </div>
@@ -799,8 +799,8 @@ const Pedido = () => {
                           <div className="flex flex-row items-center gap-2 flex-1">
                             <p className="text-black font-coolvetica font-medium">
                               {currentOrder.pendingOfBeingAccepted
-                                ? 'Entre 3 a 5 minutos para confirmar'
-                                : currentOrder.direccion === ''
+                                ? "Entre 3 a 5 minutos para confirmar"
+                                : currentOrder.direccion === ""
                                 ? `Retirar entre ${sumarMinutos(
                                     currentOrder.hora,
                                     15
@@ -820,7 +820,7 @@ const Pedido = () => {
                           {!currentOrder.elaborado && (
                             <button
                               onClick={() => handleEditTime(currentOrder.id)}
-                              className="rounded-full hover:bg-gray-100"
+                              className="rounded-full hover:bg-gray-50 "
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -836,7 +836,7 @@ const Pedido = () => {
                         </div>
 
                         <div className="flex flex-row gap-2 items-center">
-                          {currentOrder.direccion === '' ? (
+                          {currentOrder.direccion === "" ? (
                             <img
                               src={clientData.logo}
                               className="h-6 brightness-0"
@@ -857,16 +857,16 @@ const Pedido = () => {
                             className="text-black font-coolvetica font-medium cursor-pointer flex-1"
                             onClick={() => setShowFullAddress(!showFullAddress)}
                           >
-                            {currentOrder.direccion === '' ? (
-                              'Retirar por Buenos Aires 618'
+                            {currentOrder.direccion === "" ? (
+                              "Retirar por Buenos Aires 618"
                             ) : (
                               <>
-                                Destino a{' '}
+                                Destino a{" "}
                                 {showFullAddress
                                   ? currentOrder.direccion
                                   : (currentOrder.direccion
-                                      ?.split(',')[0]
-                                      .trim() || 'No disponible') + '...'}
+                                      ?.split(",")[0]
+                                      .trim() || "No disponible") + "..."}
                               </>
                             )}
                           </p>
@@ -876,7 +876,7 @@ const Pedido = () => {
                                 onClick={() =>
                                   handleEditAddress(currentOrder.id)
                                 }
-                                className="rounded-full  hover:bg-gray-100"
+                                className="rounded-full  hover:bg-gray-50 "
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -909,7 +909,7 @@ const Pedido = () => {
                             </svg>
 
                             <p className="text-black font-coolvetica font-medium">
-                              ${currentOrder.total || '0.00'}
+                              ${currentOrder.total || "0.00"}
                             </p>
                           </div>
                         </div>
@@ -917,7 +917,7 @@ const Pedido = () => {
                     </div>
                     {/* botones */}
                     <div
-                      className={`w-full px-4 ${hasButtons ? 'mt-11' : 'mt-4'}`}
+                      className={`w-full px-4 ${hasButtons ? "mt-11" : "mt-4"}`}
                     >
                       {/* condicion*/}
                       {currentOrder.message && (
@@ -1007,8 +1007,8 @@ const Pedido = () => {
                           onClick={() => handleCancelClick(currentOrder.id)}
                           className={`${
                             isDeleting || currentOrder.canceled
-                              ? 'opacity-50 cursor-not-allowed'
-                              : 'cursor-pointer'
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer"
                           } bg-gray-300 w-full text-red-main font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
                           disabled={isDeleting || currentOrder.canceled}
                         >
@@ -1026,15 +1026,15 @@ const Pedido = () => {
                               />
                             </svg>
                             {currentOrder.canceled
-                              ? 'Pedido cancelado'
-                              : 'Cancelar pedido'}
+                              ? "Pedido cancelado"
+                              : "Cancelar pedido"}
                           </div>
                         </div>
                       )}
                     </div>
 
                     {!currentOrder.elaborado &&
-                      currentOrder.metodoPago === 'efectivo' && (
+                      currentOrder.metodoPago === "efectivo" && (
                         <UpdatedPedidoSection
                           currentOrder={currentOrder}
                           showCancelButton={showCancelButton}
@@ -1103,7 +1103,7 @@ const Pedido = () => {
           isEditAddressModal={true}
           orderId={editingOrderId}
           currentAddress={
-            pedidosPagados.find((p) => p.id === editingOrderId)?.direccion || ''
+            pedidosPagados.find((p) => p.id === editingOrderId)?.direccion || ""
           }
           onAddressSuccess={handleAddressUpdateSuccess}
         />
@@ -1121,7 +1121,7 @@ const Pedido = () => {
                 }
                 values={{
                   ...pedidosPagados.find((p) => p.id === editingOrderId),
-                  paymentMethod: 'mercadopago',
+                  paymentMethod: "mercadopago",
                   phone: pedidosPagados.find((p) => p.id === editingOrderId)
                     ?.telefono,
                   address: pedidosPagados.find((p) => p.id === editingOrderId)
@@ -1129,8 +1129,8 @@ const Pedido = () => {
                   deliveryMethod: pedidosPagados.find(
                     (p) => p.id === editingOrderId
                   )?.direccion
-                    ? 'delivery'
-                    : 'takeaway',
+                    ? "delivery"
+                    : "takeaway",
                   references: pedidosPagados.find(
                     (p) => p.id === editingOrderId
                   )?.referencias,
@@ -1145,7 +1145,7 @@ const Pedido = () => {
                 }
                 mapUrl={
                   pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.ubicacion || ''
+                    ?.ubicacion || ""
                 }
                 couponCodes={
                   pedidosPagados.find((p) => p.id === editingOrderId)

@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useParams } from 'react-router-dom';
-import useClientData from '../hooks/useClientData';
-import Carrusel from '../components/Carrusel';
-import NavMenu from '../components/NavMenu';
-import FloatingCart from '../components/shopping/FloatingCart';
-import { useSelector } from 'react-redux';
-import logo from '../assets/Logo APM-07.png';
-import SearchBar from '../components/SearchBar';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useParams } from "react-router-dom";
+import useClientData from "../hooks/useClientData";
+import Carrusel from "../components/Carrusel";
+import NavMenu from "../components/NavMenu";
+import FloatingCart from "../components/shopping/FloatingCart";
+import { useSelector } from "react-redux";
+import SearchBar from "../components/SearchBar";
+import { useLocation } from "react-router-dom";
 
 const ClientLayout = ({
   children,
@@ -23,7 +22,7 @@ const ClientLayout = ({
   const pathname = location.pathname;
 
   const isProductDetail = /\/menu\/[^/]+\/[^/]+$/.test(pathname);
-  const isCart = pathname.endsWith('/carrito');
+  const isCart = pathname.endsWith("/carrito");
 
   const shouldHideHeader = isProductDetail || isCart;
   const shouldShowFloatingCart = !isCart;
@@ -31,12 +30,12 @@ const ClientLayout = ({
   const cart = useSelector((state) => state.cartState.cart);
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const [previousPhone, setPreviousPhone] = useState('');
+  const [previousPhone, setPreviousPhone] = useState("");
 
   useEffect(() => {
-    const storedPhone = localStorage.getItem('customerPhone');
+    const storedPhone = localStorage.getItem("customerPhone");
     if (storedPhone) {
       setPreviousPhone(storedPhone);
     }
@@ -61,7 +60,7 @@ const ClientLayout = ({
     <>
       {clientData && (
         <Helmet>
-          <title>{clientData?.name || 'ABSOLUTE'}</title>
+          <title>{clientData?.name || "ABSOLUTE"}</title>
           {clientData?.logo && (
             <link
               rel="icon"
@@ -72,7 +71,7 @@ const ClientLayout = ({
           )}
         </Helmet>
       )}
-      <div className="flex flex-col relative mb-[90px]">
+      <div className="flex flex-col relative ">
         {!shouldHideHeader && (
           <>
             <div className="fixed inset-x-0 top-0 z-50 h-10 bg-gradient-to-b from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
@@ -83,12 +82,6 @@ const ClientLayout = ({
               setShowSuggestion={setShowSuggestion}
               previousPhone={previousPhone}
               onSuggestionClick={onSuggestionClick}
-            />
-
-            <img
-              src={logo}
-              className="h-20 top-[100px] left-1/2 -translate-x-1/2 absolute z-[30]"
-              alt="Logo"
             />
 
             <div className="relative z-[10]">
@@ -103,7 +96,7 @@ const ClientLayout = ({
           </>
         )}
 
-        <div className={`${!shouldHideHeader ? 'mt-[100px]' : ''} z-[5]`}>
+        <div className={`${!shouldHideHeader ? "mt-[100px]" : ""} z-[5]`}>
           {children}
         </div>
 

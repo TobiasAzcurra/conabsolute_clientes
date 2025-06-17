@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import QuickAddToCart from './quickAddToCart';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { Link, useParams } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { listenToAltaDemanda } from '../../../firebase/readConstants';
-import LoadingPoints from '../../LoadingPoints';
-import { getImageSrc } from '../../../helpers/getImageSrc';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import QuickAddToCart from "./quickAddToCart";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { Link, useParams } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { listenToAltaDemanda } from "../../../firebase/readConstants";
+import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
+import imagen2 from "../../../assets/IMG_8408.jpg";
+import imagen3 from "../../../assets/IMG_8413.jpg";
 
 const Card = ({
   name,
@@ -22,9 +30,119 @@ const Card = ({
   const { slug } = useParams();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
-  // const [availableUnits, setAvailableUnits] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(null); // Estado para el color seleccionado
+  const [selectedColor, setSelectedColor] = useState(null);
   const [showConsultStock, setShowConsultStock] = useState(false);
+
+  // Estados para la rotación de imágenes
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isInViewport, setIsInViewport] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const cardRef = useRef(null);
+  const intervalRef = useRef(null);
+
+  // Array de imágenes para rotar
+  const images = useMemo(() => {
+    const mainImage = getImageSrc(data || img);
+    return [mainImage, imagen2, imagen3];
+  }, [data, img]);
+
+  // Generar números y etiquetas aleatorias usando useMemo para que sean consistentes
+  const randomLabels = useMemo(() => {
+    const generateRandomNumber = () => Math.floor(Math.random() * 4) + 1;
+
+    const allLabels = [
+      { key: "colores", text: `${generateRandomNumber()} colores` },
+      { key: "tamaños", text: `${generateRandomNumber()} tamaños` },
+      { key: "labrados", text: `${generateRandomNumber()} labrados` },
+    ];
+
+    // Determinar cuántas etiquetas mostrar (1, 2 o 3)
+    const numLabels = Math.floor(Math.random() * 3) + 1;
+
+    // Mezclar el array y tomar solo las primeras numLabels
+    const shuffled = allLabels.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, numLabels);
+  }, [id]); // Usar id como dependencia para que sea consistente por producto
+
+  // Función para verificar si este card está más centrado que otros
+  const checkIfCentered = useCallback(() => {
+    if (!cardRef.current) return false;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportCenterY = viewportHeight / 2;
+
+    // Calcular el centro del card
+    const cardCenterY = rect.top + rect.height / 2;
+
+    // Calcular la distancia del centro del card al centro del viewport
+    const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
+
+    // Considerar "centrado" si está dentro de un rango pequeño del centro
+    const threshold = 100; // píxeles de tolerancia
+
+    return (
+      distanceFromCenter < threshold &&
+      rect.top < viewportHeight &&
+      rect.bottom > 0
+    );
+  }, []);
+
+  // Efecto para detectar el card centrado mediante scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const isCentered = checkIfCentered();
+      setIsInViewport(isCentered);
+    };
+
+    // Verificar inicialmente
+    handleScroll();
+
+    // Agregar listener de scroll con throttling
+    let ticking = false;
+    const throttledScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", throttledScroll);
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", throttledScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [checkIfCentered]);
+
+  // Efecto para manejar la rotación automática de imágenes
+  useEffect(() => {
+    if (isInViewport) {
+      // Iniciar rotación automática cuando esté en viewport
+      intervalRef.current = setInterval(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }, 1000); // Cambiar imagen cada 2 segundos
+    } else {
+      // Detener rotación y volver a la primera imagen cuando no esté en viewport
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setCurrentImageIndex(0);
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isInViewport, images.length]);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -34,92 +152,21 @@ const Card = ({
     return () => unsubscribe();
   }, []);
 
-  // const renderStars = (score) => {
-  //   const stars = [];
-  //   const fullStars = Math.floor(score);
-  //   const hasHalfStar = score - fullStars >= 0.5;
-  //   const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-
-  //   for (let i = 0; i < fullStars; i++) {
-  //     stars.push(
-  //       <FontAwesomeIcon
-  //         key={`full-${i}`}
-  //         icon="star"
-  //         className="text-red-main h-3"
-  //         aria-label="Estrella completa"
-  //       />
-  //     );
-  //   }
-
-  //   if (hasHalfStar) {
-  //     stars.push(
-  //       <FontAwesomeIcon
-  //         key="half"
-  //         icon="star-half-alt"
-  //         className="text-red-main h-3"
-  //         aria-label="Media estrella"
-  //       />
-  //     );
-  //   }
-
-  //   for (let i = 0; i < emptyStars; i++) {
-  //     stars.push(
-  //       <FontAwesomeIcon
-  //         key={`empty-${i}`}
-  //         icon={['far', 'star']}
-  //         className="text-red-main h-3"
-  //         aria-label="Estrella vacía"
-  //       />
-  //     );
-  //   }
-
-  //   return stars;
-  // };
-
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
   const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
-
-  // Función para verificar si el producto tiene ingredientes agotados
-  // const hasUnavailableIngredients = () => {
-  //   const ingredients = productIngredients[name] || [];
-  //   // Si no tiene ingredientes o solo tiene strings vacíos, no filtrar
-  //   if (
-  //     ingredients.length === 0 ||
-  //     (ingredients.length === 1 && ingredients[0] === '')
-  //   ) {
-  //     return false;
-  //   }
-  //   // Verificar si algún ingrediente está agotado (false)
-  //   return ingredients.some(
-  //     (ingredient) => ingredient !== '' && itemsOut[ingredient] === false
-  //   );
-  // };
-
-  const imageSrc = getImageSrc(data || img);
-
-  // const handleColorClick = (colorIndex, event) => {
-  //   event.preventDefault(); // Prevenir navegación del Link
-  //   event.stopPropagation(); // Evitar que el evento se propague
-  //   setSelectedColor(colorIndex);
-  // };
-
-  // const colors = [
-  //   { bg: 'bg-red-500', name: 'rojo' },
-  //   { bg: 'bg-white', name: 'blanco' },
-  //   { bg: 'bg-black', name: 'negro' },
-  // ];
+  const currentImageSrc = images[currentImageIndex];
 
   return (
-    <div className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-100  transition duration-300 w-full max-w-[400px] text-black z-50 ">
+    <div
+      ref={cardRef}
+      className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
+    >
       <div className="absolute right-3.5 top-2.5 z-40">
         <QuickAddToCart
           product={{
             name,
             description,
             price: adjustedPrice,
-            img: imageSrc,
+            img: currentImageSrc,
             path,
             id,
             category,
@@ -164,11 +211,39 @@ const Card = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
+          {/* Contenedor horizontal para las etiquetas aleatorias */}
+          <div className="absolute bottom-0 left-2 z-30 flex gap-2">
+            {randomLabels.map((label, index) => (
+              <span
+                key={`${label.key}-${index}`}
+                className="text-gray-600 text-[10px] font-medium bg-gray-50  px-2 py-1 rounded-t-xl"
+              >
+                {label.text}
+              </span>
+            ))}
+          </div>
+
+          {/* Indicadores de imagen (puntos) */}
+          {isInViewport && (
+            <div className="absolute top-4 left-1/2 z-30 flex gap-1">
+              {images.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentImageIndex
+                      ? "bg-white opacity-100"
+                      : "bg-white opacity-50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+
           <img
-            src={imageSrc}
-            alt={name || 'Producto'}
-            className={`object-cover w-full h-full transition-transform duration-300 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+            src={currentImageSrc}
+            alt={name || "Producto"}
+            className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
+              isLoaded && !imageError ? "opacity-100" : "opacity-0"
             }`}
             onLoad={() => {
               console.log(`✅ Imagen cargada exitosamente para ${name}`);
@@ -178,21 +253,22 @@ const Card = ({
             onError={(e) => {
               console.error(
                 `❌ Error al cargar imagen para ${name}:`,
-                imageSrc
+                currentImageSrc
               );
               setImageError(true);
               setIsLoaded(false);
             }}
           />
         </div>
+
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
-            <h5 className=" text-xl   font-medium  text-center">
-              {name || 'Producto sin nombre'}
+            <h5 className=" text-lg   font-medium  text-center">
+              {name || "Producto sin nombre"}
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-sm text-gray-600 font-coolvetica leading-tight mb-1">
+            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight mb-1">
               {data.cardDescription}
             </p>
           )}
@@ -202,44 +278,14 @@ const Card = ({
               {description}
             </p>
           )}
-          <div className="flex w-full mt-4 items-center  justify-between mb-6">
-            {type === 'promo' ? (
-              <div className="flex flex-row gap-2 items-baseline">
-                <span className="font-bold text-4xl text-black">
-                  {currencyFormat(adjustedPrice)}
-                </span>
-                <p className="font-light line-through opacity-30">
-                  {currencyFormat(adjustedPrice * 2)}
-                </p>
-              </div>
-            ) : (
-              <span className="font-bold text-4xl text-black">
-                {currencyFormat(adjustedPrice)}
-              </span>
-            )}
-            {/* <div className="flex flex-col gap-1 items-end">
-              <div className="flex flex-row gap-1">
-                {colors.map((color, index) => (
-                  <div
-                    key={index}
-                    className={`${
-                      color.bg
-                    } h-4 w-4 rounded-full cursor-pointer transition-all duration-200 ${
-                      selectedColor === index
-                        ? 'border-4 border-gray-500'
-                        : 'border border-gray-300'
-                    }`}
-                    onClick={(e) => handleColorClick(index, e)}
-                    title={`Seleccionar color ${color.name}`}
-                  />
-                ))}
-              </div>
-              <p className="font-medium text-xs text-gray-500">
-                {showConsultStock
-                  ? '*Consultar disponibilidad de stock'
-                  : `${availableUnits}u. disponibles`}
-              </p>
-            </div> */}
+          <div className="flex w-full mt-4 flex-col mb-6">
+            <span className="font-bold text-4xl text-black">
+              {currencyFormat(adjustedPrice)}
+            </span>
+            <span className="font-light pr-12 text-xs text-green-500">
+              en 6 cuotas de ${Math.ceil(adjustedPrice / 6)} o en transferencia
+              / efectivo por ${Math.ceil(adjustedPrice * 0.85)}
+            </span>
           </div>
         </div>
       </Link>

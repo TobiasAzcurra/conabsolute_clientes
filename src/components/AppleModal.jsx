@@ -3,9 +3,14 @@ import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import LoadingPoints from "./LoadingPoints";
 import { MapDirection } from "./form/MapDirection";
-import { doc, runTransaction, collection, getFirestore } from 'firebase/firestore';
-import { obtenerFechaActual } from '../helpers/currencyFormat';
-import isologo from '../assets/isologo.png';
+import {
+  doc,
+  runTransaction,
+  collection,
+  getFirestore,
+} from "firebase/firestore";
+import { obtenerFechaActual } from "../helpers/currencyFormat";
+import isologo from "../assets/isologo.png";
 
 const AppleModal = ({
   isOpen,
@@ -36,23 +41,28 @@ const AppleModal = ({
     comentario: "",
   });
 
-  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
-  const [newTime, setNewTime] = useState('');
-  const [timeError, setTimeError] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState("delivery");
+  const [newTime, setNewTime] = useState("");
+  const [timeError, setTimeError] = useState("");
   const [isUpdatingTime, setIsUpdatingTime] = useState(false);
-  const [newAddress, setNewAddress] = useState('');
-  const [mapUrl, setMapUrl] = useState('');
-  const [addressError, setAddressError] = useState('');
+  const [newAddress, setNewAddress] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
+  const [addressError, setAddressError] = useState("");
   const [isUpdatingAddress, setIsUpdatingAddress] = useState(false);
-  const [aclaraciones, setAclaraciones] = useState('');
+  const [aclaraciones, setAclaraciones] = useState("");
 
   const handleUpdateAddress = async () => {
-    if (deliveryMethod === 'takeaway') {
+    if (deliveryMethod === "takeaway") {
       try {
         const firestore = getFirestore();
         const fechaActual = obtenerFechaActual();
         const [dia, mes, anio] = fechaActual.split("/");
-        const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
+        const pedidosCollectionRef = collection(
+          firestore,
+          "pedidos",
+          anio,
+          mes
+        );
         const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
         await runTransaction(firestore, async (transaction) => {
@@ -86,21 +96,23 @@ const AppleModal = ({
         onAddressSuccess?.("");
         onClose();
       } catch (error) {
-        console.error('Error al cambiar a retiro:', error);
-        setAddressError('Hubo un error al cambiar a retiro. Por favor intenta nuevamente.');
+        console.error("Error al cambiar a retiro:", error);
+        setAddressError(
+          "Hubo un error al cambiar a retiro. Por favor intenta nuevamente."
+        );
       } finally {
         setIsUpdatingAddress(false);
       }
       return;
     }
 
-    if (!newAddress && deliveryMethod === 'delivery') {
-      setAddressError('Por favor selecciona una dirección válida');
+    if (!newAddress && deliveryMethod === "delivery") {
+      setAddressError("Por favor selecciona una dirección válida");
       return;
     }
 
     setIsUpdatingAddress(true);
-    setAddressError('');
+    setAddressError("");
 
     try {
       const firestore = getFirestore();
@@ -134,7 +146,7 @@ const AppleModal = ({
         if (coords) {
           pedidosDelDia[pedidoIndex].map = [
             parseFloat(coords[1]),
-            parseFloat(coords[2])
+            parseFloat(coords[2]),
           ];
         }
 
@@ -147,8 +159,10 @@ const AppleModal = ({
       onAddressSuccess?.(newAddress);
       onClose();
     } catch (error) {
-      console.error('Error al actualizar la dirección:', error);
-      setAddressError('Hubo un error al actualizar la dirección. Por favor intenta nuevamente.');
+      console.error("Error al actualizar la dirección:", error);
+      setAddressError(
+        "Hubo un error al actualizar la dirección. Por favor intenta nuevamente."
+      );
     } finally {
       setIsUpdatingAddress(false);
     }
@@ -156,12 +170,12 @@ const AppleModal = ({
 
   const handleUpdateTime = async () => {
     if (!newTime) {
-      setTimeError('Por favor selecciona una hora válida');
+      setTimeError("Por favor selecciona una hora válida");
       return;
     }
 
     setIsUpdatingTime(true);
-    setTimeError('');
+    setTimeError("");
 
     try {
       const firestore = getFirestore();
@@ -191,7 +205,7 @@ const AppleModal = ({
         const isDelivery = pedido.direccion !== "";
 
         // Convertimos la hora seleccionada a minutos desde medianoche
-        const [hours, minutes] = newTime.split(':').map(Number);
+        const [hours, minutes] = newTime.split(":").map(Number);
         let totalMinutes = hours * 60 + minutes;
 
         // Restamos el tiempo de preparación/envío según corresponda
@@ -204,7 +218,10 @@ const AppleModal = ({
         // Convertimos nuevamente a formato HH:mm
         const adjustedHours = Math.floor(totalMinutes / 60);
         const adjustedMinutes = totalMinutes % 60;
-        const adjustedTime = `${String(adjustedHours).padStart(2, '0')}:${String(adjustedMinutes).padStart(2, '0')}`;
+        const adjustedTime = `${String(adjustedHours).padStart(
+          2,
+          "0"
+        )}:${String(adjustedMinutes).padStart(2, "0")}`;
 
         pedidosDelDia[pedidoIndex].hora = adjustedTime;
 
@@ -217,8 +234,10 @@ const AppleModal = ({
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('❌ Error al actualizar la hora:', error);
-      setTimeError('Hubo un problema al actualizar la hora. Por favor intenta nuevamente.');
+      console.error("❌ Error al actualizar la hora:", error);
+      setTimeError(
+        "Hubo un problema al actualizar la hora. Por favor intenta nuevamente."
+      );
     } finally {
       setIsUpdatingTime(false);
     }
@@ -227,10 +246,10 @@ const AppleModal = ({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
-      alert('¡Copiado al portapapeles!');
+      alert("¡Copiado al portapapeles!");
     } catch (err) {
-      console.error('Error al copiar:', err);
-      alert('No se pudo copiar al portapapeles');
+      console.error("Error al copiar:", err);
+      alert("No se pudo copiar al portapapeles");
     }
   };
 
@@ -238,7 +257,7 @@ const AppleModal = ({
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
-      <div className="bg-gray-100 flex flex-col items-center justify-center rounded-3xl shadow-xl w-full max-w-md font-coolvetica pb-4 pt-2 relative">
+      <div className="bg-gray-50  flex flex-col items-center justify-center rounded-3xl shadow-xl w-full max-w-md font-coolvetica pb-4 pt-2 relative">
         {title && (
           <h2 className="text-2xl font-bold px-4 text-black pt-2 border-b border-black border-opacity-20 w-full text-center pb-4">
             {title}
@@ -256,39 +275,60 @@ const AppleModal = ({
                       fill="currentColor"
                       className="h-6"
                     >
-                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
+                      <path
+                        fillRule="evenodd"
+                        d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <select
                       value={newTime}
                       onChange={(e) => setNewTime(e.target.value)}
                       className="bg-transparent outline-none w-full custom-select"
                     >
-                      <option value="" disabled>Selecciona un horario</option>
+                      <option value="" disabled>
+                        Selecciona un horario
+                      </option>
                       {(() => {
                         const now = new Date();
                         const currentHour = now.getHours();
                         const currentMinute = now.getMinutes();
 
                         const allTimeSlots = [
-                          '20:30', '21:00', '21:30', '22:00',
-                          '22:30', '23:00', '23:30', '00:00'
+                          "20:30",
+                          "21:00",
+                          "21:30",
+                          "22:00",
+                          "22:30",
+                          "23:00",
+                          "23:30",
+                          "00:00",
                         ];
 
-                        const nextSlotMinutes = Math.ceil((currentHour * 60 + currentMinute) / 30) * 30 + 30;
+                        const nextSlotMinutes =
+                          Math.ceil((currentHour * 60 + currentMinute) / 30) *
+                            30 +
+                          30;
                         const nextSlotHour = Math.floor(nextSlotMinutes / 60);
                         const nextSlotMinute = nextSlotMinutes % 60;
 
-                        return allTimeSlots.filter((timeSlot) => {
-                          let [slotHour, slotMinute] = timeSlot.split(':').map(Number);
-                          if (slotHour === 0) slotHour = 24;
-                          const slotTimeInMinutes = slotHour * 60 + slotMinute;
-                          const nextValidTimeInMinutes = nextSlotHour * 60 + nextSlotMinute;
-                          return slotTimeInMinutes >= nextValidTimeInMinutes;
-                        }).map((timeSlot) => (
-                          <option key={timeSlot} value={timeSlot}>
-                            {timeSlot}
-                          </option>
-                        ));
+                        return allTimeSlots
+                          .filter((timeSlot) => {
+                            let [slotHour, slotMinute] = timeSlot
+                              .split(":")
+                              .map(Number);
+                            if (slotHour === 0) slotHour = 24;
+                            const slotTimeInMinutes =
+                              slotHour * 60 + slotMinute;
+                            const nextValidTimeInMinutes =
+                              nextSlotHour * 60 + nextSlotMinute;
+                            return slotTimeInMinutes >= nextValidTimeInMinutes;
+                          })
+                          .map((timeSlot) => (
+                            <option key={timeSlot} value={timeSlot}>
+                              {timeSlot}
+                            </option>
+                          ));
                       })()}
                     </select>
                   </div>
@@ -303,11 +343,12 @@ const AppleModal = ({
               <div className="flex flex-row w-full gap-2">
                 <button
                   type="button"
-                  className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${deliveryMethod === 'delivery'
-                    ? 'bg-black text-gray-100'
-                    : 'bg-gray-300 text-black'
-                    }`}
-                  onClick={() => setDeliveryMethod('delivery')}
+                  className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
+                    deliveryMethod === "delivery"
+                      ? "bg-black text-gray-100"
+                      : "bg-gray-300 text-black"
+                  }`}
+                  onClick={() => setDeliveryMethod("delivery")}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -323,19 +364,21 @@ const AppleModal = ({
                 </button>
                 <button
                   type="button"
-                  className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${deliveryMethod === 'takeaway'
-                    ? 'bg-black text-gray-100'
-                    : 'bg-gray-300 text-black'
-                    }`}
-                  onClick={() => setDeliveryMethod('takeaway')}
+                  className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
+                    deliveryMethod === "takeaway"
+                      ? "bg-black text-gray-100"
+                      : "bg-gray-300 text-black"
+                  }`}
+                  onClick={() => setDeliveryMethod("takeaway")}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <img
                       src={isologo}
-                      className={`h-4 ${deliveryMethod === 'takeaway'
-                        ? 'invert brightness-0'
-                        : 'brightness-0'
-                        }`}
+                      className={`h-4 ${
+                        deliveryMethod === "takeaway"
+                          ? "invert brightness-0"
+                          : "brightness-0"
+                      }`}
                       alt=""
                     />
                     <p className="font-bold text-">Retiro</p>
@@ -344,15 +387,15 @@ const AppleModal = ({
                 </button>
               </div>
 
-              {deliveryMethod === 'delivery' && (
+              {deliveryMethod === "delivery" && (
                 <div className="w-full items-center rounded-3xl border-2 border-black">
                   <div className="border-b border-black border-opacity-20">
                     <MapDirection
                       setUrl={setMapUrl}
-                      setValidarUbi={() => { }}
-                      setNoEncontre={() => { }}
+                      setValidarUbi={() => {}}
+                      setNoEncontre={() => {}}
                       setFieldValue={(field, value) => {
-                        if (field === 'address') {
+                        if (field === "address") {
                           setNewAddress(value);
                         }
                       }}
@@ -396,15 +439,20 @@ const AppleModal = ({
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(textToCopy);
-                  alert('¡Copiado al portapapeles!');
+                  alert("¡Copiado al portapapeles!");
                 } catch (err) {
-                  console.error('Error al copiar:', err);
-                  alert('No se pudo copiar al portapapeles');
+                  console.error("Error al copiar:", err);
+                  alert("No se pudo copiar al portapapeles");
                 }
               }}
               className="w-full h-10 mb-2 text-base bg-gray-300 text-black rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5"
+              >
                 <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 013.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0121 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 017.5 16.125V3.375z" />
                 <path d="M15 5.25a5.23 5.23 0 00-1.279-3.434 9.768 9.768 0 016.963 6.963A5.23 5.23 0 0017.25 7.5h-1.875A.375.375 0 0115 7.125V5.25zM4.875 6H6v10.125A3.375 3.375 0 009.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V7.875C3 6.839 3.84 6 4.875 6z" />
               </svg>
@@ -417,10 +465,17 @@ const AppleModal = ({
               <button
                 onClick={handleUpdateTime}
                 disabled={isUpdatingTime}
-                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${isUpdatingTime ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                  }`}
+                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
+                  isUpdatingTime
+                    ? "cursor-not-allowed opacity-70"
+                    : "cursor-pointer"
+                }`}
               >
-                {isUpdatingTime ? <LoadingPoints color="text-gray-100" /> : "Confirmar"}
+                {isUpdatingTime ? (
+                  <LoadingPoints color="text-gray-100" />
+                ) : (
+                  "Confirmar"
+                )}
               </button>
               <button
                 onClick={onClose}
@@ -453,8 +508,9 @@ const AppleModal = ({
             <div className="flex justify-center gap-2">
               <button
                 onClick={onConfirm}
-                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
-                  }`}
+                className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
+                  isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                }`}
                 disabled={isLoading}
               >
                 {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
@@ -520,27 +576,27 @@ AppleModal.propTypes = {
   currentTime: PropTypes.string,
   onTimeSuccess: PropTypes.func,
   copy: PropTypes.bool,
-  textToCopy: PropTypes.string
+  textToCopy: PropTypes.string,
 };
 
 AppleModal.defaultProps = {
   title: "",
   twoOptions: false,
-  onConfirm: () => { },
+  onConfirm: () => {},
   isLoading: false,
   isRatingModal: false,
   isEditAddressModal: false,
   orderId: "",
   currentAddress: "",
-  onAddressSuccess: () => { },
+  onAddressSuccess: () => {},
   children: null,
   orderProducts: [],
   additionalProducts: [],
   isEditTimeModal: false,
-  currentTime: '',
-  onTimeSuccess: () => { },
+  currentTime: "",
+  onTimeSuccess: () => {},
   copy: false,
-  textToCopy: ''
+  textToCopy: "",
 };
 
 export default AppleModal;
