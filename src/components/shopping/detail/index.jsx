@@ -1,22 +1,22 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import toppings from "../../../assets/toppings-v1.json";
-import { addItem } from "../../../redux/cart/cartSlice";
-import currencyFormat from "../../../helpers/currencyFormat";
-import ArrowBack from "../../back";
-import QuickAddToCart from "../card/quickAddToCart";
-import VideoSlider from "./VideoSlider";
-import { listenToAltaDemanda } from "../../../firebase/readConstants";
-import { getProductById } from "../../../firebase/getProducts";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-import logo from "../../../assets/Logo APM-07.png";
-import imagen2 from "../../../assets/IMG_8408.jpg";
-import imagen3 from "../../../assets/IMG_8413.jpg";
-import arrowIcon from "../../../assets/arrowIcon.png";
-import labrado1 from "../../../assets/labrado1.jpg";
-import labrado2 from "../../../assets/labrado2.jpg";
-import labrado3 from "../../../assets/labrado3.jpg";
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import toppings from '../../../assets/toppings-v1.json';
+import { addItem } from '../../../redux/cart/cartSlice';
+import currencyFormat from '../../../helpers/currencyFormat';
+import ArrowBack from '../../back';
+import QuickAddToCart from '../card/quickAddToCart';
+import VideoSlider from './VideoSlider';
+import { listenToAltaDemanda } from '../../../firebase/readConstants';
+import { getProductById } from '../../../firebase/getProducts';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import imagen2 from '../../../assets/IMG_8408.jpg';
+import imagen3 from '../../../assets/IMG_8413.jpg';
+import arrowIcon from '../../../assets/arrowIcon.png';
+import labrado1 from '../../../assets/labrado1.jpg';
+import labrado2 from '../../../assets/labrado2.jpg';
+import labrado3 from '../../../assets/labrado3.jpg';
+import { getClientAssets } from '../../../firebase/getClientConfig';
 
 const DetailCard = ({ type }) => {
   const location = useLocation();
@@ -36,6 +36,8 @@ const DetailCard = ({ type }) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedLabrado, setSelectedLabrado] = useState(null);
+  const [reels, setReels] = useState([]);
+  const [logo, setLogo] = useState('');
 
   // Función para ir hacia atrás
   const handleGoBack = () => {
@@ -62,11 +64,20 @@ const DetailCard = ({ type }) => {
           setLoading(false);
         })
         .catch((err) => {
-          console.error("❌ Error cargando producto:", err);
+          console.error('❌ Error cargando producto:', err);
           setLoading(false);
         });
     }
   }, [product, slug, id]);
+
+  useEffect(() => {
+    if (slug) {
+      getClientAssets(slug).then((data) => {
+        setReels(data.reels || []);
+        setLogo(data.logoFooter || '');
+      });
+    }
+  }, [slug]);
 
   // Función para capitalizar cada palabra con solo la primera letra en mayúscula
   const capitalizeWords = (str) => {
@@ -142,8 +153,8 @@ const DetailCard = ({ type }) => {
                   onClick={() => setSelectedImageIndex(index)}
                   className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
                     selectedImageIndex === index
-                      ? "border-white opacity-100 shadow-lg"
-                      : "border-white opacity-70 hover:opacity-90"
+                      ? 'border-white opacity-100 shadow-lg'
+                      : 'border-white opacity-70 hover:opacity-90'
                   }`}
                 >
                   <img
@@ -183,21 +194,21 @@ const DetailCard = ({ type }) => {
                     </h5>
                     <div className="flex">
                       <button
-                        onClick={() => setSelectedColor("red")}
+                        onClick={() => setSelectedColor('red')}
                         className={`px-4 h-10 rounded-l-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedColor === "red"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-gray-50  font-light text-gray-500"
+                          selectedColor === 'red'
+                            ? 'bg-gray-300 text-gray-900'
+                            : 'bg-gray-50  font-light text-gray-500'
                         }`}
                       >
                         Rojo
                       </button>
                       <button
-                        onClick={() => setSelectedColor("black")}
+                        onClick={() => setSelectedColor('black')}
                         className={`px-4 h-10 rounded-r-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedColor === "black"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-gray-50  font-light text-gray-500 "
+                          selectedColor === 'black'
+                            ? 'bg-gray-300 text-gray-900'
+                            : 'bg-gray-50  font-light text-gray-500 '
                         }`}
                       >
                         Negro
@@ -212,31 +223,31 @@ const DetailCard = ({ type }) => {
                     </h5>
                     <div className="flex">
                       <button
-                        onClick={() => setSelectedSize("small")}
+                        onClick={() => setSelectedSize('small')}
                         className={`px-4 h-10 rounded-l-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedSize === "small"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-gray-50  font-light text-gray-500 "
+                          selectedSize === 'small'
+                            ? 'bg-gray-300 text-gray-900'
+                            : 'bg-gray-50  font-light text-gray-500 '
                         }`}
                       >
                         Chico
                       </button>
                       <button
-                        onClick={() => setSelectedSize("medium")}
+                        onClick={() => setSelectedSize('medium')}
                         className={`px-4 h-10  font-coolvetica text-xs   transition-all duration-200 ${
-                          selectedSize === "medium"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-gray-50  font-light text-gray-500 "
+                          selectedSize === 'medium'
+                            ? 'bg-gray-300 text-gray-900'
+                            : 'bg-gray-50  font-light text-gray-500 '
                         }`}
                       >
                         Mediano
                       </button>
                       <button
-                        onClick={() => setSelectedSize("large")}
+                        onClick={() => setSelectedSize('large')}
                         className={`px-4 h-10 rounded-r-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedSize === "large"
-                            ? "bg-gray-300 text-gray-900"
-                            : "bg-gray-50  font-light text-gray-500 "
+                          selectedSize === 'large'
+                            ? 'bg-gray-300 text-gray-900'
+                            : 'bg-gray-50  font-light text-gray-500 '
                         }`}
                       >
                         Grande
@@ -251,11 +262,11 @@ const DetailCard = ({ type }) => {
                     </h5>
                     <div className="flex">
                       <button
-                        onClick={() => setSelectedLabrado("labrado1")}
+                        onClick={() => setSelectedLabrado('labrado1')}
                         className={`relative overflow-hidden h-10 w-1/3 rounded-l-full transition-all duration-200 ${
-                          selectedLabrado === "labrado1"
-                            ? "opacity-100"
-                            : "opacity-30"
+                          selectedLabrado === 'labrado1'
+                            ? 'opacity-100'
+                            : 'opacity-30'
                         }`}
                       >
                         <img
@@ -263,16 +274,16 @@ const DetailCard = ({ type }) => {
                           alt="Labrado 1"
                           className="w-full h-full object-cover"
                         />
-                        {selectedLabrado === "labrado1" && (
+                        {selectedLabrado === 'labrado1' && (
                           <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
                         )}
                       </button>
                       <button
-                        onClick={() => setSelectedLabrado("labrado2")}
+                        onClick={() => setSelectedLabrado('labrado2')}
                         className={`relative overflow-hidden h-10 w-1/3 transition-all duration-200 ${
-                          selectedLabrado === "labrado2"
-                            ? "opacity-100"
-                            : "opacity-30"
+                          selectedLabrado === 'labrado2'
+                            ? 'opacity-100'
+                            : 'opacity-30'
                         }`}
                       >
                         <img
@@ -280,16 +291,16 @@ const DetailCard = ({ type }) => {
                           alt="Labrado 2"
                           className="w-full h-full object-cover"
                         />
-                        {selectedLabrado === "labrado2" && (
+                        {selectedLabrado === 'labrado2' && (
                           <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
                         )}
                       </button>
                       <button
-                        onClick={() => setSelectedLabrado("labrado3")}
+                        onClick={() => setSelectedLabrado('labrado3')}
                         className={`relative overflow-hidden h-10 w-1/3 rounded-r-full transition-all duration-200 ${
-                          selectedLabrado === "labrado3"
-                            ? "opacity-100"
-                            : "opacity-30"
+                          selectedLabrado === 'labrado3'
+                            ? 'opacity-100'
+                            : 'opacity-30'
                         }`}
                       >
                         <img
@@ -297,7 +308,7 @@ const DetailCard = ({ type }) => {
                           alt="Labrado 3"
                           className="w-full h-full object-cover"
                         />
-                        {selectedLabrado === "labrado3" && (
+                        {selectedLabrado === 'labrado3' && (
                           <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
                         )}
                       </button>
@@ -349,7 +360,7 @@ const DetailCard = ({ type }) => {
               </div>
               <div className="flex  pl-2  font-coolvetica flex-col">
                 <p className=" text-xs text-gray-900">
-                  Por <strong>{currencyFormat(totalPrice)}</strong>.{" "}
+                  Por <strong>{currencyFormat(totalPrice)}</strong>.{' '}
                 </p>
                 <p className="font-light  text-xs w-full text-gray-900">
                   8u. disponibles
@@ -357,7 +368,7 @@ const DetailCard = ({ type }) => {
               </div>
             </div>
             <div className="mt-10">
-              <VideoSlider />
+              <VideoSlider reels={reels} />
             </div>
             <img
               src={logo}
