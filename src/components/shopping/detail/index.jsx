@@ -1,11 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import toppings from '../../../assets/toppings-v1.json';
-import { addItem } from '../../../redux/cart/cartSlice';
 import currencyFormat from '../../../helpers/currencyFormat';
-import ArrowBack from '../../back';
-import QuickAddToCart from '../card/quickAddToCart';
 import VideoSlider from './VideoSlider';
 import { listenToAltaDemanda } from '../../../firebase/readConstants';
 import { getProductById } from '../../../firebase/getProducts';
@@ -370,11 +366,13 @@ const DetailCard = ({ type }) => {
             <div className="mt-10">
               <VideoSlider reels={reels} />
             </div>
-            <img
-              src={logo}
-              className="invert brigtness-0 w-1/3 mx-auto flex justify-center  my-16"
-              alt=""
-            />
+            {logo && (
+              <img
+                src={logo}
+                className="invert brigtness-0 w-1/3 mx-auto flex justify-center  my-16"
+                alt=""
+              />
+            )}
           </div>
         </div>
       </div>
