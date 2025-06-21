@@ -1,28 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { useParams } from "react-router-dom";
-import useClientData from "../hooks/useClientData";
-import Carrusel from "../components/Carrusel";
-import NavMenu from "../components/NavMenu";
-import FloatingCart from "../components/shopping/FloatingCart";
-import { useSelector } from "react-redux";
-import SearchBar from "../components/SearchBar";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useClient } from '../contexts/ClientContext';
+import Carrusel from '../components/Carrusel';
+import NavMenu from '../components/NavMenu';
+import FloatingCart from '../components/shopping/FloatingCart';
+import { useSelector } from 'react-redux';
+import SearchBar from '../components/SearchBar';
+import { useLocation } from 'react-router-dom';
 
-const ClientLayout = ({
-  children,
-  handleItemClick,
-  selectedItem,
-  introConfig,
-}) => {
-  const { slug } = useParams();
-  const { clientData } = useClientData(slug);
+const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
+  const { clientData, clientConfig } = useClient();
 
   const location = useLocation();
   const pathname = location.pathname;
 
   const isProductDetail = /\/menu\/[^/]+\/[^/]+$/.test(pathname);
-  const isCart = pathname.endsWith("/carrito");
+  const isCart = pathname.endsWith('/carrito');
 
   const shouldHideHeader = isProductDetail || isCart;
   const shouldShowFloatingCart = !isCart;
@@ -30,12 +23,12 @@ const ClientLayout = ({
   const cart = useSelector((state) => state.cartState.cart);
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const [previousPhone, setPreviousPhone] = useState("");
+  const [previousPhone, setPreviousPhone] = useState('');
 
   useEffect(() => {
-    const storedPhone = localStorage.getItem("customerPhone");
+    const storedPhone = localStorage.getItem('customerPhone');
     if (storedPhone) {
       setPreviousPhone(storedPhone);
     }
@@ -60,7 +53,7 @@ const ClientLayout = ({
     <>
       {clientData && (
         <Helmet>
-          <title>{clientData?.name || "ABSOLUTE"}</title>
+          <title>{clientData?.name || 'ABSOLUTE'}</title>
           {clientData?.logo && (
             <link
               rel="icon"
@@ -85,7 +78,7 @@ const ClientLayout = ({
             />
 
             <div className="relative z-[10]">
-              <Carrusel images={introConfig.hero || []} />
+              <Carrusel images={clientConfig?.hero || []} />
               <div className="top-[215px] inset-0 absolute">
                 <NavMenu
                   selectedItem={selectedItem}
@@ -96,7 +89,7 @@ const ClientLayout = ({
           </>
         )}
 
-        <div className={`${!shouldHideHeader ? "mt-[100px]" : ""} z-[5]`}>
+        <div className={`${!shouldHideHeader ? 'mt-[100px]' : ''} z-[5]`}>
           {children}
         </div>
 

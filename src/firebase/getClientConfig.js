@@ -3,8 +3,15 @@ import { app } from './config';
 
 const db = getFirestore(app);
 
-export const getClientIntro = async (slug) => {
-  const ref = doc(db, 'absoluteClientes', slug, 'config', 'intro');
+export const getClientConfig = async (empresa, sucursal) => {
+  const ref = doc(
+    db,
+    'absoluteClientes',
+    empresa,
+    'sucursales',
+    sucursal,
+    'config'
+  );
   const snapshot = await getDoc(ref);
   return snapshot.exists() ? snapshot.data() : null;
 };
@@ -15,17 +22,16 @@ export const getClientData = async (slug) => {
   return snapshot.exists() ? snapshot.data() : null;
 };
 
-export const getClientAssets = async (slug) => {
+export const getClientAssets = async (empresa, sucursal) => {
   const ref = doc(
-    getFirestore(app),
+    db,
     'absoluteClientes',
-    slug,
+    empresa,
+    'sucursales',
+    sucursal,
     'config',
     'assets'
   );
   const snapshot = await getDoc(ref);
-  if (!snapshot.exists()) return { reels: [], logoFooter: '' };
-  const data = snapshot.data();
-  console.log('getClientAssets', data);
-  return data;
+  return snapshot.exists() ? snapshot.data() : null;
 };
