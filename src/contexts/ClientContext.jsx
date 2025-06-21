@@ -1,17 +1,26 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useMemo } from 'react';
 
 const ClientContext = createContext();
 
 export const ClientProvider = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [clientConfig, setClientConfig] = useState(null);
+  const [clientData, setClientData] = useState(null);
+  const [clientAssets, setClientAssets] = useState(null);
+
+  const value = useMemo(
+    () => ({
+      isLoaded,
+      setIsLoaded,
+      clientData,
+      setClientData,
+      clientAssets,
+      setClientAssets,
+    }),
+    [isLoaded, clientData, clientAssets]
+  );
 
   return (
-    <ClientContext.Provider
-      value={{ isLoaded, setIsLoaded, clientConfig, setClientConfig }}
-    >
-      {children}
-    </ClientContext.Provider>
+    <ClientContext.Provider value={value}>{children}</ClientContext.Provider>
   );
 };
 

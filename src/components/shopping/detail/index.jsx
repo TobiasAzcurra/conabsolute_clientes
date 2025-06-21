@@ -12,7 +12,7 @@ import arrowIcon from '../../../assets/arrowIcon.png';
 import labrado1 from '../../../assets/labrado1.jpg';
 import labrado2 from '../../../assets/labrado2.jpg';
 import labrado3 from '../../../assets/labrado3.jpg';
-import { getClientAssets } from '../../../firebase/getClientConfig';
+import { getClientAssets } from '../../../firebase/getClient';
 
 const DetailCard = ({ type }) => {
   const location = useLocation();

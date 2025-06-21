@@ -1,34 +1,35 @@
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useClient } from '../../contexts/ClientContext';
-import { getClientAssets } from '../../firebase/getClientConfig';
+import { getClientAssets, getClientData } from '../../firebase/getClient';
 import { useEffect, useState } from 'react';
 
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { setClientConfig, setIsLoaded } = useClient();
+  const { setClientData, setClientAssets, setIsLoaded } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const config = await getClientAssets(slugEmpresa, slugSucursal);
-        setClientConfig(config);
-        setIntroGif(config?.loading || null);
+    Promise.all([
+      getClientData(slugEmpresa, slugSucursal),
+      getClientAssets(slugEmpresa, slugSucursal),
+    ])
+      .then(([data, assets]) => {
+        setClientData(data);
+        setClientAssets(assets);
+        setIntroGif(assets?.loading || null);
 
         setTimeout(() => {
           setIsLoaded(true);
           navigate(location.pathname, { replace: true });
-        }, 30000);
-      } catch (e) {
-        console.error('❌ Error cargando intro:', e);
-      }
-    };
-
-    load();
+        }, 3000);
+      })
+      .catch((e) => {
+        console.error('❌ Error cargando intro o data:', e);
+      });
   }, []);
 
   return (

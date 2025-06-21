@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClientData } from '../firebase/getClientConfig';
+import { getClientData } from '../firebase/getClient';
 
 const useClientData = (slug) => {
   const [clientData, setClientData] = useState(null);

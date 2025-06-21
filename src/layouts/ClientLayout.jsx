@@ -9,7 +9,7 @@ import SearchBar from '../components/SearchBar';
 import { useLocation } from 'react-router-dom';
 
 const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
-  const { clientData, clientConfig } = useClient();
+  const { clientData, clientAssets } = useClient();
 
   const location = useLocation();
   const pathname = location.pathname;
@@ -51,19 +51,17 @@ const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
 
   return (
     <>
-      {clientData && (
-        <Helmet>
-          <title>{clientData?.name || 'ABSOLUTE'}</title>
-          {clientData?.logo && (
-            <link
-              rel="icon"
-              type="image/png"
-              href={clientData.logo}
-              key={`favicon-${clientData.logo}`}
-            />
-          )}
-        </Helmet>
-      )}
+      <Helmet>
+        <title>{clientData?.name || 'CONABSOLUTE'}</title>
+        {clientAssets?.logo && (
+          <link
+            rel="icon"
+            type="image/png"
+            href={clientAssets.logo}
+            key={`favicon-${clientAssets.logo}`}
+          />
+        )}
+      </Helmet>
       <div className="flex flex-col relative ">
         {!shouldHideHeader && (
           <>
@@ -78,7 +76,7 @@ const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
             />
 
             <div className="relative z-[10]">
-              <Carrusel images={clientConfig?.hero || []} />
+              <Carrusel images={clientAssets?.hero || []} />
               <div className="top-[215px] inset-0 absolute">
                 <NavMenu
                   selectedItem={selectedItem}
