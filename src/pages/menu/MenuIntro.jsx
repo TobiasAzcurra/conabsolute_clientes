@@ -1,13 +1,23 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useClient } from '../../contexts/ClientContext';
 import { getClientAssets, getClientData } from '../../firebase/getClient';
-import { useEffect, useState } from 'react';
+import { getCategoriesByClient } from '../../firebase/getCategories';
+import { getProductsByClientV2 } from '../../firebase/getProducts';
+import { getProductsByCategoryPosition } from '../../firebase/getProductsByCategory';
 
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { setClientData, setClientAssets, setIsLoaded } = useClient();
+  const {
+    setIsLoaded,
+    setClientData,
+    setClientAssets,
+    setProducts,
+    setProductsByCategory,
+    setCategories,
+  } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -16,6 +26,9 @@ const MenuIntro = () => {
     Promise.all([
       getClientData(slugEmpresa, slugSucursal),
       getClientAssets(slugEmpresa, slugSucursal),
+      getCategoriesByClient(slugEmpresa, slugSucursal),
+      getProductsByClientV2(slugEmpresa, slugSucursal),
+      getProductsByCategoryPosition(slugEmpresa, slugSucursal),
     ])
       .then(([data, assets]) => {
         setClientData(data);

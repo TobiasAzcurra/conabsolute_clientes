@@ -6,6 +6,9 @@ export const ClientProvider = ({ children }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [clientData, setClientData] = useState(null);
   const [clientAssets, setClientAssets] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [productsByCategory, setProductsByCategory] = useState({});
+  const [categories, setCategories] = useState([]);
 
   const value = useMemo(
     () => ({
@@ -15,8 +18,21 @@ export const ClientProvider = ({ children }) => {
       setClientData,
       clientAssets,
       setClientAssets,
+      products,
+      setProducts,
+      productsByCategory,
+      setProductsByCategory,
+      categories,
+      setCategories,
     }),
-    [isLoaded, clientData, clientAssets]
+    [
+      isLoaded,
+      clientData,
+      clientAssets,
+      products,
+      productsByCategory,
+      categories,
+    ]
   );
 
   return (
