@@ -1,3 +1,11 @@
+import {
+  collection,
+  doc,
+  getFirestore,
+  runTransaction,
+} from 'firebase/firestore';
+import { useClient } from '../../contexts/ClientContext';
+
 export const updateOrderItemQuantity = async (
   pedidoId,
   fechaPedido,
@@ -5,8 +13,18 @@ export const updateOrderItemQuantity = async (
   newQuantity
 ) => {
   const firestore = getFirestore();
+  const { slugEmpresa, slugSucursal } = useClient();
   const [dia, mes, anio] = fechaPedido.split('/');
-  const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+  const pedidosCollectionRef = collection(
+    firestore,
+    'absoluteClientes',
+    slugEmpresa,
+    'sucursales',
+    slugSucursal,
+    'pedidos',
+    anio,
+    mes
+  );
   const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
   try {

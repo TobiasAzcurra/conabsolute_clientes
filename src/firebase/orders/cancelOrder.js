@@ -1,10 +1,31 @@
+import {
+  getFirestore,
+  doc,
+  runTransaction,
+  getDocs,
+  collection,
+} from 'firebase/firestore';
+import { obtenerFechaActual } from '../utils/dateHelpers';
+import { useClient } from '../../contexts/ClientContext';
+
 export const cancelOrder = async (orderId) => {
+  const { slugEmpresa, slugSucursal } = useClient();
   const firestore = getFirestore();
   const todayDateString = obtenerFechaActual();
   const [day, month, year] = todayDateString.split('/');
 
-  // Referencia al documento del día actual
-  const ordersDocRef = doc(firestore, 'pedidos', year, month, day);
+  // Referencia al documento del día actual bajo la empresa y sucursal
+  const ordersDocRef = doc(
+    firestore,
+    'absoluteClientes',
+    slugEmpresa,
+    'sucursales',
+    slugSucursal,
+    'pedidos',
+    year,
+    month,
+    day
+  );
 
   // console.log(`🚫 Iniciando cancelación del pedido ID ${orderId} en la fecha ${day}/${month}/${year}`);
 

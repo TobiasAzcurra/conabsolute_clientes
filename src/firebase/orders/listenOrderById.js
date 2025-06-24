@@ -1,12 +1,27 @@
+import { doc, getFirestore } from 'firebase/firestore';
+import { useClient } from '../../contexts/ClientContext';
+import { obtenerFechaActual } from '../utils/dateHelpers';
+
 export const ReadOrdersForTodayById = (orderId, callback) => {
   const firestore = getFirestore();
+  const { slugEmpresa, slugSucursal } = useClient();
   const todayDateString = obtenerFechaActual();
 
   // Obtener el año, mes y día actual
   const [day, month, year] = todayDateString.split('/');
 
   // Referencia al documento del día actual dentro de la colección del mes actual
-  const ordersDocRef = doc(firestore, 'pedidos', year, month, day);
+  const ordersDocRef = doc(
+    firestore,
+    'absoluteClientes',
+    slugEmpresa,
+    'sucursales',
+    slugSucursal,
+    'pedidos',
+    year,
+    month,
+    day
+  );
 
   // console.log(
   // 	`📡 Escuchando cambios en el pedido ID ${orderId} para la fecha ${day}/${month}/${year}`

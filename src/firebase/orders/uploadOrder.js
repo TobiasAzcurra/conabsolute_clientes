@@ -12,13 +12,24 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { cleanPhoneNumber } from '../utils/phoneUtils';
 import { obtenerFechaActual } from '../utils/dateHelpers';
+import { useClient } from '../../contexts/ClientContext';
 
 export const UploadOrder = async (orderDetail) => {
   const firestore = getFirestore();
+  const { slugEmpresa, slugSucursal } = useClient();
   const pedidoId = uuidv4();
   const fechaFormateada = obtenerFechaActual();
   const [dia, mes, anio] = fechaFormateada.split('/');
-  const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+  const pedidosCollectionRef = collection(
+    firestore,
+    'absoluteClientes',
+    slugEmpresa,
+    'sucursales',
+    slugSucursal,
+    'pedidos',
+    anio,
+    mes
+  );
   const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
   try {
@@ -92,6 +103,7 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
   const collectionRef = collection(firestore, 'telefonos');
   const q = query(collectionRef, where('telefono', '==', cleanPhone));
   const querySnapshot = await getDocs(q);
+  const { slugEmpresa, slugSucursal } = useClient();
 
   if (querySnapshot.empty) {
     try {
@@ -109,7 +121,15 @@ export const addTelefonoFirebase = async (phoneNumber, fecha) => {
   } else {
     querySnapshot.forEach(async (documento) => {
       try {
-        const docRef = doc(firestore, 'telefonos', documento.id);
+        const docRef = doc(
+          firestore,
+          'absoluteClientes',
+          slugEmpresa,
+          'sucursales',
+          slugSucursal,
+          'telefonos',
+          documento.id
+        );
         await updateDoc(docRef, {
           lastOrder: fecha,
         });

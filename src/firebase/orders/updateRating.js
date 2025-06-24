@@ -1,9 +1,28 @@
+import {
+  collection,
+  doc,
+  getFirestore,
+  runTransaction,
+  Transaction,
+} from 'firebase/firestore';
+import { useClient } from '../../contexts/ClientContext';
+
 export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
   const firestore = getFirestore();
+  const { slugEmpresa, slugSucursal } = useClient();
 
   return new Promise((resolve, reject) => {
     const [dia, mes, anio] = fechaPedido.split('/');
-    const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+    const pedidosCollectionRef = collection(
+      firestore,
+      'absoluteClientes',
+      slugEmpresa,
+      'sucursales',
+      slugSucursal,
+      'pedidos',
+      anio,
+      mes
+    );
     const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
     // console.log("🔄 updateRatingForOrder llamado con:", {
@@ -36,7 +55,7 @@ export const updateRatingForOrder = (fechaPedido, pedidoId, rating) => {
         }
       });
 
-      transaction.set(pedidoDocRef, {
+      Transaction.set(pedidoDocRef, {
         ...existingData,
         pedidos: pedidosActualizados,
       });

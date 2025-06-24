@@ -1,8 +1,22 @@
+import { collection, getFirestore } from 'firebase/firestore';
+import { useClient } from '../../contexts/ClientContext';
+import { obtenerFechaActual } from '../utils/dateHelpers';
+
 export const handleConfirmChanges = async (orderId) => {
   const firestore = getFirestore();
+  const { slugEmpresa, slugSucursal } = useClient();
   const fechaActual = obtenerFechaActual();
   const [dia, mes, anio] = fechaActual.split('/');
-  const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+  const pedidosCollectionRef = collection(
+    firestore,
+    'absoluteClientes',
+    slugEmpresa,
+    'sucursales',
+    slugSucursal,
+    'pedidos',
+    anio,
+    mes
+  );
   const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
   try {
