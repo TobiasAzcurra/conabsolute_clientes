@@ -11,7 +11,7 @@ import AppleErrorMessage from "./AppleErrorMessage";
 import {
   validarVoucher,
   canjearVouchers,
-} from "../../firebase/validateVoucher";
+} from "../../firebase/vouchers/validateVoucher";
 import Payment from "../mercadopago/Payment";
 import currencyFormat from "../../helpers/currencyFormat";
 import { calculateDiscountedTotal } from "../../helpers/currencyFormat";
@@ -23,7 +23,7 @@ import {
 import LoadingPoints from "../LoadingPoints";
 import Toggle from "../Toggle";
 import AppleModal from "../AppleModal";
-import { listenToAltaDemanda } from "../../firebase/readConstants";
+import { listenToAltaDemanda } from "../../firebase/constants/altaDemanda";
 import Tooltip from "../Tooltip";
 import useClientData from "../../hooks/useClientData";
 

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import classNames from "classnames";
-import { functions } from "../../firebase/config";
+import { functions } from "../../firebase/config/firebaseConfig";
 import { httpsCallable } from "firebase/functions";
 import LoadingPoints from "../LoadingPoints";
-import { canjearVouchers } from "../../firebase/validateVoucher";
+import { canjearVouchers } from "../../firebase/vouchers/validateVoucher";
 import {
   isWithinClosedDays,
   isWithinOrderTimeRange,

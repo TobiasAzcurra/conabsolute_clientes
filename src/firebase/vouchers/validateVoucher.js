@@ -4,16 +4,16 @@ import {
   runTransaction,
   collection,
   getDocs,
-} from "firebase/firestore";
+} from 'firebase/firestore';
 
 export const validarVoucher = async (codigo) => {
-  console.log("🔍 INICIO VALIDACIÓN DE VOUCHER EN FIREBASE:", codigo);
+  console.log('🔍 INICIO VALIDACIÓN DE VOUCHER EN FIREBASE:', codigo);
 
   const firestore = getFirestore();
-  const vouchersCollectionRef = collection(firestore, "vouchers");
+  const vouchersCollectionRef = collection(firestore, 'vouchers');
 
   try {
-    console.log("📡 OBTENIENDO DOCUMENTOS DE VOUCHERS...");
+    console.log('📡 OBTENIENDO DOCUMENTOS DE VOUCHERS...');
     const querySnapshot = await getDocs(vouchersCollectionRef);
     console.log(`📋 DOCUMENTOS OBTENIDOS: ${querySnapshot.docs.length}`);
 
@@ -48,7 +48,7 @@ export const validarVoucher = async (codigo) => {
         indiceEncontrado = codigoIndex;
 
         const voucher = codigos[codigoIndex];
-        console.log("🎫 DETALLES DEL VOUCHER ENCONTRADO:", {
+        console.log('🎫 DETALLES DEL VOUCHER ENCONTRADO:', {
           documento: docSnapshot.id,
           indice: codigoIndex,
           codigo: voucher.codigo,
@@ -56,39 +56,39 @@ export const validarVoucher = async (codigo) => {
           gratis: voucher.gratis || false,
         });
 
-        if (voucher.estado === "usado") {
-          console.log("⚠️ EL CUPÓN YA HA SIDO USADO");
+        if (voucher.estado === 'usado') {
+          console.log('⚠️ EL CUPÓN YA HA SIDO USADO');
           return {
             isValid: false,
-            message: "El cupón ya ha sido usado",
+            message: 'El cupón ya ha sido usado',
             gratis: false,
           };
         }
 
         const esGratis = voucher.gratis || false;
-        console.log(`✅ CUPÓN VÁLIDO - TIPO: ${esGratis ? "GRATIS" : "2X1"}`);
+        console.log(`✅ CUPÓN VÁLIDO - TIPO: ${esGratis ? 'GRATIS' : '2X1'}`);
 
         return {
           isValid: true,
-          message: "¡Código válido!",
+          message: '¡Código válido!',
           gratis: esGratis,
         };
       }
     }
 
     if (!voucherEncontrado) {
-      console.log("❌ CUPÓN NO ENCONTRADO EN NINGÚN DOCUMENTO");
-      return { isValid: false, message: "Cupón no encontrado", gratis: false };
+      console.log('❌ CUPÓN NO ENCONTRADO EN NINGÚN DOCUMENTO');
+      return { isValid: false, message: 'Cupón no encontrado', gratis: false };
     }
   } catch (error) {
-    console.error("❌ ERROR AL VALIDAR EL VOUCHER:", error);
+    console.error('❌ ERROR AL VALIDAR EL VOUCHER:', error);
     throw error;
   }
 };
 
 export const canjearVouchers = async (codigos) => {
   const firestore = getFirestore();
-  const vouchersCollectionRef = collection(firestore, "vouchers");
+  const vouchersCollectionRef = collection(firestore, 'vouchers');
 
   try {
     return await runTransaction(firestore, async (transaction) => {
@@ -115,7 +115,7 @@ export const canjearVouchers = async (codigos) => {
           );
 
           if (codigoIndex !== -1) {
-            if (doc.data.codigos[codigoIndex].estado === "usado") {
+            if (doc.data.codigos[codigoIndex].estado === 'usado') {
               console.error(`El código ${codigo} ya está usado`);
               return false;
             }
@@ -126,7 +126,7 @@ export const canjearVouchers = async (codigos) => {
               codigos: [...doc.data.codigos],
             };
 
-            currentUpdates.codigos[codigoIndex].estado = "usado";
+            currentUpdates.codigos[codigoIndex].estado = 'usado';
             updates.set(docId, currentUpdates);
             found = true;
             break;
@@ -148,7 +148,7 @@ export const canjearVouchers = async (codigos) => {
       return true;
     });
   } catch (error) {
-    console.error("Error al canjear vouchers:", error);
+    console.error('Error al canjear vouchers:', error);
     throw error;
   }
 };
@@ -156,7 +156,7 @@ export const canjearVouchers = async (codigos) => {
 // Función para validar un cupón sin marcarlo como usado
 export const canjearVoucher = async (codigo) => {
   const firestore = getFirestore();
-  const vouchersCollectionRef = collection(firestore, "vouchers");
+  const vouchersCollectionRef = collection(firestore, 'vouchers');
 
   try {
     const success = await runTransaction(firestore, async (transaction) => {
@@ -170,8 +170,8 @@ export const canjearVoucher = async (codigo) => {
         const codigoIndex = codigos.findIndex((c) => c.codigo === codigo);
 
         if (codigoIndex !== -1) {
-          if (codigos[codigoIndex].estado === "usado") {
-            console.error("El voucher ya ha sido canjeado");
+          if (codigos[codigoIndex].estado === 'usado') {
+            console.error('El voucher ya ha sido canjeado');
             return false;
           }
 
@@ -181,7 +181,7 @@ export const canjearVoucher = async (codigo) => {
       }
 
       if (!voucherEncontrado) {
-        console.error("No se encontró el voucher con el código proporcionado");
+        console.error('No se encontró el voucher con el código proporcionado');
         return false;
       }
 
@@ -190,7 +190,7 @@ export const canjearVoucher = async (codigo) => {
 
     return success;
   } catch (error) {
-    console.error("Error al validar el voucher:", error);
+    console.error('Error al validar el voucher:', error);
     throw error;
   }
 };
@@ -198,7 +198,7 @@ export const canjearVoucher = async (codigo) => {
 // Función para canjear múltiples cupones en una sola transacción
 export const canjearMultiplesVouchers = async (codigos) => {
   const firestore = getFirestore();
-  const vouchersCollectionRef = collection(firestore, "vouchers");
+  const vouchersCollectionRef = collection(firestore, 'vouchers');
 
   try {
     const success = await runTransaction(firestore, async (transaction) => {
@@ -217,13 +217,13 @@ export const canjearMultiplesVouchers = async (codigos) => {
           );
 
           if (codigoIndex !== -1) {
-            if (codigosArray[codigoIndex].estado === "usado") {
+            if (codigosArray[codigoIndex].estado === 'usado') {
               console.error(`El voucher ${codigo} ya ha sido canjeado`);
               return false;
             }
 
             actualizaciones.push({
-              docRef: doc(firestore, "vouchers", docSnapshot.id),
+              docRef: doc(firestore, 'vouchers', docSnapshot.id),
               codigoIndex,
               codigosArray,
               docData: data,
@@ -242,7 +242,7 @@ export const canjearMultiplesVouchers = async (codigos) => {
       // Si todos los códigos son válidos, procedemos a actualizar
       for (const actualizacion of actualizaciones) {
         const nuevosCodigos = [...actualizacion.codigosArray];
-        nuevosCodigos[actualizacion.codigoIndex].estado = "usado";
+        nuevosCodigos[actualizacion.codigoIndex].estado = 'usado';
         transaction.update(actualizacion.docRef, { codigos: nuevosCodigos });
       }
 
@@ -251,14 +251,14 @@ export const canjearMultiplesVouchers = async (codigos) => {
 
     return success;
   } catch (error) {
-    console.error("Error al canjear múltiples vouchers:", error);
+    console.error('Error al canjear múltiples vouchers:', error);
     throw error;
   }
 };
 
 export const canjearVoucherPedir = async (codigo) => {
   const firestore = getFirestore();
-  const vouchersCollectionRef = collection(firestore, "vouchers");
+  const vouchersCollectionRef = collection(firestore, 'vouchers');
 
   try {
     const success = await runTransaction(firestore, async (transaction) => {
@@ -274,16 +274,16 @@ export const canjearVoucherPedir = async (codigo) => {
 
         if (codigoIndex !== -1) {
           // Si el código ya está marcado como "usado"
-          if (codigos[codigoIndex].estado === "usado") {
-            console.error("El voucher ya ha sido canjeado");
+          if (codigos[codigoIndex].estado === 'usado') {
+            console.error('El voucher ya ha sido canjeado');
             return false;
           }
 
           // Marca el código como "usado"
-          codigos[codigoIndex].estado = "usado";
+          codigos[codigoIndex].estado = 'usado';
 
           // Actualiza el documento con el nuevo estado del código
-          const voucherDocRef = doc(firestore, "vouchers", docSnapshot.id);
+          const voucherDocRef = doc(firestore, 'vouchers', docSnapshot.id);
           transaction.update(voucherDocRef, { codigos });
 
           voucherEncontrado = true;
@@ -292,7 +292,7 @@ export const canjearVoucherPedir = async (codigo) => {
       }
 
       if (!voucherEncontrado) {
-        console.error("No se encontró el voucher con el código proporcionado");
+        console.error('No se encontró el voucher con el código proporcionado');
         return false;
       }
 
@@ -301,7 +301,7 @@ export const canjearVoucherPedir = async (codigo) => {
 
     return success;
   } catch (error) {
-    console.error("Error al canjear el voucher:", error);
+    console.error('Error al canjear el voucher:', error);
     throw error;
   }
 };

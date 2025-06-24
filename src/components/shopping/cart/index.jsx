@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import Items from "../../../pages/menu/Items";
 import box from "../../../assets/box.png";
 import fries from "../../../assets/fries.png";
-import { getProductsByClient } from "../../../firebase/getProducts";
+import { getProductsByClient } from "../../../firebase/products/getProductsByClient";
 import CartCard from "./CartCard";
 import carrusel from "../../../assets/carrusel3.jpg";
 import MovingRibbon from "../MovingRibbon";
 import FormCustom from "../../form";
 import LoadingPoints from "../../LoadingPoints";
-import { getProductsByCategoryPosition } from "../../../firebase/getProductsByCategory";
+import { getProductsByCategoryPosition } from "../../../firebase/products/getProductsByCategory";
 import { getImageSrc } from "../../../helpers/getImageSrc";
 
 export const items = {

@@ -1,26 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import Items from "../pages/menu/Items";
-import { getCategoriesByClient } from "../firebase/getCategories";
-import { useParams } from "react-router-dom";
+import { useEffect, useRef } from 'react';
+import Items from '../pages/menu/Items';
+import { useClient } from '../contexts/ClientContext';
+import { useParams } from 'react-router-dom';
 
-const NavMenu = ({ selectedItem, handleItemClick }) => {
-  const { slug } = useParams();
+const NavMenu = () => {
   const navRef = useRef(null);
   const animationRef = useRef(null);
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const cats = await getCategoriesByClient(slug);
-        setCategories(cats);
-      } catch (err) {
-        console.error("❌ Error al obtener categorías:", err);
-      }
-    };
-
-    if (slug) fetchCategories();
-  }, [slug]);
+  const { categories } = useClient();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -85,15 +71,13 @@ const NavMenu = ({ selectedItem, handleItemClick }) => {
       <nav
         ref={navRef}
         className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide"
-        style={{ scrollBehavior: "auto" }}
+        style={{ scrollBehavior: 'auto' }}
       >
         {categories.map((cat) => (
           <Items
             key={cat.id}
-            selectedItem={selectedItem}
-            img={cat.image || "/menu/defaultPortada.jpeg"}
+            img={cat.image || cat.img || '/menu/defaultPortada.jpeg'}
             name={cat.id}
-            handleItemClick={handleItemClick}
           />
         ))}
       </nav>

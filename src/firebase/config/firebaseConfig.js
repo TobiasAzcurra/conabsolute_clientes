@@ -1,8 +1,7 @@
-// Import the functions you need from the SDKs you need
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import { GoogleAuthProvider } from "firebase/auth";
-import "firebase/compat/functions";
+// src/firebase/config.js
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,10 +13,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Inicializar solo si no está inicializado
+const app =
+  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-const projectAuth = firebase.auth();
+const projectAuth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const functions = firebase.functions(); // Esto inicializa Firebase Functions
-export { projectAuth, provider, functions };
+const functions = getFunctions(app);
+
+export { app, projectAuth, provider, functions };

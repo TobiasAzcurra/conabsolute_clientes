@@ -1,50 +1,56 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './node_modules/react-tailwindcss-datepicker/dist/index.esm.js',
   ],
   theme: {
     extend: {
       backgroundColor: {
-        "custom-red": "#FE0000",
+        'custom-red': '#FE0000',
       },
       animation: {
-        shimmer: "shimmer 2s infinite",
+        shimmer: 'shimmer 2s infinite',
+        pulseOrbit: 'pulseOrbit 1.6s ease-in-out infinite',
       },
       textColor: {
-        "custom-red": "#FE0000",
+        'custom-red': '#FE0000',
       },
       fontFamily: {
-        oswald: ["Oswald", "sans-serif"],
-        antonio: ["Antonio", "sans-serif"],
-        koch: ["Koch Fette Deutsche Schrift", "sans-serif"],
-        coolvetica: ["Coolvetica", "sans-serif"],
-        "coolvetica-compressed": ["Coolvetica Compressed", "sans-serif"],
-        "coolvetica-condensed": ["Coolvetica Condensed", "sans-serif"],
-        "coolvetica-crammed": ["Coolvetica Crammed", "sans-serif"],
-        "coolvetica-ul": ["Coolvetica Ul", "sans-serif"],
+        oswald: ['Oswald', 'sans-serif'],
+        antonio: ['Antonio', 'sans-serif'],
+        koch: ['Koch Fette Deutsche Schrift', 'sans-serif'],
+        coolvetica: ['Coolvetica', 'sans-serif'],
+        'coolvetica-compressed': ['Coolvetica Compressed', 'sans-serif'],
+        'coolvetica-condensed': ['Coolvetica Condensed', 'sans-serif'],
+        'coolvetica-crammed': ['Coolvetica Crammed', 'sans-serif'],
+        'coolvetica-ul': ['Coolvetica Ul', 'sans-serif'],
       },
       fontWeight: {
-        thin: "200",
-        light: "300",
-        normal: "400",
-        medium: "500",
-        bold: "700",
-        black: "900",
+        thin: '200',
+        light: '300',
+        normal: '400',
+        medium: '500',
+        bold: '700',
+        black: '900',
       },
       screens: {
-        random: "463px",
+        random: '463px',
       },
       colors: {
-        "blue-apm": "#396FB7",
+        'blue-apm': '#396FB7',
       },
       keyframes: {
         shimmer: {
-          "100%": {
-            transform: "translateX(100%)",
+          '100%': {
+            transform: 'translateX(100%)',
           },
+        },
+        pulseOrbit: {
+          '0%': { transform: 'scale(1)', opacity: '0.4' },
+          '50%': { transform: 'scale(1.4)', opacity: '0.2' },
+          '100%': { transform: 'scale(1)', opacity: '0.4' },
         },
       },
     },

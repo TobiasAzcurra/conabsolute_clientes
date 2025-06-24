@@ -3,18 +3,6 @@ export default function currencyFormat(num) {
   return "$" + num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
 }
 
-export const obtenerFechaActual = () => {
-  const fechaActual = new Date();
-  const dia = String(fechaActual.getDate()).padStart(2, "0");
-  const mes = String(fechaActual.getMonth() + 1).padStart(2, "0");
-  const anio = fechaActual.getFullYear();
-
-  // Formatea la fecha como "DD/MM/AAAA"
-  const fechaFormateada = `${dia}/${mes}/${anio}`;
-
-  return fechaFormateada;
-};
-
 export const obtenerHoraActual = () => {
   // Obtener la hora actual
   const ahora = new Date();
