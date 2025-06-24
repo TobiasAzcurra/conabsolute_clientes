@@ -5,23 +5,39 @@ import {
   where,
   getDocs,
 } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
 
-export const getProductsByCategory = async (slug, categoryId) => {
-  const db = getFirestore();
-  const ref = collection(db, 'absoluteClientes', slug, 'productos');
+const db = getFirestore(app);
+
+export const getProductsByCategory = async (empresa, sucursal, categoryId) => {
+  const ref = collection(
+    db,
+    'absoluteClientes',
+    empresa,
+    'sucursales',
+    sucursal,
+    'productos'
+  );
+
   const q = query(ref, where('category', '==', categoryId));
-
   const snapshot = await getDocs(q);
+
   return snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
   }));
 };
 
-export const getProductsByCategoryPosition = async (slug) => {
-  const db = getFirestore();
+export const getProductsByCategoryPosition = async (empresa, sucursal) => {
+  const categoriesRef = collection(
+    db,
+    'absoluteClientes',
+    empresa,
+    'sucursales',
+    sucursal,
+    'categories'
+  );
 
-  const categoriesRef = collection(db, 'absoluteClientes', slug, 'categories');
   const categoriesSnapshot = await getDocs(categoriesRef);
 
   const orderedCategories = categoriesSnapshot.docs
@@ -32,12 +48,20 @@ export const getProductsByCategoryPosition = async (slug) => {
 
   if (categoryOrder.length === 0) return [];
 
-  const productsRef = collection(db, 'absoluteClientes', slug, 'productos');
-  const batches = [];
+  const productsRef = collection(
+    db,
+    'absoluteClientes',
+    empresa,
+    'sucursales',
+    sucursal,
+    'productos'
+  );
 
+  const batches = [];
   let remaining = [...categoryOrder];
+
   while (remaining.length) {
-    const batch = remaining.splice(0, 10);
+    const batch = remaining.splice(0, 10); // Firestore limita `in` a 10
     const q = query(productsRef, where('category', 'in', batch));
     batches.push(getDocs(q));
   }

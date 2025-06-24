@@ -8,10 +8,10 @@ import {
   removeItem,
 } from "../../../redux/cart/cartSlice";
 import {
-  addProductToOrder,
   ReadMateriales,
   ReadData,
-} from "../../../firebase/uploadOrder";
+} from "../../../firebase/orders/uploadOrder";
+import { addProductToOrder } from "../../../firebase/orders/addProductToOrder";
 import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 
 const normalizeProduct = (product) => ({

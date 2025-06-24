@@ -4,17 +4,14 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from "react";
-import QuickAddToCart from "./quickAddToCart";
-import currencyFormat from "../../../helpers/currencyFormat";
-import { Link, useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { listenToAltaDemanda } from "../../../firebase/readConstants";
-import LoadingPoints from "../../LoadingPoints";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-import imagen2 from "../../../assets/IMG_8408.jpg";
-import imagen3 from "../../../assets/IMG_8413.jpg";
+} from 'react';
+import QuickAddToCart from './quickAddToCart';
+import currencyFormat from '../../../helpers/currencyFormat';
+import { Link, useParams } from 'react-router-dom';
+import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
+import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({
   name,
@@ -27,7 +24,7 @@ const Card = ({
   type,
   data,
 }) => {
-  const { slug } = useParams();
+  const { slugEmpresa, slugSucursal } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
@@ -42,10 +39,15 @@ const Card = ({
   const cardRef = useRef(null);
   const intervalRef = useRef(null);
 
-  // Array de imágenes para rotar
   const images = useMemo(() => {
-    const mainImage = getImageSrc(data || img);
-    return [mainImage, imagen2, imagen3];
+    const raw = data?.img || data?.image || data?.images || img || [];
+
+    if (Array.isArray(raw)) {
+      return raw;
+    }
+
+    const resolved = getImageSrc(raw);
+    return [resolved];
   }, [data, img]);
 
   // Generar números y etiquetas aleatorias usando useMemo para que sean consistentes
@@ -53,9 +55,9 @@ const Card = ({
     const generateRandomNumber = () => Math.floor(Math.random() * 4) + 1;
 
     const allLabels = [
-      { key: "colores", text: `${generateRandomNumber()} colores` },
-      { key: "tamaños", text: `${generateRandomNumber()} tamaños` },
-      { key: "labrados", text: `${generateRandomNumber()} labrados` },
+      { key: 'colores', text: `${generateRandomNumber()} colores` },
+      { key: 'tamaños', text: `${generateRandomNumber()} tamaños` },
+      { key: 'labrados', text: `${generateRandomNumber()} labrados` },
     ];
 
     // Determinar cuántas etiquetas mostrar (1, 2 o 3)
@@ -66,22 +68,15 @@ const Card = ({
     return shuffled.slice(0, numLabels);
   }, [id]); // Usar id como dependencia para que sea consistente por producto
 
-  // Función para verificar si este card está más centrado que otros
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
 
     const rect = cardRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportCenterY = viewportHeight / 2;
-
-    // Calcular el centro del card
     const cardCenterY = rect.top + rect.height / 2;
-
-    // Calcular la distancia del centro del card al centro del viewport
     const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
-
-    // Considerar "centrado" si está dentro de un rango pequeño del centro
-    const threshold = 100; // píxeles de tolerancia
+    const threshold = 140;
 
     return (
       distanceFromCenter < threshold &&
@@ -112,24 +107,25 @@ const Card = ({
       }
     };
 
-    window.addEventListener("scroll", throttledScroll);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener('scroll', throttledScroll);
+    window.addEventListener('resize', handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", throttledScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener('scroll', throttledScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [checkIfCentered]);
 
   // Efecto para manejar la rotación automática de imágenes
   useEffect(() => {
-    if (isInViewport) {
-      // Iniciar rotación automática cuando esté en viewport
+    console.log(
+      `🔄 ${name} - isInViewport: ${isInViewport}, images.length: ${images.length} `
+    );
+    if (isInViewport && images.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 1000); // Cambiar imagen cada 2 segundos
+      }, 2000);
     } else {
-      // Detener rotación y volver a la primera imagen cuando no esté en viewport
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -142,7 +138,7 @@ const Card = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isInViewport, images.length]);
+  }, [isInViewport, images]);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -176,7 +172,7 @@ const Card = ({
       </div>
 
       <Link
-        to={`/${slug}/menu/${path}/${id}`}
+        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${id}`}
         state={{ product: data }}
         className="w-full"
       >
@@ -231,8 +227,8 @@ const Card = ({
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? "bg-white opacity-100"
-                      : "bg-white opacity-50"
+                      ? 'bg-white opacity-100'
+                      : 'bg-white opacity-50'
                   }`}
                 />
               ))}
@@ -241,9 +237,9 @@ const Card = ({
 
           <img
             src={currentImageSrc}
-            alt={name || "Producto"}
+            alt={name || 'Producto'}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? "opacity-100" : "opacity-0"
+              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => {
               console.log(`✅ Imagen cargada exitosamente para ${name}`);
@@ -264,7 +260,7 @@ const Card = ({
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {name || "Producto sin nombre"}
+              {name || 'Producto sin nombre'}
             </h5>
           </div>
           {data?.cardDescription && (

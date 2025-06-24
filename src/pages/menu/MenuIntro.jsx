@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useClient } from '../../contexts/ClientContext';
-import { getClientAssets, getClientData } from '../../firebase/getClient';
-import { getCategoriesByClient } from '../../firebase/getCategories';
-import { getProductsByClientV2 } from '../../firebase/getProducts';
-import { getProductsByCategoryPosition } from '../../firebase/getProductsByCategory';
+import { getClientData } from '../../firebase/clients/getClientData';
+import { getClientAssets } from '../../firebase/clients/getClientAssets';
+import { getCategoriesByClient } from '../../firebase/categories/getCategories';
+import { getProductsByClient } from '../../firebase/products/getProductsByClient';
+import { getProductsByCategoryPosition } from '../../firebase/products/getProductsByCategory';
 
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const {
     setIsLoaded,
@@ -17,27 +17,39 @@ const MenuIntro = () => {
     setProducts,
     setProductsByCategory,
     setCategories,
+    setProductsSorted,
+    setSlugEmpresa,
+    setSlugSucursal,
   } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
+    setSlugEmpresa(slugEmpresa);
+    setSlugSucursal(slugSucursal);
+
     Promise.all([
       getClientData(slugEmpresa, slugSucursal),
       getClientAssets(slugEmpresa, slugSucursal),
       getCategoriesByClient(slugEmpresa, slugSucursal),
-      getProductsByClientV2(slugEmpresa, slugSucursal),
+      getProductsByClient(slugEmpresa, slugSucursal),
       getProductsByCategoryPosition(slugEmpresa, slugSucursal),
     ])
-      .then(([data, assets]) => {
+      .then(([data, assets, categories, productsData, sortedProducts]) => {
         setClientData(data);
         setClientAssets(assets);
         setIntroGif(assets?.loading || null);
+        setCategories(categories);
+        setProducts(productsData.todos);
+        setProductsByCategory(productsData.porCategoria);
+        setProductsSorted(sortedProducts);
 
         setTimeout(() => {
           setIsLoaded(true);
-          navigate(location.pathname, { replace: true });
+          navigate(`menu/${categories?.[0]?.id || 'default'}`, {
+            replace: true,
+          });
         }, 3000);
       })
       .catch((e) => {

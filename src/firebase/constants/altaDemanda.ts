@@ -1,5 +1,5 @@
-import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
-import { Unsubscribe } from "firebase/auth";
+import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { Unsubscribe } from 'firebase/auth';
 
 // Interfaz para itemsOut
 export interface ItemsOutProps {
@@ -33,7 +33,7 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
   // console.log('Iniciando lectura de Alta Demanda...');
   const firestore = getFirestore();
   try {
-    const docRef = doc(firestore, "constantes", "altaDemanda");
+    const docRef = doc(firestore, 'constantes', 'altaDemanda');
     // console.log('Referencia al documento creada');
 
     const docSnap = await getDoc(docRef);
@@ -56,7 +56,7 @@ export const readAltaDemanda = async (): Promise<AltaDemandaProps | null> => {
       return null;
     }
   } catch (error) {
-    console.error("Error al leer Alta Demanda:", error);
+    console.error('Error al leer Alta Demanda:', error);
     throw error;
   }
 };
@@ -67,7 +67,7 @@ export const listenToAltaDemanda = (
 ): Unsubscribe => {
   // console.log('Iniciando escucha de cambios en Alta Demanda...');
   const firestore = getFirestore();
-  const docRef = doc(firestore, "constantes", "altaDemanda");
+  const docRef = doc(firestore, 'constantes', 'altaDemanda');
 
   return onSnapshot(
     docRef,
@@ -92,7 +92,7 @@ export const listenToAltaDemanda = (
       }
     },
     (error) => {
-      console.error("Error en la escucha de Alta Demanda:", error);
+      console.error('Error en la escucha de Alta Demanda:', error);
     }
   );
 };

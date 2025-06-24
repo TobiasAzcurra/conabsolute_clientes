@@ -9,6 +9,9 @@ export const ClientProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [productsByCategory, setProductsByCategory] = useState({});
   const [categories, setCategories] = useState([]);
+  const [productsSorted, setProductsSorted] = useState([]);
+  const [slugEmpresa, setSlugEmpresa] = useState(null);
+  const [slugSucursal, setSlugSucursal] = useState(null);
 
   const value = useMemo(
     () => ({
@@ -24,6 +27,13 @@ export const ClientProvider = ({ children }) => {
       setProductsByCategory,
       categories,
       setCategories,
+      setProductsSorted,
+      productsSorted,
+      setProductsSorted,
+      slugEmpresa,
+      setSlugEmpresa,
+      slugSucursal,
+      setSlugSucursal,
     }),
     [
       isLoaded,
@@ -32,6 +42,9 @@ export const ClientProvider = ({ children }) => {
       products,
       productsByCategory,
       categories,
+      productsSorted,
+      slugEmpresa,
+      slugSucursal,
     ]
   );
 

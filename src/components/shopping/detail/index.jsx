@@ -3,8 +3,8 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import currencyFormat from '../../../helpers/currencyFormat';
 import VideoSlider from './VideoSlider';
-import { listenToAltaDemanda } from '../../../firebase/readConstants';
-import { getProductById } from '../../../firebase/getProducts';
+import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
+import { getProductById } from '../../../firebase/products/getProductsById';
 import { getImageSrc } from '../../../helpers/getImageSrc';
 import imagen2 from '../../../assets/IMG_8408.jpg';
 import imagen3 from '../../../assets/IMG_8413.jpg';
@@ -12,7 +12,7 @@ import arrowIcon from '../../../assets/arrowIcon.png';
 import labrado1 from '../../../assets/labrado1.jpg';
 import labrado2 from '../../../assets/labrado2.jpg';
 import labrado3 from '../../../assets/labrado3.jpg';
-import { getClientAssets } from '../../../firebase/getClient';
+import { getClientAssets } from '../../../firebase/clients/getClientAssets';
 
 const DetailCard = ({ type }) => {
   const location = useLocation();

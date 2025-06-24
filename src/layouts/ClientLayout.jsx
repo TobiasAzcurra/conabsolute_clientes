@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import SearchBar from '../components/SearchBar';
 import { useLocation } from 'react-router-dom';
 
-const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
+const ClientLayout = ({ children }) => {
   const { clientData, clientAssets } = useClient();
 
   const location = useLocation();
@@ -78,10 +78,7 @@ const ClientLayout = ({ children, handleItemClick, selectedItem }) => {
             <div className="relative z-[10]">
               <Carrusel images={clientAssets?.hero || []} />
               <div className="top-[215px] inset-0 absolute">
-                <NavMenu
-                  selectedItem={selectedItem}
-                  handleItemClick={handleItemClick}
-                />
+                <NavMenu />
               </div>
             </div>
           </>

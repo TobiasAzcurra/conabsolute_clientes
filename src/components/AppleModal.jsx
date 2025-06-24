@@ -9,7 +9,7 @@ import {
   collection,
   getFirestore,
 } from "firebase/firestore";
-import { obtenerFechaActual } from "../helpers/currencyFormat";
+import { obtenerFechaActual } from "../firebase/utils/dateHelpers";
 import isologo from "../assets/isologo.png";
 
 const AppleModal = ({
