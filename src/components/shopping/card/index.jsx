@@ -220,19 +220,21 @@ const Card = ({ data, path }) => {
       ref={cardRef}
       className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
     >
-      <div className="absolute right-3.5 top-2.5 z-40">
-        <QuickAddToCart
-          product={{
-            name,
-            description,
-            price: adjustedPrice,
-            img: currentImageSrc,
-            path,
-            id,
-            category,
-          }}
-        />
-      </div>
+      {(!variants || variants.length === 0) && (
+        <div className="absolute right-3.5 top-2.5 z-40">
+          <QuickAddToCart
+            product={{
+              name,
+              description,
+              price: adjustedPrice,
+              img: currentImageSrc,
+              path,
+              id,
+              category,
+            }}
+          />
+        </div>
+      )}
 
       <Link
         to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${data.id}`}

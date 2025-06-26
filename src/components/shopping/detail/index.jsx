@@ -6,6 +6,7 @@ import currencyFormat from '../../../helpers/currencyFormat';
 import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
 import arrowIcon from '../../../assets/arrowIcon.png';
 import VideoSlider from './VideoSlider';
+import QuickAddToCart from '../card/quickAddToCart';
 
 const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -199,7 +200,7 @@ const DetailCard = ({ type }) => {
             </div>
           </div>
 
-          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl">
+          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl gap-4">
             <button
               onClick={handleGoBack}
               className="text-xs font-coolvetica flex flex-row gap-2 items-center justify-center mt-3 opacity-50 hover:opacity-75 transition-opacity cursor-pointer "
@@ -207,17 +208,17 @@ const DetailCard = ({ type }) => {
               <img src={arrowIcon} className="h-2 rotate-180" alt="" />
               Volver
             </button>
-            <h4 className="font-coolvetica mt-6 font-bold text-4xl sm:text-6xl text-gray-900  px-4 leading-9 w-full">
+            <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-gray-900 px-4 leading-9 w-full">
               {capitalizeWords(product.name)}
             </h4>
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs mt-2 text-gray-900 font-light pl-4 pr-16 leading-tight">
+              <p className="font-coolvetica text-xs text-gray-900 font-light pl-4 pr-16 leading-tight">
                 {product.detailDescription}
               </p>
             )}
 
             {customization ? (
-              <div className="w-full flex justify-center px-4 mt-4">
+              <div className="w-full flex justify-center px-4">
                 <div className="space-y-2 w-full">
                   {Object.entries(variantStats).map(([key, values]) => (
                     <div key={key}>
@@ -247,7 +248,7 @@ const DetailCard = ({ type }) => {
                                     : 'bg-white text-gray-600'
                                 } ${borderRadiusClass} ${
                                   index > 0 ? '-ml-px' : ''
-                                }`} // evita separación entre botones
+                                }`}
                               >
                                 {capitalizeWords(value)}
                               </button>
@@ -261,51 +262,21 @@ const DetailCard = ({ type }) => {
               </div>
             ) : null}
 
-            {/* quickaddtocart o agotado */}
-            <div className="flex flex-row items-center  w-full mt-10 gap-2">
-              {/* {hasUnavailableIngredients() ? (
-              <div className="bg-red-500 -mt-4 -mb-5 flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  class="h-6"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                Agotado
+            <div className="flex flex-row items-center w-full px-4 gap-2">
+              <div className="flex-shrink-0 flex-1">
+                <QuickAddToCart
+                  product={product}
+                  toppings={dataTopping}
+                  calculatedPrice={totalPrice}
+                  displayAsFullButton={true}
+                />
               </div>
-            ) : (
-              <QuickAddToCart
-                product={product}
-                toppings={dataTopping}
-                calculatedPrice={totalPrice} // Agregar esta prop
-              />
-            )} */}
-              <div className="font-coolvetica bg-black rounded-3xl h-20 text-gray-50 items-center text-center flex flex-row gap-2 px-8 text-4xl w-fit ml-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="h-6"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Agregar
-              </div>
-              <div className="flex  pl-2  font-coolvetica flex-col">
-                <p className=" text-xs text-gray-900">
-                  Por <strong>{currencyFormat(totalPrice)}</strong>.{' '}
+
+              <div className="flex-1 pl-2 font-coolvetica flex-col">
+                <p className="text-xs text-gray-900">
+                  Por <strong>{currencyFormat(totalPrice)}</strong>.
                 </p>
-                <p className="font-light  text-xs w-full text-gray-900">
+                <p className="font-light text-xs w-full text-gray-900">
                   8u. disponibles
                 </p>
               </div>
