@@ -27,6 +27,9 @@ const Card = ({ data, path }) => {
   const cardRef = useRef(null);
   const intervalRef = useRef(null);
 
+  const installments = data?.installments;
+  const cashDiscount = data?.cashDiscount;
+
   const {
     id,
     name = 'Producto sin nombre',
@@ -38,7 +41,9 @@ const Card = ({ data, path }) => {
     image,
   } = data;
 
-  console.log('Card data:', data);
+  useEffect(() => {
+    console.log('Card data:', data);
+  }, [data]);
 
   const images = useMemo(() => {
     const raw = data?.img || data?.image || data?.images || img || [];
@@ -51,23 +56,42 @@ const Card = ({ data, path }) => {
     return [resolved];
   }, [data, img]);
 
-  // Generar números y etiquetas aleatorias usando useMemo para que sean consistentes
-  const randomLabels = useMemo(() => {
-    const generateRandomNumber = () => Math.floor(Math.random() * 4) + 1;
+  const variantStats = useMemo(() => {
+    const stats = {};
 
-    const allLabels = [
-      { key: 'colores', text: `${generateRandomNumber()} colores` },
-      { key: 'tamaños', text: `${generateRandomNumber()} tamaños` },
-      { key: 'labrados', text: `${generateRandomNumber()} labrados` },
-    ];
+    for (const variant of variants || []) {
+      Object.entries(variant).forEach(([key, value]) => {
+        if (!value) return;
 
-    // Determinar cuántas etiquetas mostrar (1, 2 o 3)
-    const numLabels = Math.floor(Math.random() * 3) + 1;
+        // Si es un objeto (como labrado: { name: "X" }), intentamos acceder a su .name
+        const stringValue =
+          typeof value === 'object' && value !== null
+            ? value.name?.toLowerCase?.()
+            : String(value).toLowerCase();
 
-    // Mezclar el array y tomar solo las primeras numLabels
-    const shuffled = allLabels.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, numLabels);
-  }, [id]); // Usar id como dependencia para que sea consistente por producto
+        if (!stringValue) return;
+
+        if (!stats[key]) stats[key] = new Set();
+        stats[key].add(stringValue);
+      });
+    }
+
+    const result = {};
+    for (const key in stats) {
+      result[key] = Array.from(stats[key]);
+    }
+
+    return result;
+  }, [variants]);
+
+  const visibleLabels = useMemo(() => {
+    return Object.entries(variantStats)
+      .filter(([, values]) => values.length > 0)
+      .map(([key, values]) => ({
+        key,
+        text: `${values.length} ${key}`,
+      }));
+  }, [variantStats]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
@@ -96,15 +120,40 @@ const Card = ({ data, path }) => {
     [data.variants]
   );
 
+  const basePrice = selectedVariant?.price || data.price || 0;
+  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+
+  const cuotaText = useMemo(() => {
+    if (!installments?.enabled || !installments.quantity) return null;
+
+    const base = adjustedPrice;
+    const interestRate = installments.interest || 0;
+    const finalAmount = base * (1 + interestRate);
+    const perCuota = finalAmount / installments.quantity;
+
+    return (
+      `en ${installments.quantity} cuota${
+        installments.quantity > 1 ? 's' : ''
+      } de $${Math.ceil(perCuota)}` +
+      (interestRate === 0
+        ? ' sin interés'
+        : ` (con ${Math.floor(interestRate * 100)}% interés)`)
+    );
+  }, [adjustedPrice, installments]);
+
+  const efectivoText = useMemo(() => {
+    if (!cashDiscount?.enabled || !cashDiscount.percentage) return null;
+
+    const discountAmount = adjustedPrice * (1 - cashDiscount.percentage);
+    return `o en transferencia / efectivo por $${Math.ceil(discountAmount)}`;
+  }, [adjustedPrice, cashDiscount]);
+
   const resolvedImages = useMemo(() => {
     const imgs =
       selectedVariant?.images || data?.img || data?.image || data?.images || [];
     if (Array.isArray(imgs)) return imgs;
     return [getImageSrc(imgs)];
   }, [selectedVariant, data]);
-
-  const basePrice = selectedVariant?.price || data.price || 0;
-  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -222,10 +271,10 @@ const Card = ({ data, path }) => {
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
-            {randomLabels.map((label, index) => (
+            {visibleLabels.map((label, index) => (
               <span
                 key={`${label.key}-${index}`}
-                className="text-gray-600 text-[10px] font-medium bg-gray-50  px-2 py-1 rounded-t-xl"
+                className="text-gray-600 text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-t-xl"
               >
                 {label.text}
               </span>
@@ -285,10 +334,13 @@ const Card = ({ data, path }) => {
             <span className="font-bold text-4xl text-black">
               {currencyFormat(adjustedPrice)}
             </span>
-            <span className="font-light pr-12 text-xs text-green-500">
-              en 6 cuotas de ${Math.ceil(adjustedPrice / 6)} o en transferencia
-              / efectivo por ${Math.ceil(adjustedPrice * 0.85)}
-            </span>
+            {(cuotaText || efectivoText) && (
+              <span className="font-light pr-12 text-xs text-green-500">
+                {cuotaText}
+                {cuotaText && efectivoText && ' - '}
+                {efectivoText}
+              </span>
+            )}
           </div>
         </div>
       </Link>
