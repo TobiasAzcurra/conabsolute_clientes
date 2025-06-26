@@ -1,40 +1,92 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useClient } from '../../../contexts/ClientContext';
 import currencyFormat from '../../../helpers/currencyFormat';
-import VideoSlider from './VideoSlider';
 import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
 import arrowIcon from '../../../assets/arrowIcon.png';
-import labrado1 from '../../../assets/labrado1.jpg';
-import labrado2 from '../../../assets/labrado2.jpg';
-import labrado3 from '../../../assets/labrado3.jpg';
-import { useClient } from '../../../contexts/ClientContext';
+import VideoSlider from './VideoSlider';
+
+const capitalizeWords = (str) => {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
 
 const DetailCard = ({ type }) => {
   const { slug: category, id } = useParams();
   const { productsByCategory, clientAssets } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
-
   const dispatch = useDispatch();
-  const [disable, setDisable] = useState(false);
-  const [dataTopping, setDataTopping] = useState([]);
-  const [quantity, setQuantity] = useState(1);
+  const cart = useSelector((state) => state.cartState.cart);
+
+  const [selectedVariants, setSelectedVariants] = useState({});
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [altaDemanda, setAltaDemanda] = useState(null);
   const [itemsOut, setItemsOut] = useState({});
-  const cart = useSelector((state) => state.cartState.cart);
+  const [dataTopping, setDataTopping] = useState([]);
   const [customization, setCustomization] = useState(true);
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [selectedLabrado, setSelectedLabrado] = useState(null);
+  const [disable, setDisable] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+
+  const prevImagesRef = useRef([]);
 
   const reels = clientAssets?.reels || [];
   const logo = clientAssets?.logoFooter || clientAssets?.logo || '';
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
+  const product = useMemo(() => {
+    if (location?.state?.product) return location.state.product;
+
+    const list = productsByCategory?.[category] || [];
+    return list.find((p) => p.id === id);
+  }, [location?.state, productsByCategory, category, id]);
+
+  const variantStats = useMemo(() => {
+    const stats = {};
+
+    for (const variant of product?.variants || []) {
+      Object.entries(variant).forEach(([key, value]) => {
+        if (!value) return;
+
+        const stringValue =
+          typeof value === 'object' && value !== null
+            ? value.name?.toLowerCase?.()
+            : String(value).toLowerCase();
+
+        if (!stringValue) return;
+
+        if (!stats[key]) stats[key] = new Set();
+        stats[key].add(stringValue);
+      });
+    }
+
+    const result = {};
+    for (const key in stats) {
+      result[key] = Array.from(stats[key]);
+    }
+
+    return result;
+  }, [product?.variants]);
+
+  useEffect(() => {
+    if (!product?.variants) return;
+
+    const matched = product.variants.find((variant) => {
+      return Object.entries(selectedVariants).every(([key, value]) => {
+        if (!value) return true;
+        const variantValue = variant[key];
+
+        const stringValue =
+          typeof variantValue === 'object' && variantValue !== null
+            ? variantValue.name?.toLowerCase?.()
+            : String(variantValue).toLowerCase();
+
+        return stringValue === value;
+      });
+    });
+
+    setSelectedVariant(matched || null);
+  }, [selectedVariants, product?.variants]);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemandaData) => {
@@ -45,44 +97,67 @@ const DetailCard = ({ type }) => {
     return () => unsubscribe();
   }, []);
 
-  const capitalizeWords = (str) => {
-    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  const product = useMemo(() => {
-    if (location?.state?.product) return location.state.product;
-
-    const list = productsByCategory?.[category] || [];
-    return list.find((p) => p.id === id);
-  }, [location?.state, productsByCategory, category, id]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const productImages = useMemo(() => {
-    if (!product) return [];
-    if (Array.isArray(product.img)) return product.img;
-    if (typeof product.img === 'string') return [product.img];
-    return [];
-  }, [product]);
+    const imgs =
+      selectedVariant?.images ||
+      product?.img ||
+      product?.image ||
+      product?.images ||
+      [];
+
+    const normalized = Array.isArray(imgs) ? imgs : [imgs];
+
+    const isSame =
+      prevImagesRef.current.length === normalized.length &&
+      prevImagesRef.current.every((img, i) => img === normalized[i]);
+
+    if (!isSame) {
+      prevImagesRef.current = normalized;
+    }
+
+    return prevImagesRef.current;
+  }, [selectedVariant, product]);
 
   useEffect(() => {
+    if (!productImages || productImages.length <= 1) return;
+
     const interval = setInterval(() => {
-      setSelectedImageIndex((prev) => (prev + 1) % productImages.length);
+      setSelectedImageIndex(
+        (prevIndex) => (prevIndex + 1) % productImages.length
+      );
     }, 2000);
+
     return () => clearInterval(interval);
+  }, [productImages]);
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
   }, [productImages]);
 
   const totalPrice = useMemo(() => {
     if (!product) return 0;
-    const basePrice = product.price || 0;
+    const basePrice = selectedVariant?.price || product.price || 0;
     const toppingsCost = dataTopping
       .filter((t) => t.price > 0)
       .reduce((acc, t) => acc + t.price, 0);
     const priceFactor = altaDemanda?.priceFactor || 1;
     return Math.ceil(((basePrice + toppingsCost) * priceFactor) / 100) * 100;
-  }, [product, dataTopping, altaDemanda?.priceFactor]);
+  }, [selectedVariant, product, dataTopping, altaDemanda?.priceFactor]);
+
+  const handleVariantSelect = (key, value) => {
+    setSelectedVariants((prev) => ({
+      ...prev,
+      [key]: prev[key] === value ? null : value,
+    }));
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!product) {
     return (
@@ -144,131 +219,44 @@ const DetailCard = ({ type }) => {
             {customization ? (
               <div className="w-full flex justify-center px-4 mt-4">
                 <div className="space-y-2 w-full">
-                  <div>
-                    <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
-                      Color
-                    </h5>
-                    <div className="flex">
-                      <button
-                        onClick={() => setSelectedColor('red')}
-                        className={`px-4 h-10 rounded-l-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedColor === 'red'
-                            ? 'bg-gray-300 text-gray-900'
-                            : 'bg-gray-50  font-light text-gray-500'
-                        }`}
-                      >
-                        Rojo
-                      </button>
-                      <button
-                        onClick={() => setSelectedColor('black')}
-                        className={`px-4 h-10 rounded-r-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedColor === 'black'
-                            ? 'bg-gray-300 text-gray-900'
-                            : 'bg-gray-50  font-light text-gray-500 '
-                        }`}
-                      >
-                        Negro
-                      </button>
-                    </div>
-                  </div>
+                  {Object.entries(variantStats).map(([key, values]) => (
+                    <div key={key}>
+                      <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
+                        {capitalizeWords(key)}
+                      </h5>
+                      <div className="flex w-full overflow-auto">
+                        <div className="flex">
+                          {values.map((value, index) => {
+                            const isSelected = selectedVariants[key] === value;
+                            const isFirst = index === 0;
+                            const isLast = index === values.length - 1;
 
-                  <div>
-                    <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
-                      Tamaño
-                    </h5>
-                    <div className="flex">
-                      <button
-                        onClick={() => setSelectedSize('small')}
-                        className={`px-4 h-10 rounded-l-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedSize === 'small'
-                            ? 'bg-gray-300 text-gray-900'
-                            : 'bg-gray-50  font-light text-gray-500 '
-                        }`}
-                      >
-                        Chico
-                      </button>
-                      <button
-                        onClick={() => setSelectedSize('medium')}
-                        className={`px-4 h-10  font-coolvetica text-xs   transition-all duration-200 ${
-                          selectedSize === 'medium'
-                            ? 'bg-gray-300 text-gray-900'
-                            : 'bg-gray-50  font-light text-gray-500 '
-                        }`}
-                      >
-                        Mediano
-                      </button>
-                      <button
-                        onClick={() => setSelectedSize('large')}
-                        className={`px-4 h-10 rounded-r-full font-coolvetica text-xs transition-all duration-200 ${
-                          selectedSize === 'large'
-                            ? 'bg-gray-300 text-gray-900'
-                            : 'bg-gray-50  font-light text-gray-500 '
-                        }`}
-                      >
-                        Grande
-                      </button>
-                    </div>
-                  </div>
+                            const borderRadiusClass = isFirst
+                              ? 'rounded-l-full'
+                              : isLast
+                              ? 'rounded-r-full'
+                              : 'rounded-none';
 
-                  {/* Selector de labrado */}
-                  <div>
-                    <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
-                      Labrado
-                    </h5>
-                    <div className="flex">
-                      <button
-                        onClick={() => setSelectedLabrado('labrado1')}
-                        className={`relative overflow-hidden h-10 w-1/3 rounded-l-full transition-all duration-200 ${
-                          selectedLabrado === 'labrado1'
-                            ? 'opacity-100'
-                            : 'opacity-30'
-                        }`}
-                      >
-                        <img
-                          src={labrado1}
-                          alt="Labrado 1"
-                          className="w-full h-full object-cover"
-                        />
-                        {selectedLabrado === 'labrado1' && (
-                          <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setSelectedLabrado('labrado2')}
-                        className={`relative overflow-hidden h-10 w-1/3 transition-all duration-200 ${
-                          selectedLabrado === 'labrado2'
-                            ? 'opacity-100'
-                            : 'opacity-30'
-                        }`}
-                      >
-                        <img
-                          src={labrado2}
-                          alt="Labrado 2"
-                          className="w-full h-full object-cover"
-                        />
-                        {selectedLabrado === 'labrado2' && (
-                          <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => setSelectedLabrado('labrado3')}
-                        className={`relative overflow-hidden h-10 w-1/3 rounded-r-full transition-all duration-200 ${
-                          selectedLabrado === 'labrado3'
-                            ? 'opacity-100'
-                            : 'opacity-30'
-                        }`}
-                      >
-                        <img
-                          src={labrado3}
-                          alt="Labrado 3"
-                          className="w-full h-full object-cover"
-                        />
-                        {selectedLabrado === 'labrado3' && (
-                          <div className="absolute inset-0 bg-gray-900 bg-opacity-20"></div>
-                        )}
-                      </button>
+                            return (
+                              <button
+                                key={value}
+                                onClick={() => handleVariantSelect(key, value)}
+                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-300 ${
+                                  isSelected
+                                    ? 'bg-gray-900 text-white'
+                                    : 'bg-white text-gray-600'
+                                } ${borderRadiusClass} ${
+                                  index > 0 ? '-ml-px' : ''
+                                }`} // evita separación entre botones
+                              >
+                                {capitalizeWords(value)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             ) : null}
