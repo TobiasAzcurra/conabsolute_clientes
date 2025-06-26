@@ -27,7 +27,6 @@ export const ClientProvider = ({ children }) => {
       setProductsByCategory,
       categories,
       setCategories,
-      setProductsSorted,
       productsSorted,
       setProductsSorted,
       slugEmpresa,

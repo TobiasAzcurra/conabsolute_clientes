@@ -4,23 +4,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import currencyFormat from '../../../helpers/currencyFormat';
 import VideoSlider from './VideoSlider';
 import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
-import { getProductById } from '../../../firebase/products/getProductsById';
-import { getImageSrc } from '../../../helpers/getImageSrc';
-import imagen2 from '../../../assets/IMG_8408.jpg';
-import imagen3 from '../../../assets/IMG_8413.jpg';
 import arrowIcon from '../../../assets/arrowIcon.png';
 import labrado1 from '../../../assets/labrado1.jpg';
 import labrado2 from '../../../assets/labrado2.jpg';
 import labrado3 from '../../../assets/labrado3.jpg';
-import { getClientAssets } from '../../../firebase/clients/getClientAssets';
+import { useClient } from '../../../contexts/ClientContext';
 
 const DetailCard = ({ type }) => {
-  const location = useLocation();
-  const { id, slug } = useParams();
-  const dispatch = useDispatch();
+  const { slug: category, id } = useParams();
+  const { productsByCategory, clientAssets } = useClient();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(location.state?.product || null);
-  const [loading, setLoading] = useState(!location.state?.product);
+  const location = useLocation();
+
+  const dispatch = useDispatch();
   const [disable, setDisable] = useState(false);
   const [dataTopping, setDataTopping] = useState([]);
   const [quantity, setQuantity] = useState(1);
@@ -32,57 +28,51 @@ const DetailCard = ({ type }) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedLabrado, setSelectedLabrado] = useState(null);
-  const [reels, setReels] = useState([]);
-  const [logo, setLogo] = useState('');
 
-  // Función para ir hacia atrás
+  const reels = clientAssets?.reels || [];
+  const logo = clientAssets?.logoFooter || clientAssets?.logo || '';
+
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  // Escucha cambios en alta demanda
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemandaData) => {
       setAltaDemanda(altaDemandaData);
-      setItemsOut(altaDemandaData.itemsOut); // Usar altaDemandaData directamente
+      setItemsOut(altaDemandaData.itemsOut);
     });
 
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!product && slug && id) {
-      console.log(`Cargando producto con slug: ${slug} y id: ${id}`);
-      getProductById(slug, id)
-        .then((data) => {
-          setProduct(data);
-          console.log(`✅ Producto cargado:`, data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error('❌ Error cargando producto:', err);
-          setLoading(false);
-        });
-    }
-  }, [product, slug, id]);
-
-  useEffect(() => {
-    if (slug) {
-      getClientAssets(slug).then((data) => {
-        setReels(data.reels || []);
-        setLogo(data.logoFooter || '');
-      });
-    }
-  }, [slug]);
-
-  // Función para capitalizar cada palabra con solo la primera letra en mayúscula
   const capitalizeWords = (str) => {
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
+  const product = useMemo(() => {
+    if (location?.state?.product) return location.state.product;
+
+    const list = productsByCategory?.[category] || [];
+    return list.find((p) => p.id === id);
+  }, [location?.state, productsByCategory, category, id]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []); // Arreglo de dependencias vacío
+  }, []);
+
+  const productImages = useMemo(() => {
+    if (!product) return [];
+    if (Array.isArray(product.img)) return product.img;
+    if (typeof product.img === 'string') return [product.img];
+    return [];
+  }, [product]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSelectedImageIndex((prev) => (prev + 1) % productImages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [productImages]);
 
   const totalPrice = useMemo(() => {
     if (!product) return 0;
@@ -94,17 +84,6 @@ const DetailCard = ({ type }) => {
     return Math.ceil(((basePrice + toppingsCost) * priceFactor) / 100) * 100;
   }, [product, dataTopping, altaDemanda?.priceFactor]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-white">
-        <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mb-4" />
-        <p className="text-xs m font-semibold text-gray-700">
-          Cargando producto...
-        </p>
-      </div>
-    );
-  }
-
   if (!product) {
     return (
       <div className="text-center mt-8 font-coolvetica text-gray-900 text-xs m">
@@ -112,23 +91,6 @@ const DetailCard = ({ type }) => {
       </div>
     );
   }
-
-  const imageSrc = getImageSrc(product);
-
-  // Array de imágenes: primera es la principal, segunda y tercera son las importadas
-  const productImages = useMemo(() => [imageSrc, imagen2, imagen3], [imageSrc]);
-
-  // Auto-cambio de imágenes cada 2 segundos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSelectedImageIndex(
-        (prevIndex) => (prevIndex + 1) % productImages.length
-      );
-    }, 2000);
-
-    // Limpiar el intervalo cuando el componente se desmonte o cambie
-    return () => clearInterval(interval);
-  }, [productImages.length]);
 
   return (
     <div>
@@ -141,7 +103,6 @@ const DetailCard = ({ type }) => {
               alt={product.name}
             />
 
-            {/* Círculos de imágenes */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-3">
               {productImages.map((image, index) => (
                 <button
@@ -175,7 +136,7 @@ const DetailCard = ({ type }) => {
               {capitalizeWords(product.name)}
             </h4>
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs mt-2 text-gray-900 font-light text-xs pl-4 pr-16 text-gray-500 leading-tight">
+              <p className="font-coolvetica text-xs mt-2 text-gray-900 font-light pl-4 pr-16 leading-tight">
                 {product.detailDescription}
               </p>
             )}
@@ -183,7 +144,6 @@ const DetailCard = ({ type }) => {
             {customization ? (
               <div className="w-full flex justify-center px-4 mt-4">
                 <div className="space-y-2 w-full">
-                  {/* Selector de Color */}
                   <div>
                     <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
                       Color
@@ -212,7 +172,6 @@ const DetailCard = ({ type }) => {
                     </div>
                   </div>
 
-                  {/* Selector de Tamaño */}
                   <div>
                     <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
                       Tamaño

@@ -13,24 +13,12 @@ import LoadingPoints from '../../LoadingPoints';
 import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
-const Card = ({
-  name,
-  description,
-  price,
-  img,
-  path,
-  id,
-  category,
-  type,
-  data,
-}) => {
+const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
   const [showConsultStock, setShowConsultStock] = useState(false);
-
-  // Estados para la rotación de imágenes
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -38,6 +26,19 @@ const Card = ({
 
   const cardRef = useRef(null);
   const intervalRef = useRef(null);
+
+  const {
+    id,
+    name = 'Producto sin nombre',
+    description = '',
+    price,
+    category,
+    variants,
+    img,
+    image,
+  } = data;
+
+  console.log('Card data:', data);
 
   const images = useMemo(() => {
     const raw = data?.img || data?.image || data?.images || img || [];
@@ -85,7 +86,26 @@ const Card = ({
     );
   }, []);
 
-  // Efecto para detectar el card centrado mediante scroll
+  const getDefaultVariant = (variants) => {
+    if (!Array.isArray(variants) || variants.length === 0) return null;
+    return variants.find((v) => v.stock > 0) || variants[0];
+  };
+
+  const selectedVariant = useMemo(
+    () => getDefaultVariant(data.variants),
+    [data.variants]
+  );
+
+  const resolvedImages = useMemo(() => {
+    const imgs =
+      selectedVariant?.images || data?.img || data?.image || data?.images || [];
+    if (Array.isArray(imgs)) return imgs;
+    return [getImageSrc(imgs)];
+  }, [selectedVariant, data]);
+
+  const basePrice = selectedVariant?.price || data.price || 0;
+  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+
   useEffect(() => {
     const handleScroll = () => {
       const isCentered = checkIfCentered();
@@ -116,11 +136,7 @@ const Card = ({
     };
   }, [checkIfCentered]);
 
-  // Efecto para manejar la rotación automática de imágenes
   useEffect(() => {
-    console.log(
-      `🔄 ${name} - isInViewport: ${isInViewport}, images.length: ${images.length} `
-    );
     if (isInViewport && images.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -148,7 +164,6 @@ const Card = ({
     return () => unsubscribe();
   }, []);
 
-  const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
   const currentImageSrc = images[currentImageIndex];
 
   return (
@@ -166,13 +181,12 @@ const Card = ({
             path,
             id,
             category,
-            type,
           }}
         />
       </div>
 
       <Link
-        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${id}`}
+        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${data.id}`}
         state={{ product: data }}
         className="w-full"
       >
@@ -207,7 +221,6 @@ const Card = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
-          {/* Contenedor horizontal para las etiquetas aleatorias */}
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
             {randomLabels.map((label, index) => (
               <span
@@ -219,7 +232,6 @@ const Card = ({
             ))}
           </div>
 
-          {/* Indicadores de imagen (puntos) */}
           {isInViewport && (
             <div className="absolute top-4 left-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
@@ -242,15 +254,10 @@ const Card = ({
               isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => {
-              console.log(`✅ Imagen cargada exitosamente para ${name}`);
               setIsLoaded(true);
               setImageError(false);
             }}
             onError={(e) => {
-              console.error(
-                `❌ Error al cargar imagen para ${name}:`,
-                currentImageSrc
-              );
               setImageError(true);
               setIsLoaded(false);
             }}

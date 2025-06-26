@@ -51,9 +51,13 @@ export const getProductsByClient = async (empresa, sucursal) => {
 
   const porCategoria = productos.reduce((acc, prod) => {
     const key = prod.categoryId || 'sin-categoria';
-    console.log('🧪 Agregando producto', prod.name, 'a categoría', key);
     if (!acc[key]) acc[key] = [];
-    acc[key].push(prod);
+
+    const alreadyExists = acc[key].some((p) => p.id === prod.id);
+    if (!alreadyExists) {
+      acc[key].push(prod);
+    }
+
     return acc;
   }, {});
 
