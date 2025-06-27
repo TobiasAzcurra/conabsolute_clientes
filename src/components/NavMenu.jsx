@@ -1,24 +1,25 @@
 import { useEffect, useRef } from 'react';
 import Items from '../pages/menu/Items';
 import { useClient } from '../contexts/ClientContext';
-import { useParams } from 'react-router-dom';
 
 const NavMenu = () => {
   const navRef = useRef(null);
   const animationRef = useRef(null);
+  const interactionTimeoutRef = useRef(null);
+  const isUserInteracting = useRef(false);
   const { categories } = useClient();
 
   useEffect(() => {
     const nav = navRef.current;
     if (!nav) return;
 
-    let scrollAmount = 0;
+    let scrollAmount = nav.scrollLeft || 0;
     let isResetting = false;
     const speed = 0.5;
     const resetDuration = 800;
 
     const scroll = () => {
-      if (isResetting) {
+      if (isUserInteracting.current || isResetting) {
         animationRef.current = requestAnimationFrame(scroll);
         return;
       }
@@ -54,12 +55,48 @@ const NavMenu = () => {
       }
     };
 
+    const startInteraction = () => {
+      isUserInteracting.current = true;
+      clearTimeout(interactionTimeoutRef.current);
+    };
+
+    const endInteraction = () => {
+      clearTimeout(interactionTimeoutRef.current);
+      interactionTimeoutRef.current = setTimeout(() => {
+        isUserInteracting.current = false;
+        // sincroniza scrollAmount actual al reanudar animación
+        scrollAmount = nav.scrollLeft;
+      }, 2000);
+    };
+
+    // Eventos para desktop
+    nav.addEventListener('mousedown', startInteraction);
+    nav.addEventListener('mousemove', startInteraction);
+    nav.addEventListener('mouseup', endInteraction);
+    nav.addEventListener('wheel', () => {
+      startInteraction();
+      endInteraction();
+    });
+
+    // Eventos para mobile
+    nav.addEventListener('touchstart', startInteraction);
+    nav.addEventListener('touchmove', startInteraction);
+    nav.addEventListener('touchend', endInteraction);
+
     animationRef.current = requestAnimationFrame(scroll);
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      clearTimeout(interactionTimeoutRef.current);
+
+      nav.removeEventListener('mousedown', startInteraction);
+      nav.removeEventListener('mousemove', startInteraction);
+      nav.removeEventListener('mouseup', endInteraction);
+      nav.removeEventListener('wheel', endInteraction);
+
+      nav.removeEventListener('touchstart', startInteraction);
+      nav.removeEventListener('touchmove', startInteraction);
+      nav.removeEventListener('touchend', endInteraction);
     };
   }, []);
 
@@ -70,8 +107,8 @@ const NavMenu = () => {
       </p>
       <nav
         ref={navRef}
-        className="flex flex-row w-full gap-2 px-4 overflow-x-auto scrollbar-hide"
-        style={{ scrollBehavior: 'auto' }}
+        className="flex flex-row w-full gap-2 px-4 overflow-x-auto nav-scroll-hide"
+        style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
       >
         {categories.map((cat) => (
           <Items
