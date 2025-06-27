@@ -13,24 +13,12 @@ import LoadingPoints from '../../LoadingPoints';
 import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
-const Card = ({
-  name,
-  description,
-  price,
-  img,
-  path,
-  id,
-  category,
-  type,
-  data,
-}) => {
+const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
   const [showConsultStock, setShowConsultStock] = useState(false);
-
-  // Estados para la rotación de imágenes
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -38,6 +26,24 @@ const Card = ({
 
   const cardRef = useRef(null);
   const intervalRef = useRef(null);
+
+  const installments = data?.installments;
+  const cashDiscount = data?.cashDiscount;
+
+  const {
+    id,
+    name = 'Producto sin nombre',
+    description = '',
+    price,
+    category,
+    variants,
+    img,
+    image,
+  } = data;
+
+  useEffect(() => {
+    console.log('Card data:', data);
+  }, [data]);
 
   const images = useMemo(() => {
     const raw = data?.img || data?.image || data?.images || img || [];
@@ -50,23 +56,42 @@ const Card = ({
     return [resolved];
   }, [data, img]);
 
-  // Generar números y etiquetas aleatorias usando useMemo para que sean consistentes
-  const randomLabels = useMemo(() => {
-    const generateRandomNumber = () => Math.floor(Math.random() * 4) + 1;
+  const variantStats = useMemo(() => {
+    const stats = {};
 
-    const allLabels = [
-      { key: 'colores', text: `${generateRandomNumber()} colores` },
-      { key: 'tamaños', text: `${generateRandomNumber()} tamaños` },
-      { key: 'labrados', text: `${generateRandomNumber()} labrados` },
-    ];
+    for (const variant of variants || []) {
+      Object.entries(variant).forEach(([key, value]) => {
+        if (!value) return;
 
-    // Determinar cuántas etiquetas mostrar (1, 2 o 3)
-    const numLabels = Math.floor(Math.random() * 3) + 1;
+        // Si es un objeto (como labrado: { name: "X" }), intentamos acceder a su .name
+        const stringValue =
+          typeof value === 'object' && value !== null
+            ? value.name?.toLowerCase?.()
+            : String(value).toLowerCase();
 
-    // Mezclar el array y tomar solo las primeras numLabels
-    const shuffled = allLabels.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, numLabels);
-  }, [id]); // Usar id como dependencia para que sea consistente por producto
+        if (!stringValue) return;
+
+        if (!stats[key]) stats[key] = new Set();
+        stats[key].add(stringValue);
+      });
+    }
+
+    const result = {};
+    for (const key in stats) {
+      result[key] = Array.from(stats[key]);
+    }
+
+    return result;
+  }, [variants]);
+
+  const visibleLabels = useMemo(() => {
+    return Object.entries(variantStats)
+      .filter(([, values]) => values.length > 0)
+      .map(([key, values]) => ({
+        key,
+        text: `${values.length} ${key}`,
+      }));
+  }, [variantStats]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
@@ -85,7 +110,51 @@ const Card = ({
     );
   }, []);
 
-  // Efecto para detectar el card centrado mediante scroll
+  const getDefaultVariant = (variants) => {
+    if (!Array.isArray(variants) || variants.length === 0) return null;
+    return variants.find((v) => v.stock > 0) || variants[0];
+  };
+
+  const selectedVariant = useMemo(
+    () => getDefaultVariant(data.variants),
+    [data.variants]
+  );
+
+  const basePrice = selectedVariant?.price || data.price || 0;
+  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+
+  const cuotaText = useMemo(() => {
+    if (!installments?.enabled || !installments.quantity) return null;
+
+    const base = adjustedPrice;
+    const interestRate = installments.interest || 0;
+    const finalAmount = base * (1 + interestRate);
+    const perCuota = finalAmount / installments.quantity;
+
+    return (
+      `en ${installments.quantity} cuota${
+        installments.quantity > 1 ? 's' : ''
+      } de $${Math.ceil(perCuota)}` +
+      (interestRate === 0
+        ? ' sin interés'
+        : ` (con ${Math.floor(interestRate * 100)}% interés)`)
+    );
+  }, [adjustedPrice, installments]);
+
+  const efectivoText = useMemo(() => {
+    if (!cashDiscount?.enabled || !cashDiscount.percentage) return null;
+
+    const discountAmount = adjustedPrice * (1 - cashDiscount.percentage);
+    return `o en transferencia / efectivo por $${Math.ceil(discountAmount)}`;
+  }, [adjustedPrice, cashDiscount]);
+
+  const resolvedImages = useMemo(() => {
+    const imgs =
+      selectedVariant?.images || data?.img || data?.image || data?.images || [];
+    if (Array.isArray(imgs)) return imgs;
+    return [getImageSrc(imgs)];
+  }, [selectedVariant, data]);
+
   useEffect(() => {
     const handleScroll = () => {
       const isCentered = checkIfCentered();
@@ -116,11 +185,7 @@ const Card = ({
     };
   }, [checkIfCentered]);
 
-  // Efecto para manejar la rotación automática de imágenes
   useEffect(() => {
-    console.log(
-      `🔄 ${name} - isInViewport: ${isInViewport}, images.length: ${images.length} `
-    );
     if (isInViewport && images.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -148,7 +213,6 @@ const Card = ({
     return () => unsubscribe();
   }, []);
 
-  const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
   const currentImageSrc = images[currentImageIndex];
 
   return (
@@ -156,23 +220,24 @@ const Card = ({
       ref={cardRef}
       className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
     >
-      <div className="absolute right-3.5 top-2.5 z-40">
-        <QuickAddToCart
-          product={{
-            name,
-            description,
-            price: adjustedPrice,
-            img: currentImageSrc,
-            path,
-            id,
-            category,
-            type,
-          }}
-        />
-      </div>
+      {(!variants || variants.length === 0) && (
+        <div className="absolute right-3.5 top-2.5 z-40">
+          <QuickAddToCart
+            product={{
+              name,
+              description,
+              price: adjustedPrice,
+              img: currentImageSrc,
+              path,
+              id,
+              category,
+            }}
+          />
+        </div>
+      )}
 
       <Link
-        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${id}`}
+        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${data.id}`}
         state={{ product: data }}
         className="w-full"
       >
@@ -207,19 +272,17 @@ const Card = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
-          {/* Contenedor horizontal para las etiquetas aleatorias */}
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
-            {randomLabels.map((label, index) => (
+            {visibleLabels.map((label, index) => (
               <span
                 key={`${label.key}-${index}`}
-                className="text-gray-600 text-[10px] font-medium bg-gray-50  px-2 py-1 rounded-t-xl"
+                className="text-gray-600 text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-t-xl"
               >
                 {label.text}
               </span>
             ))}
           </div>
 
-          {/* Indicadores de imagen (puntos) */}
           {isInViewport && (
             <div className="absolute top-4 left-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
@@ -242,15 +305,10 @@ const Card = ({
               isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => {
-              console.log(`✅ Imagen cargada exitosamente para ${name}`);
               setIsLoaded(true);
               setImageError(false);
             }}
             onError={(e) => {
-              console.error(
-                `❌ Error al cargar imagen para ${name}:`,
-                currentImageSrc
-              );
               setImageError(true);
               setIsLoaded(false);
             }}
@@ -278,10 +336,13 @@ const Card = ({
             <span className="font-bold text-4xl text-black">
               {currencyFormat(adjustedPrice)}
             </span>
-            <span className="font-light pr-12 text-xs text-green-500">
-              en 6 cuotas de ${Math.ceil(adjustedPrice / 6)} o en transferencia
-              / efectivo por ${Math.ceil(adjustedPrice * 0.85)}
-            </span>
+            {(cuotaText || efectivoText) && (
+              <span className="font-light pr-12 text-xs text-green-500">
+                {cuotaText}
+                {cuotaText && efectivoText && ' - '}
+                {efectivoText}
+              </span>
+            )}
           </div>
         </div>
       </Link>
