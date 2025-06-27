@@ -3,43 +3,43 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaRg-Regular.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaRg-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaRg-Italic.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaRg-Italic.ttf') format('truetype');
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaRg-Bold.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaRg-Bold.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaRg-BoldItalic.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaRg-BoldItalic.ttf') format('truetype');
   font-weight: bold;
   font-style: italic;
 }
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaLt-Regular.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaLt-Regular.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
-  font-family: "Coolvetica";
-  src: url("/fonts/coolvetica/CoolveticaHv-Regular.ttf") format("truetype");
+  font-family: 'Coolvetica';
+  src: url('/fonts/coolvetica/CoolveticaHv-Regular.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
 }
@@ -68,13 +68,13 @@
   background-color: black;
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"]::-moz-number-spin-box {
+input[type='number']::-moz-number-spin-box {
   -moz-appearance: textfield;
 }
 
@@ -125,4 +125,17 @@ input[type="number"]::-moz-number-spin-box {
 .autocomplete-container .custom-list-item:hover {
   background: lightgrey;
   cursor: pointer;
+}
+
+.nav-scroll-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.nav-scroll-hide::-webkit-scrollbar {
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
+}
+.nav-scroll-hide::-webkit-scrollbar-thumb {
+  background: transparent !important;
 }
