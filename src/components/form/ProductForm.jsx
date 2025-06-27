@@ -9,6 +9,15 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
     price: '',
     category: '',
     img: [],
+    installments: {
+      enabled: false,
+      interest: 0,
+      quantity: 1,
+    },
+    cashDiscount: {
+      enabled: false,
+      percentage: 0,
+    },
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -244,6 +253,92 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
           value={formData.category}
           onChange={handleChange}
           required
+          className="w-full border p-2 rounded"
+        />
+      </div>
+
+      <div className="border p-3 rounded space-y-2">
+        <h4 className="font-semibold">Financiación (Installments)</h4>
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={formData.installments.enabled}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                installments: {
+                  ...prev.installments,
+                  enabled: e.target.checked,
+                },
+              }))
+            }
+          />
+          Habilitar cuotas
+        </label>
+        <input
+          type="number"
+          placeholder="Interés (%)"
+          value={formData.installments.interest}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              installments: {
+                ...prev.installments,
+                interest: Number(e.target.value),
+              },
+            }))
+          }
+          className="w-full border p-2 rounded"
+        />
+        <input
+          type="number"
+          placeholder="Cantidad de cuotas"
+          value={formData.installments.quantity}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              installments: {
+                ...prev.installments,
+                quantity: Number(e.target.value),
+              },
+            }))
+          }
+          className="w-full border p-2 rounded"
+        />
+      </div>
+
+      <div className="border p-3 rounded space-y-2">
+        <h4 className="font-semibold">Descuento por pago en efectivo</h4>
+        <label className="block">
+          <input
+            type="checkbox"
+            checked={formData.cashDiscount.enabled}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                cashDiscount: {
+                  ...prev.cashDiscount,
+                  enabled: e.target.checked,
+                },
+              }))
+            }
+          />
+          Habilitar descuento en efectivo
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Porcentaje de descuento (ej: 0.15)"
+          value={formData.cashDiscount.percentage}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              cashDiscount: {
+                ...prev.cashDiscount,
+                percentage: Number(e.target.value),
+              },
+            }))
+          }
           className="w-full border p-2 rounded"
         />
       </div>
