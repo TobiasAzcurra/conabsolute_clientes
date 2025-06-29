@@ -12,9 +12,9 @@ const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const DetailCard = ({ type }) => {
+const DetailCard = () => {
   const { slug: category, id } = useParams();
-  const { productsByCategory, clientAssets } = useClient();
+  const { productsByCategory, clientAssets, clientConfig } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -25,7 +25,6 @@ const DetailCard = ({ type }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [altaDemanda, setAltaDemanda] = useState(null);
   const [itemsOut, setItemsOut] = useState({});
-  const [dataTopping, setDataTopping] = useState([]);
   const [customization, setCustomization] = useState(true);
   const [disable, setDisable] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -39,14 +38,17 @@ const DetailCard = ({ type }) => {
     if (location?.state?.product) return location.state.product;
 
     const list = productsByCategory?.[category] || [];
-    return list.find((p) => p.id === id);
+    const foundProduct = list.find((p) => p.id === id);
+
+    return foundProduct;
   }, [location?.state, productsByCategory, category, id]);
 
   const variantStats = useMemo(() => {
     const stats = {};
 
     for (const variant of product?.variants || []) {
-      Object.entries(variant).forEach(([key, value]) => {
+      const attrs = variant.attributes || {};
+      Object.entries(attrs).forEach(([key, value]) => {
         if (!value) return;
 
         const stringValue =
@@ -75,7 +77,8 @@ const DetailCard = ({ type }) => {
     const matched = product.variants.find((variant) => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return true;
-        const variantValue = variant[key];
+
+        const variantValue = variant.attributes?.[key];
 
         const stringValue =
           typeof variantValue === 'object' && variantValue !== null
@@ -99,12 +102,13 @@ const DetailCard = ({ type }) => {
   }, []);
 
   const productImages = useMemo(() => {
-    const imgs =
-      selectedVariant?.images ||
-      product?.img ||
-      product?.image ||
-      product?.images ||
-      [];
+    const variantHasImages =
+      Array.isArray(selectedVariant?.images) &&
+      selectedVariant.images.length > 0;
+
+    const imgs = variantHasImages
+      ? selectedVariant.images
+      : product?.img || product?.image || product?.images || [];
 
     const normalized = Array.isArray(imgs) ? imgs : [imgs];
 
@@ -137,13 +141,17 @@ const DetailCard = ({ type }) => {
 
   const totalPrice = useMemo(() => {
     if (!product) return 0;
-    const basePrice = selectedVariant?.price || product.price || 0;
-    const toppingsCost = dataTopping
-      .filter((t) => t.price > 0)
-      .reduce((acc, t) => acc + t.price, 0);
+
+    const variantPrice = selectedVariant?.price;
+    const basePrice =
+      variantPrice !== undefined && variantPrice !== 0
+        ? variantPrice
+        : product.price || 0;
+
     const priceFactor = altaDemanda?.priceFactor || 1;
-    return Math.ceil(((basePrice + toppingsCost) * priceFactor) / 100) * 100;
-  }, [selectedVariant, product, dataTopping, altaDemanda?.priceFactor]);
+
+    return Math.ceil((basePrice * priceFactor) / 100) * 100;
+  }, [selectedVariant, product, altaDemanda?.priceFactor]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => ({
@@ -159,6 +167,20 @@ const DetailCard = ({ type }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const productToSend = selectedVariant
+    ? {
+        ...selectedVariant,
+        name: product.name,
+        category: product.category,
+        id: product.id,
+        img: selectedVariant.images?.[0] || product.img?.[0] || product.img,
+        price:
+          selectedVariant.price && selectedVariant.price !== 0
+            ? selectedVariant.price
+            : product.price,
+      }
+    : product;
 
   if (!product) {
     return (
@@ -208,7 +230,7 @@ const DetailCard = ({ type }) => {
               <img src={arrowIcon} className="h-2 rotate-180" alt="" />
               Volver
             </button>
-            <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-gray-900 px-4 leading-9 w-full">
+            <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-gray-900 px-4 leading-9 w-full text-center">
               {capitalizeWords(product.name)}
             </h4>
             {product.detailDescription && (
@@ -223,7 +245,7 @@ const DetailCard = ({ type }) => {
                   {Object.entries(variantStats).map(([key, values]) => (
                     <div key={key}>
                       <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
-                        {capitalizeWords(key)}
+                        {clientConfig?.labels?.[key] || capitalizeWords(key)}
                       </h5>
                       <div className="flex w-full overflow-auto">
                         <div className="flex">
@@ -265,19 +287,20 @@ const DetailCard = ({ type }) => {
             <div className="flex flex-row items-center w-full px-4 gap-2">
               <div className="flex-shrink-0 flex-1">
                 <QuickAddToCart
-                  product={product}
-                  toppings={dataTopping}
+                  product={productToSend}
                   calculatedPrice={totalPrice}
                   displayAsFullButton={true}
+                  disabled={
+                    !selectedVariant &&
+                    product.variants &&
+                    product.variants.length > 0
+                  }
                 />
               </div>
 
               <div className="flex-1 pl-2 font-coolvetica flex-col">
                 <p className="text-xs text-gray-900">
-                  Por <strong>{currencyFormat(totalPrice)}</strong>.
-                </p>
-                <p className="font-light text-xs w-full text-gray-900">
-                  8u. disponibles
+                  Por <strong>{currencyFormat(totalPrice)}</strong>
                 </p>
               </div>
             </div>
