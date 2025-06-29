@@ -171,20 +171,23 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
           labradoImageUrl = await getDownloadURL(labradoRef);
         }
 
-        const variantData = {
-          images: urls,
-        };
-
-        if (variant.color) variantData.color = variant.color;
-        if (variant.size) variantData.size = variant.size;
+        const attributes = {};
+        if (variant.color) attributes.color = variant.color;
+        if (variant.size) attributes.size = variant.size;
+        if (variant.labradoName) attributes.labradoName = variant.labradoName;
 
         const parsedPrice = Number(variant.price);
-        variantData.price = !isNaN(parsedPrice)
-          ? parsedPrice
-          : Number(formData.price);
-
         const parsedStock = Number(variant.stock);
-        if (!isNaN(parsedStock)) variantData.stock = parsedStock;
+
+        const variantData = {
+          attributes,
+          images: urls,
+          price: !isNaN(parsedPrice) ? parsedPrice : Number(formData.price),
+        };
+
+        if (!isNaN(parsedStock)) {
+          variantData.stock = parsedStock;
+        }
 
         if (variant.labradoName) {
           variantData.labrado = {
