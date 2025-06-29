@@ -11,31 +11,9 @@ import { ReadMateriales, ReadData } from '../../../firebase/orders/uploadOrder';
 import { addProductToOrder } from '../../../firebase/orders/addProductToOrder';
 import { calcularCostoHamburguesa } from '../../../helpers/currencyFormat';
 
-const normalizeProduct = (product) => ({
-  ...product,
-  name: product.name || product.data?.name || 'Producto sin nombre',
-  price: product.price || product.data?.price || 0,
-  img: product.img || product.data?.img || '',
-  category:
-    product.category ||
-    product.categoria ||
-    product.data?.categoria ||
-    'default',
-  type: product.type || 'regular',
-});
-
-const compareToppings = (toppings1, toppings2) => {
-  if (!toppings1 || !toppings2) return false;
-  if (toppings1.length !== toppings2.length) return false;
-  const sorted1 = [...toppings1].sort((a, b) => a.id - b.id);
-  const sorted2 = [...toppings2].sort((a, b) => a.id - b.id);
-  return JSON.stringify(sorted1) === JSON.stringify(sorted2);
-};
-
 const QuickAddToCart = ({
   product,
   animateFromCenter,
-  toppings,
   displayAsFullButton = false,
   isOrderItem = false,
   onOrderQuantityChange = null,
@@ -43,26 +21,21 @@ const QuickAddToCart = ({
   isPedidoComponente = false,
   currentOrder = null,
   calculatedPrice = null,
+  disabled = false,
 }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cartState);
   const location = useLocation();
 
-  const normalizedProduct = normalizeProduct(product);
-  const effectiveToppings =
-    toppings?.length > 0 ? toppings : normalizedProduct.toppings || [];
-
   const cartItem = !isOrderItem
     ? cart.find(
         (item) =>
-          item.name === normalizedProduct.name &&
-          item.category === normalizedProduct.category &&
-          compareToppings(item.toppings, effectiveToppings)
+          item.name === product.name && item.category === product.category
       )
     : null;
 
   const initialQuantity = isOrderItem
-    ? initialOrderQuantity || normalizedProduct.quantity
+    ? initialOrderQuantity || product.quantity
     : cartItem?.quantity || 0;
 
   const [quantity, setQuantity] = useState(initialQuantity);
@@ -73,11 +46,11 @@ const QuickAddToCart = ({
 
   useEffect(() => {
     const newQty = isOrderItem
-      ? initialOrderQuantity || normalizedProduct.quantity
+      ? initialOrderQuantity || product.quantity
       : cartItem?.quantity || 0;
     setQuantity(newQty);
     quantityRef.current = newQty;
-  }, [cartItem, initialOrderQuantity, isOrderItem, normalizedProduct.quantity]);
+  }, [cartItem, initialOrderQuantity, isOrderItem, product.quantity]);
 
   useEffect(() => () => clearTimeout(pendingUpdateRef.current), []);
 
@@ -94,15 +67,13 @@ const QuickAddToCart = ({
     if (qty === 0 && cartItem) {
       const itemIndex = cart.findIndex(
         (item) =>
-          item.name === normalizedProduct.name &&
-          compareToppings(item.toppings, effectiveToppings)
+          item.name === product.name && item.category === product.category
       );
       dispatch(removeItem(itemIndex));
     } else if (qty >= 1) {
       const payload = {
-        name: normalizedProduct.name,
-        category: normalizedProduct.category,
-        toppings: effectiveToppings,
+        name: product.name,
+        category: product.category,
         quantity: qty,
       };
       if (cartItem) dispatch(updateItemQuantity(payload));
@@ -110,33 +81,34 @@ const QuickAddToCart = ({
         dispatch(
           addItem({
             ...payload,
-            price: calculatedPrice || normalizedProduct.price,
-            img: normalizedProduct.img,
-            type: normalizedProduct.type,
+            price: calculatedPrice || product.price,
+            img: product.img,
           })
         );
     }
   };
 
   const startAddingProcess = async () => {
+    if (disabled) return;
+
     setIsEditing(true);
     setIsAdding(true);
     clearTimeout(pendingUpdateRef.current);
     pendingUpdateRef.current = setTimeout(async () => {
       try {
         if (isPedidoComponente && currentOrder?.id) {
-          if (normalizedProduct.orderIndex !== undefined) {
+          if (product.orderIndex !== undefined) {
             await updateOrderItemQuantity(
               currentOrder.id,
               obtenerFechaActual(),
-              normalizedProduct.orderIndex,
+              product.orderIndex,
               quantityRef.current
             );
           } else if (quantityRef.current > 0) {
             const materialesData = await ReadMateriales();
             const productsData = await ReadData();
             const productData = productsData.find(
-              (p) => p.data.name === normalizedProduct.name
+              (p) => p.data.name === product.name
             )?.data;
             const costoBurger = productData
               ? calcularCostoHamburguesa(
@@ -144,19 +116,11 @@ const QuickAddToCart = ({
                   productData.ingredients
                 )
               : 0;
-            const costoToppings = effectiveToppings.reduce((sum, t) => {
-              const material = materialesData.find(
-                (m) => m.nombre.toLowerCase() === t.name.toLowerCase()
-              );
-              return sum + (material?.costo || 0);
-            }, 0);
             await addProductToOrder(
               currentOrder.id,
               {
-                ...normalizedProduct,
-                toppings: effectiveToppings,
-                costoBurger:
-                  (costoBurger + costoToppings) * quantityRef.current,
+                ...product,
+                costoBurger: costoBurger * quantityRef.current,
               },
               quantityRef.current
             );
@@ -174,16 +138,6 @@ const QuickAddToCart = ({
     }, 2000);
   };
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const isCarritoPage = pathParts.includes('carrito');
-  const isMenuProductPage =
-    pathParts.length === 4 &&
-    pathParts[1] === 'menu' &&
-    !!pathParts[2] &&
-    !!pathParts[3];
-
-  const shouldAnimateBothSides = isMenuProductPage || animateFromCenter;
-
   return (
     <div
       className={`relative ${
@@ -196,42 +150,29 @@ const QuickAddToCart = ({
         {isEditing ? (
           <motion.div
             key="edit-qty"
-            initial={
-              displayAsFullButton
-                ? { opacity: 0, scaleX: 0.33 }
-                : { opacity: 0, scaleX: 0.33 }
-            }
-            animate={
-              displayAsFullButton
-                ? { opacity: 1, scaleX: 1 }
-                : { opacity: 1, scaleX: 1 }
-            }
-            exit={
-              displayAsFullButton
-                ? { scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }
-                : { scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }
-            }
+            initial={{ opacity: 0, scaleX: 0.33 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            exit={{ scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }}
             transition={{ duration: 0.3 }}
-            className={`
-              absolute z-50 overflow-hidden rounded-3xl border-black border-2 bg-gray-50 flex items-center
-              ${displayAsFullButton ? '' : 'right-0'}
-            `}
+            className={`absolute z-50 overflow-hidden rounded-3xl border-black border-2 bg-gray-50 flex items-center ${
+              displayAsFullButton ? '' : 'right-0'
+            }`}
             style={{
-              transformOrigin: displayAsFullButton ? 'center' : 'right', // <-- este es el cambio importante
+              transformOrigin: displayAsFullButton ? 'center' : 'right',
             }}
           >
             <div className="flex w-[105px] h-[35px]">
               <div
-                className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+                className="text-black font-coolvetica font-black flex justify-center text-center items-center w-[35px] h-[35px] cursor-pointer"
                 onClick={() => handleQuantityChange(-1)}
               >
                 -
               </div>
-              <div className="font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px]">
+              <div className="font-coolvetica font-black flex justify-center text-center items-center w-[35px] h-[35px]">
                 {quantity}
               </div>
               <div
-                className="text-black font-coolvetica font-black text-center items-center flex justify-center w-[35px] h-[35px] cursor-pointer"
+                className="text-black font-coolvetica font-black flex justify-center text-center items-center w-[35px] h-[35px] cursor-pointer"
                 onClick={() => handleQuantityChange(1)}
               >
                 +
@@ -245,8 +186,11 @@ const QuickAddToCart = ({
           {displayAsFullButton && quantity === 0 && !isOrderItem ? (
             <div className="absolute z-[60]">
               <button
-                className="bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl"
-                onClick={startAddingProcess}
+                disabled={disabled}
+                className={`bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl ${
+                  disabled ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={!disabled ? startAddingProcess : undefined}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
