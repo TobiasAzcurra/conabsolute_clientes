@@ -14,7 +14,7 @@ import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
-  const { slugEmpresa, slugSucursal } = useClient();
+  const { slugEmpresa, slugSucursal, clientConfig } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
@@ -41,10 +41,6 @@ const Card = ({ data, path }) => {
     image,
   } = data;
 
-  useEffect(() => {
-    console.log('Card data:', data);
-  }, [data]);
-
   const images = useMemo(() => {
     const raw = data?.img || data?.image || data?.images || img || [];
 
@@ -60,10 +56,10 @@ const Card = ({ data, path }) => {
     const stats = {};
 
     for (const variant of variants || []) {
-      Object.entries(variant).forEach(([key, value]) => {
+      const attrs = variant.attributes || {};
+      Object.entries(attrs).forEach(([key, value]) => {
         if (!value) return;
 
-        // Si es un objeto (como labrado: { name: "X" }), intentamos acceder a su .name
         const stringValue =
           typeof value === 'object' && value !== null
             ? value.name?.toLowerCase?.()
@@ -87,11 +83,14 @@ const Card = ({ data, path }) => {
   const visibleLabels = useMemo(() => {
     return Object.entries(variantStats)
       .filter(([, values]) => values.length > 0)
-      .map(([key, values]) => ({
-        key,
-        text: `${values.length} ${key}`,
-      }));
-  }, [variantStats]);
+      .map(([key, values]) => {
+        const translatedKey = clientConfig?.labels?.[key] || key;
+        return {
+          key,
+          text: `${values.length} ${translatedKey}`,
+        };
+      });
+  }, [variantStats, clientConfig]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
