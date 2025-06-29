@@ -2,6 +2,8 @@ import ClientLayout from '../../layouts/ClientLayout';
 import ProductForm from '../../components/form/ProductForm';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useClient } from '../../contexts/ClientContext';
+import { getClientIds } from '../../firebase/clients/getClientIds';
+import { useEffect, useState } from 'react';
 
 const AgregarProductoPage = () => {
   const { slugEmpresa: slugEmpresaFromURL, slugSucursal: slugSucursalFromURL } =
@@ -15,12 +17,19 @@ const AgregarProductoPage = () => {
   const empresa = slugEmpresaFromURL || slugEmpresaFromContext;
   const sucursal = slugSucursalFromURL || slugSucursalFromContext;
 
-  console.log(
-    'Empresa desde URL o Contexto:',
-    empresa,
-    'Sucursal desde URL o Contexto:',
-    sucursal
-  );
+  const [ids, setIds] = useState(null);
+
+  useEffect(() => {
+    const resolveIds = async () => {
+      const result = await getClientIds(empresa, sucursal);
+      if (!result) {
+        console.error('❌ No se encontraron IDs');
+        return;
+      }
+      setIds(result);
+    };
+    resolveIds();
+  }, [empresa, sucursal]);
 
   const handleSuccess = () => {
     navigate(`/${empresa}/${sucursal}/menu`);
@@ -30,11 +39,15 @@ const AgregarProductoPage = () => {
     <ClientLayout>
       <div className="p-4 bg-white max-w-xl mx-auto mt-10 rounded shadow">
         <h2 className="text-xl font-bold mb-4">Agregar Producto</h2>
-        <ProductForm
-          empresa={empresa}
-          sucursal={sucursal}
-          onSuccess={handleSuccess}
-        />
+        {ids ? (
+          <ProductForm
+            empresa={ids.empresaId}
+            sucursal={ids.sucursalId}
+            onSuccess={handleSuccess}
+          />
+        ) : (
+          <p>Cargando...</p>
+        )}
       </div>
     </ClientLayout>
   );
