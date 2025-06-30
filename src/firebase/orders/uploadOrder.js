@@ -17,7 +17,7 @@ import { cleanPhoneNumber } from '../utils/phoneUtils';
 
 const db = getFirestore(app);
 
-export const UploadOrder = async (orderDetail, empresaId, sucursalId) => {
+export const UploadOrder = async (empresaId, sucursalId, orderDetail) => {
   const pedidoId = uuidv4();
   const pedidosCollectionRef = collection(
     db,
@@ -34,6 +34,7 @@ export const UploadOrder = async (orderDetail, empresaId, sucursalId) => {
       id: pedidoId,
       createdAt: serverTimestamp(),
       cerca: false,
+      enCamino: false,
     });
     console.log('✅ Pedido subido exitosamente con ID:', pedidoId);
     return pedidoId;
@@ -90,10 +91,10 @@ export const ReadData = async () => {
 };
 
 export const addTelefonoCliente = async (
-  phoneNumber,
-  fecha,
   empresaId,
-  sucursalId
+  sucursalId,
+  phoneNumber,
+  fecha
 ) => {
   const cleanPhone = cleanPhoneNumber(phoneNumber);
 
