@@ -9,6 +9,12 @@ import { getProductsByCategoryPosition } from "../../firebase/products/getProduc
 import { getClientIds } from "../../firebase/clients/getClientIds";
 import { getClientConfig } from "../../firebase/clients/getClientConfig";
 
+// Constantes para mejorar mantenibilidad
+const DEFAULT_INTRO_DURATION = 0;
+// si no tiene duracion la animacion lo ponemos en 0 por las dudas
+const REDIRECT_BUFFER = 300;
+// para asegurar que termine la animacion
+
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
   const navigate = useNavigate();
@@ -71,6 +77,10 @@ const MenuIntro = () => {
         console.log("clientData:", data);
         console.log("clientConfig:", config);
 
+        // Obtener duración desde assets (configurada por el cliente)
+        const introDuration = assets?.loadingDuration || DEFAULT_INTRO_DURATION;
+        console.log(`⏱️  Duración de intro: ${introDuration}ms`);
+
         const normalizePath = (path) =>
           path.endsWith("/") ? path.slice(0, -1) : path;
 
@@ -84,8 +94,7 @@ const MenuIntro = () => {
           } else {
             navigate(location.pathname, { replace: true });
           }
-        }, 5000);
-        // este tiempo deberia ser a duracion del gif
+        }, introDuration + REDIRECT_BUFFER);
       } catch (error) {
         console.error("❌ Error cargando datos:", error);
       }
@@ -104,6 +113,7 @@ const MenuIntro = () => {
           }`}
           style={{ minHeight: "100vh", minWidth: "100vw" }}
           onLoad={() => setImgLoaded(true)}
+          alt="Loading animation"
         />
       ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white">
