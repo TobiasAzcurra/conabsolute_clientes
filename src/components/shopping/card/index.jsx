@@ -358,7 +358,7 @@ const Card = ({ data, path }) => {
             </span>
 
             {(pricingInfo.primaryText || pricingInfo.secondaryText) && (
-              <div className="font-light pr-12  mt-1 flex flex-col items-start">
+              <div className="font-light pr-12   flex flex-col items-start">
                 {pricingInfo.primaryText && (
                   <span className="text-gray-400 font-light text-xs">
                     {pricingInfo.primaryText}
