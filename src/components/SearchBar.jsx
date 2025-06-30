@@ -1,6 +1,6 @@
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useClient } from '../contexts/ClientContext';
+import React from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useClient } from "../contexts/ClientContext";
 
 const SearchBar = ({
   phoneNumber,
@@ -26,7 +26,7 @@ const SearchBar = ({
         type="tel"
         value={phoneNumber}
         onChange={(e) => setPhoneNumber(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
         onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
         placeholder="Busca tu pedido con tu telefono ej: 3585168275"
@@ -54,7 +54,7 @@ const SearchBar = ({
         <div className="absolute left-0 right-0 top-12 h-10 bg-gray-50  shadow-lg rounded-full border border-gray-200 z-50">
           <button
             onClick={onSuggestionClick}
-            className="w-full font-bold text-left px-4 h-10 text-xs flex items-center"
+            className="w-full font-bold font-coolvetica font-light text-left px-4 h-10 text-xs flex items-center"
           >
             Último: {previousPhone}
           </button>
