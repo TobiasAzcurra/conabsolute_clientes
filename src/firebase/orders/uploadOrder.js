@@ -33,7 +33,6 @@ export const UploadOrder = async (empresaId, sucursalId, orderDetail) => {
       ...orderDetail,
       id: pedidoId,
       createdAt: serverTimestamp(),
-      cerca: false,
       enCamino: false,
     });
     console.log('✅ Pedido subido exitosamente con ID:', pedidoId);
