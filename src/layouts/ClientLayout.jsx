@@ -16,9 +16,10 @@ const ClientLayout = ({ children }) => {
 
   const isProductDetail = /\/menu\/[^/]+\/[^/]+$/.test(pathname);
   const isCart = pathname.endsWith('/carrito');
+  const isSuccessPage = pathname.includes('/success/');
 
-  const shouldHideHeader = isProductDetail || isCart;
-  const shouldShowFloatingCart = !isCart;
+  const shouldHideHeader = isProductDetail || isCart || isSuccessPage;
+  const shouldShowFloatingCart = !isCart && !isSuccessPage;
 
   const cart = useSelector((state) => state.cartState.cart);
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
