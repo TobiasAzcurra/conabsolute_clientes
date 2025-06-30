@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useClient } from '../../contexts/ClientContext';
-import currencyFormat from '../../helpers/currencyFormat';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useClient } from "../../contexts/ClientContext";
+import currencyFormat from "../../helpers/currencyFormat";
 
 const FloatingCart = ({ totalQuantity, cart }) => {
   const { slugEmpresa, slugSucursal } = useClient();
@@ -14,7 +14,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
     <div className="fixed border border-black border-opacity-30 bottom-4 rounded-2xl left-4 right-4 h-20 bg-white bg-opacity-80 backdrop-blur-sm pl-4 flex flex-row items-center justify-between md:justify-center gap-4 font-coolvetica z-50">
       <div className="flex flex-col items-center">
         <p className="text-xs font-medium">
-          {totalQuantity} {totalQuantity === 1 ? 'producto' : 'productos'}
+          {totalQuantity} {totalQuantity === 1 ? "producto" : "productos"}
         </p>
         <p className="text-4xl font-bold mt-[-5px]">
           {currencyFormat(totalPrice)}
@@ -27,18 +27,20 @@ const FloatingCart = ({ totalQuantity, cart }) => {
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
+          fill="none"
           viewBox="0 0 24 24"
-          fill="currentColor"
-          className="h-5 mr-2 text-gray-100"
+          stroke-width="1.5"
+          stroke="currentColor"
+          className="h-6 mr-2 text-gray-100"
         >
           <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
           />
         </svg>
 
-        <p className="text-gray-100 text-2xl font-bold text-center">
+        <p className="text-gray-100 text-xl font-bold text-center">
           Ver pedido
         </p>
       </Link>
