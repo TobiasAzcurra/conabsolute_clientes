@@ -26,21 +26,25 @@ export const listenOrdersByPhone = (
 
   const pedidosQuery = query(
     pedidosCollectionRef,
-    where('telefono', '==', phoneNumber),
-    where('canceled', '!=', true)
+    where('telefono', '==', phoneNumber)
   );
-
   return onSnapshot(
     pedidosQuery,
     (querySnapshot) => {
       const pedidos = [];
       querySnapshot.forEach((doc) => {
-        pedidos.push({ id: doc.id, ...doc.data() });
+        const data = doc.data();
+        if (!data.canceled) {
+          pedidos.push({ id: doc.id, ...data });
+        }
       });
       callback(pedidos);
     },
     (error) => {
-      console.error('❌ Error al escuchar los pedidos por teléfono:', error);
+      console.error(
+        '[listenOrdersByPhone] ❌ Error al escuchar los pedidos por teléfono:',
+        error
+      );
       callback([]);
     }
   );
