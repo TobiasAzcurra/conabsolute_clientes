@@ -193,6 +193,14 @@ const DetailCard = () => {
     );
   }, [product.variants, selectedVariants]);
 
+  const selectedVariantsArray = useMemo(() => {
+    return (product.variants || []).filter((v) => {
+      const key = v.linkedTo?.toLowerCase();
+      const value = v.name?.toLowerCase();
+      return selectedVariants[key] === value;
+    });
+  }, [product.variants, selectedVariants]);
+
   const productToSend = useMemo(() => {
     return {
       ...product,
@@ -204,8 +212,17 @@ const DetailCard = () => {
         product.img?.[0] ||
         product.img,
       price: totalPrice,
+      basePrice: basePrice,
+      finalPrice: totalPrice,
+      variants: selectedVariantsArray,
     };
-  }, [product, combinedName, firstVariantWithImage, totalPrice]);
+  }, [
+    product,
+    combinedName,
+    firstVariantWithImage,
+    totalPrice,
+    selectedVariantsArray,
+  ]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => ({
