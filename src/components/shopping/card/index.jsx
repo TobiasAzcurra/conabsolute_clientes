@@ -4,14 +4,14 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from 'react';
-import QuickAddToCart from './quickAddToCart';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { Link, useParams } from 'react-router-dom';
-import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
-import LoadingPoints from '../../LoadingPoints';
-import { getImageSrc } from '../../../helpers/getImageSrc';
-import { useClient } from '../../../contexts/ClientContext';
+} from "react";
+import QuickAddToCart from "./quickAddToCart";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { Link, useParams } from "react-router-dom";
+import { listenToAltaDemanda } from "../../../firebase/constants/altaDemanda";
+import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
+import { useClient } from "../../../contexts/ClientContext";
 
 const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal, clientConfig } = useClient();
@@ -32,8 +32,8 @@ const Card = ({ data, path }) => {
 
   const {
     id,
-    name = 'Producto sin nombre',
-    description = '',
+    name = "Producto sin nombre",
+    description = "",
     category,
     variants,
   } = data;
@@ -114,30 +114,65 @@ const Card = ({ data, path }) => {
   const basePrice = data.price || 0;
   const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
-  const cuotaText = useMemo(() => {
-    if (!installments?.enabled || !installments.quantity) return null;
+  // Nueva lógica de precios
+  const pricingInfo = useMemo(() => {
+    const hasInstallments = installments?.enabled && installments.quantity;
+    const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
-    const base = adjustedPrice;
-    const interestRate = installments.interest || 0;
-    const finalAmount = base * (1 + interestRate);
-    const perCuota = finalAmount / installments.quantity;
+    if (hasCashDiscount) {
+      // Caso 1: Con descuento en efectivo - precio principal es el más barato
+      const cashPrice = Math.ceil(
+        adjustedPrice * (1 - cashDiscount.percentage)
+      );
+      const result = {
+        mainPrice: cashPrice,
+        primaryText: "en efectivo/transferencia",
+        secondaryText: null,
+      };
 
-    return (
-      `en ${installments.quantity} cuota${
-        installments.quantity > 1 ? 's' : ''
-      } de $${Math.ceil(perCuota)}` +
-      (interestRate === 0
-        ? ' sin interés'
-        : ` (con ${Math.floor(interestRate * 100)}% interés)`)
-    );
-  }, [adjustedPrice, installments]);
+      if (hasInstallments) {
+        const interestRate = installments.interest || 0;
+        const finalAmount = adjustedPrice * (1 + interestRate);
+        const perCuota = finalAmount / installments.quantity;
 
-  const efectivoText = useMemo(() => {
-    if (!cashDiscount?.enabled || !cashDiscount.percentage) return null;
+        result.secondaryText = `o por ${installments.quantity} cuota${
+          installments.quantity > 1 ? "s" : ""
+        } de ${currencyFormat(Math.ceil(perCuota))}${
+          interestRate === 0
+            ? " (sin interés)"
+            : ` (con ${Math.floor(interestRate * 100)}% interés)`
+        }`;
+      }
 
-    const discountAmount = adjustedPrice * (1 - cashDiscount.percentage);
-    return `o en transferencia / efectivo por $${Math.ceil(discountAmount)}`;
-  }, [adjustedPrice, cashDiscount]);
+      return result;
+    }
+
+    if (hasInstallments) {
+      // Caso 2: Solo cuotas - precio principal es el normal
+      const interestRate = installments.interest || 0;
+      const finalAmount = adjustedPrice * (1 + interestRate);
+      const perCuota = finalAmount / installments.quantity;
+
+      return {
+        mainPrice: adjustedPrice,
+        primaryText: null,
+        secondaryText: `o en ${installments.quantity} cuota${
+          installments.quantity > 1 ? "s" : ""
+        } de ${currencyFormat(Math.ceil(perCuota))}${
+          interestRate === 0
+            ? " (sin interés)"
+            : ` (con ${Math.floor(interestRate * 100)}% interés)`
+        }`,
+      };
+    }
+
+    // Caso 3: Simple - solo precio
+    return {
+      mainPrice: adjustedPrice,
+      primaryText: null,
+      secondaryText: null,
+    };
+  }, [adjustedPrice, installments, cashDiscount]);
 
   const resolvedImages = useMemo(() => {
     const imgs =
@@ -165,12 +200,12 @@ const Card = ({ data, path }) => {
       }
     };
 
-    window.addEventListener('scroll', throttledScroll);
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener("scroll", throttledScroll);
+    window.addEventListener("resize", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', throttledScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", throttledScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, [checkIfCentered]);
 
@@ -215,7 +250,7 @@ const Card = ({ data, path }) => {
             product={{
               name,
               description: data.cardDescription || description,
-              price: adjustedPrice,
+              price: pricingInfo.mainPrice,
               img: currentImageSrc,
               path,
               id,
@@ -279,8 +314,8 @@ const Card = ({ data, path }) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? 'bg-white opacity-100'
-                      : 'bg-white opacity-50'
+                      ? "bg-white opacity-100"
+                      : "bg-white opacity-50"
                   }`}
                 />
               ))}
@@ -289,9 +324,9 @@ const Card = ({ data, path }) => {
 
           <img
             src={currentImageSrc}
-            alt={name || 'Producto'}
+            alt={name || "Producto"}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+              isLoaded && !imageError ? "opacity-100" : "opacity-0"
             }`}
             onLoad={() => {
               setIsLoaded(true);
@@ -307,7 +342,7 @@ const Card = ({ data, path }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {name || 'Producto sin nombre'}
+              {name || "Producto sin nombre"}
             </h5>
           </div>
           {data?.cardDescription && (
@@ -317,12 +352,21 @@ const Card = ({ data, path }) => {
           )}
           <div className="flex w-full mt-4 flex-col mb-6">
             <span className="font-bold text-4xl text-black">
-              {currencyFormat(adjustedPrice)}
+              {currencyFormat(pricingInfo.mainPrice)}
             </span>
-            {(cuotaText || efectivoText) && (
-              <div className="font-light pr-12 text-xs text-green-500 flex flex-col items-start">
-                {cuotaText && <span>{cuotaText}</span>}
-                {efectivoText && <span>{efectivoText}</span>}
+
+            {(pricingInfo.primaryText || pricingInfo.secondaryText) && (
+              <div className="font-light pr-12  mt-1 flex flex-col items-start">
+                {pricingInfo.primaryText && (
+                  <span className="text-gray-400 font-light text-xs">
+                    {pricingInfo.primaryText}
+                  </span>
+                )}
+                {pricingInfo.secondaryText && (
+                  <span className="text-gray-400 text-xs">
+                    {pricingInfo.secondaryText}
+                  </span>
+                )}
               </div>
             )}
           </div>
