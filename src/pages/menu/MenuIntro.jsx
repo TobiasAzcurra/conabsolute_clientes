@@ -1,73 +1,117 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { getProductsByClientV2 } from '../../firebase/getProducts';
-import { getClientConfig } from '../../firebase/getClientConfig';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useClient } from '../../contexts/ClientContext';
+import { getClientData } from '../../firebase/clients/getClientData';
+import { getClientAssets } from '../../firebase/clients/getClientAssets';
+import { getCategoriesByClient } from '../../firebase/categories/getCategories';
+import { getProductsByClient } from '../../firebase/products/getProductsByClient';
+import { getProductsByCategoryPosition } from '../../firebase/products/getProductsByCategory';
+import { getClientIds } from '../../firebase/clients/getClientIds';
+import { getClientConfig } from '../../firebase/clients/getClientConfig';
 
 const MenuIntro = () => {
-  const { slug } = useParams();
+  const { slugEmpresa, slugSucursal } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    setIsLoaded,
+    setClientData,
+    setClientAssets,
+    setClientConfig,
+    setProducts,
+    setProductsByCategory,
+    setCategories,
+    setProductsSorted,
+    setSlugEmpresa,
+    setSlugSucursal,
+    setEmpresaId,
+    setSucursalId,
+  } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
-  const [redirectPath, setRedirectPath] = useState(null);
-  const [hasWaited, setHasWaited] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
+    setSlugEmpresa(slugEmpresa);
+    setSlugSucursal(slugSucursal);
+
     const fetchData = async () => {
       try {
-        const config = await getClientConfig(slug);
-        if (config?.intro) {
-          setIntroGif(config.intro);
+        const ids = await getClientIds(slugEmpresa, slugSucursal);
+        if (!ids) {
+          console.error('❌ Empresa o sucursal no encontrada');
+          return;
         }
 
-        const data = await getProductsByClientV2(slug);
-        const categorias = Object.keys(data?.porCategoria || {});
-        const primeraCategoria = categorias[0] || null;
+        const { empresaId, sucursalId } = ids;
 
-        if (primeraCategoria) {
-          setRedirectPath(`/${slug}/menu/${primeraCategoria}`);
-        } else {
-          setRedirectPath(`/${slug}/menu`);
-        }
+        setEmpresaId(empresaId);
+        setSucursalId(sucursalId);
+
+        const assets = await getClientAssets(empresaId, sucursalId);
+        setClientAssets(assets);
+        setIntroGif(assets?.loading || null);
+
+        const [data, config, categories, productsData, sortedProducts] =
+          await Promise.all([
+            getClientData(empresaId, sucursalId),
+            getClientConfig(empresaId, sucursalId),
+            getCategoriesByClient(empresaId, sucursalId),
+            getProductsByClient(empresaId, sucursalId),
+            getProductsByCategoryPosition(empresaId, sucursalId),
+          ]);
+
+        setClientData(data);
+        setClientConfig(config);
+        setCategories(categories);
+        setProducts(productsData.todos);
+        setProductsByCategory(productsData.porCategoria);
+        setProductsSorted(sortedProducts);
+
+        console.log('clientData:', data);
+        console.log('clientConfig:', config);
+
+        const normalizePath = (path) =>
+          path.endsWith('/') ? path.slice(0, -1) : path;
+
+        setTimeout(() => {
+          setIsLoaded(true);
+          const rootPath = `/${slugEmpresa}/${slugSucursal}`;
+          if (normalizePath(location.pathname) === rootPath) {
+            navigate(`menu/${categories?.[0]?.id || 'default'}`, {
+              replace: true,
+            });
+          } else {
+            navigate(location.pathname, { replace: true });
+          }
+        }, 3000);
       } catch (error) {
-        console.error('❌ Error cargando tienda:', error);
-        setRedirectPath(`/${slug}/menu`);
-      } finally {
-        setHasLoaded(true);
+        console.error('❌ Error cargando datos:', error);
       }
     };
 
     fetchData();
-  }, [slug]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasWaited(true);
-    }, 5000);
-    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (hasWaited && hasLoaded && redirectPath) {
-      navigate(redirectPath);
-    }
-  }, [hasWaited, hasLoaded, redirectPath, navigate]);
-
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-white">
+    <div className="flex items-center justify-center w-full h-screen bg-white relative overflow-hidden">
       {introGif ? (
         <img
           src={introGif}
-          alt="Intro"
-          className="max-w-full max-h-full object-contain"
+          className={`w-full h-full object-cover absolute top-0 left-0 z-10 transition-opacity duration-700 ${
+            imgLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          style={{ minHeight: '100vh', minWidth: '100vw' }}
+          onLoad={() => setImgLoaded(true)}
         />
       ) : (
-        <>
-          <div className="animate-spin rounded-full h-24 w-24 border-4 border-purple-500 border-t-transparent mb-6" />
-          <p className="text-lg font-semibold text-gray-700">
-            Cargando tu tienda...
-          </p>
-        </>
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white">
+          <div className="relative flex items-center justify-center w-32 h-32">
+            <span className="absolute w-28 h-28 rounded-full border border-neutral-300 animate-pulseOrbit" />
+            <span className="absolute w-20 h-20 rounded-full border border-neutral-400 animate-pulseOrbit delay-200" />
+            <span className="absolute w-12 h-12 rounded-full border border-neutral-500 animate-pulseOrbit delay-400" />
+          </div>
+        </div>
       )}
     </div>
   );

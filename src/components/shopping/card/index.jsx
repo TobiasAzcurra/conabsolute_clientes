@@ -4,36 +4,21 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from "react";
-import QuickAddToCart from "./quickAddToCart";
-import currencyFormat from "../../../helpers/currencyFormat";
-import { Link, useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { listenToAltaDemanda } from "../../../firebase/readConstants";
-import LoadingPoints from "../../LoadingPoints";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-import imagen2 from "../../../assets/IMG_8408.jpg";
-import imagen3 from "../../../assets/IMG_8413.jpg";
+} from 'react';
+import QuickAddToCart from './quickAddToCart';
+import currencyFormat from '../../../helpers/currencyFormat';
+import { Link, useParams } from 'react-router-dom';
+import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
+import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import { useClient } from '../../../contexts/ClientContext';
 
-const Card = ({
-  name,
-  description,
-  price,
-  img,
-  path,
-  id,
-  category,
-  type,
-  data,
-}) => {
-  const { slug } = useParams();
+const Card = ({ data, path }) => {
+  const { slugEmpresa, slugSucursal, clientConfig } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
   const [showConsultStock, setShowConsultStock] = useState(false);
-
-  // Estados para la rotación de imágenes
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,46 +27,72 @@ const Card = ({
   const cardRef = useRef(null);
   const intervalRef = useRef(null);
 
-  // Array de imágenes para rotar
+  const installments = data?.installments;
+  const cashDiscount = data?.cashDiscount;
+
+  const {
+    id,
+    name = 'Producto sin nombre',
+    description = '',
+    category,
+    variants,
+  } = data;
+
   const images = useMemo(() => {
-    const mainImage = getImageSrc(data || img);
-    return [mainImage, imagen2, imagen3];
-  }, [data, img]);
+    const raw = data?.img || data?.image || data?.images || [];
 
-  // Generar números y etiquetas aleatorias usando useMemo para que sean consistentes
-  const randomLabels = useMemo(() => {
-    const generateRandomNumber = () => Math.floor(Math.random() * 4) + 1;
+    if (Array.isArray(raw)) {
+      return raw;
+    }
 
-    const allLabels = [
-      { key: "colores", text: `${generateRandomNumber()} colores` },
-      { key: "tamaños", text: `${generateRandomNumber()} tamaños` },
-      { key: "labrados", text: `${generateRandomNumber()} labrados` },
-    ];
+    const resolved = getImageSrc(raw);
+    return [resolved];
+  }, [data]);
 
-    // Determinar cuántas etiquetas mostrar (1, 2 o 3)
-    const numLabels = Math.floor(Math.random() * 3) + 1;
+  const variantStats = useMemo(() => {
+    const stats = {};
 
-    // Mezclar el array y tomar solo las primeras numLabels
-    const shuffled = allLabels.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, numLabels);
-  }, [id]); // Usar id como dependencia para que sea consistente por producto
+    for (const variant of variants || []) {
+      const key = variant.linkedTo;
+      const value = variant.name;
+      if (!key || !value) continue;
 
-  // Función para verificar si este card está más centrado que otros
+      const stringKey = String(key).toLowerCase();
+      const stringValue = String(value).toLowerCase();
+
+      if (!stats[stringKey]) stats[stringKey] = new Set();
+      stats[stringKey].add(stringValue);
+    }
+
+    const result = {};
+    for (const key in stats) {
+      result[key] = Array.from(stats[key]);
+    }
+
+    return result;
+  }, [variants]);
+
+  const visibleLabels = useMemo(() => {
+    return Object.entries(variantStats)
+      .filter(([, values]) => values.length > 0)
+      .map(([key, values]) => {
+        const translatedKey = clientConfig?.labels?.[key] || key;
+        return {
+          key,
+          text: `${values.length} ${translatedKey}`,
+        };
+      });
+  }, [variantStats, clientConfig]);
+
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
 
     const rect = cardRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportCenterY = viewportHeight / 2;
-
-    // Calcular el centro del card
     const cardCenterY = rect.top + rect.height / 2;
-
-    // Calcular la distancia del centro del card al centro del viewport
     const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
-
-    // Considerar "centrado" si está dentro de un rango pequeño del centro
-    const threshold = 100; // píxeles de tolerancia
+    const threshold = 140;
 
     return (
       distanceFromCenter < threshold &&
@@ -90,17 +101,59 @@ const Card = ({
     );
   }, []);
 
-  // Efecto para detectar el card centrado mediante scroll
+  const getDefaultVariant = (variants) => {
+    if (!Array.isArray(variants) || variants.length === 0) return null;
+    return variants.find((v) => v.stock > 0) || variants[0];
+  };
+
+  const selectedVariant = useMemo(
+    () => getDefaultVariant(data.variants),
+    [data.variants]
+  );
+
+  const basePrice = data.price || 0;
+  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+
+  const cuotaText = useMemo(() => {
+    if (!installments?.enabled || !installments.quantity) return null;
+
+    const base = adjustedPrice;
+    const interestRate = installments.interest || 0;
+    const finalAmount = base * (1 + interestRate);
+    const perCuota = finalAmount / installments.quantity;
+
+    return (
+      `en ${installments.quantity} cuota${
+        installments.quantity > 1 ? 's' : ''
+      } de $${Math.ceil(perCuota)}` +
+      (interestRate === 0
+        ? ' sin interés'
+        : ` (con ${Math.floor(interestRate * 100)}% interés)`)
+    );
+  }, [adjustedPrice, installments]);
+
+  const efectivoText = useMemo(() => {
+    if (!cashDiscount?.enabled || !cashDiscount.percentage) return null;
+
+    const discountAmount = adjustedPrice * (1 - cashDiscount.percentage);
+    return `o en transferencia / efectivo por $${Math.ceil(discountAmount)}`;
+  }, [adjustedPrice, cashDiscount]);
+
+  const resolvedImages = useMemo(() => {
+    const imgs =
+      selectedVariant?.images || data?.img || data?.image || data?.images || [];
+    if (Array.isArray(imgs)) return imgs;
+    return [getImageSrc(imgs)];
+  }, [selectedVariant, data]);
+
   useEffect(() => {
     const handleScroll = () => {
       const isCentered = checkIfCentered();
       setIsInViewport(isCentered);
     };
 
-    // Verificar inicialmente
     handleScroll();
 
-    // Agregar listener de scroll con throttling
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -112,24 +165,21 @@ const Card = ({
       }
     };
 
-    window.addEventListener("scroll", throttledScroll);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener('scroll', throttledScroll);
+    window.addEventListener('resize', handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", throttledScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener('scroll', throttledScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [checkIfCentered]);
 
-  // Efecto para manejar la rotación automática de imágenes
   useEffect(() => {
-    if (isInViewport) {
-      // Iniciar rotación automática cuando esté en viewport
+    if (isInViewport && images.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 1000); // Cambiar imagen cada 2 segundos
+      }, 2000);
     } else {
-      // Detener rotación y volver a la primera imagen cuando no esté en viewport
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -142,7 +192,7 @@ const Card = ({
         clearInterval(intervalRef.current);
       }
     };
-  }, [isInViewport, images.length]);
+  }, [isInViewport, images]);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -152,7 +202,6 @@ const Card = ({
     return () => unsubscribe();
   }, []);
 
-  const adjustedPrice = Math.ceil((price * priceFactor) / 100) * 100;
   const currentImageSrc = images[currentImageIndex];
 
   return (
@@ -160,23 +209,24 @@ const Card = ({
       ref={cardRef}
       className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
     >
-      <div className="absolute right-3.5 top-2.5 z-40">
-        <QuickAddToCart
-          product={{
-            name,
-            description,
-            price: adjustedPrice,
-            img: currentImageSrc,
-            path,
-            id,
-            category,
-            type,
-          }}
-        />
-      </div>
+      {(!variants || variants.length === 0) && (
+        <div className="absolute right-3.5 top-2.5 z-40">
+          <QuickAddToCart
+            product={{
+              name,
+              description: data.cardDescription || description,
+              price: adjustedPrice,
+              img: currentImageSrc,
+              path,
+              id,
+              category,
+            }}
+          />
+        </div>
+      )}
 
       <Link
-        to={`/${slug}/menu/${path}/${id}`}
+        to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${data.id}`}
         state={{ product: data }}
         className="w-full"
       >
@@ -211,19 +261,17 @@ const Card = ({
 
           <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
 
-          {/* Contenedor horizontal para las etiquetas aleatorias */}
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
-            {randomLabels.map((label, index) => (
+            {visibleLabels.map((label, index) => (
               <span
                 key={`${label.key}-${index}`}
-                className="text-gray-600 text-[10px] font-medium bg-gray-50  px-2 py-1 rounded-t-xl"
+                className="text-gray-600 text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-t-xl"
               >
                 {label.text}
               </span>
             ))}
           </div>
 
-          {/* Indicadores de imagen (puntos) */}
           {isInViewport && (
             <div className="absolute top-4 left-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
@@ -231,8 +279,8 @@ const Card = ({
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? "bg-white opacity-100"
-                      : "bg-white opacity-50"
+                      ? 'bg-white opacity-100'
+                      : 'bg-white opacity-50'
                   }`}
                 />
               ))}
@@ -241,20 +289,15 @@ const Card = ({
 
           <img
             src={currentImageSrc}
-            alt={name || "Producto"}
+            alt={name || 'Producto'}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? "opacity-100" : "opacity-0"
+              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => {
-              console.log(`✅ Imagen cargada exitosamente para ${name}`);
               setIsLoaded(true);
               setImageError(false);
             }}
             onError={(e) => {
-              console.error(
-                `❌ Error al cargar imagen para ${name}:`,
-                currentImageSrc
-              );
               setImageError(true);
               setIsLoaded(false);
             }}
@@ -264,28 +307,24 @@ const Card = ({
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {name || "Producto sin nombre"}
+              {name || 'Producto sin nombre'}
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight mb-1">
+            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight ">
               {data.cardDescription}
-            </p>
-          )}
-
-          {description && (
-            <p className="text-center text-xs font-light text-opacity-30 text-black">
-              {description}
             </p>
           )}
           <div className="flex w-full mt-4 flex-col mb-6">
             <span className="font-bold text-4xl text-black">
               {currencyFormat(adjustedPrice)}
             </span>
-            <span className="font-light pr-12 text-xs text-green-500">
-              en 6 cuotas de ${Math.ceil(adjustedPrice / 6)} o en transferencia
-              / efectivo por ${Math.ceil(adjustedPrice * 0.85)}
-            </span>
+            {(cuotaText || efectivoText) && (
+              <div className="font-light pr-12 text-xs text-green-500 flex flex-col items-start">
+                {cuotaText && <span>{cuotaText}</span>}
+                {efectivoText && <span>{efectivoText}</span>}
+              </div>
+            )}
           </div>
         </div>
       </Link>

@@ -1,4 +1,4 @@
-import { signInWithGoogle } from "../../firebase/auth";
+import { signInWithGoogle } from "../../firebase/auth/authService";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/user/userSlice"; // Importa la acción setUser
 import { doc, getDoc, setDoc, getFirestore } from "firebase/firestore";

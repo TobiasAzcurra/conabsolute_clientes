@@ -188,7 +188,7 @@ const Reclamos = () => {
   const renderReclamoStatus = (order) => {
     if (order.reclamo) {
       return (
-        <div className="px-4 h-10 items-center mt-1 flex rounded-full text-sm text-red-main bg-red-200">
+        <div className="px-4 h-10 items-center mt-1 flex rounded-full text-sm text-red-500 bg-red-200">
           <p>Reclamo en curso</p>
         </div>
       );
@@ -260,7 +260,7 @@ const Reclamos = () => {
               <div
                 className={`${
                   order.canceled
-                    ? "text-red-main bg-red-200"
+                    ? "text-red-500 bg-red-200"
                     : "text-green-500 bg-green-200"
                 }
                                 w-min px-4 h-10 bg-gray-200 items-center mt-1 flex rounded-full text-sm`}

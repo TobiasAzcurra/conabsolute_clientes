@@ -1,56 +1,30 @@
-// src/components/shopping/section/index.jsx
-import React, { useEffect, useRef, useState } from "react";
-import Card from "../card";
-import { getProductsByCategory } from "../../../firebase/getProductsByCategory";
-import LoadingPoints from "../../LoadingPoints";
+import React, { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { useClient } from '../../../contexts/ClientContext';
+import Card from '../card';
+import LoadingPoints from '../../LoadingPoints';
 
-const Section = ({ slug, path }) => {
-  const containerRef = useRef(null);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+const Section = () => {
+  const { category } = useParams();
+  const { productsByCategory } = useClient();
 
-  const normalize = (product) => {
-    const base = product.data || product;
-    return {
-      id: product.id,
-      name: base.name || "Producto sin nombre",
-      price: base.price || 0,
-      img: base.img || base.image || "",
-      category: product.category || path,
-      description: base.description || "",
-      type: base.type || "regular",
-      data: base,
-    };
-  };
+  const products = useMemo(() => {
+    if (!productsByCategory || !productsByCategory[category]) return [];
+    return productsByCategory[category];
+  }, [productsByCategory, category]);
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const prods = await getProductsByCategory(slug, path);
-        console.log("Productos cargados:", prods);
-        setProducts(prods.map(normalize));
-      } catch (e) {
-        console.error("❌ Error al cargar productos:", e);
-        setProducts([]);
-      } finally {
-        setLoading(false);
-        window.scrollTo(0, 0);
-      }
-    };
-
-    fetch();
-  }, [slug, path]);
+  if (!productsByCategory) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mt-8 mb-10">
+        <LoadingPoints />
+      </div>
+    );
+  }
 
   return (
-    <div
-      ref={containerRef}
-      className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mt-8 mb-10"
-    >
-      {loading ? (
-        <LoadingPoints />
-      ) : products.length > 0 ? (
-        products.map((p, i) => <Card key={p.id || i} {...p} path={path} />)
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mt-8 mb-10">
+      {products.length > 0 ? (
+        products.map((p) => <Card key={p.id} data={p} path={category} />)
       ) : (
         <p className="font-coolvetica text-center text-xs col-span-full">
           No hay productos en esta categoría.

@@ -1,55 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom"; // Agregamos useNavigate para redirección
-import logo from "../../assets/anheloTMwhite.png";
-import { clearCart } from "../../redux/cart/cartSlice";
-import { useDispatch } from "react-redux";
-
-export const items = {
-	burgers: "burgers",
-	combos: "combos",
-	papas: "papas",
-	bebidas: "bebidas",
-};
+import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useClient } from '../../contexts/ClientContext';
 
 const SuccessPage = () => {
-	const { pathname } = useLocation();
-	const navigate = useNavigate();
-	const { orderId } = useParams();
-	const dispatch = useDispatch();
+  const { slugEmpresa, slugSucursal } = useClient();
+  const { orderId } = useParams();
+  const navigate = useNavigate();
 
-	const [selectedItem, setSelectedItem] = useState("");
-	const [locationMenu, setLocationMenu] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${orderId}`);
+    }, 2000);
 
-	useEffect(() => {
-		const pathParts = pathname.split("/");
-		const lastPart = pathParts[pathParts.length - 1];
-		// Si selecciono PROMOCIONES, que no se actualice el selectedItem
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
-		dispatch(clearCart());
-
-		if (selectedItem === "PROMOCIONES") {
-			setSelectedItem("PROMOCIONES");
-		} else {
-			setSelectedItem(lastPart);
-		}
-
-		setLocationMenu(pathname.startsWith("/menu/"));
-	}, [pathname, selectedItem]);
-
-	// Redirección después de la animación
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			navigate(`/pedido/${orderId}`);
-		}, 2000); // Redirige después de 2 segundos
-
-		return () => clearTimeout(timer);
-	}, [navigate]);
-
-	return (
-		<>
-			{/* Definición de las animaciones dentro del componente */}
-			<style>
-				{`
+  return (
+    <>
+      <style>
+        {`
           @keyframes drawCircle {
             from {
               stroke-dashoffset: 157; /* Circunferencia de un círculo con r=25: 2 * π * 25 ≈ 157 */
@@ -83,6 +52,18 @@ const SuccessPage = () => {
             }
           }
 
+          @keyframes backgroundMovement {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+
           .circle-animation {
             stroke-dasharray: 157;
             stroke-dashoffset: 157;
@@ -110,6 +91,12 @@ const SuccessPage = () => {
             animation-delay: 1s;
           }
 
+          .blue-gradient-background {
+            background: linear-gradient(135deg, #1E4F95 0%, #396FB7 25%, #2E5FA6 50%, #4479C4 75%, #5089D1 100%);
+            background-size: 300% 300%;
+            animation: backgroundMovement 8s ease-in-out infinite;
+          }
+
           @keyframes fadeInUpCustom {
             0% {
               opacity: 0;
@@ -121,29 +108,27 @@ const SuccessPage = () => {
             }
           }
         `}
-			</style>
-
-			<div className="bg-gradient-to-b from-black via-black to-red-main flex items-center justify-center h-screen">
-				<div className="text-center">
-					{/* Ícono de éxito con animaciones de dibujo */}
-					<svg
-						className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 52 52"
-						aria-label="Operación exitosa"
-					>
-						<path
-							className="check-animation"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="5"
-							d="M14 27 L22 35 L38 19"
-						/>
-					</svg>
-				</div>
-			</div>
-		</>
-	);
+      </style>
+      <div className="blue-gradient-background flex items-center justify-center h-screen">
+        <div className="text-center">
+          <svg
+            className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 52 52"
+            aria-label="Operación exitosa"
+          >
+            <path
+              className="check-animation"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="5"
+              d="M14 27 L22 35 L38 19"
+            />
+          </svg>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default SuccessPage;

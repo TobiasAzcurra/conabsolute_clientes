@@ -10,7 +10,7 @@ const MyRadioGroup = ({ name, options }) => {
           <div
             key={option.value}
             className={`p-2 font-coolvetica text-xs  mb-2 md:w-6/12 w-full gap-1 ${
-              values[name] === option.value ? "bg-red-main " : "bg-gray-300"
+              values[name] === option.value ? "bg-red-500 " : "bg-gray-300"
             }`}
             onClick={() => {
               setFieldValue(name, option.value);
@@ -38,7 +38,7 @@ const MyRadioGroup = ({ name, options }) => {
       <ErrorMessage
         name={name}
         component="span"
-        className=" text-sm text-red-main font-coolvetica font-light"
+        className=" text-sm text-red-500 font-coolvetica font-light"
       />
     </div>
   );

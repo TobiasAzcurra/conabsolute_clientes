@@ -1,21 +1,13 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useClient } from '../../contexts/ClientContext';
 import currencyFormat from '../../helpers/currencyFormat';
 
 const FloatingCart = ({ totalQuantity, cart }) => {
-  const { slug } = useParams();
+  const { slugEmpresa, slugSucursal } = useClient();
 
   const totalPrice = cart.reduce((acc, item) => {
-    let itemTotal = item.price * item.quantity;
-
-    const toppingsTotal = item.toppings.reduce((tAcc, topping) => {
-      return tAcc + topping.price;
-    }, 0);
-
-    itemTotal += toppingsTotal * item.quantity;
-
-    return acc + itemTotal;
+    return acc + item.price * item.quantity;
   }, 0);
 
   return (
@@ -30,7 +22,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
       </div>
 
       <Link
-        to={`/${slug}/carrito`}
+        to={`/${slugEmpresa}/${slugSucursal}/carrito`}
         className="bg-blue-apm mr-2 w-full items-center flex justify-center md:w-[500px] h-[62px] px-6 rounded-2xl"
       >
         <svg

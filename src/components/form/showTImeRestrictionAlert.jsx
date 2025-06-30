@@ -10,7 +10,7 @@ export const showTimeRestrictionAlert = () => {
     background: "#f9f9f9",
     customClass: {
       popup: "rounded-lg shadow-lg",
-      title: "text-3xl text-red-main font-bold",
+      title: "text-3xl text-red-500 font-bold",
       content: "text-lg text-gray-700",
       confirmButton: "text-lg font-semibold",
     },
