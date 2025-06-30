@@ -1,39 +1,31 @@
-import { ErrorMessage, Field, Form, Formik } from 'formik';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Form, Formik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addLastCart, setEnvioExpress } from '../../redux/cart/cartSlice';
-import { useEffect, useState, useMemo, useRef } from 'react';
-import MyTextInput from './MyTextInput';
+import { useState } from 'react';
 import validations from './validations';
 import handleSubmit from './handleSubmit';
-import { MapDirection } from './MapDirection';
-import AppleErrorMessage from './AppleErrorMessage';
-import {
-  validarVoucher,
-  canjearVouchers,
-} from '../../firebase/vouchers/validateVoucher';
 import Payment from '../mercadopago/Payment';
-import currencyFormat from '../../helpers/currencyFormat';
-import {
-  isWithinClosedDays,
-  isWithinOrderTimeRange,
-} from '../../helpers/validate-hours';
 import LoadingPoints from '../LoadingPoints';
-import Toggle from '../Toggle';
 import AppleModal from '../AppleModal';
-import { listenToAltaDemanda } from '../../firebase/constants/altaDemanda';
-import Tooltip from '../Tooltip';
 import { useClient } from '../../contexts/ClientContext';
 import { useFormStates } from '../../hooks/useFormStates';
 import AddressInputs from './AddressInputs';
-import TimeSelector from './TimeSelector';
 import OrderSummary from './OrderSummary';
+import { adjustHora } from '../../helpers/time';
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { slugEmpresa, slugSucursal, clientConfig, clientData, clientAssets } =
-    useClient();
+  const {
+    slugEmpresa,
+    slugSucursal,
+    empresaId,
+    sucursalId,
+    clientConfig,
+    clientData,
+    clientAssets,
+  } = useClient();
 
   const envio = clientConfig?.logistics?.deliveryFee || 2000;
   const expressDeliveryFee = clientConfig?.logistics?.expressFee || 2000;
@@ -75,11 +67,16 @@ const FormCustom = ({ cart, total }) => {
       const orderId = await handleSubmit(
         updatedValues,
         cart,
-        envio,
-        '',
-        false,
-        message,
-        altaDemanda?.priceFactor || 1
+        0, // discountedTotal
+        envio, // envio
+        mapUrl, // mapUrl correcto
+        [], // couponCodes
+        0, // descuento
+        clientConfig?.logistics?.pendingOfBeingAccepted || false, // isPending
+        message, // message
+        altaDemanda?.priceFactor || 1, // priceFactor
+        empresaId, // empresaId
+        sucursalId // sucursalId
       );
       if (orderId) {
         navigate(`/success/${orderId}`);
@@ -118,15 +115,24 @@ const FormCustom = ({ cart, total }) => {
         }
       `}</style>
       <Formik
-        initialValues={{ phone: '', deliveryMethod: 'delivery', hora: '' }}
+        initialValues={{
+          subTotal: total,
+          phone: '',
+          deliveryMethod: 'delivery',
+          references: '',
+          paymentMethod: 'efectivo',
+          hora: '',
+        }}
         validationSchema={validations(total + envio)}
         onSubmit={async (values) => {
-          if (!altaDemanda?.open) return;
           const isReserva = values.hora.trim() !== '';
+          console.log('Submitting form with values:', values);
           await processPedido(values, isReserva);
         }}
       >
-        {({ values, setFieldValue, isSubmitting, submitForm }) => {
+        {({ values, setFieldValue, isSubmitting, submitForm, errors }) => {
+          console.log('Formik errors:', errors);
+
           const productsTotal = cart.reduce(
             (acc, item) => acc + item.price * item.quantity,
             0
@@ -183,11 +189,13 @@ const FormCustom = ({ cart, total }) => {
                       )}
                       <p className="font-bold">Retiro</p>
                     </div>
-                    <p className="font-light text-xs text-center">
-                      por Mitre 614, Río Cuarto
-                      <br />
-                      Córdoba, Argentina
-                    </p>
+                    {clientData?.address && clientData?.province && (
+                      <p className="font-light text-xs text-center">
+                        Por {clientData?.address}
+                        <br />
+                        {clientData?.province}
+                      </p>
+                    )}
                   </button>
                 </div>
                 {/* Datos de entrega */}
@@ -232,6 +240,9 @@ const FormCustom = ({ cart, total }) => {
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-blue-apm text-gray-100 rounded-3xl h-20 font-bold hover:bg-blue-600 transition-colors duration-300 ${
                       isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
+                    onClick={() => {
+                      console.log('Submitting form');
+                    }}
                   >
                     {isSubmitting ? (
                       <LoadingPoints color="text-gray-100" />
