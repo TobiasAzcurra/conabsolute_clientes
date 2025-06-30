@@ -130,7 +130,7 @@ const FormCustom = ({ cart, total }) => {
           hora: '',
           couponCode: '',
         }}
-        validationSchema={validations(total + envio)}
+        validationSchema={validations(total + envio, cart)}
         onSubmit={async (values) => {
           const isReserva = values.hora.trim() !== '';
           console.log('Submitting form with values:', values);
@@ -154,7 +154,7 @@ const FormCustom = ({ cart, total }) => {
           ];
           if (activeCoupons.includes(values.couponCode.trim().toUpperCase())) {
             const hasYerba = cart.some(
-              (item) => item.category?.toLowerCase() === 'yerbas'
+              (item) => item.category?.toLowerCase() === 'yerba'
             );
             if (!hasYerba) {
               descuento = Math.round(productsTotal * 0.3);
