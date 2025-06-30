@@ -8,6 +8,7 @@ const OrderSummary = ({
   expressFee,
   expressBaseFee,
   finalTotal,
+  descuento,
   handleExpressToggle,
   isEnabled,
 }) => {
@@ -41,6 +42,10 @@ const OrderSummary = ({
       <div className="flex flex-row justify-between w-full">
         <p>Velocidad extra</p>
         <p>{currencyFormat(expressFee)}</p>
+      </div>
+      <div className="flex flex-row justify-between w-full">
+        <p>Descuento cupón</p>
+        <p>-{currencyFormat(descuento)}</p>
       </div>
       <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-screen">
         <p className="text-2xl font-bold">Total</p>
