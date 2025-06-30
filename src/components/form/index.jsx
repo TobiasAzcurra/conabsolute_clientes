@@ -55,28 +55,34 @@ const FormCustom = ({ cart, total }) => {
     setIsCloseRestrictedModalOpen,
   } = useFormStates(expressDeliveryFee);
 
+  const submitConfig = {
+    empresaId,
+    sucursalId,
+    envio,
+    mapUrl,
+    couponCodes: [],
+    descuento: 0,
+    isPending: clientConfig?.logistics?.pendingOfBeingAccepted || false,
+    priceFactor: altaDemanda?.priceFactor || 1,
+  };
+
   const processPedido = async (values, isReserva, message = '') => {
     try {
       let hora = values.hora;
       if (isReserva) hora = adjustHora(values.hora);
+
       const updatedValues = {
         ...values,
         hora,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
       };
+
       const orderId = await handleSubmit(
         updatedValues,
         cart,
-        0, // discountedTotal
-        envio, // envio
-        mapUrl, // mapUrl correcto
-        [], // couponCodes
-        0, // descuento
-        clientConfig?.logistics?.pendingOfBeingAccepted || false, // isPending
-        message, // message
-        altaDemanda?.priceFactor || 1, // priceFactor
-        empresaId, // empresaId
-        sucursalId // sucursalId
+        submitConfig,
+        message,
+        clientData
       );
       if (orderId) {
         navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
