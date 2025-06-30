@@ -71,10 +71,13 @@ const MenuIntro = () => {
         console.log('clientData:', data);
         console.log('clientConfig:', config);
 
+        const normalizePath = (path) =>
+          path.endsWith('/') ? path.slice(0, -1) : path;
+
         setTimeout(() => {
           setIsLoaded(true);
           const rootPath = `/${slugEmpresa}/${slugSucursal}`;
-          if (location.pathname === rootPath) {
+          if (normalizePath(location.pathname) === rootPath) {
             navigate(`menu/${categories?.[0]?.id || 'default'}`, {
               replace: true,
             });
