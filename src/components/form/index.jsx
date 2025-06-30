@@ -79,7 +79,7 @@ const FormCustom = ({ cart, total }) => {
         sucursalId // sucursalId
       );
       if (orderId) {
-        navigate(`/success/${orderId}`);
+        navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
         dispatch({ type: 'cart/addLastCart' });
       }
     } catch (err) {
@@ -300,7 +300,7 @@ const FormCustom = ({ cart, total }) => {
                 true // isPending
               );
               if (orderId) {
-                navigate(`/success/${orderId}`);
+                navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
                 dispatch(addLastCart());
               }
             }
@@ -362,8 +362,8 @@ const FormCustom = ({ cart, total }) => {
             );
 
             if (orderId) {
-              navigate(`/success/${orderId}`); // Redirigimos
-              dispatch(addLastCart()); // Actualizamos el carrito
+              navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
+              dispatch(addLastCart());
             }
           }
           setIsModalConfirmLoading(false);
