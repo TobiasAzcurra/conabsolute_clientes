@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useClient } from '../../../contexts/ClientContext';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
-import arrowIcon from '../../../assets/arrowIcon.png';
-import VideoSlider from './VideoSlider';
-import QuickAddToCart from '../card/quickAddToCart';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useClient } from "../../../contexts/ClientContext";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { listenToAltaDemanda } from "../../../firebase/constants/altaDemanda";
+import arrowIcon from "../../../assets/arrowIcon.png";
+import VideoSlider from "./VideoSlider";
+import QuickAddToCart from "../card/quickAddToCart";
 
 const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -32,7 +32,7 @@ const DetailCard = () => {
   const prevImagesRef = useRef([]);
 
   const reels = clientAssets?.reels || [];
-  const logo = clientAssets?.logoFooter || clientAssets?.logo || '';
+  const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
 
   const product = useMemo(() => {
     if (location?.state?.product) return location.state.product;
@@ -178,7 +178,7 @@ const DetailCard = () => {
     return Object.values(selectedVariants)
       .filter(Boolean)
       .map((v) => capitalizeWords(v))
-      .join(' ');
+      .join(" ");
   }, [selectedVariants]);
 
   const combinedName = useMemo(() => {
@@ -258,15 +258,15 @@ const DetailCard = () => {
               alt={product.name}
             />
 
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-3">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
               {productImages.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
                   className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
                     selectedImageIndex === index
-                      ? 'border-white opacity-100 shadow-lg'
-                      : 'border-white opacity-70 hover:opacity-90'
+                      ? "border-white opacity-100 shadow-lg"
+                      : "border-white opacity-70 hover:opacity-90"
                   }`}
                 >
                   <img
@@ -280,25 +280,39 @@ const DetailCard = () => {
           </div>
 
           <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl gap-4">
-            <button
-              onClick={handleGoBack}
-              className="text-xs font-coolvetica flex flex-row gap-2 items-center justify-center mt-3 opacity-50 hover:opacity-75 transition-opacity cursor-pointer "
-            >
-              <img src={arrowIcon} className="h-2 rotate-180" alt="" />
-              Volver
-            </button>
-            <h4 className="font-coolvetica font-bold text-4xl sm:text-6xl text-gray-900 px-4 leading-9 w-full text-center">
-              {capitalizeWords(product.name)}
-            </h4>
+            {/* titulo */}
+            <div className="flex flex-row gap-2 items-center justify-center mt-4">
+              <button onClick={handleGoBack}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-6 text-gray-400"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 19.5 8.25 12l7.5-7.5"
+                  />
+                </svg>
+              </button>
+              <h4 className="font-coolvetica font-bold text-3xl text-gray-900 leading-9  ">
+                {capitalizeWords(product.name)}
+              </h4>
+            </div>
+            {/* desc */}
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs text-gray-900 font-light pl-4 pr-16 leading-tight">
-                {product.detailDescription}
+              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4 mb-4 pr-16 leading-tight">
+                {product.detailDescription.charAt(0).toUpperCase() +
+                  product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
 
             {customization ? (
-              <div className="w-full flex justify-center px-4">
-                <div className="space-y-2 w-full">
+              <div className="w-full flex justify-center mb-4 px-4">
+                <div className="gap-2 flex flex-col w-full">
                   {Object.entries(variantStats).map(([key, values]) => (
                     <div key={key}>
                       <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
@@ -313,12 +327,12 @@ const DetailCard = () => {
                             const isOnly = values.length === 1;
 
                             const borderRadiusClass = isOnly
-                              ? 'rounded-full'
+                              ? "rounded-full"
                               : isFirst
-                              ? 'rounded-l-full'
+                              ? "rounded-l-full"
                               : isLast
-                              ? 'rounded-r-full'
-                              : 'rounded-none';
+                              ? "rounded-r-full"
+                              : "rounded-none";
 
                             const variant = (product.variants || []).find(
                               (v) =>
@@ -341,24 +355,24 @@ const DetailCard = () => {
                               <button
                                 key={value}
                                 onClick={() => handleVariantSelect(key, value)}
-                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-300 ${borderRadiusClass} ${
-                                  index > 0 ? '-ml-px' : ''
+                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-200 font-light ${borderRadiusClass} ${
+                                  index > 0 ? "-ml-px" : ""
                                 } flex items-center justify-center
                                   ${
                                     !hasAttributeImage
                                       ? isSelected
-                                        ? 'bg-gray-900 text-white'
-                                        : 'bg-white text-gray-600'
-                                      : ''
+                                        ? "bg-black text-gray-50"
+                                        : "bg-gray-50 text-gray-400"
+                                      : ""
                                   }
                                 `}
                                 style={
                                   hasAttributeImage
                                     ? {
                                         padding: 0,
-                                        width: '100%',
+                                        width: "100%",
                                         height: 40,
-                                        overflow: 'hidden',
+                                        overflow: "hidden",
                                       }
                                     : {}
                                 }
@@ -368,9 +382,9 @@ const DetailCard = () => {
                                     src={variant.attributeImage[0]}
                                     alt={value}
                                     className={`w-full h-full object-cover transition-opacity duration-200 ${
-                                      isSelected ? 'opacity-100' : 'opacity-50'
+                                      isSelected ? "opacity-100" : "opacity-50"
                                     }`}
-                                    style={{ width: '100%', height: '100%' }}
+                                    style={{ width: "100%", height: "100%" }}
                                   />
                                 ) : (
                                   capitalizeWords(value)
@@ -386,8 +400,8 @@ const DetailCard = () => {
               </div>
             ) : null}
 
-            <div className="flex flex-row items-center w-full px-4 gap-2">
-              <div className="flex-shrink-0 flex-1">
+            <div className="flex flex-row items-center w-full px-3 ">
+              <div className="">
                 <QuickAddToCart
                   product={productToSend}
                   calculatedPrice={totalPrice}
@@ -395,13 +409,11 @@ const DetailCard = () => {
                 />
               </div>
 
-              <div className="flex-1 pl-2 font-coolvetica flex-col">
-                <p className="text-xs text-gray-900">
-                  Por <strong>{currencyFormat(totalPrice)}</strong>
-                </p>
-              </div>
+              <p className="text-xs pl-2 font-coolvetica font-light text-gray-900">
+                Por {currencyFormat(totalPrice)}
+              </p>
             </div>
-            <div className="mt-10">
+            <div className="mt-8">
               <VideoSlider reels={reels} />
             </div>
             {logo && (
