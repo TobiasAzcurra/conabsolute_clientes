@@ -344,7 +344,8 @@ const Card = ({ data, path }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {name || "Producto sin nombre"}
+              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
+                (name || "Producto sin nombre").slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
