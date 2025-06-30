@@ -9,13 +9,17 @@ import carrusel from '../../../assets/carrusel3.jpg';
 import MovingRibbon from '../MovingRibbon';
 import FormCustom from '../../form';
 import { getImageSrc } from '../../../helpers/getImageSrc';
+import VideoSlider from '../detail/VideoSlider';
+import arrowIcon from '../../../assets/arrowIcon.png';
 
 const CartItems = () => {
   const { cart, total } = useSelector((state) => state.cartState);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const { products, productsSorted, slugEmpresa, slugSucursal } = useClient();
+  const { products, productsSorted, slugEmpresa, slugSucursal, clientAssets } =
+    useClient();
+  const reels = clientAssets?.reels || [];
 
   useEffect(() => {
     console.log('🛒 Cart actualizado:', cart);
@@ -58,9 +62,20 @@ const CartItems = () => {
     (product) => !cart.some((cartItem) => cartItem.name === product.name)
   );
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="flex flex-col font-coolvetica overflow-x-hidden">
       <div className="flex justify-center flex-col mt-8 items-center w-full">
+        <button
+          onClick={handleGoBack}
+          className="text-xs font-coolvetica flex flex-row gap-2 items-center justify-center opacity-50 hover:opacity-75 transition-opacity cursor-pointer"
+        >
+          <img src={arrowIcon} className="h-2 rotate-180" alt="" />
+          Volver
+        </button>
         <p className="text-2xl font-bold">Tu pedido</p>
         <div
           className="flex flex-col md:flex-row gap-2 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
@@ -130,9 +145,12 @@ const CartItems = () => {
 
       <FormCustom cart={cart} total={total} />
 
-      <div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
+      {/* <div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
         <MovingRibbon angle={0} />
-        <img src={carrusel} className="w-full mt-28 md:hidden" alt="" />
+        <img src={carrusel} className="w-full md:hidden" alt="" />
+      </div> */}
+      <div className="my-10">
+        <VideoSlider reels={reels} />
       </div>
 
       <style>
