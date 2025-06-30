@@ -12,7 +12,7 @@ const AddressInputs = ({
   setNoEncontre,
 }) => {
   return (
-    <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300">
+    <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300 overflow-hidden">
       {values.deliveryMethod === 'delivery' && (
         <>
           {/* Mapa y dirección */}
