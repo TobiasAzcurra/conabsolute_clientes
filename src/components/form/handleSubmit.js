@@ -6,20 +6,15 @@ import {
 } from '../../firebase/orders/uploadOrder';
 import { obtenerFechaActual } from '../../firebase/utils/dateHelpers';
 
-const handleSubmit = async (values, cart, config, message = '', clientData) => {
-  const {
-    empresaId,
-    sucursalId,
-    mapUrl,
-    couponCodes,
-    descuento,
-    isPending,
-    priceFactor,
-  } = config;
+const VALID_COUPONS = [
+  'APMCONKINGCAKES',
+  'APMCONANHELO',
+  'APMCONPROVIMARK',
+  'APMCONLATABLITA',
+];
 
-  console.log('handleSubmit values:', values);
-  console.log('handleSubmit cart:', cart);
-  console.log('handleSubmit config:', config);
+const handleSubmit = async (values, cart, config, message = '', clientData) => {
+  const { empresaId, sucursalId, mapUrl, isPending, priceFactor } = config;
 
   const coordinates = extractCoordinates(mapUrl);
   const direccion =
@@ -28,8 +23,33 @@ const handleSubmit = async (values, cart, config, message = '', clientData) => {
       : clientData?.address || 'Sin dirección';
 
   const phone = String(values.phone) || '';
-
   const envio = values.deliveryMethod === 'takeaway' ? 0 : config.envio || 0;
+
+  const hasYerbas = cart.some(
+    (item) => item.category?.toLowerCase() === 'yerbas'
+  );
+
+  let descuento = 0;
+  let couponCodes = [];
+
+  if (VALID_COUPONS.includes(values.couponCode)) {
+    if (!hasYerbas) {
+      // Aplicar 30% de descuento al subtotal del carrito
+      const subtotal = cart.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      );
+      descuento = subtotal * 0.3;
+      couponCodes.push(values.couponCode);
+      console.log(
+        `✅ Cupón ${values.couponCode} aplicado con 30% de descuento`
+      );
+    } else {
+      console.log(
+        `❌ Cupón ${values.couponCode} no válido porque hay productos de yerbas`
+      );
+    }
+  }
 
   const orderDetail = {
     aclaraciones: values.aclaraciones || '',
