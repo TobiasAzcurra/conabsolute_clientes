@@ -14,13 +14,12 @@ import {
   getFirestore,
 } from 'firebase/firestore';
 import Payment from '../../components/mercadopago/Payment';
-import useClientData from '../../hooks/useClientData';
 import { listenOrderById } from '../../firebase/orders/listenOrderById';
 import { useClient } from '../../contexts/ClientContext';
+import { listenOrdersByPhone } from '../../firebase/orders/listenOrdersByPhone';
 
 const Pedido = () => {
   const { empresaId, sucursalId } = useClient();
-  const { clientData } = useClientData('empresa2');
   const [order, setOrder] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -420,7 +419,9 @@ const Pedido = () => {
     }
 
     if (phoneNumber) {
-      unsubscribePhoneNumber = ListenOrdersForTodayByPhoneNumber(
+      unsubscribePhoneNumber = listenOrdersByPhone(
+        empresaId,
+        sucursalId,
         phoneNumber,
         (pedidosActualizados) => {
           const pedidosConPago = pedidosActualizados.filter(
