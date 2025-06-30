@@ -1,5 +1,6 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useClient } from '../contexts/ClientContext';
 
 const SearchBar = ({
   phoneNumber,
@@ -9,12 +10,12 @@ const SearchBar = ({
   previousPhone,
   onSuggestionClick,
 }) => {
+  const { slugEmpresa, slugSucursal } = useClient();
   const navigate = useNavigate();
-  const { slug } = useParams();
 
   const handleSearch = () => {
     if (phoneNumber.trim().length < 8) return;
-    navigate(`/${slug}/pedido/${phoneNumber}`);
+    navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${phoneNumber}`);
   };
 
   return (
@@ -23,7 +24,7 @@ const SearchBar = ({
         type="tel"
         value={phoneNumber}
         onChange={(e) => setPhoneNumber(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
         onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
         placeholder="Busca tu pedido con tu telefono ej: 3585168275"
