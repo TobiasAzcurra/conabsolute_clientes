@@ -1,17 +1,17 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import StickerCanvas from '../../components/StickerCanvas';
-import LoadingPoints from '../../components/LoadingPoints';
+import React, { useRef, useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import StickerCanvas from "../../components/StickerCanvas";
+import LoadingPoints from "../../components/LoadingPoints";
 // import UpdatedPedidoSection from './UpdatedPedidoSection';
-import AppleModal from '../../components/AppleModal';
-import isologo from '../../assets/isologo.png';
-import EditAddressModal from './EditAddressModal';
-import { doc, runTransaction, getFirestore } from 'firebase/firestore';
-import Payment from '../../components/mercadopago/Payment';
-import { listenOrderById } from '../../firebase/orders/listenOrderById';
-import { listenOrdersByPhone } from '../../firebase/orders/listenOrdersByPhone';
-import { cancelOrder } from '../../firebase/orders/cancelOrder';
-import { useClient } from '../../contexts/ClientContext';
+import AppleModal from "../../components/AppleModal";
+import isologo from "../../assets/isologo.png";
+import EditAddressModal from "./EditAddressModal";
+import { doc, runTransaction, getFirestore } from "firebase/firestore";
+import Payment from "../../components/mercadopago/Payment";
+import { listenOrderById } from "../../firebase/orders/listenOrderById";
+import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
+import { cancelOrder } from "../../firebase/orders/cancelOrder";
+import { useClient } from "../../contexts/ClientContext";
 
 const Pedido = () => {
   const { empresaId, sucursalId, clientConfig, clientData } = useClient();
@@ -30,7 +30,7 @@ const Pedido = () => {
   const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
   const [showFullAddress, setShowFullAddress] = useState(false);
   const [isEditTimeModalOpen, setIsEditTimeModalOpen] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
@@ -61,14 +61,14 @@ const Pedido = () => {
   }, []);
 
   const getOrderCreatedDate = (createdAt) => {
-    if (createdAt && typeof createdAt.seconds === 'number') {
+    if (createdAt && typeof createdAt.seconds === "number") {
       return new Date(createdAt.seconds * 1000);
     }
     return null;
   };
 
   const isDelayed = (order) => {
-    console.log('[Pedido] isDelayed:', order);
+    console.log("[Pedido] isDelayed:", order);
     const { createdAt } = order;
     let { entregado } = order;
 
@@ -108,23 +108,23 @@ const Pedido = () => {
   };
 
   function sumarMinutos(date, minutosASumar) {
-    if (!date) return '';
+    if (!date) return "";
     const nuevaFecha = new Date(date.getTime());
     nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutosASumar);
 
-    const nuevasHoras = nuevaFecha.getHours().toString().padStart(2, '0');
-    const nuevosMinutos = nuevaFecha.getMinutes().toString().padStart(2, '0');
+    const nuevasHoras = nuevaFecha.getHours().toString().padStart(2, "0");
+    const nuevosMinutos = nuevaFecha.getMinutes().toString().padStart(2, "0");
 
     return `${nuevasHoras}:${nuevosMinutos}`;
   }
 
   const handleRateOrder = async (ratings) => {
-    console.log('[Pedido] handleRateOrder: inicio', {
+    console.log("[Pedido] handleRateOrder: inicio", {
       ratings,
       selectedOrderId,
     });
     if (!selectedOrderId) {
-      console.error('❌ Error: No hay Order ID seleccionado para calificar');
+      console.error("❌ Error: No hay Order ID seleccionado para calificar");
       return;
     }
 
@@ -137,16 +137,16 @@ const Pedido = () => {
         (order) => order.id === selectedOrderId
       );
       if (!currentOrder) {
-        throw new Error('Pedido no encontrado.');
+        throw new Error("Pedido no encontrado.");
       }
 
       const fecha = getOrderCreatedDate(currentOrder.createdAt);
       if (!fecha) {
-        throw new Error('Fecha del pedido no disponible.');
+        throw new Error("Fecha del pedido no disponible.");
       }
 
       await updateRatingForOrder(fecha, selectedOrderId, ratings);
-      localStorage.removeItem('pendingRating');
+      localStorage.removeItem("pendingRating");
 
       setPedidosPagados((prevPedidos) =>
         prevPedidos.map((pedido) =>
@@ -156,13 +156,13 @@ const Pedido = () => {
         )
       );
 
-      setMessage('¡Gracias por calificar tu pedido!');
+      setMessage("¡Gracias por calificar tu pedido!");
       setIsRatingModalOpen(false);
     } catch (err) {
-      console.error('[Pedido] handleRateOrder: error al calificar', err);
-      setError('Hubo un problema al calificar el pedido. Inténtalo de nuevo.');
+      console.error("[Pedido] handleRateOrder: error al calificar", err);
+      setError("Hubo un problema al calificar el pedido. Inténtalo de nuevo.");
     } finally {
-      console.log('[Pedido] handleRateOrder: finalizado');
+      console.log("[Pedido] handleRateOrder: finalizado");
       setIsRatingLoading(false);
       setSelectedOrderId(null);
       setAdditionalProducts([]);
@@ -170,21 +170,21 @@ const Pedido = () => {
   };
 
   const handleUpdateTime = async () => {
-    console.log('[Pedido] handleUpdateTime: inicio', { newTime, orderId });
+    console.log("[Pedido] handleUpdateTime: inicio", { newTime, orderId });
     if (!newTime) {
-      setTimeError('Por favor selecciona una hora válida');
+      setTimeError("Por favor selecciona una hora válida");
       return;
     }
 
     setIsUpdatingTime(true);
-    setTimeError('');
+    setTimeError("");
 
     try {
       const firestore = getFirestore();
 
       // Construir la fecha/hora completa para el nuevo horario
       const now = new Date();
-      const [hours, minutes] = newTime.split(':').map(Number);
+      const [hours, minutes] = newTime.split(":").map(Number);
       const newDate = new Date(
         now.getFullYear(),
         now.getMonth(),
@@ -197,7 +197,7 @@ const Pedido = () => {
 
       // Restar minutos según método de entrega
       const currentOrder = pedidosPagados.find((p) => p.id === orderId);
-      const isDelivery = currentOrder?.direccion !== '';
+      const isDelivery = currentOrder?.direccion !== "";
       if (isDelivery) {
         newDate.setMinutes(newDate.getMinutes() - 30);
       } else {
@@ -207,18 +207,18 @@ const Pedido = () => {
       // Referencia al pedido individual (igual que listenOrdersByPhone)
       const pedidoDocRef = doc(
         firestore,
-        'absoluteClientes',
+        "absoluteClientes",
         empresaId,
-        'sucursales',
+        "sucursales",
         sucursalId,
-        'pedidos',
+        "pedidos",
         orderId
       );
 
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe.');
+          throw new Error("El pedido no existe.");
         }
 
         // Guardar el nuevo horario como timestamp
@@ -230,12 +230,12 @@ const Pedido = () => {
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('[Pedido] handleUpdateTime: error', error);
+      console.error("[Pedido] handleUpdateTime: error", error);
       setTimeError(
-        'Hubo un problema al actualizar la hora. Por favor intenta nuevamente.'
+        "Hubo un problema al actualizar la hora. Por favor intenta nuevamente."
       );
     } finally {
-      console.log('[Pedido] handleUpdateTime: finalizado');
+      console.log("[Pedido] handleUpdateTime: finalizado");
       setIsUpdatingTime(false);
     }
   };
@@ -256,8 +256,8 @@ const Pedido = () => {
 
       setMessage(
         tieneVouchers
-          ? 'El pedido fue cancelado exitosamente, tus vouchers están disponibles para que los canjees en tu próximo pedido!'
-          : 'El pedido fue cancelado exitosamente.'
+          ? "El pedido fue cancelado exitosamente, tus vouchers están disponibles para que los canjees en tu próximo pedido!"
+          : "El pedido fue cancelado exitosamente."
       );
 
       if (orderId) {
@@ -272,7 +272,7 @@ const Pedido = () => {
 
       setIsModalOpen(false);
     } catch (err) {
-      setError('Hubo un problema al cancelar el pedido. Inténtalo de nuevo.');
+      setError("Hubo un problema al cancelar el pedido. Inténtalo de nuevo.");
     } finally {
       setIsDeleting(false);
       setSelectedOrderId(null);
@@ -285,36 +285,36 @@ const Pedido = () => {
   };
 
   const handleSupportClick = () => {
-    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
+    const phoneNumber = clientConfig?.logistics?.phone || "543584306832";
     const message =
-      'Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.';
+      "Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleTransferenciaClick = async (total, telefono) => {
-    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
-    const alias = clientConfig?.logistics?.alias || 'AbsoluteHSAS.mp';
+    const phoneNumber = clientConfig?.logistics?.phone || "543584306832";
+    const alias = clientConfig?.logistics?.alias || "AbsoluteHSAS.mp";
     const nameAlias =
-      clientConfig?.logistics?.name || 'Absolute Holdings S.A.S.';
+      clientConfig?.logistics?.name || "Absolute Holdings S.A.S.";
     const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: ${alias} a nombre de ${nameAlias}`;
 
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
     )}`;
 
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleCompensationClick = (message) => {
-    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
+    const phoneNumber = clientConfig?.logistics?.phone || "543584306832";
     const whatsappMessage = `Hola! Acepte mi pedido con esta condicion: ${message}, cual es mi compensacion?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       whatsappMessage
     )}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(whatsappUrl, "_blank");
   };
 
   const handleEditAddress = (orderId) => {
@@ -324,7 +324,7 @@ const Pedido = () => {
 
   const handleAddressUpdateSuccess = (newAddress) => {
     // Opcional: Puedes mostrar un mensaje de éxito aquí
-    setMessage('¡Dirección actualizada exitosamente!');
+    setMessage("¡Dirección actualizada exitosamente!");
     setTimeout(() => setMessage(null), 3000);
   };
 
@@ -343,7 +343,7 @@ const Pedido = () => {
         sucursalId,
         orderId,
         (pedido) => {
-          if (pedido && typeof pedido.direccion === 'string') {
+          if (pedido && typeof pedido.direccion === "string") {
             setOrder(pedido);
 
             if (!pedido.entregado || !pedido.rating) {
@@ -383,7 +383,7 @@ const Pedido = () => {
   }, [phoneNumber]);
 
   useEffect(() => {
-    console.log('[Pedido] useEffect: updateSize');
+    console.log("[Pedido] useEffect: updateSize");
     const updateSize = () => {
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth;
@@ -393,31 +393,31 @@ const Pedido = () => {
     };
 
     updateSize();
-    window.addEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize);
     return () => {
-      console.log('[Pedido] useEffect cleanup: updateSize');
-      window.removeEventListener('resize', updateSize);
+      console.log("[Pedido] useEffect cleanup: updateSize");
+      window.removeEventListener("resize", updateSize);
     };
   }, []);
 
   const handleEditTime = (orderId) => {
-    console.log('[Pedido] handleEditTime:', orderId);
+    console.log("[Pedido] handleEditTime:", orderId);
     setEditingOrderId(orderId);
     setIsEditTimeModalOpen(true);
   };
 
   const handleTimeUpdateSuccess = (newTime) => {
-    console.log('[Pedido] handleTimeUpdateSuccess:', newTime);
-    setMessage('¡Hora actualizada exitosamente!');
+    console.log("[Pedido] handleTimeUpdateSuccess:", newTime);
+    setMessage("¡Hora actualizada exitosamente!");
     setTimeout(() => setMessage(null), 3000);
   };
 
   return (
     <div
       ref={containerRef}
-      className="bg-gray-50  relative flex justify-between flex-col h-screen"
+      className="bg-gray-150  relative flex justify-between flex-col h-screen"
     >
-      {console.log('[Pedido] Render: pedidosPagados', pedidosPagados)}
+      {console.log("[Pedido] Render: pedidosPagados", pedidosPagados)}
       <style>
         {`
                     @keyframes loadingBar {
@@ -454,7 +454,7 @@ const Pedido = () => {
             src={isologo}
             className="w-2/3"
             alt="Logo"
-            style={{ filter: 'invert(1)' }}
+            style={{ filter: "invert(1)" }}
           />
         </div>
 
@@ -486,7 +486,7 @@ const Pedido = () => {
                   return (
                     <div key={currentOrder.id} className="px-4 w-full">
                       <p className="text-red-600 font-medium mb-4 text-center">
-                        {clientData?.name || 'El local'} rechazó tu pedido por
+                        {clientData?.name || "El local"} rechazó tu pedido por
                         falta de stock.
                       </p>
                     </div>
@@ -497,9 +497,9 @@ const Pedido = () => {
                 const retrasado = isDelayed(currentOrder);
                 const delayMinutes = getDelayTime(currentOrder);
                 const showSupportButton =
-                  retrasado && currentOrder.cadete === 'NO ASIGNADO';
+                  retrasado && currentOrder.cadete === "NO ASIGNADO";
                 const showCadeteCallButton =
-                  retrasado && currentOrder.cadete !== 'NO ASIGNADO';
+                  retrasado && currentOrder.cadete !== "NO ASIGNADO";
                 const showCancelButton =
                   !currentOrder.elaborado && !currentOrder.paid;
                 const hasButtons =
@@ -509,8 +509,8 @@ const Pedido = () => {
                   <div
                     key={currentOrder.id}
                     className={`flex items-center flex-col w-full ${
-                      index !== 0 ? 'mt-4' : ''
-                    } ${index === pedidosPagados.length - 1 ? 'pb-4' : ''}`}
+                      index !== 0 ? "mt-4" : ""
+                    } ${index === pedidosPagados.length - 1 ? "pb-4" : ""}`}
                   >
                     {pedidosPagados.length > 1 && (
                       <h2 className="text-2xl w-full px-4 text-left font-bold font-coolvetica mb-10">
@@ -521,7 +521,7 @@ const Pedido = () => {
                     <div className="flex flex-col px-4 w-full">
                       {currentOrder.aceptado && (
                         <p className="text-green-600 font-medium mb-4 text-center">
-                          ¡{clientData?.name || 'El local'} aceptó tu pedido!
+                          ¡{clientData?.name || "El local"} aceptó tu pedido!
                         </p>
                       )}
 
@@ -540,7 +540,7 @@ const Pedido = () => {
                                 <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
                               </svg>
                             </>
-                          ) : currentOrder.direccion === '' ? (
+                          ) : currentOrder.direccion === "" ? (
                             <>
                               {(() => {
                                 const fechaHoraPedido = getOrderCreatedDate(
@@ -556,15 +556,15 @@ const Pedido = () => {
                                     <div
                                       className={`w-1/2 h-2.5 rounded-full ${
                                         diferenciaEnMinutos <= 20
-                                          ? 'animated-loading'
-                                          : 'bg-black'
+                                          ? "animated-loading"
+                                          : "bg-black"
                                       }`}
                                     ></div>
                                     <div
                                       className={`w-1/2 h-2.5 rounded-full ${
                                         diferenciaEnMinutos > 20
-                                          ? 'animated-loading'
-                                          : 'bg-gray-50  border-opacity-20 border-black border-1 border'
+                                          ? "animated-loading"
+                                          : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                       }`}
                                     ></div>
                                   </>
@@ -576,8 +576,8 @@ const Pedido = () => {
                               <div
                                 className={`w-1/4 h-2.5 rounded-full ${
                                   !currentOrder.elaborado
-                                    ? 'animated-loading'
-                                    : 'bg-black'
+                                    ? "animated-loading"
+                                    : "bg-black"
                                 }`}
                               ></div>
                               <div
@@ -589,8 +589,8 @@ const Pedido = () => {
                                     );
                                     const minutosElaborado = parseInt(
                                       currentOrder.tiempoElaborado?.split(
-                                        ':'
-                                      )[1] || '0',
+                                        ":"
+                                      )[1] || "0",
                                       10
                                     );
                                     const fechaElaboracion = new Date(
@@ -604,17 +604,17 @@ const Pedido = () => {
                                       (new Date() - fechaElaboracion) / 60000;
                                     return diffMinutes <= 15;
                                   })()
-                                    ? 'animated-loading'
+                                    ? "animated-loading"
                                     : currentOrder.elaborado
-                                    ? 'bg-black'
-                                    : 'bg-gray-50  border-opacity-20 border-black border-1 border'
+                                    ? "bg-black"
+                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                 }`}
                               />
                               <div
                                 className={`w-1/2 h-2.5 rounded-full ${
                                   currentOrder.enCamino
-                                    ? 'animated-loading'
-                                    : 'bg-gray-50  border-opacity-20 border-black border-1 border'
+                                    ? "animated-loading"
+                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
                                 }`}
                               />
                             </>
@@ -622,24 +622,24 @@ const Pedido = () => {
                         </div>
                         <p className="text-black font-coolvetica font-bold text-left mt-2">
                           {currentOrder.pendingOfBeingAccepted
-                            ? 'Tu pedido está pendiente de aprobación...'
-                            : currentOrder.direccion === ''
+                            ? "Tu pedido está pendiente de aprobación..."
+                            : currentOrder.direccion === ""
                             ? diferenciaEnMinutos <= 20
                               ? `${
-                                  clientData?.name || 'El local'
+                                  clientData?.name || "El local"
                                 } está preparando tu pedido...`
-                              : 'Esperando que retires tu pedido...'
+                              : "Esperando que retires tu pedido..."
                             : !currentOrder.elaborado
                             ? `${
-                                clientData?.name || 'El local'
+                                clientData?.name || "El local"
                               } está preparando tu pedido...`
                             : (() => {
                                 const fechaHoraPedido = getOrderCreatedDate(
                                   currentOrder.createdAt
                                 );
                                 const minutosElaborado = parseInt(
-                                  currentOrder.tiempoElaborado?.split(':')[1] ||
-                                    '0',
+                                  currentOrder.tiempoElaborado?.split(":")[1] ||
+                                    "0",
                                   10
                                 );
                                 const fechaElaboracion = sumarMinutos(
@@ -652,15 +652,15 @@ const Pedido = () => {
 
                                 return diffMinutes <= 15
                                   ? `Tu cadete está llegando a ${
-                                      clientData?.name || 'al local'
+                                      clientData?.name || "al local"
                                     }...`
-                                  : 'En camino... Atención, te va a llamar tu cadete.';
+                                  : "En camino... Atención, te va a llamar tu cadete.";
                               })()}
                         </p>
                       </div>
                       <div className="flex flex-col text-left gap-2">
                         <div className="flex flex-row gap-2 items-center">
-                          {currentOrder.direccion === '' ? (
+                          {currentOrder.direccion === "" ? (
                             <img
                               src={clientData.logo}
                               className="h-6 brightness-0"
@@ -681,16 +681,16 @@ const Pedido = () => {
                             className="text-black font-coolvetica font-medium cursor-pointer flex-1"
                             onClick={() => setShowFullAddress(!showFullAddress)}
                           >
-                            {currentOrder.direccion === '' ? (
-                              'Retirar por Buenos Aires 618'
+                            {currentOrder.direccion === "" ? (
+                              "Retirar por Buenos Aires 618"
                             ) : (
                               <>
-                                Destino a{' '}
+                                Destino a{" "}
                                 {showFullAddress
                                   ? currentOrder.direccion
                                   : (currentOrder.direccion
-                                      ?.split(',')[0]
-                                      .trim() || 'No disponible') + '...'}
+                                      ?.split(",")[0]
+                                      .trim() || "No disponible") + "..."}
                               </>
                             )}
                           </p>
@@ -713,7 +713,7 @@ const Pedido = () => {
                             </svg>
 
                             <p className="text-black font-coolvetica font-medium">
-                              ${currentOrder.total || '0.00'}
+                              ${currentOrder.total || "0.00"}
                             </p>
                           </div>
                         </div>
@@ -721,7 +721,7 @@ const Pedido = () => {
                     </div>
                     {/* botones */}
                     <div
-                      className={`w-full px-4 ${hasButtons ? 'mt-11' : 'mt-4'}`}
+                      className={`w-full px-4 ${hasButtons ? "mt-11" : "mt-4"}`}
                     >
                       {/* condicion*/}
                       {currentOrder.message && (
@@ -813,8 +813,8 @@ const Pedido = () => {
                           onClick={() => handleCancelClick(currentOrder.id)}
                           className={`${
                             isDeleting || currentOrder.canceled
-                              ? 'opacity-50 cursor-not-allowed'
-                              : 'cursor-pointer'
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer"
                           } bg-gray-300 w-full text-red-500 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl mt-2 font-bold`}
                           disabled={isDeleting || currentOrder.canceled}
                         >
@@ -832,8 +832,8 @@ const Pedido = () => {
                               />
                             </svg>
                             {currentOrder.canceled
-                              ? 'Pedido cancelado'
-                              : 'Cancelar pedido'}
+                              ? "Pedido cancelado"
+                              : "Cancelar pedido"}
                           </div>
                         </div>
                       )}
@@ -899,7 +899,7 @@ const Pedido = () => {
           isEditAddressModal={true}
           orderId={editingOrderId}
           currentAddress={
-            pedidosPagados.find((p) => p.id === editingOrderId)?.direccion || ''
+            pedidosPagados.find((p) => p.id === editingOrderId)?.direccion || ""
           }
           onAddressSuccess={handleAddressUpdateSuccess}
         />
@@ -917,7 +917,7 @@ const Pedido = () => {
                 }
                 values={{
                   ...pedidosPagados.find((p) => p.id === editingOrderId),
-                  paymentMethod: 'mercadopago',
+                  paymentMethod: "mercadopago",
                   phone: pedidosPagados.find((p) => p.id === editingOrderId)
                     ?.telefono,
                   address: pedidosPagados.find((p) => p.id === editingOrderId)
@@ -925,8 +925,8 @@ const Pedido = () => {
                   deliveryMethod: pedidosPagados.find(
                     (p) => p.id === editingOrderId
                   )?.direccion
-                    ? 'delivery'
-                    : 'takeaway',
+                    ? "delivery"
+                    : "takeaway",
                   references: pedidosPagados.find(
                     (p) => p.id === editingOrderId
                   )?.referencias,
@@ -941,7 +941,7 @@ const Pedido = () => {
                 }
                 mapUrl={
                   pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.ubicacion || ''
+                    ?.ubicacion || ""
                 }
                 couponCodes={
                   pedidosPagados.find((p) => p.id === editingOrderId)
