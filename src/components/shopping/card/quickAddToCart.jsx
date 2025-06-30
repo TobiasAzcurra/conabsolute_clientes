@@ -22,6 +22,7 @@ const QuickAddToCart = ({
   currentOrder = null,
   calculatedPrice = null,
   disabled = false,
+  animateFrom = 'right',
 }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cartState);
@@ -72,8 +73,7 @@ const QuickAddToCart = ({
       dispatch(removeItem(itemIndex));
     } else if (qty >= 1) {
       const payload = {
-        name: product.name,
-        category: product.category,
+        ...product,
         quantity: qty,
       };
       if (cartItem) dispatch(updateItemQuantity(payload));
@@ -155,10 +155,14 @@ const QuickAddToCart = ({
             exit={{ scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }}
             transition={{ duration: 0.3 }}
             className={`absolute z-50 overflow-hidden rounded-3xl border-black border-2 bg-gray-50 flex items-center ${
-              displayAsFullButton ? '' : 'right-0'
+              displayAsFullButton
+                ? ''
+                : animateFrom === 'right'
+                ? 'right-0'
+                : 'left-0'
             }`}
             style={{
-              transformOrigin: displayAsFullButton ? 'center' : 'right',
+              transformOrigin: displayAsFullButton ? 'center' : animateFrom,
             }}
           >
             <div className="flex w-[105px] h-[35px]">
