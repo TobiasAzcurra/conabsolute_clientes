@@ -4,7 +4,6 @@ export const obtenerFechaActual = () => {
   const mes = String(fechaActual.getMonth() + 1).padStart(2, '0');
   const anio = fechaActual.getFullYear();
 
-  // Formatea la fecha como "DD/MM/AAAA"
   const fechaFormateada = `${dia}/${mes}/${anio}`;
 
   return fechaFormateada;

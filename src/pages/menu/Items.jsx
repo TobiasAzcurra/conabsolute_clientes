@@ -9,7 +9,13 @@ const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const Items = ({ img, name, currentOrder, isPedidoComponente = false }) => {
+const Items = ({
+  img,
+  name,
+  currentOrder,
+  isPedidoComponente = false,
+  handleItemClick,
+}) => {
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
 
@@ -28,7 +34,7 @@ const Items = ({ img, name, currentOrder, isPedidoComponente = false }) => {
     return () => unsubscribe();
   }, []);
 
-  const isCarrito = location.pathname === '/carrito';
+  const isCarrito = location.pathname.includes('/carrito');
   const isSelected = selectedItem === name;
 
   const borderStyle = isSelected
@@ -59,7 +65,7 @@ const Items = ({ img, name, currentOrder, isPedidoComponente = false }) => {
       <div
         className={`font-coolvetica text-center ${
           isCarrito || isPedidoComponente
-            ? 'flex flex-col items-center justify-between h-[93px]'
+            ? 'flex flex-col items-center justify-between h-[43px]'
             : 'h-[50px]'
         }`}
       >
@@ -102,7 +108,14 @@ const Items = ({ img, name, currentOrder, isPedidoComponente = false }) => {
   );
 
   if (isCarrito || isPedidoComponente) {
-    return <div className={className}>{content}</div>;
+    return (
+      <div
+        className={className + (handleItemClick ? ' cursor-pointer' : '')}
+        onClick={handleItemClick}
+      >
+        {content}
+      </div>
+    );
   } else {
     return (
       <Link
@@ -116,26 +129,3 @@ const Items = ({ img, name, currentOrder, isPedidoComponente = false }) => {
 };
 
 export default Items;
-
-// TO DO REVISAR
-// const hasUnavailableIngredients = () => {
-//     const ingredients = productIngredients[selectedItem.name] || []; // Cambiar name por product.name
-//     if (
-//       ingredients.length === 0 ||
-//       (ingredients.length === 1 && ingredients[0] === '')
-//     ) {
-//       return false;
-//     }
-//     return ingredients.some(
-//       (ingredient) => ingredient !== '' && itemsOut[ingredient] === false
-//     );
-//   };
-
-//   const adjustedPrice =
-//     Math.ceil((selectedItem?.price * priceFactor) / 100) * 100;
-
-//   // Cuando pasamos el producto a QuickAddToCart, incluimos el precio ajustado
-//   const adjustedProduct = {
-//     ...selectedItem,
-//     price: adjustedPrice,
-//   };

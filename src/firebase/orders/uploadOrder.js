@@ -8,42 +8,34 @@ import {
   where,
   updateDoc,
   addDoc,
+  serverTimestamp,
+  setDoc,
 } from 'firebase/firestore';
+import { app } from '../config/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { cleanPhoneNumber } from '../utils/phoneUtils';
-import { obtenerFechaActual } from '../utils/dateHelpers';
-import { useClient } from '../../contexts/ClientContext';
 
-export const UploadOrder = async (orderDetail) => {
-  const firestore = getFirestore();
-  const { slugEmpresa, slugSucursal } = useClient();
+const db = getFirestore(app);
+
+export const UploadOrder = async (empresaId, sucursalId, orderDetail) => {
   const pedidoId = uuidv4();
-  const fechaFormateada = obtenerFechaActual();
-  const [dia, mes, anio] = fechaFormateada.split('/');
   const pedidosCollectionRef = collection(
-    firestore,
+    db,
     'absoluteClientes',
-    slugEmpresa,
+    empresaId,
     'sucursales',
-    slugSucursal,
-    'pedidos',
-    anio,
-    mes
+    sucursalId,
+    'pedidos'
   );
-  const pedidoDocRef = doc(pedidosCollectionRef, dia);
-
+  const pedidoDocRef = doc(pedidosCollectionRef, pedidoId);
   try {
-    await runTransaction(firestore, async (transaction) => {
-      const docSnapshot = await transaction.get(pedidoDocRef);
-      const existingData = docSnapshot.exists() ? docSnapshot.data() : {};
-      const pedidosDelDia = existingData.pedidos || [];
-      pedidosDelDia.push({ ...orderDetail, id: pedidoId, cerca: false });
-      transaction.set(pedidoDocRef, {
-        ...existingData,
-        pedidos: pedidosDelDia,
-      });
+    await setDoc(pedidoDocRef, {
+      ...orderDetail,
+      id: pedidoId,
+      createdAt: serverTimestamp(),
+      enCamino: false,
     });
-    // console.log("✅ Pedido subido exitosamente con ID:", pedidoId);
+    console.log('✅ Pedido subido exitosamente con ID:', pedidoId);
     return pedidoId;
   } catch (error) {
     console.error('❌ Error al subir el pedido:', error);
@@ -97,48 +89,54 @@ export const ReadData = async () => {
   return fetchedData.flat();
 };
 
-export const addTelefonoFirebase = async (phoneNumber, fecha) => {
+export const addTelefonoCliente = async (
+  empresaId,
+  sucursalId,
+  phoneNumber,
+  fecha
+) => {
   const cleanPhone = cleanPhoneNumber(phoneNumber);
-  const firestore = getFirestore();
-  const collectionRef = collection(firestore, 'telefonos');
-  const q = query(collectionRef, where('telefono', '==', cleanPhone));
-  const querySnapshot = await getDocs(q);
-  const { slugEmpresa, slugSucursal } = useClient();
 
-  if (querySnapshot.empty) {
-    try {
-      const docRef = await addDoc(collectionRef, {
-        telefono: cleanPhone,
-        fecha: fecha,
+  const clienteDocRef = doc(
+    db,
+    'absoluteClientes',
+    empresaId,
+    'sucursales',
+    sucursalId,
+    'clientes',
+    cleanPhone
+  );
+
+  try {
+    const docSnap = await getDocs(
+      query(
+        collection(
+          db,
+          'absoluteClientes',
+          empresaId,
+          'sucursales',
+          sucursalId,
+          'clientes'
+        ),
+        where('telefono', '==', cleanPhone)
+      )
+    );
+
+    if (!docSnap.empty) {
+      await updateDoc(clienteDocRef, {
         lastOrder: fecha,
       });
-      // console.log(
-      // 	`Se agregó el número de teléfono ${cleanPhone} a Firebase con el ID: ${docRef.id}. Fecha: ${fecha}`
-      // );
-    } catch (e) {
-      console.error('Error al agregar el número de teléfono a Firebase:', e);
+      console.log(
+        `📲 Cliente ${cleanPhone} actualizado con lastOrder: ${fecha}`
+      );
+    } else {
+      await setDoc(clienteDocRef, {
+        telefono: cleanPhone,
+        lastOrder: fecha,
+      });
+      console.log(`✅ Cliente ${cleanPhone} creado en Firebase`);
     }
-  } else {
-    querySnapshot.forEach(async (documento) => {
-      try {
-        const docRef = doc(
-          firestore,
-          'absoluteClientes',
-          slugEmpresa,
-          'sucursales',
-          slugSucursal,
-          'telefonos',
-          documento.id
-        );
-        await updateDoc(docRef, {
-          lastOrder: fecha,
-        });
-        // console.log(
-        // 	`El número de teléfono ${cleanPhone} ya existe en la base de datos. Actualizado lastOrder a: ${fecha}`
-        // );
-      } catch (e) {
-        console.error('Error al actualizar el campo lastOrder en Firebase:', e);
-      }
-    });
+  } catch (error) {
+    console.error('❌ Error al agregar o actualizar cliente:', error);
   }
 };

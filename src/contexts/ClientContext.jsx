@@ -1,17 +1,20 @@
 import React, { createContext, useState, useContext, useMemo } from 'react';
 
-const ClientContext = createContext();
+export const ClientContext = createContext();
 
 export const ClientProvider = ({ children }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [clientData, setClientData] = useState(null);
-  const [clientAssets, setClientAssets] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [productsByCategory, setProductsByCategory] = useState({});
-  const [categories, setCategories] = useState([]);
-  const [productsSorted, setProductsSorted] = useState([]);
-  const [slugEmpresa, setSlugEmpresa] = useState(null);
-  const [slugSucursal, setSlugSucursal] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false); // Indica si los datos están cargados
+  const [clientData, setClientData] = useState(null); // Info general del cliente
+  const [clientAssets, setClientAssets] = useState(null); // Recursos gráficos
+  const [clientConfig, setClientConfig] = useState(null);
+  const [products, setProducts] = useState([]); // Todos los productos
+  const [productsByCategory, setProductsByCategory] = useState({}); // Productos por categoría
+  const [categories, setCategories] = useState([]); // Categorías
+  const [productsSorted, setProductsSorted] = useState([]); // Productos ordenados
+  const [slugEmpresa, setSlugEmpresa] = useState(null); // Slug de la empresa
+  const [slugSucursal, setSlugSucursal] = useState(null); // Slug de la sucursal
+  const [empresaId, setEmpresaId] = useState(null); // ID de la empresa
+  const [sucursalId, setSucursalId] = useState(null); // ID de la sucursal
 
   const value = useMemo(
     () => ({
@@ -21,6 +24,8 @@ export const ClientProvider = ({ children }) => {
       setClientData,
       clientAssets,
       setClientAssets,
+      clientConfig,
+      setClientConfig,
       products,
       setProducts,
       productsByCategory,
@@ -33,17 +38,24 @@ export const ClientProvider = ({ children }) => {
       setSlugEmpresa,
       slugSucursal,
       setSlugSucursal,
+      empresaId,
+      setEmpresaId,
+      sucursalId,
+      setSucursalId,
     }),
     [
       isLoaded,
       clientData,
       clientAssets,
+      clientConfig,
       products,
       productsByCategory,
       categories,
       productsSorted,
       slugEmpresa,
       slugSucursal,
+      empresaId,
+      sucursalId,
     ]
   );
 
@@ -52,4 +64,10 @@ export const ClientProvider = ({ children }) => {
   );
 };
 
-export const useClient = () => useContext(ClientContext);
+export const useClient = () => {
+  const context = useContext(ClientContext);
+  if (!context) {
+    throw new Error('useClient debe usarse dentro de un ClientProvider');
+  }
+  return context;
+};

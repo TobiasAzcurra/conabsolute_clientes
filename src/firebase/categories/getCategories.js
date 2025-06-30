@@ -13,7 +13,6 @@ export const getCategoriesByClient = async (empresa, sucursal) => {
     'categorias'
   );
   const snapshot = await getDocs(ref);
-  console.log('Categories fetched:', snapshot.docs.length);
   const categories = snapshot.docs
     .map((doc) => ({ id: doc.id, ...doc.data() }))
     .filter((cat) => cat.active && cat.name);

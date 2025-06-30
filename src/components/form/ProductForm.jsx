@@ -27,14 +27,12 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
     setVariants([
       ...variants,
       {
-        color: '',
-        size: '',
+        name: '',
+        linkedTo: '',
         price: '',
         stock: '',
-        img: [],
-        files: [],
-        labradoName: '',
-        labradoFile: null,
+        productImage: [],
+        attributeImage: null,
       },
     ]);
   };
@@ -45,10 +43,9 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
     setVariants(updated);
   };
 
-  const handleVariantImageChange = async (e, index) => {
+  const handleVariantProductImageChange = async (e, index) => {
     const files = Array.from(e.target.files);
     const processed = [];
-
     for (const file of files) {
       if (
         file.type === 'image/heic' ||
@@ -77,12 +74,17 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
         processed.push(file);
       }
     }
-
     const updated = [...variants];
-    updated[index].files = processed;
+    updated[index].productImage = processed;
     setVariants(updated);
   };
 
+  const handleVariantAttributeImageChange = (e, index) => {
+    const file = e.target.files[0] || null;
+    const updated = [...variants];
+    updated[index].attributeImage = file;
+    setVariants(updated);
+  };
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -146,8 +148,8 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
 
       const processedVariants = [];
       for (const variant of variants) {
-        const urls = [];
-        for (const file of variant.files || []) {
+        const productImageUrls = [];
+        for (const file of variant.productImage || []) {
           const storageRef = ref(
             storage,
             `conabsoluteClientes/${empresa}/sucursales/${sucursal}/productos/${Date.now()}_${
@@ -156,41 +158,37 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
           );
           await uploadBytes(storageRef, file);
           const url = await getDownloadURL(storageRef);
-          urls.push(url);
+          productImageUrls.push(url);
         }
 
-        let labradoImageUrl = '';
-        if (variant.labradoFile) {
-          const labradoRef = ref(
+        let attributeImageUrl = '';
+        if (variant.attributeImage) {
+          const attrRef = ref(
             storage,
-            `conabsoluteClientes/${empresa}/sucursales/${sucursal}/productos/labrados/${Date.now()}_${
-              variant.labradoFile.name
+            `conabsoluteClientes/${empresa}/sucursales/${sucursal}/productos/attributes/${Date.now()}_${
+              variant.attributeImage.name
             }`
           );
-          await uploadBytes(labradoRef, variant.labradoFile);
-          labradoImageUrl = await getDownloadURL(labradoRef);
+          await uploadBytes(attrRef, variant.attributeImage);
+          attributeImageUrl = await getDownloadURL(attrRef);
         }
 
+        const parsedPrice = Number(variant.price);
+        const parsedStock = Number(variant.stock);
+
         const variantData = {
-          images: urls,
+          name: variant.name,
+          linkedTo: variant.linkedTo,
+          productImage: productImageUrls,
+          price: !isNaN(parsedPrice) ? parsedPrice : Number(formData.price),
         };
 
-        if (variant.color) variantData.color = variant.color;
-        if (variant.size) variantData.size = variant.size;
+        if (attributeImageUrl) {
+          variantData.attributeImage = [attributeImageUrl];
+        }
 
-        const parsedPrice = Number(variant.price);
-        variantData.price = !isNaN(parsedPrice)
-          ? parsedPrice
-          : Number(formData.price);
-
-        const parsedStock = Number(variant.stock);
-        if (!isNaN(parsedStock)) variantData.stock = parsedStock;
-
-        if (variant.labradoName) {
-          variantData.labrado = {
-            name: variant.labradoName,
-            img: labradoImageUrl || '',
-          };
+        if (!isNaN(parsedStock)) {
+          variantData.stock = parsedStock;
         }
 
         processedVariants.push(variantData);
@@ -362,19 +360,19 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
           <div key={index} className="border p-3 rounded mb-3 space-y-2">
             <input
               type="text"
-              placeholder="Color"
-              value={variant.color}
+              placeholder="Nombre de la variante (ej: Azul)"
+              value={variant.name}
               onChange={(e) =>
-                handleVariantChange(index, 'color', e.target.value)
+                handleVariantChange(index, 'name', e.target.value)
               }
               className="w-full border p-2 rounded"
             />
             <input
               type="text"
-              placeholder="Tamaño (opcional)"
-              value={variant.size}
+              placeholder="Tipo de atributo (ej: Color)"
+              value={variant.linkedTo}
               onChange={(e) =>
-                handleVariantChange(index, 'size', e.target.value)
+                handleVariantChange(index, 'linkedTo', e.target.value)
               }
               className="w-full border p-2 rounded"
             />
@@ -396,28 +394,23 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
               }
               className="w-full border p-2 rounded"
             />
-            <input
-              type="text"
-              placeholder="Nombre del labrado (opcional)"
-              value={variant.labradoName}
-              onChange={(e) =>
-                handleVariantChange(index, 'labradoName', e.target.value)
-              }
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                handleVariantChange(index, 'labradoFile', e.target.files[0])
-              }
-              className="w-full border p-2 rounded"
-            />
+            <label className="block mt-2">
+              Imágenes del producto (puede subir varias):
+            </label>
             <input
               type="file"
               multiple
               accept="image/*"
-              onChange={(e) => handleVariantImageChange(e, index)}
+              onChange={(e) => handleVariantProductImageChange(e, index)}
+              className="w-full border p-2 rounded"
+            />
+            <label className="block mt-2">
+              Imagen del atributo (opcional):
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleVariantAttributeImageChange(e, index)}
               className="w-full border p-2 rounded"
             />
           </div>

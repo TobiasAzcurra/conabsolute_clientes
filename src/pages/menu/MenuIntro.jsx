@@ -6,20 +6,26 @@ import { getClientAssets } from '../../firebase/clients/getClientAssets';
 import { getCategoriesByClient } from '../../firebase/categories/getCategories';
 import { getProductsByClient } from '../../firebase/products/getProductsByClient';
 import { getProductsByCategoryPosition } from '../../firebase/products/getProductsByCategory';
+import { getClientIds } from '../../firebase/clients/getClientIds';
+import { getClientConfig } from '../../firebase/clients/getClientConfig';
 
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     setIsLoaded,
     setClientData,
     setClientAssets,
+    setClientConfig,
     setProducts,
     setProductsByCategory,
     setCategories,
     setProductsSorted,
     setSlugEmpresa,
     setSlugSucursal,
+    setEmpresaId,
+    setSucursalId,
   } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
@@ -29,32 +35,62 @@ const MenuIntro = () => {
     setSlugEmpresa(slugEmpresa);
     setSlugSucursal(slugSucursal);
 
-    Promise.all([
-      getClientData(slugEmpresa, slugSucursal),
-      getClientAssets(slugEmpresa, slugSucursal),
-      getCategoriesByClient(slugEmpresa, slugSucursal),
-      getProductsByClient(slugEmpresa, slugSucursal),
-      getProductsByCategoryPosition(slugEmpresa, slugSucursal),
-    ])
-      .then(([data, assets, categories, productsData, sortedProducts]) => {
-        setClientData(data);
+    const fetchData = async () => {
+      try {
+        const ids = await getClientIds(slugEmpresa, slugSucursal);
+        if (!ids) {
+          console.error('❌ Empresa o sucursal no encontrada');
+          return;
+        }
+
+        const { empresaId, sucursalId } = ids;
+
+        setEmpresaId(empresaId);
+        setSucursalId(sucursalId);
+
+        const assets = await getClientAssets(empresaId, sucursalId);
         setClientAssets(assets);
         setIntroGif(assets?.loading || null);
+
+        const [data, config, categories, productsData, sortedProducts] =
+          await Promise.all([
+            getClientData(empresaId, sucursalId),
+            getClientConfig(empresaId, sucursalId),
+            getCategoriesByClient(empresaId, sucursalId),
+            getProductsByClient(empresaId, sucursalId),
+            getProductsByCategoryPosition(empresaId, sucursalId),
+          ]);
+
+        setClientData(data);
+        setClientConfig(config);
         setCategories(categories);
         setProducts(productsData.todos);
         setProductsByCategory(productsData.porCategoria);
         setProductsSorted(sortedProducts);
 
+        console.log('clientData:', data);
+        console.log('clientConfig:', config);
+
+        const normalizePath = (path) =>
+          path.endsWith('/') ? path.slice(0, -1) : path;
+
         setTimeout(() => {
           setIsLoaded(true);
-          navigate(`menu/${categories?.[0]?.id || 'default'}`, {
-            replace: true,
-          });
+          const rootPath = `/${slugEmpresa}/${slugSucursal}`;
+          if (normalizePath(location.pathname) === rootPath) {
+            navigate(`menu/${categories?.[0]?.id || 'default'}`, {
+              replace: true,
+            });
+          } else {
+            navigate(location.pathname, { replace: true });
+          }
         }, 3000);
-      })
-      .catch((e) => {
-        console.error('❌ Error cargando intro o data:', e);
-      });
+      } catch (error) {
+        console.error('❌ Error cargando datos:', error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (

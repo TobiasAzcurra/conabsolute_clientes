@@ -14,7 +14,7 @@ import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
-  const { slugEmpresa, slugSucursal } = useClient();
+  const { slugEmpresa, slugSucursal, clientConfig } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [selectedColor, setSelectedColor] = useState(null);
@@ -34,19 +34,12 @@ const Card = ({ data, path }) => {
     id,
     name = 'Producto sin nombre',
     description = '',
-    price,
     category,
     variants,
-    img,
-    image,
   } = data;
 
-  useEffect(() => {
-    console.log('Card data:', data);
-  }, [data]);
-
   const images = useMemo(() => {
-    const raw = data?.img || data?.image || data?.images || img || [];
+    const raw = data?.img || data?.image || data?.images || [];
 
     if (Array.isArray(raw)) {
       return raw;
@@ -54,26 +47,21 @@ const Card = ({ data, path }) => {
 
     const resolved = getImageSrc(raw);
     return [resolved];
-  }, [data, img]);
+  }, [data]);
 
   const variantStats = useMemo(() => {
     const stats = {};
 
     for (const variant of variants || []) {
-      Object.entries(variant).forEach(([key, value]) => {
-        if (!value) return;
+      const key = variant.linkedTo;
+      const value = variant.name;
+      if (!key || !value) continue;
 
-        // Si es un objeto (como labrado: { name: "X" }), intentamos acceder a su .name
-        const stringValue =
-          typeof value === 'object' && value !== null
-            ? value.name?.toLowerCase?.()
-            : String(value).toLowerCase();
+      const stringKey = String(key).toLowerCase();
+      const stringValue = String(value).toLowerCase();
 
-        if (!stringValue) return;
-
-        if (!stats[key]) stats[key] = new Set();
-        stats[key].add(stringValue);
-      });
+      if (!stats[stringKey]) stats[stringKey] = new Set();
+      stats[stringKey].add(stringValue);
     }
 
     const result = {};
@@ -87,11 +75,14 @@ const Card = ({ data, path }) => {
   const visibleLabels = useMemo(() => {
     return Object.entries(variantStats)
       .filter(([, values]) => values.length > 0)
-      .map(([key, values]) => ({
-        key,
-        text: `${values.length} ${key}`,
-      }));
-  }, [variantStats]);
+      .map(([key, values]) => {
+        const translatedKey = clientConfig?.labels?.[key] || key;
+        return {
+          key,
+          text: `${values.length} ${translatedKey}`,
+        };
+      });
+  }, [variantStats, clientConfig]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
@@ -120,7 +111,7 @@ const Card = ({ data, path }) => {
     [data.variants]
   );
 
-  const basePrice = selectedVariant?.price || data.price || 0;
+  const basePrice = data.price || 0;
   const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
   const cuotaText = useMemo(() => {
@@ -161,10 +152,8 @@ const Card = ({ data, path }) => {
       setIsInViewport(isCentered);
     };
 
-    // Verificar inicialmente
     handleScroll();
 
-    // Agregar listener de scroll con throttling
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -225,7 +214,7 @@ const Card = ({ data, path }) => {
           <QuickAddToCart
             product={{
               name,
-              description,
+              description: data.cardDescription || description,
               price: adjustedPrice,
               img: currentImageSrc,
               path,
@@ -322,14 +311,8 @@ const Card = ({ data, path }) => {
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight mb-1">
+            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight ">
               {data.cardDescription}
-            </p>
-          )}
-
-          {description && (
-            <p className="text-center text-xs font-light text-opacity-30 text-black">
-              {description}
             </p>
           )}
           <div className="flex w-full mt-4 flex-col mb-6">
@@ -337,11 +320,10 @@ const Card = ({ data, path }) => {
               {currencyFormat(adjustedPrice)}
             </span>
             {(cuotaText || efectivoText) && (
-              <span className="font-light pr-12 text-xs text-green-500">
-                {cuotaText}
-                {cuotaText && efectivoText && ' - '}
-                {efectivoText}
-              </span>
+              <div className="font-light pr-12 text-xs text-green-500 flex flex-col items-start">
+                {cuotaText && <span>{cuotaText}</span>}
+                {efectivoText && <span>{efectivoText}</span>}
+              </div>
             )}
           </div>
         </div>

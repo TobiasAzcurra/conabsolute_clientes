@@ -1,149 +1,48 @@
-import { useSelector, useDispatch } from "react-redux";
-import { addOneItem, removeOneItem } from "../../../redux/cart/cartSlice";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import Items from "../../../pages/menu/Items";
-import box from "../../../assets/box.png";
-import fries from "../../../assets/fries.png";
-import { getProductsByClient } from "../../../firebase/products/getProductsByClient";
-import CartCard from "./CartCard";
-import carrusel from "../../../assets/carrusel3.jpg";
-import MovingRibbon from "../MovingRibbon";
-import FormCustom from "../../form";
-import LoadingPoints from "../../LoadingPoints";
-import { getProductsByCategoryPosition } from "../../../firebase/products/getProductsByCategory";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-
-export const items = {
-  mates: "mates",
-  termos: "termos",
-  bombillas: "bombillas",
-  yerbas: "yerbas",
-  canastas: "canastas",
-  // Mantener compatibilidad con productos legacy
-  burgers: "burgers",
-  papas: "papas",
-  bebidas: "drinks",
-};
+import { useSelector, useDispatch } from 'react-redux';
+import { addOneItem, removeOneItem } from '../../../redux/cart/cartSlice';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useClient } from '../../../contexts/ClientContext';
+import Items from '../../../pages/menu/Items';
+import CartCard from './CartCard';
+import carrusel from '../../../assets/carrusel3.jpg';
+import MovingRibbon from '../MovingRibbon';
+import FormCustom from '../../form';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import VideoSlider from '../detail/VideoSlider';
+import arrowIcon from '../../../assets/arrowIcon.png';
 
 const CartItems = () => {
   const { cart, total } = useSelector((state) => state.cartState);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const { slug } = useParams();
-
-  // Estados para productos de Firebase
-  const [allProducts, setAllProducts] = useState([]);
-  const [isLoadingCategoryProducts, setIsLoadingCategoryProducts] =
-    useState(true);
-
-  // Estados nuevos para prods
-  const [productsByCategoryPosition, setProductsByCategoryPosition] = useState(
-    []
-  );
-  const [isLoadingProductsByCategory, setIsLoadingProductsByCategory] =
-    useState(true);
-
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-
-  const deleteItem = (i) => {
-    // ... código de Swal.fire para eliminar ítems
-  };
-
-  const clearAll = () => {
-    // ... código de Swal.fire para vaciar el carrito
-  };
-
-  // Cargar productos de Firebase
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setIsLoadingProducts(true);
-        console.log("🛒 CartItems: Cargando productos desde Firebase...");
-
-        const productosData = await getProductsByClient();
-
-        // Normalizar productos para compatibilidad con el carrito
-        const normalizedProducts = productosData.todos.map((product) => ({
-          id: product.id,
-          name: product.data?.name || product.name || "Producto sin nombre",
-          description: product.data?.description || product.description || "",
-          price: product.data?.price || product.price || 0,
-          img: product.data?.img || product.img || "",
-          category: product.categoria || product.category || "default",
-          type: product.type || "regular",
-          // Mantener datos originales
-          data: product.data || product,
-          categoria: product.categoria,
-        }));
-
-        setAllProducts(normalizedProducts);
-
-        console.log("✅ CartItems: Productos cargados:", {
-          total: normalizedProducts.length,
-          porCategoria: {
-            mates: normalizedProducts.filter((p) => p.category === "mates")
-              .length,
-            termos: normalizedProducts.filter((p) => p.category === "termos")
-              .length,
-            bombillas: normalizedProducts.filter(
-              (p) => p.category === "bombillas"
-            ).length,
-            yerbas: normalizedProducts.filter((p) => p.category === "yerbas")
-              .length,
-            canastas: normalizedProducts.filter(
-              (p) => p.category === "canastas"
-            ).length,
-          },
-        });
-      } catch (error) {
-        console.error("❌ CartItems: Error al cargar productos:", error);
-        setAllProducts([]); // Fallback a array vacío
-      } finally {
-        setIsLoadingProducts(false);
-      }
-    };
-
-    loadProducts();
-  }, []);
+  const { products, productsSorted, slugEmpresa, slugSucursal, clientAssets } =
+    useClient();
+  const reels = clientAssets?.reels || [];
 
   useEffect(() => {
-    const loadProductsByCategoryPosition = async () => {
-      try {
-        setIsLoadingCategoryProducts(true);
-        const products = await getProductsByCategoryPosition(slug);
-        setProductsByCategoryPosition(products);
-      } catch (error) {
-        console.error(
-          "❌ Error al cargar productos por categoría con position:",
-          error
-        );
-        setProductsByCategoryPosition([]);
-      } finally {
-        setIsLoadingCategoryProducts(false);
-      }
-    };
+    console.log('🛒 Cart actualizado:', cart);
 
-    loadProductsByCategoryPosition();
-  }, []);
-
-  useEffect(() => {
-    // Verifica si el carrito está vacío y si estamos en la ruta "/carrito"
-    if (cart.length <= 0 && pathname === "/carrito") {
-      navigate("/menu");
+    if (cart.length > 0) {
+      console.log('✅ Productos añadidos al carrito:');
+      cart.forEach((item) => {
+        console.log(`- ${item.name} | Cantidad: ${item.quantity}`);
+      });
+    } else {
+      console.log('⚠️ Carrito vacío');
     }
-  }, [cart, navigate, pathname]);
+  }, [cart]);
 
-  // Desplazar al inicio cuando el componente se monta
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
+    if (cart.length <= 0 && pathname.includes('/carrito')) {
+      navigate(`/${slugEmpresa}/${slugSucursal}/menu`);
+    }
+  }, [cart.length, pathname, navigate, slugEmpresa, slugSucursal]);
 
-  useEffect(() => {}, [cart]);
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const decrementQuantity = (index, quantity) => {
     if (quantity > 1) {
@@ -155,56 +54,34 @@ const CartItems = () => {
     dispatch(addOneItem(index));
   };
 
-  // Función para obtener la imagen predeterminada basada en la categoría
-  const getDefaultImage = (product) => {
-    // Mapear categorías de Firebase a imágenes por defecto
-    const categoryImageMap = {
-      // Nuevas categorías de Firebase
-      mates: "/default-mate.png",
-      termos: "/default-termo.png",
-      bombillas: "/default-bombilla.png",
-      yerbas: "/default-yerba.png",
-      canastas: "/default-canasta.png",
-      // Categorías legacy
-      burger: box,
-      burgers: box,
-      papas: fries,
-      drinks: "/menu/coca.png",
-    };
-
-    const defaultImg =
-      categoryImageMap[product.category] || categoryImageMap[product.categoria];
-
-    if (defaultImg) {
-      console.log(
-        `🎭 Imagen por defecto para ${product.name} (${product.category}):`,
-        defaultImg
-      );
-      return defaultImg;
-    }
-
-    console.warn(
-      `⚠️ No hay imagen por defecto para categoría ${
-        product.category || product.categoria
-      }`
-    );
-    return "/default-product.png";
+  const deleteItem = (index) => {
+    dispatch(removeOneItem(index));
   };
 
-  // Filtrar productos que no están en el carrito
-  const availableProducts = allProducts.filter(
+  const availableProducts = products.filter(
     (product) => !cart.some((cartItem) => cartItem.name === product.name)
   );
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   return (
     <div className="flex flex-col font-coolvetica overflow-x-hidden">
       <div className="flex justify-center flex-col mt-8 items-center w-full">
+        <button
+          onClick={handleGoBack}
+          className="text-xs font-coolvetica flex flex-row gap-2 items-center justify-center opacity-50 hover:opacity-75 transition-opacity cursor-pointer"
+        >
+          <img src={arrowIcon} className="h-2 rotate-180" alt="" />
+          Volver
+        </button>
         <p className="text-2xl font-bold">Tu pedido</p>
         <div
           className="flex flex-col md:flex-row gap-2 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
           style={{
-            scrollBehavior: "smooth",
-            WebkitOverflowScrolling: "touch",
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           <div className="flex flex-col md:flex-row gap-2 md:w-max">
@@ -213,7 +90,6 @@ const CartItems = () => {
                 key={item.id || index}
                 item={item}
                 index={index}
-                getDefaultImage={getDefaultImage}
                 decrementQuantity={decrementQuantity}
                 incrementQuantity={incrementQuantity}
                 deleteItem={deleteItem}
@@ -229,24 +105,26 @@ const CartItems = () => {
         </p>
 
         <div className="w-full mb-4">
-          {isLoadingCategoryProducts ? (
-            <div className="flex justify-center items-center w-full h-20">
-              <LoadingPoints />
-            </div>
-          ) : productsByCategoryPosition.length > 0 ? (
+          {productsSorted.length > 0 ? (
             <div
               className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
               style={{
-                maxHeight: "220px",
-                paddingBottom: "1rem",
-                scrollBehavior: "smooth",
-                WebkitOverflowScrolling: "touch",
-                width: "100%",
+                maxHeight: '220px',
+                paddingBottom: '1rem',
+                scrollBehavior: 'smooth',
+                WebkitOverflowScrolling: 'touch',
+                width: '100%',
               }}
             >
-              <div className="flex gap-2" style={{ width: "max-content" }}>
-                {productsByCategoryPosition.map((product, index) => {
+              <div className="flex gap-2" style={{ width: 'max-content' }}>
+                {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
+
+                  const handleItemClick = () => {
+                    navigate(
+                      `/${slugEmpresa}/${slugSucursal}/menu/${product.category}/`
+                    );
+                  };
 
                   return (
                     <Items
@@ -254,7 +132,7 @@ const CartItems = () => {
                       selectedItem={product}
                       img={productImg}
                       name={product.name}
-                      handleItemClick={() => {}}
+                      handleItemClick={handleItemClick}
                       isCart={true}
                     />
                   );
@@ -273,9 +151,12 @@ const CartItems = () => {
 
       <FormCustom cart={cart} total={total} />
 
-      <div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
+      {/* <div className="flex justify-center flex-col mt-[-10px] items-center relative w-full">
         <MovingRibbon angle={0} />
-        <img src={carrusel} className="w-full mt-28 md:hidden" alt="" />
+        <img src={carrusel} className="w-full md:hidden" alt="" />
+      </div> */}
+      <div className="my-10">
+        <VideoSlider reels={reels} />
       </div>
 
       <style>
