@@ -8,6 +8,7 @@ import DetailCard from './components/shopping/detail';
 import CartItems from './components/shopping/cart';
 import NotFound from './components/NotFound.jsx';
 import SuccessPage from './pages/menu/SuccessPage.jsx';
+import Pedido from './pages/pedido/Pedido.jsx';
 
 const EmpresaRouter = () => {
   const { isLoaded } = useClient();
@@ -22,6 +23,7 @@ const EmpresaRouter = () => {
         <Route path="menu/:category/:id" element={<DetailCard />} />
         <Route path="carrito" element={<CartItems />} />
         <Route path="success/:orderId" element={<SuccessPage />} />
+        <Route path="pedido/:orderId" element={<Pedido />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ClientLayout>
