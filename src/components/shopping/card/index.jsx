@@ -265,7 +265,8 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
+        {/* loading */}
+        <div className="relative h-[160px]  overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
               <LoadingPoints />
@@ -294,8 +295,7 @@ const Card = ({ data, path }) => {
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
-
+          {/* indicador de variante */}
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
             {visibleLabels.map((label, index) => (
               <span
@@ -307,8 +307,9 @@ const Card = ({ data, path }) => {
             ))}
           </div>
 
+          {/* indicador de imagenes */}
           {isInViewport && (
-            <div className="absolute top-4 left-1/2 z-30 flex gap-1">
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
                 <div
                   key={index}
@@ -339,6 +340,7 @@ const Card = ({ data, path }) => {
           />
         </div>
 
+        {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
