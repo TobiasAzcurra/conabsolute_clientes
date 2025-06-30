@@ -56,20 +56,15 @@ const Card = ({ data, path }) => {
     const stats = {};
 
     for (const variant of variants || []) {
-      const attrs = variant.attributes || {};
-      Object.entries(attrs).forEach(([key, value]) => {
-        if (!value) return;
+      const key = variant.linkedTo;
+      const value = variant.name;
+      if (!key || !value) continue;
 
-        const stringValue =
-          typeof value === 'object' && value !== null
-            ? value.name?.toLowerCase?.()
-            : String(value).toLowerCase();
+      const stringKey = String(key).toLowerCase();
+      const stringValue = String(value).toLowerCase();
 
-        if (!stringValue) return;
-
-        if (!stats[key]) stats[key] = new Set();
-        stats[key].add(stringValue);
-      });
+      if (!stats[stringKey]) stats[stringKey] = new Set();
+      stats[stringKey].add(stringValue);
     }
 
     const result = {};
