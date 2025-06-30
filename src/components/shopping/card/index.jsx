@@ -352,7 +352,7 @@ const Card = ({ data, path }) => {
               {data.cardDescription}
             </p>
           )}
-          <div className="flex w-full mt-8 flex-col mb-4">
+          <div className="flex w-full mt-4 flex-col mb-4">
             <span className="font-bold text-4xl text-black">
               {currencyFormat(pricingInfo.mainPrice)}
             </span>
