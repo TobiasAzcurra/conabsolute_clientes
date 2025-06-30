@@ -1,8 +1,8 @@
-import { ErrorMessage, Field } from 'formik';
-import MyTextInput from './MyTextInput';
-import { MapDirection } from './MapDirection';
-import AppleErrorMessage from './AppleErrorMessage';
-import TimeSelector from './TimeSelector';
+import { ErrorMessage, Field } from "formik";
+import MyTextInput from "./MyTextInput";
+import { MapDirection } from "./MapDirection";
+import AppleErrorMessage from "./AppleErrorMessage";
+import TimeSelector from "./TimeSelector";
 
 const AddressInputs = ({
   values,
@@ -13,7 +13,7 @@ const AddressInputs = ({
 }) => {
   return (
     <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300 overflow-hidden">
-      {values.deliveryMethod === 'delivery' && (
+      {values.deliveryMethod === "delivery" && (
         <>
           {/* Mapa y dirección */}
           <MapDirection
@@ -132,7 +132,7 @@ const AddressInputs = ({
       </div>
 
       {/* Selector de hora: ¿Quieres reservar para más tarde? */}
-      {values.deliveryMethod === 'delivery' && (
+      {/* {values.deliveryMethod === 'delivery' && (
         <div className="border-t border-black border-opacity-20 px-3">
           <TimeSelector
             selectedHora={values.hora}
@@ -140,7 +140,7 @@ const AddressInputs = ({
             setFieldValue={setFieldValue}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };
