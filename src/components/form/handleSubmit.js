@@ -1,13 +1,10 @@
 import {
-  addTelefonoFirebase,
-  ReadData,
-  ReadMateriales,
+  addTelefonoCliente,
   UploadOrder,
 } from '../../firebase/orders/uploadOrder';
-import { canjearVoucherPedir } from '../../firebase/vouchers/validateVoucher';
 import {
-  calcularCostoHamburguesa,
   extractCoordinates,
+  obtenerHoraActual,
 } from '../../helpers/currencyFormat';
 import { obtenerFechaActual } from '../../firebase/utils/dateHelpers';
 import { cleanPhoneNumber } from '../../firebase/utils/phoneUtils';
@@ -20,108 +17,48 @@ const handleSubmit = async (
   mapUrl,
   couponCodes,
   descuento,
-  isPending = false,
+  isPending,
   message = '',
-  priceFactor = 1
+  priceFactor = 1,
+  empresaId,
+  sucursalId
 ) => {
   const coordinates = extractCoordinates(mapUrl);
-  const materialesData = await ReadMateriales();
-  const productsData = await ReadData();
-
-  const formattedData = productsData.map(({ data }) => ({
-    description: data.description || '',
-    img: data.img,
-    name: data.name,
-    price: data.price,
-    type: data.type,
-    ingredients: data.ingredients,
-    costo: calcularCostoHamburguesa(materialesData, data.ingredients),
-  }));
+  const direccion =
+    values.deliveryMethod === 'delivery'
+      ? values.address
+      : 'Retiro en sucursal';
 
   const phone = String(values.phone) || '';
 
-  const validacionCupones = await Promise.all(
-    couponCodes.map(async (cupon) => {
-      return await canjearVoucherPedir(cupon);
-    })
-  );
-
-  // console.log(validacionCupones);
-
   const orderDetail = {
     pendingOfBeingAccepted: isPending,
-    envio: values.deliveryMethod === 'delivery' ? envio : 0,
+    envio: envio || 0,
     envioExpress: values.envioExpress || 0,
     message: message,
     ...(priceFactor > 1 && { priceFactor }), // Solo incluir si es mayor a 1
     detallePedido: cart.map((item) => {
       const quantity = item.quantity !== undefined ? item.quantity : 0;
-
-      const productoSeleccionado = formattedData.find(
-        (producto) => producto.name === item.name
-      );
-
-      const toppingsSeleccionados = item.toppings || [];
-      let costoToppings = 0;
-
-      toppingsSeleccionados.forEach((topping) => {
-        const materialTopping = materialesData.find(
-          (material) =>
-            material.nombre.toLowerCase() === topping.name.toLowerCase()
-        );
-
-        if (materialTopping) {
-          costoToppings += materialTopping.costo;
-        }
-      });
-
-      const costoBurger = productoSeleccionado
-        ? (productoSeleccionado.costo + costoToppings) * quantity
-        : 0;
-
       return {
-        burger: item.name,
-        toppings: item.toppings.map((topping) => topping.name),
-        quantity: item.quantity,
-        priceBurger: item.price,
-        priceToppings: item.toppings.reduce(
-          (total, topping) => total + (topping.price || 0),
-          0
-        ),
+        name: item.name,
+        quantity,
+        price: item.price,
         subTotal: item.price * item.quantity,
-        costoBurger,
       };
     }),
     subTotal: cart.reduce(
-      (total, item) =>
-        total +
-        item.price * item.quantity +
-        item.toppings.reduce(
-          (toppingTotal, topping) => toppingTotal + (topping.price || 0),
-          0
-        ) *
-          item.quantity,
+      (total, item) => total + item.price * item.quantity,
       0
     ),
     total:
-      cart.reduce(
-        (total, item) =>
-          total +
-          item.price * item.quantity +
-          item.toppings.reduce(
-            (toppingTotal, topping) => toppingTotal + (topping.price || 0),
-            0
-          ) *
-            item.quantity,
-        0
-      ) -
+      cart.reduce((total, item) => total + item.price * item.quantity, 0) -
       descuento +
       (values.deliveryMethod === 'delivery' ? envio : 0) +
       (values.envioExpress || 0),
     fecha: obtenerFechaActual(),
     aclaraciones: values.aclaraciones || '',
     metodoPago: values.paymentMethod,
-    direccion: values.address,
+    direccion: direccion,
     telefono: cleanPhoneNumber(phone),
     hora: values.hora || obtenerHoraActual(),
     cerca: false,
@@ -135,10 +72,19 @@ const handleSubmit = async (
     deliveryMethod: values.deliveryMethod,
   };
 
+  console.log('orderDetail to upload:', orderDetail);
+
   try {
-    const orderId = await UploadOrder(orderDetail);
-    await addTelefonoFirebase(phone, obtenerFechaActual());
+    const orderId = await UploadOrder(orderDetail, empresaId, sucursalId);
+    await addTelefonoCliente(
+      phone,
+      obtenerFechaActual(),
+      empresaId,
+      sucursalId
+    );
     localStorage.setItem('customerPhone', cleanPhoneNumber(phone));
+
+    console.log('Order uploaded successfully. orderId:', orderId);
 
     return orderId;
   } catch (error) {
