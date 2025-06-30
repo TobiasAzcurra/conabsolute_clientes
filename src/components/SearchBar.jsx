@@ -15,7 +15,9 @@ const SearchBar = ({
 
   const handleSearch = () => {
     if (phoneNumber.trim().length < 8) return;
-    navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${phoneNumber}`);
+    navigate(`/${slugEmpresa}/${slugSucursal}/pedido`, {
+      state: { phoneNumber },
+    });
   };
 
   return (
