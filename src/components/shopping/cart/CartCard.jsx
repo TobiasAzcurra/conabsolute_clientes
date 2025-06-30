@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { updateOrderItemQuantity } from '../../../firebase/orders/updateOrderItem';
-import { handleConfirmChanges } from '../../../firebase/orders/confirmChanges';
-import currencyFormat from '../../../helpers/currencyFormat';
-import QuickAddToCart from '../card/quickAddToCart';
-import LoadingPoints from '../../LoadingPoints';
-import { getImageSrc } from '../../../helpers/getImageSrc';
+import React, { useState, useEffect } from "react";
+import { updateOrderItemQuantity } from "../../../firebase/orders/updateOrderItem";
+import { handleConfirmChanges } from "../../../firebase/orders/confirmChanges";
+import currencyFormat from "../../../helpers/currencyFormat";
+import QuickAddToCart from "../card/quickAddToCart";
+import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
 
 const CartCard = ({
   item,
@@ -41,7 +41,7 @@ const CartCard = ({
     try {
       await handleConfirmChanges(currentOrder.id);
     } catch (error) {
-      console.error('❌ Error al confirmar el producto:', error);
+      console.error("❌ Error al confirmar el producto:", error);
     } finally {
       setIsUpdating(false);
       setShowConfirmation(false);
@@ -59,7 +59,7 @@ const CartCard = ({
         0
       );
     } catch (error) {
-      console.error('❌ Error al eliminar el producto:', error);
+      console.error("❌ Error al eliminar el producto:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -74,12 +74,12 @@ const CartCard = ({
 
   const isDisabled =
     isPedidoComponente &&
-    (!item.hasOwnProperty('extra') ||
+    (!item.hasOwnProperty("extra") ||
       item.extra === undefined ||
       (extra === true && isConfirmed));
 
   const capitalizeWords = (str) => {
-    if (!str) return '';
+    if (!str) return "";
     return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
@@ -89,28 +89,28 @@ const CartCard = ({
       !Array.isArray(toppingsArray) ||
       toppingsArray.length === 0
     )
-      return '';
+      return "";
     const names = toppingsArray
       .map((topping) => {
-        if (typeof topping === 'string') return capitalizeWords(topping);
-        return topping && typeof topping === 'object' && topping.name
+        if (typeof topping === "string") return capitalizeWords(topping);
+        return topping && typeof topping === "object" && topping.name
           ? capitalizeWords(topping.name)
-          : '';
+          : "";
       })
       .filter((name) => name);
 
-    if (names.length === 0) return '';
+    if (names.length === 0) return "";
     if (names.length === 1) return names[0];
     if (names.length === 2) return `${names[0]} y ${names[1]}`;
     const last = names.pop();
-    return `${names.join(', ')} y ${last}`;
+    return `${names.join(", ")} y ${last}`;
   };
 
   const calculateTotalPrice = () => {
     const toppingsTotal =
       toppings && Array.isArray(toppings)
         ? toppings.reduce((acc, topping) => {
-            if (typeof topping === 'object' && topping?.price) {
+            if (typeof topping === "object" && topping?.price) {
               return acc + topping.price;
             }
             return acc;
@@ -126,8 +126,8 @@ const CartCard = ({
   return (
     <div className="relative">
       <div
-        className={`flex flex-row border w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
-          isDisabled ? 'blur-sm cursor-not-allowed bg-gray-50 ' : ''
+        className={`flex flex-row border bg-gray-50 w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
+          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50 " : ""
         }`}
       >
         <div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden relative">
@@ -155,9 +155,9 @@ const CartCard = ({
 
           <img
             src={imageSrc}
-            alt={name || 'Product'}
+            alt={name || "Product"}
             className={`h-[350px] object-cover transition-opacity duration-300 ${
-              imageError ? 'opacity-0' : 'opacity-100'
+              imageError ? "opacity-0" : "opacity-100"
             }`}
             onLoad={() => {
               console.log(
@@ -179,7 +179,7 @@ const CartCard = ({
           <div>
             <h3
               className={`text-2xl font-bold mb-1.5 ${
-                showConfirmation ? 'truncate leading-none' : 'leading-6'
+                showConfirmation ? "truncate leading-none" : "leading-6"
               }`}
             >
               {capitalizeWords(name)}
@@ -199,15 +199,15 @@ const CartCard = ({
                 product={{
                   ...item,
                   // 🔥 Asegurar que el producto tenga todas las propiedades necesarias
-                  name: item.name || item.data?.name || 'Producto sin nombre',
+                  name: item.name || item.data?.name || "Producto sin nombre",
                   price: item.price || item.data?.price || 0,
                   img: imageSrc, // Pasar la URL correcta
                   category:
                     item.category ||
                     item.categoria ||
                     item.data?.categoria ||
-                    'default',
-                  type: item.type || 'regular',
+                    "default",
+                  type: item.type || "regular",
                   data: item.data || item,
                 }}
                 isOrderItem={!!currentOrder}
@@ -218,7 +218,7 @@ const CartCard = ({
                 }
                 isUpdating={isUpdating}
                 disabled={isDisabled}
-                animateFrom='left'
+                animateFrom="left"
               />
 
               {showConfirmation && countdown !== null && (
@@ -237,8 +237,8 @@ const CartCard = ({
                     disabled={isDeleting}
                     className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${
                       isDeleting
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer'
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
                     }`}
                   >
                     <div className="flex items-center gap-1">

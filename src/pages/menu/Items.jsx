@@ -1,9 +1,9 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
-import QuickAddToCart from '../../components/shopping/card/quickAddToCart';
-import { useState } from 'react';
-import { listenToAltaDemanda } from '../../firebase/constants/altaDemanda';
-import { useEffect } from 'react';
-import { useClient } from '../../contexts/ClientContext';
+import { Link, useLocation, useParams } from "react-router-dom";
+import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
+import { useState } from "react";
+import { listenToAltaDemanda } from "../../firebase/constants/altaDemanda";
+import { useEffect } from "react";
+import { useClient } from "../../contexts/ClientContext";
 
 const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -34,23 +34,23 @@ const Items = ({
     return () => unsubscribe();
   }, []);
 
-  const isCarrito = location.pathname.includes('/carrito');
+  const isCarrito = location.pathname.includes("/carrito");
   const isSelected = selectedItem === name;
 
   const borderStyle = isSelected
-    ? 'border-2 border-black border-opacity-100'
-    : 'border border-black border-opacity-20';
+    ? "border-2 border-black border-opacity-100"
+    : "border border-black border-opacity-20";
 
   const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
-      ? 'w-[110px]'
-      : 'min-w-[110px] max-w-[200px]'
+      ? "w-[110px]"
+      : "min-w-[110px] max-w-[200px]"
   }`;
 
   let imageSrc = img;
   if (isCarrito) {
     imageSrc =
-      img.startsWith('/menu/') || img.startsWith('http') ? img : `/menu/${img}`;
+      img.startsWith("/menu/") || img.startsWith("http") ? img : `/menu/${img}`;
   }
 
   const content = (
@@ -65,8 +65,8 @@ const Items = ({
       <div
         className={`font-coolvetica text-center ${
           isCarrito || isPedidoComponente
-            ? 'flex flex-col items-center justify-between h-[43px]'
-            : 'h-[50px]'
+            ? "flex flex-col items-center justify-between h-[43px]"
+            : "h-[50px]"
         }`}
       >
         <h5 className="mt-1 text-xs font-medium tracking-tight">
@@ -110,7 +110,7 @@ const Items = ({
   if (isCarrito || isPedidoComponente) {
     return (
       <div
-        className={className + (handleItemClick ? ' cursor-pointer' : '')}
+        className={className + (handleItemClick ? " cursor-pointer" : "")}
         onClick={handleItemClick}
       >
         {content}
