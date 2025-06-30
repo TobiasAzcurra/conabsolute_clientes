@@ -34,15 +34,12 @@ const Card = ({ data, path }) => {
     id,
     name = 'Producto sin nombre',
     description = '',
-    price,
     category,
     variants,
-    img,
-    image,
   } = data;
 
   const images = useMemo(() => {
-    const raw = data?.img || data?.image || data?.images || img || [];
+    const raw = data?.img || data?.image || data?.images || [];
 
     if (Array.isArray(raw)) {
       return raw;
@@ -50,7 +47,7 @@ const Card = ({ data, path }) => {
 
     const resolved = getImageSrc(raw);
     return [resolved];
-  }, [data, img]);
+  }, [data]);
 
   const variantStats = useMemo(() => {
     const stats = {};
@@ -155,10 +152,8 @@ const Card = ({ data, path }) => {
       setIsInViewport(isCentered);
     };
 
-    // Verificar inicialmente
     handleScroll();
 
-    // Agregar listener de scroll con throttling
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -219,7 +214,7 @@ const Card = ({ data, path }) => {
           <QuickAddToCart
             product={{
               name,
-              description,
+              description: data.cardDescription || description,
               price: adjustedPrice,
               img: currentImageSrc,
               path,
@@ -316,14 +311,8 @@ const Card = ({ data, path }) => {
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight mb-1">
+            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight ">
               {data.cardDescription}
-            </p>
-          )}
-
-          {description && (
-            <p className="text-center text-xs font-light text-opacity-30 text-black">
-              {description}
             </p>
           )}
           <div className="flex w-full mt-4 flex-col mb-6">
