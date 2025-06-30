@@ -120,13 +120,19 @@ const CartItems = () => {
                 {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
 
+                  const handleItemClick = () => {
+                    navigate(
+                      `/${slugEmpresa}/${slugSucursal}/menu/${product.category}/`
+                    );
+                  };
+
                   return (
                     <Items
                       key={product.id || index}
                       selectedItem={product}
                       img={productImg}
                       name={product.name}
-                      handleItemClick={() => {}}
+                      handleItemClick={handleItemClick}
                       isCart={true}
                     />
                   );
