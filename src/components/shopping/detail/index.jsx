@@ -279,9 +279,9 @@ const DetailCard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl gap-4">
+          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl ">
             {/* titulo */}
-            <div className="flex flex-row gap-2 items-center justify-center mt-4">
+            <div className="flex flex-row gap-2 items-center justify-center my-4">
               <button onClick={handleGoBack}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -304,60 +304,60 @@ const DetailCard = () => {
             </div>
             {/* desc */}
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4 mb-4 pr-16 leading-tight">
+              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4 mb-8 pr-16 leading-tight">
                 {product.detailDescription.charAt(0).toUpperCase() +
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
 
+            {/* variantes */}
             {customization ? (
-              <div className="w-full flex justify-center mb-4 px-4">
-                <div className="gap-2 flex flex-col w-full">
-                  {Object.entries(variantStats).map(([key, values]) => (
-                    <div key={key}>
-                      <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
-                        {clientConfig?.labels?.[key] || capitalizeWords(key)}
-                      </h5>
-                      <div className="flex w-full overflow-auto">
-                        <div className="flex">
-                          {values.map((value, index) => {
-                            const isSelected = selectedVariants[key] === value;
-                            const isFirst = index === 0;
-                            const isLast = index === values.length - 1;
-                            const isOnly = values.length === 1;
+              <div className="gap-2 w-full flex justify-center gap-2 px-4 flex flex-col w-full">
+                {Object.entries(variantStats).map(([key, values]) => (
+                  <div key={key} className="">
+                    <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
+                      {clientConfig?.labels?.[key] || capitalizeWords(key)}
+                    </h5>
+                    <div className="flex w-full overflow-auto">
+                      <div className="flex">
+                        {values.map((value, index) => {
+                          const isSelected = selectedVariants[key] === value;
+                          const isFirst = index === 0;
+                          const isLast = index === values.length - 1;
+                          const isOnly = values.length === 1;
 
-                            const borderRadiusClass = isOnly
-                              ? "rounded-full"
-                              : isFirst
-                              ? "rounded-l-full"
-                              : isLast
-                              ? "rounded-r-full"
-                              : "rounded-none";
+                          const borderRadiusClass = isOnly
+                            ? "rounded-full"
+                            : isFirst
+                            ? "rounded-l-full"
+                            : isLast
+                            ? "rounded-r-full"
+                            : "rounded-none";
 
-                            const variant = (product.variants || []).find(
-                              (v) =>
-                                v.linkedTo?.toLowerCase() === key &&
-                                v.name?.toLowerCase() === value
-                            );
-                            const hasAttributeImage =
-                              variant &&
-                              Array.isArray(variant.attributeImage) &&
-                              variant.attributeImage.length > 0;
+                          const variant = (product.variants || []).find(
+                            (v) =>
+                              v.linkedTo?.toLowerCase() === key &&
+                              v.name?.toLowerCase() === value
+                          );
+                          const hasAttributeImage =
+                            variant &&
+                            Array.isArray(variant.attributeImage) &&
+                            variant.attributeImage.length > 0;
 
-                            const totalVariants = values.length;
-                            const maxTotalWidth = 500; // px
-                            const widthPerButton = Math.min(
-                              Math.floor(maxTotalWidth / totalVariants),
-                              200
-                            );
+                          const totalVariants = values.length;
+                          const maxTotalWidth = 500; // px
+                          const widthPerButton = Math.min(
+                            Math.floor(maxTotalWidth / totalVariants),
+                            200
+                          );
 
-                            return (
-                              <button
-                                key={value}
-                                onClick={() => handleVariantSelect(key, value)}
-                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-200 font-light ${borderRadiusClass} ${
-                                  index > 0 ? "-ml-px" : ""
-                                } flex items-center justify-center
+                          return (
+                            <button
+                              key={value}
+                              onClick={() => handleVariantSelect(key, value)}
+                              className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-200 font-light ${borderRadiusClass} ${
+                                index > 0 ? "-ml-px" : ""
+                              } flex items-center justify-center
                                   ${
                                     !hasAttributeImage
                                       ? isSelected
@@ -366,41 +366,42 @@ const DetailCard = () => {
                                       : ""
                                   }
                                 `}
-                                style={
-                                  hasAttributeImage
-                                    ? {
-                                        padding: 0,
-                                        width: "100%",
-                                        height: 40,
-                                        overflow: "hidden",
-                                      }
-                                    : {}
-                                }
-                              >
-                                {hasAttributeImage ? (
-                                  <img
-                                    src={variant.attributeImage[0]}
-                                    alt={value}
-                                    className={`w-full h-full object-cover transition-opacity duration-200 ${
-                                      isSelected ? "opacity-100" : "opacity-50"
-                                    }`}
-                                    style={{ width: "100%", height: "100%" }}
-                                  />
-                                ) : (
-                                  capitalizeWords(value)
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
+                              style={
+                                hasAttributeImage
+                                  ? {
+                                      padding: 0,
+                                      width: "100%",
+                                      height: 40,
+                                      overflow: "hidden",
+                                    }
+                                  : {}
+                              }
+                            >
+                              {hasAttributeImage ? (
+                                <img
+                                  src={variant.attributeImage[0]}
+                                  alt={value}
+                                  className={`w-full h-full object-cover transition-opacity duration-200 ${
+                                    isSelected ? "opacity-100" : "opacity-50"
+                                  }`}
+                                  style={{ width: "100%", height: "100%" }}
+                                />
+                              ) : (
+                                capitalizeWords(value)
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             ) : null}
 
-            <div className="flex flex-row items-center w-full px-3 ">
+            {/* agregar */}
+
+            <div className="flex flex-row items-center w-full mt-10 px-3 ">
               <div className="">
                 <QuickAddToCart
                   product={productToSend}
@@ -413,7 +414,7 @@ const DetailCard = () => {
                 Por {currencyFormat(totalPrice)}
               </p>
             </div>
-            <div className="mt-8">
+            <div className="mt-16">
               <VideoSlider reels={reels} />
             </div>
             {logo && (
