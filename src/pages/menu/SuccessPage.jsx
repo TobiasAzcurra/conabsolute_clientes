@@ -1,53 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom"; // Agregamos useNavigate para redirección
-import logo from "../../assets/anheloTMwhite.png";
-import { clearCart } from "../../redux/cart/cartSlice";
-import { useDispatch } from "react-redux";
-
-export const items = {
-  burgers: "burgers",
-  combos: "combos",
-  papas: "papas",
-  bebidas: "bebidas",
-};
+import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useClient } from '../../contexts/ClientContext';
 
 const SuccessPage = () => {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
+  const { slugEmpresa, slugSucursal } = useClient();
   const { orderId } = useParams();
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [selectedItem, setSelectedItem] = useState("");
-  const [locationMenu, setLocationMenu] = useState(true);
-
-  useEffect(() => {
-    const pathParts = pathname.split("/");
-    const lastPart = pathParts[pathParts.length - 1];
-    // Si selecciono PROMOCIONES, que no se actualice el selectedItem
-
-    dispatch(clearCart());
-
-    if (selectedItem === "PROMOCIONES") {
-      setSelectedItem("PROMOCIONES");
-    } else {
-      setSelectedItem(lastPart);
-    }
-
-    setLocationMenu(pathname.startsWith("/menu/"));
-  }, [pathname, selectedItem]);
-
-  // Redirección después de la animación
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(`/pedido/${orderId}`);
-    }, 2000); // Redirige después de 2 segundos
+      navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${orderId}`);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
     <>
-      {/* Definición de las animaciones dentro del componente */}
       <style>
         {`
           @keyframes drawCircle {
@@ -125,7 +94,6 @@ const SuccessPage = () => {
 
       <div className="bg-gradient-to-b from-black via-black to-red-500 flex items-center justify-center h-screen">
         <div className="text-center">
-          {/* Ícono de éxito con animaciones de dibujo */}
           <svg
             className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
             xmlns="http://www.w3.org/2000/svg"
