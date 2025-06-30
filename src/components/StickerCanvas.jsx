@@ -7,7 +7,7 @@ import Fries from '../assets/friesSticker.png';
 import Box from '../assets/IMG-20240130-WA0059-removebg-preview.png';
 // Importa más stickers si lo deseas
 import { v4 as uuidv4 } from 'uuid'; // Importar uuid para IDs únicos
-import useClientData from '../hooks/useClientData';
+import { useClient } from '../contexts/ClientContext';
 
 const availableStickers = [
   Bolsaa,
@@ -17,7 +17,7 @@ const availableStickers = [
 ];
 
 const StickerCanvas = ({ containerWidth, containerHeight }) => {
-  const { clientData } = useClientData('empresa2');
+  const { clientAssets } = useClient();
 
   const [stickers, setStickers] = useState([]);
 
@@ -100,7 +100,7 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
       {/* Área de canvas donde se colocan los stickers */}
       <div className="w-full h-full">
         {stickers.map((sticker) =>
-          clientData?.logo ? (
+          clientAssets?.logo ? (
             <Draggable
               key={sticker.id}
               position={{ x: sticker.x, y: sticker.y }}
@@ -108,7 +108,7 @@ const StickerCanvas = ({ containerWidth, containerHeight }) => {
               bounds="parent"
             >
               <img
-                src={clientData.logo}
+                src={clientAssets.logo}
                 alt="Sticker"
                 className="h-24 sm:w-24 sm:h-24 md:w-24 md:h-24 cursor-move pointer-events-auto"
                 onDoubleClick={() => removeSticker(sticker.id)}
