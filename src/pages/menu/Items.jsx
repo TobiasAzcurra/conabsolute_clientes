@@ -1,4 +1,4 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import QuickAddToCart from "../../components/shopping/card/quickAddToCart";
 import { useState } from "react";
 import { listenToAltaDemanda } from "../../firebase/constants/altaDemanda";
@@ -15,15 +15,29 @@ const Items = ({
   currentOrder,
   isPedidoComponente = false,
   handleItemClick,
+  selectedItem, // ✅ Agregar esta prop para obtener el objeto producto completo
 }) => {
+  // Console.log al inicio para ver todas las props
+  console.log("Items Component Props:", {
+    img,
+    name,
+    currentOrder,
+    isPedidoComponente,
+    handleItemClick: !!handleItemClick,
+    selectedItem,
+    productId: selectedItem?.id,
+    productCategory: selectedItem?.category,
+  });
+
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
 
   const { slugEmpresa, slugSucursal } = useClient();
 
-  const { category: selectedItem } = useParams();
+  const { category: selectedItemParam } = useParams();
 
   const location = useLocation();
+  const navigate = useNavigate(); // ✅ Agregar navigate
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemanda) => {
@@ -35,7 +49,19 @@ const Items = ({
   }, []);
 
   const isCarrito = location.pathname.includes("/carrito");
-  const isSelected = selectedItem === name;
+  const isSelected = selectedItemParam === name;
+
+  // Console.log para ver los valores calculados
+  console.log("Items Component State:", {
+    slugEmpresa,
+    slugSucursal,
+    selectedItemParam,
+    isCarrito,
+    isSelected,
+    priceFactor,
+    itemsOut,
+    currentPath: location.pathname,
+  });
 
   const borderStyle = isSelected
     ? "border-2 border-black border-opacity-100"
@@ -52,6 +78,9 @@ const Items = ({
     imageSrc =
       img.startsWith("/menu/") || img.startsWith("http") ? img : `/menu/${img}`;
   }
+
+  // Console.log para ver la imagen que se va a mostrar
+  console.log("Image Source:", imageSrc);
 
   const content = (
     <>
@@ -73,7 +102,7 @@ const Items = ({
           {capitalizeWords(name)}
         </h5>
 
-        {isCarrito && selectedItem && (
+        {isCarrito && selectedItemParam && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
               <div className="bg-red-500 rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
@@ -87,7 +116,7 @@ const Items = ({
             )}
           </div>
         )}
-        {isPedidoComponente && selectedItem && (
+        {isPedidoComponente && selectedItemParam && (
           <div className="pb-3">
             {hasUnavailableIngredients() ? (
               <div className="bg-red-500 rounded-full w-fit text-white text-xs text-center items-center flex px-4 h-10  gap-2 ">
@@ -107,21 +136,49 @@ const Items = ({
     </>
   );
 
+  // ✅ Lógica de redirección inteligente
   if (isCarrito || isPedidoComponente) {
+    console.log("Rendering as DIV with handleItemClick for item:", name);
+
+    // ✅ Si estamos en carrito y hay handleItemClick, crear uno que vaya al producto
+    const smartHandleClick = handleItemClick
+      ? () => {
+          if (isCarrito) {
+            // En carrito: ir al producto específico con categoría e ID
+            const productCategory = selectedItem?.category || "general";
+            const productId =
+              selectedItem?.id || selectedItem?.productId || name;
+            const productUrl = `/${slugEmpresa}/${slugSucursal}/menu/${productCategory}/${productId}`;
+            console.log("🚀 Redirecting to product:", productUrl);
+            navigate(productUrl); // ✅ Usar navigate en lugar de window.location.href
+          } else {
+            // En otros casos: usar el handleItemClick original
+            handleItemClick();
+          }
+        }
+      : handleItemClick;
+
     return (
       <div
-        className={className + (handleItemClick ? " cursor-pointer" : "")}
-        onClick={handleItemClick}
+        className={className + (smartHandleClick ? " cursor-pointer" : "")}
+        onClick={smartHandleClick}
       >
         {content}
       </div>
     );
   } else {
+    // ✅ Comportamiento por defecto: ir a la categoría
+    const category = selectedItem?.category || name; // Usar la categoría del producto o el name como fallback
+    const redirectUrl = `/${slugEmpresa}/${slugSucursal}/menu/${category}`;
+
+    console.log(
+      "Rendering as LINK with redirect to category:",
+      redirectUrl,
+      "for item:",
+      name
+    );
     return (
-      <Link
-        className={className}
-        to={`/${slugEmpresa}/${slugSucursal}/menu/${name}`}
-      >
+      <Link className={className} to={redirectUrl}>
         {content}
       </Link>
     );

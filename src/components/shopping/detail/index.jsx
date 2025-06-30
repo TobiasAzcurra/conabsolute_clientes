@@ -13,12 +13,15 @@ const capitalizeWords = (str) => {
 };
 
 const DetailCard = () => {
-  const { slug: category, id } = useParams();
+  // ✅ Cambiar 'slug' por 'category' para que coincida con la ruta
+  const { category, id } = useParams();
   const { productsByCategory, clientAssets, clientConfig } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cartState.cart);
+
+  console.log("DetailCard params:", { category, id }); // ✅ Debug
 
   const [selectedVariants, setSelectedVariants] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -37,10 +40,35 @@ const DetailCard = () => {
     if (location?.state?.product) return location.state.product;
 
     const list = productsByCategory?.[category] || [];
+    console.log("Looking for product in category:", category, "with id:", id);
+    console.log(
+      "Available products:",
+      list.map((p) => ({ id: p.id, name: p.name }))
+    );
+
     const foundProduct = list.find((p) => p.id === id);
+    console.log(
+      "Found product:",
+      foundProduct ? foundProduct.name : "NOT FOUND"
+    );
 
     return foundProduct;
   }, [location?.state, productsByCategory, category, id]);
+
+  // ✅ VERIFICACIÓN TEMPRANA - ANTES de cualquier cálculo que use product
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center font-coolvetica text-gray-900">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Cargando producto...</p>
+          <p className="text-xs text-gray-500 mt-2">
+            Buscando en categoría: {category} | ID: {id}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const variantStats = useMemo(() => {
     const stats = {};
@@ -229,6 +257,7 @@ const DetailCard = () => {
     firstVariantWithImage,
     totalPrice,
     selectedVariantsArray,
+    basePrice,
   ]);
 
   const handleVariantSelect = (key, value) => {
@@ -245,14 +274,6 @@ const DetailCard = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  if (!product) {
-    return (
-      <div className="text-center mt-8 font-coolvetica text-gray-900 text-xs m">
-        Producto no encontrado.
-      </div>
-    );
-  }
 
   console.log("acaaa", customization);
 

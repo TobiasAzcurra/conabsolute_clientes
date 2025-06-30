@@ -130,19 +130,14 @@ const CartItems = () => {
                 {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
 
-                  const handleItemClick = () => {
-                    navigate(
-                      `/${slugEmpresa}/${slugSucursal}/menu/${product.category}/`
-                    );
-                  };
-
+                  // ✅ Ya no necesitas definir handleItemClick, el componente Items lo manejará automáticamente
                   return (
                     <Items
                       key={product.id || index}
-                      selectedItem={product}
+                      selectedItem={product} // ✅ Pasar el objeto producto completo
                       img={productImg}
                       name={product.name}
-                      handleItemClick={handleItemClick}
+                      handleItemClick={() => {}} // ✅ Pasar una función vacía para que Items detecte que debe ser clickeable
                       isCart={true}
                     />
                   );
