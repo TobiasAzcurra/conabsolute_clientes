@@ -1,25 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import logo from '../../assets/Logo APM-07.png';
 import StickerCanvas from '../../components/StickerCanvas';
 import LoadingPoints from '../../components/LoadingPoints';
-import UpdatedPedidoSection from './UpdatedPedidoSection';
+// import UpdatedPedidoSection from './UpdatedPedidoSection';
 import AppleModal from '../../components/AppleModal';
 import isologo from '../../assets/isologo.png';
 import EditAddressModal from './EditAddressModal';
-import {
-  doc,
-  runTransaction,
-  collection,
-  getFirestore,
-} from 'firebase/firestore';
+import { doc, runTransaction, getFirestore } from 'firebase/firestore';
 import Payment from '../../components/mercadopago/Payment';
 import { listenOrderById } from '../../firebase/orders/listenOrderById';
-import { useClient } from '../../contexts/ClientContext';
 import { listenOrdersByPhone } from '../../firebase/orders/listenOrdersByPhone';
+import { cancelOrder } from '../../firebase/orders/cancelOrder';
+import { useClient } from '../../contexts/ClientContext';
 
 const Pedido = () => {
-  const { empresaId, sucursalId } = useClient();
+  const { empresaId, sucursalId, clientConfig, clientData } = useClient();
   const [order, setOrder] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,55 +50,32 @@ const Pedido = () => {
   const [modalAdditionalProducts, setModalAdditionalProducts] = useState([]);
 
   useEffect(() => {
-    // console.log("🕒 Iniciando cronómetro...");
     const timer = setInterval(() => {
       const newTime = new Date();
-      // console.log("⏱️ Actualizando tiempo:", newTime.toLocaleTimeString());
       setCurrentTime(newTime);
     }, 60000);
 
     return () => {
-      // console.log("🛑 Limpiando cronómetro");
       clearInterval(timer);
     };
   }, []);
 
-  const getOrderDateTime = (fechaStr, horaStr) => {
-    if (!fechaStr || !horaStr) {
-      // console.log("⚠️ Fecha u hora faltante:", { fechaStr, horaStr });
-      return null;
+  const getOrderCreatedDate = (createdAt) => {
+    if (createdAt && typeof createdAt.seconds === 'number') {
+      return new Date(createdAt.seconds * 1000);
     }
-
-    const fechaValida = /^\d{2}\/\d{2}\/\d{4}$/.test(fechaStr);
-    const horaValida = /^\d{2}:\d{2}$/.test(horaStr);
-
-    if (!fechaValida || !horaValida) {
-      console.warn(
-        `⚠️ Formato inválido: Fecha - ${fechaStr}, Hora - ${horaStr}`
-      );
-      return null;
-    }
-
-    const [dia, mes, anio] = fechaStr.split('/').map(Number);
-    const [horas, minutos] = horaStr.split(':').map(Number);
-
-    const orderDateTime = new Date(anio, mes - 1, dia, horas, minutos, 0, 0);
-
-    if (isNaN(orderDateTime)) {
-      console.warn(`⚠️ Fecha inválida: Fecha - ${fechaStr}, Hora - ${horaStr}`);
-      return null;
-    }
-
-    // console.log("📅 Fecha del pedido creada:", orderDateTime.toLocaleString());
-    return orderDateTime;
+    return null;
   };
 
   const isDelayed = (order) => {
-    const { fecha, hora } = order;
+    console.log('[Pedido] isDelayed:', order);
+    const { createdAt } = order;
     let { entregado } = order;
 
-    if (!fecha || !hora) {
-      console.warn(`⚠️ Pedido ${order.id}: falta fecha u hora`);
+    const orderDateTime = getOrderCreatedDate(createdAt);
+
+    if (!orderDateTime) {
+      console.warn(`⚠️ Pedido ${order.id}: createdAt inválido`);
       return false;
     }
 
@@ -114,57 +86,43 @@ const Pedido = () => {
       );
     }
 
-    const orderDateTime = getOrderDateTime(fecha, hora);
-    if (!orderDateTime) {
-      console.warn(`⚠️ Pedido ${order.id}: fecha/hora inválida`);
-      return false;
-    }
-
     const diffMs = currentTime - orderDateTime;
     const diffMinutes = diffMs / (1000 * 60);
 
-    // console.log(`⏱️ Minutos de demora: ${diffMinutes.toFixed(2)}`);
-
     const retrasado = diffMinutes > 50 && !entregado;
-    // console.log(`🚨 Pedido retrasado: ${retrasado}`);
 
     return retrasado;
   };
 
   const getDelayTime = (order) => {
-    const { fecha, hora } = order;
-    const orderDateTime = getOrderDateTime(fecha, hora);
+    const orderDateTime = getOrderCreatedDate(order.createdAt);
 
     if (!orderDateTime) {
-      // console.log("⚠️ No se pudo calcular el tiempo de demora - fecha/hora inválida");
       return null;
     }
 
     const diffMs = currentTime - orderDateTime;
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
-    // console.log(`⏱️ Tiempo de demora calculado: ${diffMinutes} minutos`);
     return diffMinutes;
   };
 
-  function sumarMinutos(hora, minutosASumar) {
-    if (!hora) return '';
-    const [horaStr, minutoStr] = hora.split(':');
-    const horas = parseInt(horaStr, 10);
-    const minutos = parseInt(minutoStr, 10);
+  function sumarMinutos(date, minutosASumar) {
+    if (!date) return '';
+    const nuevaFecha = new Date(date.getTime());
+    nuevaFecha.setMinutes(nuevaFecha.getMinutes() + minutosASumar);
 
-    const fecha = new Date();
-    fecha.setHours(horas, minutos, 0, 0);
-    fecha.setMinutes(fecha.getMinutes() + minutosASumar);
-
-    const nuevasHoras = fecha.getHours().toString().padStart(2, '0');
-    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, '0');
+    const nuevasHoras = nuevaFecha.getHours().toString().padStart(2, '0');
+    const nuevosMinutos = nuevaFecha.getMinutes().toString().padStart(2, '0');
 
     return `${nuevasHoras}:${nuevosMinutos}`;
   }
 
   const handleRateOrder = async (ratings) => {
-    // console.log("📥 Iniciando proceso de calificación");
+    console.log('[Pedido] handleRateOrder: inicio', {
+      ratings,
+      selectedOrderId,
+    });
     if (!selectedOrderId) {
       console.error('❌ Error: No hay Order ID seleccionado para calificar');
       return;
@@ -182,7 +140,7 @@ const Pedido = () => {
         throw new Error('Pedido no encontrado.');
       }
 
-      const fecha = currentOrder.fecha;
+      const fecha = getOrderCreatedDate(currentOrder.createdAt);
       if (!fecha) {
         throw new Error('Fecha del pedido no disponible.');
       }
@@ -201,9 +159,10 @@ const Pedido = () => {
       setMessage('¡Gracias por calificar tu pedido!');
       setIsRatingModalOpen(false);
     } catch (err) {
-      console.error('❌ Error al enviar la calificación:', err);
+      console.error('[Pedido] handleRateOrder: error al calificar', err);
       setError('Hubo un problema al calificar el pedido. Inténtalo de nuevo.');
     } finally {
+      console.log('[Pedido] handleRateOrder: finalizado');
       setIsRatingLoading(false);
       setSelectedOrderId(null);
       setAdditionalProducts([]);
@@ -211,6 +170,7 @@ const Pedido = () => {
   };
 
   const handleUpdateTime = async () => {
+    console.log('[Pedido] handleUpdateTime: inicio', { newTime, orderId });
     if (!newTime) {
       setTimeError('Por favor selecciona una hora válida');
       return;
@@ -221,66 +181,61 @@ const Pedido = () => {
 
     try {
       const firestore = getFirestore();
-      const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split('/');
-      const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
-      const pedidoDocRef = doc(pedidosCollectionRef, dia);
+
+      // Construir la fecha/hora completa para el nuevo horario
+      const now = new Date();
+      const [hours, minutes] = newTime.split(':').map(Number);
+      const newDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        hours,
+        minutes,
+        0,
+        0
+      );
+
+      // Restar minutos según método de entrega
+      const currentOrder = pedidosPagados.find((p) => p.id === orderId);
+      const isDelivery = currentOrder?.direccion !== '';
+      if (isDelivery) {
+        newDate.setMinutes(newDate.getMinutes() - 30);
+      } else {
+        newDate.setMinutes(newDate.getMinutes() - 15);
+      }
+
+      // Referencia al pedido individual (igual que listenOrdersByPhone)
+      const pedidoDocRef = doc(
+        firestore,
+        'absoluteClientes',
+        empresaId,
+        'sucursales',
+        sucursalId,
+        'pedidos',
+        orderId
+      );
 
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe para la fecha especificada.');
+          throw new Error('El pedido no existe.');
         }
 
-        const existingData = docSnapshot.data();
-        const pedidosDelDia = existingData.pedidos || [];
-        const pedidoIndex = pedidosDelDia.findIndex(
-          (pedido) => pedido.id === orderId
-        );
-
-        if (pedidoIndex === -1) {
-          throw new Error('Pedido no encontrado');
-        }
-
-        // Ajustamos la hora según el método de entrega
-        const pedido = pedidosDelDia[pedidoIndex];
-        const isDelivery = pedido.direccion !== '';
-
-        // Convertimos la hora seleccionada a minutos desde medianoche
-        const [hours, minutes] = newTime.split(':').map(Number);
-        let totalMinutes = hours * 60 + minutes;
-
-        // Restamos el tiempo de preparación/envío según corresponda
-        if (isDelivery) {
-          totalMinutes -= 30; // Para delivery
-        } else {
-          totalMinutes -= 15; // Para takeaway
-        }
-
-        // Convertimos nuevamente a formato HH:mm
-        const adjustedHours = Math.floor(totalMinutes / 60);
-        const adjustedMinutes = totalMinutes % 60;
-        const adjustedTime = `${String(adjustedHours).padStart(
-          2,
-          '0'
-        )}:${String(adjustedMinutes).padStart(2, '0')}`;
-
-        pedidosDelDia[pedidoIndex].hora = adjustedTime;
-
-        transaction.set(pedidoDocRef, {
-          ...existingData,
-          pedidos: pedidosDelDia,
+        // Guardar el nuevo horario como timestamp
+        transaction.update(pedidoDocRef, {
+          pickupOrDeliveryTime: newDate, // Puedes cambiar el nombre del campo si lo deseas
         });
       });
 
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('❌ Error al actualizar la hora:', error);
+      console.error('[Pedido] handleUpdateTime: error', error);
       setTimeError(
         'Hubo un problema al actualizar la hora. Por favor intenta nuevamente.'
       );
     } finally {
+      console.log('[Pedido] handleUpdateTime: finalizado');
       setIsUpdatingTime(false);
     }
   };
@@ -288,14 +243,12 @@ const Pedido = () => {
   const eliminarPedido = async () => {
     if (!selectedOrderId) return;
 
-    // console.log("🚫 Cancelando pedido:", selectedOrderId);
     setIsDeleting(true);
     setMessage(null);
     setError(null);
 
     try {
-      await cancelOrder(selectedOrderId);
-      // console.log("✅ El pedido fue marcado como cancelado:", selectedOrderId);
+      await cancelOrder(empresaId, sucursalId, selectedOrderId);
       const pedidoCancelado = pedidosPagados.find(
         (pedido) => pedido.id === selectedOrderId
       );
@@ -319,7 +272,6 @@ const Pedido = () => {
 
       setIsModalOpen(false);
     } catch (err) {
-      console.error('❌ Hubo un problema al cancelar el pedido:', err);
       setError('Hubo un problema al cancelar el pedido. Inténtalo de nuevo.');
     } finally {
       setIsDeleting(false);
@@ -328,14 +280,12 @@ const Pedido = () => {
   };
 
   const handleCancelClick = (orderId) => {
-    // console.log("🛑 Solicitando cancelación para pedido:", orderId);
     setSelectedOrderId(orderId);
     setIsModalOpen(true);
   };
 
   const handleSupportClick = () => {
-    // console.log("💬 Iniciando contacto con soporte");
-    const phoneNumber = '543584306832';
+    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
     const message =
       'Hola! Mi pedido lleva más de 40 minutos de demora y aún no llega.';
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
@@ -345,8 +295,11 @@ const Pedido = () => {
   };
 
   const handleTransferenciaClick = async (total, telefono) => {
-    const phoneNumber = '543584306832';
-    const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: AbsoluteHSAS.mp a nombre de Absolute Holdings S.A.S.`;
+    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
+    const alias = clientConfig?.logistics?.alias || 'AbsoluteHSAS.mp';
+    const nameAlias =
+      clientConfig?.logistics?.name || 'Absolute Holdings S.A.S.';
+    const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: ${alias} a nombre de ${nameAlias}`;
 
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       message
@@ -356,8 +309,7 @@ const Pedido = () => {
   };
 
   const handleCompensationClick = (message) => {
-    // console.log("💬 Iniciando contacto por compensación");
-    const phoneNumber = '543584306832';
+    const phoneNumber = clientConfig?.logistics?.phone || '543584306832';
     const whatsappMessage = `Hola! Acepte mi pedido con esta condicion: ${message}, cual es mi compensacion?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
       whatsappMessage
@@ -384,75 +336,54 @@ const Pedido = () => {
       if (unsubscribeOrder) unsubscribeOrder();
       if (unsubscribePhoneNumber) unsubscribePhoneNumber();
     };
-
     if (orderId) {
-      // console.log("🔍 Fetching order by ID:", orderId);
       setLoading(true);
       unsubscribeOrder = listenOrderById(
         empresaId,
         sucursalId,
         orderId,
         (pedido) => {
-          // console.log("📦 Order fetched by ID:", pedido);
           if (pedido && typeof pedido.direccion === 'string') {
-            if (pedido.entregado && !pedido.rating && !hasBeenRated) {
-              setSelectedOrderProducts(pedido.detallePedido || []);
-              setSelectedOrderId(pedido.id);
-              setIsRatingModalOpen(true);
-            }
             setOrder(pedido);
-            setPhoneNumber(pedido.telefono);
-            // console.log("✅ Order set:", pedido);
+
+            if (!pedido.entregado || !pedido.rating) {
+              setPhoneNumber(pedido.telefono);
+            }
           } else {
             setOrder(null);
-            setPhoneNumber('');
-            console.warn('⚠️ Order is null or direccion is not a string');
           }
           setLoading(false);
+          setIsInitialized(true);
         }
       );
-    }
-
-    if (!orderId && location.state && location.state.phoneNumber) {
-      const { phoneNumber } = location.state;
-      setPhoneNumber(phoneNumber);
-    }
-
-    if (phoneNumber) {
-      unsubscribePhoneNumber = listenOrdersByPhone(
-        empresaId,
-        sucursalId,
-        phoneNumber,
-        (pedidosActualizados) => {
-          const pedidosConPago = pedidosActualizados.filter(
-            (pedido) => pedido.paid === true
-          );
-          const pedidosSinPago = pedidosActualizados.filter(
-            (pedido) => pedido.paid === false
-          );
-
-          const pedidoParaCalificar = pedidosConPago.find(
-            (pedido) => pedido.entregado && !pedido.rating && !hasBeenRated
-          );
-
-          if (pedidoParaCalificar) {
-            setSelectedOrderProducts(pedidoParaCalificar.detallePedido || []);
-            setSelectedOrderId(pedidoParaCalificar.id);
-            setIsRatingModalOpen(true);
-          }
-
-          setPedidosPagados(pedidosConPago);
-          setPedidosNoPagados(pedidosSinPago);
-          setLoading(false);
-          setIsInitialized(true); // Agregamos esta línea
-        }
-      );
+    } else if (location.state?.phoneNumber) {
+      setPhoneNumber(location.state.phoneNumber);
     }
 
     return cleanUp;
-  }, [orderId, location.state, phoneNumber]);
+  }, [orderId, location.state]);
 
   useEffect(() => {
+    if (!phoneNumber) return;
+
+    const unsubscribePhoneNumber = listenOrdersByPhone(
+      empresaId,
+      sucursalId,
+      phoneNumber,
+      (pedidosActualizados) => {
+        setPedidosPagados(pedidosActualizados);
+        setLoading(false);
+        setIsInitialized(true);
+      }
+    );
+
+    return () => {
+      unsubscribePhoneNumber();
+    };
+  }, [phoneNumber]);
+
+  useEffect(() => {
+    console.log('[Pedido] useEffect: updateSize');
     const updateSize = () => {
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth;
@@ -463,40 +394,30 @@ const Pedido = () => {
 
     updateSize();
     window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+    return () => {
+      console.log('[Pedido] useEffect cleanup: updateSize');
+      window.removeEventListener('resize', updateSize);
+    };
   }, []);
 
   const handleEditTime = (orderId) => {
+    console.log('[Pedido] handleEditTime:', orderId);
     setEditingOrderId(orderId);
     setIsEditTimeModalOpen(true);
   };
 
   const handleTimeUpdateSuccess = (newTime) => {
+    console.log('[Pedido] handleTimeUpdateSuccess:', newTime);
     setMessage('¡Hora actualizada exitosamente!');
     setTimeout(() => setMessage(null), 3000);
   };
-
-  function sumarMinutos(hora, minutosASumar) {
-    if (!hora) return '';
-    const [horaStr, minutoStr] = hora.split(':');
-    const horas = parseInt(horaStr, 10);
-    const minutos = parseInt(minutoStr, 10);
-
-    const fecha = new Date();
-    fecha.setHours(horas, minutos, 0, 0);
-    fecha.setMinutes(fecha.getMinutes() + minutosASumar);
-
-    const nuevasHoras = fecha.getHours().toString().padStart(2, '0');
-    const nuevosMinutos = fecha.getMinutes().toString().padStart(2, '0');
-
-    return `${nuevasHoras}:${nuevosMinutos}`;
-  }
 
   return (
     <div
       ref={containerRef}
       className="bg-gray-50  relative flex justify-between flex-col h-screen"
     >
+      {console.log('[Pedido] Render: pedidosPagados', pedidosPagados)}
       <style>
         {`
                     @keyframes loadingBar {
@@ -565,7 +486,8 @@ const Pedido = () => {
                   return (
                     <div key={currentOrder.id} className="px-4 w-full">
                       <p className="text-red-600 font-medium mb-4 text-center">
-                        Anhelo rechazó tu pedido por falta de stock.
+                        {clientData?.name || 'El local'} rechazó tu pedido por
+                        falta de stock.
                       </p>
                     </div>
                   );
@@ -578,7 +500,8 @@ const Pedido = () => {
                   retrasado && currentOrder.cadete === 'NO ASIGNADO';
                 const showCadeteCallButton =
                   retrasado && currentOrder.cadete !== 'NO ASIGNADO';
-                const showCancelButton = !currentOrder.elaborado || retrasado;
+                const showCancelButton =
+                  !currentOrder.elaborado && !currentOrder.paid;
                 const hasButtons =
                   showSupportButton || showCadeteCallButton || showCancelButton;
 
@@ -598,7 +521,7 @@ const Pedido = () => {
                     <div className="flex flex-col px-4 w-full">
                       {currentOrder.aceptado && (
                         <p className="text-green-600 font-medium mb-4 text-center">
-                          ¡Anhelo aceptó tu pedido!
+                          ¡{clientData?.name || 'El local'} aceptó tu pedido!
                         </p>
                       )}
 
@@ -620,18 +543,13 @@ const Pedido = () => {
                           ) : currentOrder.direccion === '' ? (
                             <>
                               {(() => {
-                                const horaPedido = currentOrder.hora;
-                                const partesHora = horaPedido.split(':');
-                                const fechaActual = new Date();
-                                const fechaHoraPedido = new Date(
-                                  fechaActual.getFullYear(),
-                                  fechaActual.getMonth(),
-                                  fechaActual.getDate(),
-                                  parseInt(partesHora[0]),
-                                  parseInt(partesHora[1])
+                                const fechaHoraPedido = getOrderCreatedDate(
+                                  currentOrder.createdAt
                                 );
-                                const diferenciaEnMinutos =
-                                  (new Date() - fechaHoraPedido) / 60000;
+                                const diferenciaEnMinutos = fechaHoraPedido
+                                  ? (new Date() - fechaHoraPedido) / 60000
+                                  : 0;
+                                sumarMinutos(fechaHoraPedido, 15);
 
                                 return (
                                   <>
@@ -666,32 +584,24 @@ const Pedido = () => {
                                 className={`w-1/4 h-2.5 rounded-full ${
                                   currentOrder.elaborado &&
                                   (() => {
-                                    const horaPedidoConTiempoElaborado =
-                                      sumarMinutos(
-                                        currentOrder.hora,
-                                        parseInt(
-                                          currentOrder.tiempoElaborado.split(
-                                            ':'
-                                          )[1]
-                                        )
-                                      );
-                                    const [dia, mes, anio] = currentOrder.fecha
-                                      .split('/')
-                                      .map(Number);
-                                    const [horas, minutos] =
-                                      horaPedidoConTiempoElaborado
-                                        .split(':')
-                                        .map(Number);
+                                    const fechaHoraPedido = getOrderCreatedDate(
+                                      currentOrder.createdAt
+                                    );
+                                    const minutosElaborado = parseInt(
+                                      currentOrder.tiempoElaborado?.split(
+                                        ':'
+                                      )[1] || '0',
+                                      10
+                                    );
                                     const fechaElaboracion = new Date(
-                                      anio,
-                                      mes - 1,
-                                      dia,
-                                      horas,
-                                      minutos
+                                      fechaHoraPedido.getTime()
+                                    );
+                                    fechaElaboracion.setMinutes(
+                                      fechaElaboracion.getMinutes() +
+                                        minutosElaborado
                                     );
                                     const diffMinutes =
                                       (new Date() - fechaElaboracion) / 60000;
-
                                     return diffMinutes <= 15;
                                   })()
                                     ? 'animated-loading'
@@ -699,43 +609,14 @@ const Pedido = () => {
                                     ? 'bg-black'
                                     : 'bg-gray-50  border-opacity-20 border-black border-1 border'
                                 }`}
-                              ></div>
+                              />
                               <div
                                 className={`w-1/2 h-2.5 rounded-full ${
-                                  currentOrder.elaborado &&
-                                  (() => {
-                                    const horaPedidoConTiempoElaborado =
-                                      sumarMinutos(
-                                        currentOrder.hora,
-                                        parseInt(
-                                          currentOrder.tiempoElaborado.split(
-                                            ':'
-                                          )[1]
-                                        )
-                                      );
-                                    const [dia, mes, anio] = currentOrder.fecha
-                                      .split('/')
-                                      .map(Number);
-                                    const [horas, minutos] =
-                                      horaPedidoConTiempoElaborado
-                                        .split(':')
-                                        .map(Number);
-                                    const fechaElaboracion = new Date(
-                                      anio,
-                                      mes - 1,
-                                      dia,
-                                      horas,
-                                      minutos
-                                    );
-                                    const diffMinutes =
-                                      (new Date() - fechaElaboracion) / 60000;
-
-                                    return diffMinutes > 15;
-                                  })()
+                                  currentOrder.enCamino
                                     ? 'animated-loading'
                                     : 'bg-gray-50  border-opacity-20 border-black border-1 border'
                                 }`}
-                              ></div>
+                              />
                             </>
                           )}
                         </div>
@@ -743,97 +624,41 @@ const Pedido = () => {
                           {currentOrder.pendingOfBeingAccepted
                             ? 'Tu pedido está pendiente de aprobación...'
                             : currentOrder.direccion === ''
-                            ? (new Date() - new Date(currentOrder.hora)) /
-                                60000 <=
-                              20
-                              ? 'Anhelo está preparando tu pedido...'
+                            ? diferenciaEnMinutos <= 20
+                              ? `${
+                                  clientData?.name || 'El local'
+                                } está preparando tu pedido...`
                               : 'Esperando que retires tu pedido...'
                             : !currentOrder.elaborado
-                            ? 'Anhelo está preparando tu pedido...'
+                            ? `${
+                                clientData?.name || 'El local'
+                              } está preparando tu pedido...`
                             : (() => {
-                                const horaPedidoConTiempoElaborado =
-                                  sumarMinutos(
-                                    currentOrder.hora,
-                                    parseInt(
-                                      currentOrder.tiempoElaborado.split(':')[1]
-                                    )
-                                  );
-                                const [dia, mes, anio] = currentOrder.fecha
-                                  .split('/')
-                                  .map(Number);
-                                const [horas, minutos] =
-                                  horaPedidoConTiempoElaborado
-                                    .split(':')
-                                    .map(Number);
-                                const fechaElaboracion = new Date(
-                                  anio,
-                                  mes - 1,
-                                  dia,
-                                  horas,
-                                  minutos
+                                const fechaHoraPedido = getOrderCreatedDate(
+                                  currentOrder.createdAt
+                                );
+                                const minutosElaborado = parseInt(
+                                  currentOrder.tiempoElaborado?.split(':')[1] ||
+                                    '0',
+                                  10
+                                );
+                                const fechaElaboracion = sumarMinutos(
+                                  fechaHoraPedido,
+                                  minutosElaborado
                                 );
                                 const diffMinutes =
-                                  (new Date() - fechaElaboracion) / 60000;
+                                  (new Date() - new Date(fechaElaboracion)) /
+                                  60000;
 
                                 return diffMinutes <= 15
-                                  ? 'Tu cadete está llegando a Anhelo...'
+                                  ? `Tu cadete está llegando a ${
+                                      clientData?.name || 'al local'
+                                    }...`
                                   : 'En camino... Atención, te va a llamar tu cadete.';
                               })()}
                         </p>
                       </div>
                       <div className="flex flex-col text-left gap-2">
-                        <div className="flex flex-row gap-2">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="h-6"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <div className="flex flex-row items-center gap-2 flex-1">
-                            <p className="text-black font-coolvetica font-medium">
-                              {currentOrder.pendingOfBeingAccepted
-                                ? 'Entre 3 a 5 minutos para confirmar'
-                                : currentOrder.direccion === ''
-                                ? `Retirar entre ${sumarMinutos(
-                                    currentOrder.hora,
-                                    15
-                                  )} hs y ${sumarMinutos(
-                                    currentOrder.hora,
-                                    25
-                                  )} hs`
-                                : `Llega entre ${sumarMinutos(
-                                    currentOrder.hora,
-                                    30
-                                  )} hs a ${sumarMinutos(
-                                    currentOrder.hora,
-                                    50
-                                  )} hs`}
-                            </p>
-                          </div>
-                          {!currentOrder.elaborado && (
-                            <button
-                              onClick={() => handleEditTime(currentOrder.id)}
-                              className="rounded-full hover:bg-gray-50 "
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                class="h-6"
-                              >
-                                <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-
                         <div className="flex flex-row gap-2 items-center">
                           {currentOrder.direccion === '' ? (
                             <img
@@ -869,26 +694,6 @@ const Pedido = () => {
                               </>
                             )}
                           </p>
-                          {!currentOrder.elaborado && (
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() =>
-                                  handleEditAddress(currentOrder.id)
-                                }
-                                className="rounded-full  hover:bg-gray-50 "
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 24 24"
-                                  fill="currentColor"
-                                  class="h-6"
-                                >
-                                  <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                  <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
                         </div>
                         <div className="flex flex-row items-center justify-between ">
                           <div className="flex flex-row items-center gap-2">
@@ -944,39 +749,41 @@ const Pedido = () => {
                         </div>
                       )}
 
-                      {/* pago virtual */}
-                      <div
-                        className="bg-gray-300 text-blue-500 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
-                        onClick={(e) => {
-                          handleTransferenciaClick(
-                            currentOrder.total,
-                            currentOrder.telefono
-                          );
-                        }}
-                      >
-                        <div className="flex items-center">
-                          {isPaymentLoading ? (
-                            <LoadingPoints className="text-blue-500" />
-                          ) : (
-                            <>
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="h-5 mr-2"
-                              >
-                                <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Pagar virtualmente
-                            </>
-                          )}
+                      {/* Pago virtual */}
+                      {!currentOrder.paid && (
+                        <div
+                          className="bg-gray-300 text-blue-500 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                          onClick={(e) => {
+                            handleTransferenciaClick(
+                              currentOrder.total,
+                              currentOrder.telefono
+                            );
+                          }}
+                        >
+                          <div className="flex items-center">
+                            {isPaymentLoading ? (
+                              <LoadingPoints className="text-blue-500" />
+                            ) : (
+                              <>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="h-5 mr-2"
+                                >
+                                  <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                Pagar virtualmente
+                              </>
+                            )}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {/* soporte */}
                       {showSupportButton && (
@@ -1031,16 +838,6 @@ const Pedido = () => {
                         </div>
                       )}
                     </div>
-
-                    {!currentOrder.elaborado &&
-                      currentOrder.metodoPago === 'efectivo' && (
-                        <UpdatedPedidoSection
-                          currentOrder={currentOrder}
-                          showCancelButton={showCancelButton}
-                          isDeleting={isDeleting}
-                          handleCancelClick={handleCancelClick}
-                        />
-                      )}
 
                     {index < pedidosPagados.length - 1 && (
                       <div className="w-full h-px bg-black opacity-20 mt-8"></div>
