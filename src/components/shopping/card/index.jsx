@@ -308,7 +308,7 @@ const Card = ({ data, path }) => {
           </div>
 
           {/* indicador de imagenes */}
-          {isInViewport && (
+          {isInViewport && images.length > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
                 <div
