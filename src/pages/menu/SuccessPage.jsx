@@ -52,6 +52,18 @@ const SuccessPage = () => {
             }
           }
 
+          @keyframes backgroundMovement {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+
           .circle-animation {
             stroke-dasharray: 157;
             stroke-dashoffset: 157;
@@ -79,6 +91,12 @@ const SuccessPage = () => {
             animation-delay: 1s;
           }
 
+          .blue-gradient-background {
+            background: linear-gradient(135deg, #1E4F95 0%, #396FB7 25%, #2E5FA6 50%, #4479C4 75%, #5089D1 100%);
+            background-size: 300% 300%;
+            animation: backgroundMovement 8s ease-in-out infinite;
+          }
+
           @keyframes fadeInUpCustom {
             0% {
               opacity: 0;
@@ -91,8 +109,7 @@ const SuccessPage = () => {
           }
         `}
       </style>
-
-      <div className="bg-gradient-to-b from-black via-black to-red-500 flex items-center justify-center h-screen">
+      <div className="blue-gradient-background flex items-center justify-center h-screen">
         <div className="text-center">
           <svg
             className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
