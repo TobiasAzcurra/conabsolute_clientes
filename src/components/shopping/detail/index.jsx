@@ -47,20 +47,15 @@ const DetailCard = () => {
     const stats = {};
 
     for (const variant of product?.variants || []) {
-      const attrs = variant.attributes || {};
-      Object.entries(attrs).forEach(([key, value]) => {
-        if (!value) return;
+      const key = variant.linkedTo;
+      const value = variant.name;
+      if (!key || !value) continue;
 
-        const stringValue =
-          typeof value === 'object' && value !== null
-            ? value.name?.toLowerCase?.()
-            : String(value).toLowerCase();
+      const stringKey = String(key).toLowerCase();
+      const stringValue = String(value).toLowerCase();
 
-        if (!stringValue) return;
-
-        if (!stats[key]) stats[key] = new Set();
-        stats[key].add(stringValue);
-      });
+      if (!stats[stringKey]) stats[stringKey] = new Set();
+      stats[stringKey].add(stringValue);
     }
 
     const result = {};
@@ -78,19 +73,43 @@ const DetailCard = () => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return true;
 
-        const variantValue = variant.attributes?.[key];
+        const variantKey = variant.linkedTo?.toLowerCase?.();
+        const variantValue = variant.name?.toLowerCase?.();
 
-        const stringValue =
-          typeof variantValue === 'object' && variantValue !== null
-            ? variantValue.name?.toLowerCase?.()
-            : String(variantValue).toLowerCase();
-
-        return stringValue === value;
+        return key === variantKey && value === variantValue;
       });
     });
 
     setSelectedVariant(matched || null);
   }, [selectedVariants, product?.variants]);
+
+  useEffect(() => {
+    if (!product?.variants || product.variants.length === 0) return;
+
+    if (Object.keys(selectedVariants).length > 0) return;
+
+    const autoSelected = {};
+    const stats = {};
+
+    for (const variant of product.variants) {
+      const key = variant.linkedTo;
+      const value = variant.name;
+      if (!key || !value) continue;
+
+      const stringKey = String(key).toLowerCase();
+      const stringValue = String(value).toLowerCase();
+
+      if (!stats[stringKey]) stats[stringKey] = new Set();
+      stats[stringKey].add(stringValue);
+    }
+
+    for (const key in stats) {
+      autoSelected[key] = Array.from(stats[key])[0];
+    }
+
+    setSelectedVariants(autoSelected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.variants]);
 
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((altaDemandaData) => {
@@ -103,11 +122,11 @@ const DetailCard = () => {
 
   const productImages = useMemo(() => {
     const variantHasImages =
-      Array.isArray(selectedVariant?.images) &&
-      selectedVariant.images.length > 0;
+      Array.isArray(selectedVariant?.productImage) &&
+      selectedVariant.productImage.length > 0;
 
     const imgs = variantHasImages
-      ? selectedVariant.images
+      ? selectedVariant.productImage
       : product?.img || product?.image || product?.images || [];
 
     const normalized = Array.isArray(imgs) ? imgs : [imgs];
@@ -139,19 +158,54 @@ const DetailCard = () => {
     setSelectedImageIndex(0);
   }, [productImages]);
 
-  const totalPrice = useMemo(() => {
-    if (!product) return 0;
+  const variantTotalPrice = useMemo(() => {
+    return Object.entries(selectedVariants).reduce((acc, [key, value]) => {
+      if (!value) return acc;
+      const variant = product.variants?.find(
+        (v) =>
+          v.linkedTo?.toLowerCase() === key && v.name?.toLowerCase() === value
+      );
+      return acc + (variant?.price || 0);
+    }, 0);
+  }, [selectedVariants, product?.variants]);
 
-    const variantPrice = selectedVariant?.price;
-    const basePrice =
-      variantPrice !== undefined && variantPrice !== 0
-        ? variantPrice
-        : product.price || 0;
+  const basePrice = product.price || 0;
+  const totalBeforeFactor = basePrice + variantTotalPrice;
+  const priceFactor = altaDemanda?.priceFactor || 1;
+  const totalPrice = Math.ceil((totalBeforeFactor * priceFactor) / 100) * 100;
 
-    const priceFactor = altaDemanda?.priceFactor || 1;
+  const variantNames = useMemo(() => {
+    return Object.values(selectedVariants)
+      .filter(Boolean)
+      .map((v) => capitalizeWords(v))
+      .join(' ');
+  }, [selectedVariants]);
 
-    return Math.ceil((basePrice * priceFactor) / 100) * 100;
-  }, [selectedVariant, product, altaDemanda?.priceFactor]);
+  const combinedName = useMemo(() => {
+    return variantNames ? `${product.name} ${variantNames}` : product.name;
+  }, [product?.name, variantNames]);
+
+  const firstVariantWithImage = useMemo(() => {
+    return product.variants?.find(
+      (v) =>
+        selectedVariants[v.linkedTo?.toLowerCase()] === v.name?.toLowerCase() &&
+        v.productImage?.length > 0
+    );
+  }, [product.variants, selectedVariants]);
+
+  const productToSend = useMemo(() => {
+    return {
+      ...product,
+      id: product.id,
+      name: combinedName,
+      category: product.category,
+      img:
+        firstVariantWithImage?.productImage?.[0] ||
+        product.img?.[0] ||
+        product.img,
+      price: totalPrice,
+    };
+  }, [product, combinedName, firstVariantWithImage, totalPrice]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => ({
@@ -167,20 +221,6 @@ const DetailCard = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const productToSend = selectedVariant
-    ? {
-        ...selectedVariant,
-        name: product.name,
-        category: product.category,
-        id: product.id,
-        img: selectedVariant.images?.[0] || product.img?.[0] || product.img,
-        price:
-          selectedVariant.price && selectedVariant.price !== 0
-            ? selectedVariant.price
-            : product.price,
-      }
-    : product;
 
   if (!product) {
     return (
@@ -253,26 +293,71 @@ const DetailCard = () => {
                             const isSelected = selectedVariants[key] === value;
                             const isFirst = index === 0;
                             const isLast = index === values.length - 1;
+                            const isOnly = values.length === 1;
 
-                            const borderRadiusClass = isFirst
+                            const borderRadiusClass = isOnly
+                              ? 'rounded-full'
+                              : isFirst
                               ? 'rounded-l-full'
                               : isLast
                               ? 'rounded-r-full'
                               : 'rounded-none';
 
+                            const variant = (product.variants || []).find(
+                              (v) =>
+                                v.linkedTo?.toLowerCase() === key &&
+                                v.name?.toLowerCase() === value
+                            );
+                            const hasAttributeImage =
+                              variant &&
+                              Array.isArray(variant.attributeImage) &&
+                              variant.attributeImage.length > 0;
+
+                            const totalVariants = values.length;
+                            const maxTotalWidth = 500; // px
+                            const widthPerButton = Math.min(
+                              Math.floor(maxTotalWidth / totalVariants),
+                              200
+                            );
+
                             return (
                               <button
                                 key={value}
                                 onClick={() => handleVariantSelect(key, value)}
-                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-300 ${
-                                  isSelected
-                                    ? 'bg-gray-900 text-white'
-                                    : 'bg-white text-gray-600'
-                                } ${borderRadiusClass} ${
+                                className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-300 ${borderRadiusClass} ${
                                   index > 0 ? '-ml-px' : ''
-                                }`}
+                                } flex items-center justify-center
+                                  ${
+                                    !hasAttributeImage
+                                      ? isSelected
+                                        ? 'bg-gray-900 text-white'
+                                        : 'bg-white text-gray-600'
+                                      : ''
+                                  }
+                                `}
+                                style={
+                                  hasAttributeImage
+                                    ? {
+                                        padding: 0,
+                                        width: '100%',
+                                        height: 40,
+                                        overflow: 'hidden',
+                                      }
+                                    : {}
+                                }
                               >
-                                {capitalizeWords(value)}
+                                {hasAttributeImage ? (
+                                  <img
+                                    src={variant.attributeImage[0]}
+                                    alt={value}
+                                    className={`w-full h-full object-cover transition-opacity duration-200 ${
+                                      isSelected ? 'opacity-100' : 'opacity-50'
+                                    }`}
+                                    style={{ width: '100%', height: '100%' }}
+                                  />
+                                ) : (
+                                  capitalizeWords(value)
+                                )}
                               </button>
                             );
                           })}
@@ -290,11 +375,6 @@ const DetailCard = () => {
                   product={productToSend}
                   calculatedPrice={totalPrice}
                   displayAsFullButton={true}
-                  disabled={
-                    !selectedVariant &&
-                    product.variants &&
-                    product.variants.length > 0
-                  }
                 />
               </div>
 
