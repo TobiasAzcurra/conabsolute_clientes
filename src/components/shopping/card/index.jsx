@@ -300,9 +300,9 @@ const Card = ({ data, path }) => {
             {visibleLabels.map((label, index) => (
               <span
                 key={`${label.key}-${index}`}
-                className="text-gray-400 text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-t-xl"
+                className="text-gray-400 text-[10px] font-light bg-gray-50 px-2 py-1 rounded-t-xl"
               >
-                {label.text}
+                {label.text.toLowerCase()}
               </span>
             ))}
           </div>
