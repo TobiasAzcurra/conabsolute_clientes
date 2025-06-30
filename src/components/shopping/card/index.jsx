@@ -114,7 +114,7 @@ const Card = ({ data, path }) => {
     [data.variants]
   );
 
-  const basePrice = selectedVariant?.price || data.price || 0;
+  const basePrice = data.price || 0;
   const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
   const cuotaText = useMemo(() => {
@@ -331,11 +331,10 @@ const Card = ({ data, path }) => {
               {currencyFormat(adjustedPrice)}
             </span>
             {(cuotaText || efectivoText) && (
-              <span className="font-light pr-12 text-xs text-green-500">
-                {cuotaText}
-                {cuotaText && efectivoText && ' - '}
-                {efectivoText}
-              </span>
+              <div className="font-light pr-12 text-xs text-green-500 flex flex-col items-start">
+                {cuotaText && <span>{cuotaText}</span>}
+                {efectivoText && <span>{efectivoText}</span>}
+              </div>
             )}
           </div>
         </div>
