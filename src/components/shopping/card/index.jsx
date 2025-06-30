@@ -346,7 +346,7 @@ const Card = ({ data, path }) => {
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight ">
+            <p className="text-center text-xs text-gray-400 font-light font-coolvetica leading-tight ">
               {data.cardDescription}
             </p>
           )}
