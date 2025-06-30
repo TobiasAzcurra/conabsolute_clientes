@@ -26,7 +26,7 @@ const handleSubmit = async (values, cart, config, message = '', clientData) => {
   const envio = values.deliveryMethod === 'takeaway' ? 0 : config.envio || 0;
 
   const hasYerbas = cart.some(
-    (item) => item.category?.toLowerCase() === 'yerbas'
+    (item) => item.category?.toLowerCase() === 'yerba'
   );
 
   let descuento = 0;
