@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-import Items from "../../pages/menu/Items";
-import CartCard from "../../components/shopping/cart/CartCard";
-import burgers from "../../assets/burgers-v1.json";
-import papas from "../../assets/papas-v1.json";
-import drinks from "../../assets/drinks-v1.json";
-import box from "../../assets/box.png";
-import fries from "../../assets/fries.png";
-import arrow from "../../assets/arrowIcon.png";
-import { handleConfirmChanges } from "../../firebase/uploadOrder";
-import LoadingPoints from "../../components/LoadingPoints";
+import React, { useEffect, useState } from 'react';
+import Items from '../../pages/menu/Items';
+import CartCard from '../../components/shopping/cart/CartCard';
+import burgers from '../../assets/burgers-v1.json';
+import papas from '../../assets/papas-v1.json';
+import drinks from '../../assets/drinks-v1.json';
+import box from '../../assets/box.png';
+import fries from '../../assets/fries.png';
+import arrow from '../../assets/arrowIcon.png';
+import LoadingPoints from '../../components/LoadingPoints';
 
 const UpdatedPedidoSection = ({
   currentOrder,
@@ -21,30 +20,30 @@ const UpdatedPedidoSection = ({
 
   const burgersArray = Object.values(burgers).map((product) => ({
     ...product,
-    category: "burger",
+    category: 'burger',
   }));
 
   const papasArray = Object.values(papas).map((product) => ({
     ...product,
-    category: "papas",
+    category: 'papas',
   }));
 
   const drinksArray = Object.values(drinks).map((product) => ({
     ...product,
-    category: "drinks",
+    category: 'drinks',
   }));
 
   const allProducts = [...burgersArray, ...papasArray, ...drinksArray];
 
   const getDefaultImage = (product) => {
-    if (product.category === "burger") {
+    if (product.category === 'burger') {
       return box;
-    } else if (product.category === "papas") {
+    } else if (product.category === 'papas') {
       return fries;
-    } else if (product.category === "drinks") {
-      return "/menu/coca.png";
+    } else if (product.category === 'drinks') {
+      return '/menu/coca.png';
     }
-    return "/ruta/a/imagen/default.png";
+    return '/ruta/a/imagen/default.png';
   };
 
   const getProductImage = (productName) => {
@@ -54,7 +53,7 @@ const UpdatedPedidoSection = ({
 
   const getProductCategory = (productName) => {
     const product = allProducts.find((p) => p.name === productName);
-    return product?.category || "burger";
+    return product?.category || 'burger';
   };
 
   const mapOrderItemToCartFormat = (orderItem) => {
@@ -104,7 +103,7 @@ const UpdatedPedidoSection = ({
       await handleConfirmChanges(currentOrder.id);
       // console.log("✅ Cambios confirmados exitosamente");
     } catch (error) {
-      console.error("❌ Error al confirmar los cambios:", error);
+      console.error('❌ Error al confirmar los cambios:', error);
     } finally {
       setIsConfirming(false);
     }
@@ -122,7 +121,7 @@ const UpdatedPedidoSection = ({
             ¡Podes agregar productos!
             <br />
             <p className="text-xs font-medium">
-              Por logistica las modificaciones son limitadas y cuando se cocine{" "}
+              Por logistica las modificaciones son limitadas y cuando se cocine{' '}
               <br /> esta opcion desaparece.
             </p>
             <br />
@@ -133,7 +132,7 @@ const UpdatedPedidoSection = ({
       <img
         src={arrow}
         className={`h-2 w-1.5 transform ${
-          isModifyOrderExpanded ? "-rotate-90" : "arrow-bounce"
+          isModifyOrderExpanded ? '-rotate-90' : 'arrow-bounce'
         }`}
         alt=""
       />
@@ -144,8 +143,8 @@ const UpdatedPedidoSection = ({
           <div
             className="flex flex-col md:flex-row gap-2 w-full mt-12 overflow-x-auto custom-scrollbar"
             style={{
-              scrollBehavior: "smooth",
-              WebkitOverflowScrolling: "touch",
+              scrollBehavior: 'smooth',
+              WebkitOverflowScrolling: 'touch',
             }}
           >
             <div className="flex flex-col md:flex-row px-4 gap-2 md:w-max">
@@ -183,14 +182,14 @@ const UpdatedPedidoSection = ({
             <div
               className="flex gap-2 pl-4 pr-4 overflow-x-auto overflow-y-hidden custom-scrollbar"
               style={{
-                maxHeight: "300px",
-                paddingBottom: "1rem",
-                scrollBehavior: "smooth",
-                WebkitOverflowScrolling: "touch",
-                width: "100%",
+                maxHeight: '300px',
+                paddingBottom: '1rem',
+                scrollBehavior: 'smooth',
+                WebkitOverflowScrolling: 'touch',
+                width: '100%',
               }}
             >
-              <div className="flex gap-2" style={{ width: "max-content" }}>
+              <div className="flex gap-2" style={{ width: 'max-content' }}>
                 {[...papasArray, ...drinksArray, ...burgersArray]
                   .filter(
                     (product) =>
