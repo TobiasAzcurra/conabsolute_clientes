@@ -268,23 +268,24 @@ const DetailCard = () => {
             />
 
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
-                    selectedImageIndex === index
-                      ? "border-white opacity-100 shadow-lg"
-                      : "border-white opacity-70 hover:opacity-90"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} - imagen ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+              {productImages.length > 1 &&
+                productImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                      selectedImageIndex === index
+                        ? "border-white opacity-100 shadow-lg"
+                        : "border-white opacity-70 hover:opacity-90"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} - imagen ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
             </div>
           </div>
 
@@ -410,7 +411,7 @@ const DetailCard = () => {
 
             {/* agregar */}
 
-            <div className="flex flex-row items-center w-full mt-10 px-3 ">
+            <div className="flex flex-row items-center w-full mt-6 px-3 ">
               <div className="">
                 <QuickAddToCart
                   product={productToSend}
@@ -423,7 +424,7 @@ const DetailCard = () => {
                 Por {currencyFormat(totalPrice)}
               </p>
             </div>
-            <div className="mt-16">
+            <div className="mt-12">
               <VideoSlider reels={reels} />
             </div>
             {logo && (
