@@ -40,7 +40,6 @@ const CartCard = ({
     setIsUpdating(true);
     try {
       await handleConfirmChanges(currentOrder.id);
-      // console.log("✅ Producto confirmado automáticamente");
     } catch (error) {
       console.error('❌ Error al confirmar el producto:', error);
     } finally {
@@ -59,7 +58,6 @@ const CartCard = ({
         index,
         0
       );
-      // console.log("✅ Producto eliminado exitosamente");
     } catch (error) {
       console.error('❌ Error al eliminar el producto:', error);
     } finally {
@@ -220,6 +218,7 @@ const CartCard = ({
                 }
                 isUpdating={isUpdating}
                 disabled={isDisabled}
+                animateFrom='left'
               />
 
               {showConfirmation && countdown !== null && (
