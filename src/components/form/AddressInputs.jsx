@@ -60,7 +60,7 @@ const AddressInputs = ({
             label="Aclaraciones"
             name="aclaraciones"
             type="text"
-            placeholder="¿Aclaraciones sobre el pedido? Ej: Sin mayonesa"
+            placeholder="¿Aclaraciones sobre el pedido?"
             autoComplete="off"
             className="bg-transparent font-light text-xs px-0 h-10 text-opacity-20 outline-none w-full"
           />
