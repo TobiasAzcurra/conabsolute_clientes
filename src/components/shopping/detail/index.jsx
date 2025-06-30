@@ -25,7 +25,6 @@ const DetailCard = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [altaDemanda, setAltaDemanda] = useState(null);
   const [itemsOut, setItemsOut] = useState({});
-  const [customization, setCustomization] = useState(true);
   const [disable, setDisable] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
@@ -65,6 +64,14 @@ const DetailCard = () => {
 
     return result;
   }, [product?.variants]);
+
+  // Determinar si hay customización disponible basándose en variantStats
+  const customization = useMemo(() => {
+    return (
+      Object.keys(variantStats).length > 0 &&
+      Object.values(variantStats).some((values) => values.length > 0)
+    );
+  }, [variantStats]);
 
   useEffect(() => {
     if (!product?.variants) return;
@@ -247,6 +254,8 @@ const DetailCard = () => {
     );
   }
 
+  console.log("acaaa", customization);
+
   return (
     <div>
       <div className="flex flex-col">
@@ -304,15 +313,15 @@ const DetailCard = () => {
             </div>
             {/* desc */}
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4 mb-8 pr-16 leading-tight">
+              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4  pr-16 leading-tight">
                 {product.detailDescription.charAt(0).toUpperCase() +
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
 
             {/* variantes */}
-            {customization ? (
-              <div className="gap-2 w-full flex justify-center gap-2 px-4 flex flex-col w-full">
+            {customization && (
+              <div className="gap-2 w-full mt-8 flex justify-center gap-2 px-4 flex flex-col w-full">
                 {Object.entries(variantStats).map(([key, values]) => (
                   <div key={key} className="">
                     <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
@@ -397,7 +406,7 @@ const DetailCard = () => {
                   </div>
                 ))}
               </div>
-            ) : null}
+            )}
 
             {/* agregar */}
 
