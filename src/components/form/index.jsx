@@ -128,6 +128,7 @@ const FormCustom = ({ cart, total }) => {
           references: '',
           paymentMethod: 'efectivo',
           hora: '',
+          couponCode: '',
         }}
         validationSchema={validations(total + envio)}
         onSubmit={async (values) => {
@@ -143,10 +144,26 @@ const FormCustom = ({ cart, total }) => {
             (acc, item) => acc + item.price * item.quantity,
             0
           );
-          let finalTotal = productsTotal;
+
+          let descuento = 0;
+          const activeCoupons = [
+            'APMCONKINGCAKES',
+            'APMCONANHELO',
+            'APMCONPROVIMARK',
+            'APMCONLATABLITA',
+          ];
+          if (activeCoupons.includes(values.couponCode.trim().toUpperCase())) {
+            const hasYerba = cart.some(
+              (item) => item.category?.toLowerCase() === 'yerbas'
+            );
+            if (!hasYerba) {
+              descuento = Math.round(productsTotal * 0.3);
+            }
+          }
+
+          let finalTotal = productsTotal - descuento;
           if (values.deliveryMethod === 'delivery') finalTotal += envio;
           if (isEnabled) finalTotal += expressDeliveryFee;
-
           return (
             <Form>
               <div className="flex flex-col mb-2">
@@ -219,6 +236,7 @@ const FormCustom = ({ cart, total }) => {
                   expressFee={isEnabled ? expressDeliveryFee : 0}
                   expressBaseFee={expressDeliveryFee}
                   finalTotal={finalTotal}
+                  descuento={descuento}
                   handleExpressToggle={handleExpressToggle}
                   isEnabled={isEnabled}
                 />
