@@ -315,8 +315,8 @@ const Card = ({ data, path }) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? "bg-white opacity-100"
-                      : "bg-white opacity-50"
+                      ? "bg-gray-50 opacity-100"
+                      : "bg-gray-50 opacity-30"
                   }`}
                 />
               ))}
