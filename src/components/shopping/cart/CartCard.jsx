@@ -123,6 +123,8 @@ const CartCard = ({
 
   const imageSrc = getImageSrc(item || img);
 
+  console.log(name, "acaaaa");
+
   return (
     <div className="relative">
       <div
@@ -182,7 +184,7 @@ const CartCard = ({
                 showConfirmation ? "truncate leading-none" : "leading-6"
               }`}
             >
-              {capitalizeWords(name)}
+              {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
             </h3>
             {toppings && toppings.length > 0 && (
               <p className="text-xs mb-4 font-medium">
