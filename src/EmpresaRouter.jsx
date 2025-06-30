@@ -24,6 +24,7 @@ const EmpresaRouter = () => {
         <Route path="carrito" element={<CartItems />} />
         <Route path="success/:orderId" element={<SuccessPage />} />
         <Route path="pedido/:orderId" element={<Pedido />} />
+        <Route path="pedido" element={<Pedido />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ClientLayout>
