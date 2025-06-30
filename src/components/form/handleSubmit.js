@@ -1,5 +1,10 @@
 import { extractCoordinates } from '../../helpers/currencyFormat';
 import { cleanPhoneNumber } from '../../firebase/utils/phoneUtils';
+import {
+  addTelefonoCliente,
+  UploadOrder,
+} from '../../firebase/orders/uploadOrder';
+import { obtenerFechaActual } from '../../firebase/utils/dateHelpers';
 
 const handleSubmit = async (values, cart, config, message = '', clientData) => {
   const {
@@ -40,7 +45,7 @@ const handleSubmit = async (values, cart, config, message = '', clientData) => {
       quantity: item.quantity,
       stockUsedFrom: item.stockUsedFrom || [],
     })),
-    dirección: direccion,
+    direccion,
     elaborado: false,
     enCamino: false,
     envio: envio || 0,
@@ -48,10 +53,10 @@ const handleSubmit = async (values, cart, config, message = '', clientData) => {
     map: coordinates || [],
     message,
     metodoPago: values.paymentMethod,
-    paid: true,
+    paid: false,
     pendingOfBeingAccepted: isPending,
     referencias: values.references,
-    teléfono: cleanPhoneNumber(phone),
+    telefono: cleanPhoneNumber(phone),
     total:
       cart.reduce((total, item) => total + item.price * item.quantity, 0) -
       descuento +
@@ -62,20 +67,20 @@ const handleSubmit = async (values, cart, config, message = '', clientData) => {
   console.log('orderDetail to upload:', orderDetail);
 
   try {
-    // const orderId = await UploadOrder(empresaId, sucursalId, orderDetail);
-    // await addTelefonoCliente(
-    //   empresaId,
-    //   sucursalId,
-    //   phone,
-    //   obtenerFechaActual()
-    // );
-    // localStorage.setItem('customerPhone', cleanPhoneNumber(phone));
+    const orderId = await UploadOrder(empresaId, sucursalId, orderDetail);
+    await addTelefonoCliente(
+      empresaId,
+      sucursalId,
+      phone,
+      obtenerFechaActual()
+    );
+    localStorage.setItem('customerPhone', cleanPhoneNumber(phone));
 
-    // console.log('Order uploaded successfully. orderId:', orderId);
+    console.log('Order uploaded successfully. orderId:', orderId);
     // console.log('Order uploaded successfully. orderDetail:', orderDetail);
 
-    // return orderId;
-    return orderDetail; // Return the order detail instead of orderId
+    return orderId;
+    // return orderDetail; // Return the order detail instead of orderId
   } catch (error) {
     console.error('Error al subir la orden: ', error);
     return null;
