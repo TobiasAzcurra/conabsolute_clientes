@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useClient } from '../../contexts/ClientContext';
 import { getClientData } from '../../firebase/clients/getClientData';
 import { getClientAssets } from '../../firebase/clients/getClientAssets';
@@ -12,6 +12,7 @@ import { getClientConfig } from '../../firebase/clients/getClientConfig';
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     setIsLoaded,
     setClientData,
@@ -72,9 +73,14 @@ const MenuIntro = () => {
 
         setTimeout(() => {
           setIsLoaded(true);
-          navigate(`menu/${categories?.[0]?.id || 'default'}`, {
-            replace: true,
-          });
+          const rootPath = `/${slugEmpresa}/${slugSucursal}`;
+          if (location.pathname === rootPath) {
+            navigate(`menu/${categories?.[0]?.id || 'default'}`, {
+              replace: true,
+            });
+          } else {
+            navigate(location.pathname, { replace: true });
+          }
         }, 3000);
       } catch (error) {
         console.error('❌ Error cargando datos:', error);
