@@ -580,9 +580,13 @@ const Pedido = () => {
                                     : "bg-black"
                                 }`}
                               ></div>
+
+                              {/* si esta en camino */}
+
                               <div
                                 className={`w-1/4 h-2.5 rounded-full ${
                                   currentOrder.elaborado &&
+                                  !currentOrder.enCamino &&
                                   (() => {
                                     const fechaHoraPedido = getOrderCreatedDate(
                                       currentOrder.createdAt
@@ -607,14 +611,16 @@ const Pedido = () => {
                                     ? "animated-loading"
                                     : currentOrder.elaborado
                                     ? "bg-black"
-                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
+                                    : " border-opacity-20 border-black border-1 border"
                                 }`}
                               />
+
+                              {/* si esta en camino */}
                               <div
                                 className={`w-1/2 h-2.5 rounded-full ${
                                   currentOrder.enCamino
                                     ? "animated-loading"
-                                    : "bg-gray-50  border-opacity-20 border-black border-1 border"
+                                    : "  border-opacity-20 border-black border-1 border"
                                 }`}
                               />
                             </>
