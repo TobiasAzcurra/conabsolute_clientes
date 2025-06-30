@@ -5,7 +5,7 @@ import AgregarProductoPage from "./pages/admin/AgregarProductoPage";
 const AppRouter = () => {
   return (
     <Routes>
-      {/* Redirección desde la raíz a la empresa/sucursal por defecto */}
+      {/* Redirección temporal desde la raíz a la empresa/sucursal por defecto */}
       <Route
         path="/"
         element={<Navigate to="/a-puro-mate/rio-cuarto" replace />}
