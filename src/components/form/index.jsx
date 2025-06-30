@@ -228,6 +228,7 @@ const FormCustom = ({ cart, total }) => {
                   setUrl={setUrl}
                   setValidarUbi={setValidarUbi}
                   setNoEncontre={setNoEncontre}
+                  cart={cart}
                 />
                 {/* Resumen */}
                 <OrderSummary
