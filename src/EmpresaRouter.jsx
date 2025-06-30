@@ -7,6 +7,7 @@ import Section from './components/shopping/section';
 import DetailCard from './components/shopping/detail';
 import CartItems from './components/shopping/cart';
 import NotFound from './components/NotFound.jsx';
+import SuccessPage from './pages/menu/SuccessPage.jsx';
 
 const EmpresaRouter = () => {
   const { isLoaded } = useClient();
@@ -20,6 +21,7 @@ const EmpresaRouter = () => {
         <Route path="menu/:category" element={<Section />} />
         <Route path="menu/:category/:id" element={<DetailCard />} />
         <Route path="carrito" element={<CartItems />} />
+        <Route path="success/:orderId" element={<SuccessPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ClientLayout>
