@@ -16,8 +16,8 @@ const ClientLayout = ({ children }) => {
 
   const isProductDetail = /\/menu\/[^/]+\/[^/]+$/.test(pathname);
   const isCart = pathname.endsWith('/carrito');
-  const isSuccessPage = pathname.includes('/success/');
-  const isPedidoPage = pathname.includes('/pedido/');
+  const isSuccessPage = pathname.includes('/success');
+  const isPedidoPage = pathname.includes('/pedido');
 
   const shouldHideHeader =
     isProductDetail || isCart || isSuccessPage || isPedidoPage;
