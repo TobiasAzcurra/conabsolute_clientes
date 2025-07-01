@@ -1,8 +1,8 @@
-import { ErrorMessage, Field } from 'formik';
-import MyTextInput from './MyTextInput';
-import { MapDirection } from './MapDirection';
-import AppleErrorMessage from './AppleErrorMessage';
-import TimeSelector from './TimeSelector';
+import { ErrorMessage, Field } from "formik";
+import MyTextInput from "./MyTextInput";
+import { MapDirection } from "./MapDirection";
+import AppleErrorMessage from "./AppleErrorMessage";
+import TimeSelector from "./TimeSelector";
 
 const AddressInputs = ({
   values,
@@ -10,10 +10,33 @@ const AddressInputs = ({
   setUrl,
   setValidarUbi,
   setNoEncontre,
+  cart, // Necesitamos agregar cart como prop
 }) => {
+  // Función para validar el cupón (misma lógica que en validations.js)
+  const validateCoupon = (couponCode, cart) => {
+    if (!couponCode || !couponCode.trim()) return false;
+
+    const activeCoupons = [
+      "APMCONKINGCAKES",
+      "APMCONANHELO",
+      "APMCONPROVIMARK",
+      "APMCONLATABLITA",
+    ];
+
+    const couponCodeUpper = couponCode.trim().toUpperCase();
+    const hasYerba = cart.some(
+      (item) => item.category?.toLowerCase() === "yerba"
+    );
+
+    // Solo mostrar el tilde si es un cupón activo Y no hay yerba
+    return activeCoupons.includes(couponCodeUpper) && !hasYerba;
+  };
+
+  const isCouponValid = validateCoupon(values.couponCode, cart || []);
+
   return (
     <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300 overflow-hidden">
-      {values.deliveryMethod === 'delivery' && (
+      {values.deliveryMethod === "delivery" && (
         <>
           {/* Mapa y dirección */}
           <MapDirection
@@ -101,7 +124,7 @@ const AddressInputs = ({
 
       {/* Cupón de descuento */}
       <div className="flex flex-col justify-between h-auto items-start border-t border-black border-opacity-20">
-        <div className="flex flex-row items-center px-3 gap-2 w-full">
+        <div className="flex flex-row items-center px-3 gap-2 w-full relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -119,8 +142,25 @@ const AddressInputs = ({
             type="text"
             placeholder="¿Tenés un código de descuento?"
             autoComplete="off"
-            className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full"
+            className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full pr-8"
           />
+
+          {/* Tilde verde cuando el cupón es válido */}
+          {isCouponValid && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <svg
+                className="w-5 h-5 text-green-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
         </div>
 
         <div className="w-full">
@@ -132,7 +172,7 @@ const AddressInputs = ({
       </div>
 
       {/* Selector de hora: ¿Quieres reservar para más tarde? */}
-      {values.deliveryMethod === 'delivery' && (
+      {/* {values.deliveryMethod === 'delivery' && (
         <div className="border-t border-black border-opacity-20 px-3">
           <TimeSelector
             selectedHora={values.hora}
@@ -140,7 +180,7 @@ const AddressInputs = ({
             setFieldValue={setFieldValue}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 };

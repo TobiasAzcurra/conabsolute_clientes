@@ -1,30 +1,32 @@
-import * as Yup from 'yup';
+import * as Yup from "yup";
 
 const validations = (total, cart = []) =>
   Yup.object({
     phone: Yup.string()
-      .required('Telefono obligatorio')
-      .min(6, 'Debe de tener 6 caracteres o más'),
+      .required("Telefono obligatorio")
+      .min(6, "Debe de tener 6 caracteres o más"),
 
     // deliveryMethod: Yup.string()
     //   .required('Método de entrega es obligatorio')
     //   .oneOf(['delivery', 'retiro']),
 
-    address: Yup.string().when('deliveryMethod', {
-      is: 'delivery',
+    address: Yup.string().when("deliveryMethod", {
+      is: "delivery",
       then: () =>
         Yup.string()
+          .required("Falta indicar la dirección") // ← Primer mensaje: campo vacío
+          .min(3, "Debe ser una dirección válida")
           .test(
-            'address-validation',
-            'La dirección debe incluir un número de altura',
+            "address-validation",
+            "La dirección debe incluir un número de altura", // ← Segundo mensaje: falta altura
             (value) => {
-              if (!value) return false;
+              if (!value) return true; // Si no hay valor, el required se encarga
 
               // Lista de calles que comienzan con números
               const streetNamesStartingWithNumbers = [
-                '9 de julio',
-                '25 de mayo',
-                '20 de junio',
+                "9 de julio",
+                "25 de mayo",
+                "20 de junio",
               ];
 
               // Expresión regular para buscar un número de altura
@@ -41,34 +43,25 @@ const validations = (total, cart = []) =>
 
               if (startsWithNumberedStreet) {
                 // Si la calle comienza con número, buscamos otro número más adelante en la dirección
-                const remainingAddress = words.slice(3).join(' ');
+                const remainingAddress = words.slice(3).join(" ");
                 if (!streetNumberPattern.test(remainingAddress)) {
-                  return new Yup.ValidationError(
-                    'Debe incluir un número de altura',
-                    value,
-                    'address'
-                  );
+                  return false; // Simplificado: solo retorna false
                 }
               } else {
                 // Para otras calles, buscamos el número de altura normalmente
                 if (!streetNumberPattern.test(value)) {
-                  return new Yup.ValidationError(
-                    'Debe incluir un número de altura',
-                    value,
-                    'address'
-                  );
+                  return false; // Simplificado: solo retorna false
                 }
               }
 
               return true;
             }
-          )
-          .min(3, 'Debe ser una dirección válida')
-          .required('Dirección obligatoria'),
+          ),
     }),
+
     paymentMethod: Yup.string()
-      .required('Método de pago es obligatorio')
-      .oneOf(['mercadopago', 'efectivo', 'ambos']),
+      .required("Método de pago es obligatorio")
+      .oneOf(["mercadopago", "efectivo", "ambos"]),
 
     // money: Yup.number().when('paymentMethod', {
     //   is: 'efectivo',
@@ -78,25 +71,25 @@ const validations = (total, cart = []) =>
     //       .required('El monto es obligatorio'),
     // }),
 
-    efectivoCantidad: Yup.number().when('paymentMethod', {
-      is: 'ambos',
+    efectivoCantidad: Yup.number().when("paymentMethod", {
+      is: "ambos",
       then: () =>
         Yup.number()
-          .min(0, 'El monto debe ser mayor o igual a 0')
+          .min(0, "El monto debe ser mayor o igual a 0")
           .test(
-            'efectivo-max',
+            "efectivo-max",
             `El monto en efectivo no puede exceder el total (${total})`,
             (value) => !value || value <= total
           ),
     }),
 
-    mercadopagoCantidad: Yup.number().when('paymentMethod', {
-      is: 'ambos',
+    mercadopagoCantidad: Yup.number().when("paymentMethod", {
+      is: "ambos",
       then: () =>
         Yup.number()
-          .min(0, 'El monto debe ser mayor o igual a 0')
+          .min(0, "El monto debe ser mayor o igual a 0")
           .test(
-            'mercadopago-max',
+            "mercadopago-max",
             `El monto con MercadoPago no puede exceder el total (${total})`,
             (value) => !value || value <= total
           ),
@@ -105,19 +98,19 @@ const validations = (total, cart = []) =>
     couponCode: Yup.string()
       .trim()
       .test(
-        'coupon-yerba-check',
-        'El cupón no se puede usar porque tenés productos de la categoría yerba en tu carrito.',
+        "coupon-yerba-check",
+        "El cupón no se puede usar porque tenés productos de la categoría yerba en tu carrito.",
         function (value) {
           if (!value) return true; // Si no hay cupón, pasa
           const activeCoupons = [
-            'APMCONKINGCAKES',
-            'APMCONANHELO',
-            'APMCONPROVIMARK',
-            'APMCONLATABLITA',
+            "APMCONKINGCAKES",
+            "APMCONANHELO",
+            "APMCONPROVIMARK",
+            "APMCONLATABLITA",
           ];
           const couponCode = value.trim().toUpperCase();
           const hasYerba = cart.some(
-            (item) => item.category?.toLowerCase() === 'yerba'
+            (item) => item.category?.toLowerCase() === "yerba"
           );
 
           if (activeCoupons.includes(couponCode) && hasYerba) {
