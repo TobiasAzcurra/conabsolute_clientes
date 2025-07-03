@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   addItem,
   updateItemQuantity,
   removeItem,
-} from '../../../redux/cart/cartSlice';
-import { ReadMateriales, ReadData } from '../../../firebase/orders/uploadOrder';
-import { addProductToOrder } from '../../../firebase/orders/addProductToOrder';
-import { calcularCostoHamburguesa } from '../../../helpers/currencyFormat';
+} from "../../../redux/cart/cartSlice";
+import { ReadMateriales, ReadData } from "../../../firebase/orders/uploadOrder";
+import { addProductToOrder } from "../../../firebase/orders/addProductToOrder";
+import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 
 const QuickAddToCart = ({
   product,
@@ -22,7 +22,7 @@ const QuickAddToCart = ({
   currentOrder = null,
   calculatedPrice = null,
   disabled = false,
-  animateFrom = 'right',
+  animateFrom = "right",
 }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cartState);
@@ -130,7 +130,7 @@ const QuickAddToCart = ({
         }
         if (onOrderQuantityChange) onOrderQuantityChange(quantityRef.current);
       } catch (error) {
-        console.error('Error al actualizar producto:', error);
+        console.error("Error al actualizar producto:", error);
       } finally {
         setIsAdding(false);
         setTimeout(() => setIsEditing(false), 300);
@@ -142,8 +142,8 @@ const QuickAddToCart = ({
     <div
       className={`relative ${
         displayAsFullButton
-          ? 'w-[182px] h-[72px]'
-          : 'w-[35px] h-[35px] pt-0.5 text-center cursor-pointer'
+          ? "w-[182px] h-[72px]"
+          : "w-[35px] h-[35px] pt-0.5 text-center cursor-pointer"
       } flex items-center justify-center`}
     >
       <AnimatePresence>
@@ -156,13 +156,13 @@ const QuickAddToCart = ({
             transition={{ duration: 0.3 }}
             className={`absolute z-50 overflow-hidden rounded-3xl border-black border-2 bg-gray-50 flex items-center ${
               displayAsFullButton
-                ? ''
-                : animateFrom === 'right'
-                ? 'right-0'
-                : 'left-0'
+                ? ""
+                : animateFrom === "right"
+                ? "right-0"
+                : "left-0"
             }`}
             style={{
-              transformOrigin: displayAsFullButton ? 'center' : animateFrom,
+              transformOrigin: displayAsFullButton ? "center" : animateFrom,
             }}
           >
             <div className="flex w-[105px] h-[35px]">
@@ -191,34 +191,62 @@ const QuickAddToCart = ({
             <div className="absolute z-[60]">
               <button
                 disabled={disabled}
-                className={`bg-black flex flex-row items-center gap-2 font-coolvetica font-medium text-white rounded-full p-4 text-4xl ${
-                  disabled ? 'opacity-50 cursor-not-allowed' : ''
+                className={`bg-black flex flex-row items-center gap-2 font-coolvetica  text-gray-50 rounded-2xl h-20 p-8 text-2xl ${
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 onClick={!disabled ? startAddingProcess : undefined}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
                   viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="h-6"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-6 text-gray-50"
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 0 0 4.25 22.5h15.5a1.875 1.875 0 0 0 1.865-2.071l-1.263-12a1.875 1.875 0 0 0-1.865-1.679H16.5V6a4.5 4.5 0 1 0-9 0ZM12 3a3 3 0 0 0-3 3v.75h6V6a3 3 0 0 0-3-3Zm-3 8.25a3 3 0 1 0 6 0v-.75a.75.75 0 0 1 1.5 0v.75a4.5 4.5 0 1 1-9 0v-.75a.75.75 0 0 1 1.5 0v.75Z"
-                    clipRule="evenodd"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                   />
                 </svg>
                 Agregar
               </button>
             </div>
+          ) : displayAsFullButton && quantity > 0 && !isOrderItem ? (
+            <div className="absolute z-[60]">
+              <button
+                disabled={disabled}
+                className={`bg-black w-44 justify-center flex flex-row items-center gap-2 font-coolvetica  text-gray-50 rounded-2xl h-20 p-8 text-2xl ${
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={!disabled ? startAddingProcess : undefined}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="h-6 text-gray-50"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                  />
+                </svg>
+                {quantity}
+              </button>
+            </div>
           ) : (
             <div
               className={`${
-                quantity > 0 ? 'bg-black border text-gray-100' : 'bg-gray-50'
+                quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-50"
               } rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
               onClick={startAddingProcess}
             >
-              {quantity > 0 ? quantity : '+'}
+              {quantity > 0 ? quantity : "+"}
             </div>
           )}
         </>

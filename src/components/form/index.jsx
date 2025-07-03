@@ -1,18 +1,18 @@
-import { Form, Formik } from 'formik';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { addLastCart, setEnvioExpress } from '../../redux/cart/cartSlice';
-import { useState } from 'react';
-import validations from './validations';
-import handleSubmit from './handleSubmit';
-import Payment from '../mercadopago/Payment';
-import LoadingPoints from '../LoadingPoints';
-import AppleModal from '../AppleModal';
-import { useClient } from '../../contexts/ClientContext';
-import { useFormStates } from '../../hooks/useFormStates';
-import AddressInputs from './AddressInputs';
-import OrderSummary from './OrderSummary';
-import { adjustHora } from '../../helpers/time';
+import { Form, Formik } from "formik";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addLastCart, setEnvioExpress } from "../../redux/cart/cartSlice";
+import { useState } from "react";
+import validations from "./validations";
+import handleSubmit from "./handleSubmit";
+import Payment from "../mercadopago/Payment";
+import LoadingPoints from "../LoadingPoints";
+import AppleModal from "../AppleModal";
+import { useClient } from "../../contexts/ClientContext";
+import { useFormStates } from "../../hooks/useFormStates";
+import AddressInputs from "./AddressInputs";
+import OrderSummary from "./OrderSummary";
+import { adjustHora } from "../../helpers/time";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const FormCustom = ({ cart, total }) => {
   const expressDeliveryFee = clientConfig?.logistics?.expressFee || 2000;
 
   const formValidations = validations(total + envio);
-  const [mapUrl, setUrl] = useState('');
+  const [mapUrl, setUrl] = useState("");
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
 
@@ -66,7 +66,7 @@ const FormCustom = ({ cart, total }) => {
     priceFactor: altaDemanda?.priceFactor || 1,
   };
 
-  const processPedido = async (values, isReserva, message = '') => {
+  const processPedido = async (values, isReserva, message = "") => {
     try {
       let hora = values.hora;
       if (isReserva) hora = adjustHora(values.hora);
@@ -86,7 +86,7 @@ const FormCustom = ({ cart, total }) => {
       );
       if (orderId) {
         navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
-        dispatch({ type: 'cart/addLastCart' });
+        dispatch({ type: "cart/addLastCart" });
       }
     } catch (err) {
       console.error(err);
@@ -102,7 +102,7 @@ const FormCustom = ({ cart, total }) => {
   };
 
   return (
-    <div className="flex mt-2 mr-4 mb-10 min-h-screen ml-4 flex-col">
+    <div className="flex mt-2 mr-4  min-h-screen ml-4 flex-col">
       <style>{`
         .custom-select {
           appearance: none;
@@ -123,22 +123,22 @@ const FormCustom = ({ cart, total }) => {
       <Formik
         initialValues={{
           subTotal: total,
-          phone: '',
-          deliveryMethod: 'delivery',
-          references: '',
-          paymentMethod: 'efectivo',
-          hora: '',
-          couponCode: '',
+          phone: "",
+          deliveryMethod: "delivery",
+          references: "",
+          paymentMethod: "efectivo",
+          hora: "",
+          couponCode: "",
         }}
         validationSchema={validations(total + envio, cart)}
         onSubmit={async (values) => {
-          const isReserva = values.hora.trim() !== '';
-          console.log('Submitting form with values:', values);
+          const isReserva = values.hora.trim() !== "";
+          console.log("Submitting form with values:", values);
           await processPedido(values, isReserva);
         }}
       >
         {({ values, setFieldValue, isSubmitting, submitForm, errors }) => {
-          console.log('Formik errors:', errors);
+          console.log("Formik errors:", errors);
 
           const productsTotal = cart.reduce(
             (acc, item) => acc + item.price * item.quantity,
@@ -147,14 +147,14 @@ const FormCustom = ({ cart, total }) => {
 
           let descuento = 0;
           const activeCoupons = [
-            'APMCONKINGCAKES',
-            'APMCONANHELO',
-            'APMCONPROVIMARK',
-            'APMCONLATABLITA',
+            "APMCONKINGCAKES",
+            "APMCONANHELO",
+            "APMCONPROVIMARK",
+            "APMCONLATABLITA",
           ];
           if (activeCoupons.includes(values.couponCode.trim().toUpperCase())) {
             const hasYerba = cart.some(
-              (item) => item.category?.toLowerCase() === 'yerba'
+              (item) => item.category?.toLowerCase() === "yerba"
             );
             if (!hasYerba) {
               descuento = Math.round(productsTotal * 0.3);
@@ -162,7 +162,7 @@ const FormCustom = ({ cart, total }) => {
           }
 
           let finalTotal = productsTotal - descuento;
-          if (values.deliveryMethod === 'delivery') finalTotal += envio;
+          if (values.deliveryMethod === "delivery") finalTotal += envio;
           if (isEnabled) finalTotal += expressDeliveryFee;
           return (
             <Form>
@@ -171,11 +171,11 @@ const FormCustom = ({ cart, total }) => {
                   <button
                     type="button"
                     className={`h-20 flex-1 font-bold flex items-center justify-center gap-2 rounded-2xl ${
-                      values.deliveryMethod === 'delivery'
-                        ? 'bg-black text-gray-100'
-                        : 'bg-gray-300 text-black'
+                      values.deliveryMethod === "delivery"
+                        ? "bg-black text-gray-100"
+                        : "bg-gray-300 text-black"
                     }`}
-                    onClick={() => setFieldValue('deliveryMethod', 'delivery')}
+                    onClick={() => setFieldValue("deliveryMethod", "delivery")}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -192,20 +192,20 @@ const FormCustom = ({ cart, total }) => {
                   <button
                     type="button"
                     className={`h-20 flex-1 font-bold flex flex-col items-center justify-center rounded-2xl ${
-                      values.deliveryMethod === 'takeaway'
-                        ? 'bg-black text-gray-100'
-                        : 'bg-gray-300 text-black'
+                      values.deliveryMethod === "takeaway"
+                        ? "bg-black text-gray-100"
+                        : "bg-gray-300 text-black"
                     }`}
-                    onClick={() => setFieldValue('deliveryMethod', 'takeaway')}
+                    onClick={() => setFieldValue("deliveryMethod", "takeaway")}
                   >
                     <div className="flex flex-row items-center gap-2">
                       {clientAssets?.logo && (
                         <img
                           src={clientAssets.logo}
                           className={`h-4 ${
-                            values.deliveryMethod === 'takeaway'
-                              ? 'invert brightness-0'
-                              : 'brightness-0'
+                            values.deliveryMethod === "takeaway"
+                              ? "invert brightness-0"
+                              : "brightness-0"
                           }`}
                           alt="logo"
                         />
@@ -228,6 +228,7 @@ const FormCustom = ({ cart, total }) => {
                   setUrl={setUrl}
                   setValidarUbi={setValidarUbi}
                   setNoEncontre={setNoEncontre}
+                  cart={cart}
                 />
                 {/* Resumen */}
                 <OrderSummary
@@ -241,7 +242,7 @@ const FormCustom = ({ cart, total }) => {
                   isEnabled={isEnabled}
                 />
                 {/* Botón */}
-                {values.paymentMethod === 'mercadopago' ? (
+                {values.paymentMethod === "mercadopago" ? (
                   <Payment
                     cart={cart}
                     values={values}
@@ -262,16 +263,16 @@ const FormCustom = ({ cart, total }) => {
                     type="submit"
                     disabled={isSubmitting}
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-blue-apm text-gray-100 rounded-3xl h-20 font-bold hover:bg-blue-600 transition-colors duration-300 ${
-                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      isSubmitting ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                     onClick={() => {
-                      console.log('Submitting form');
+                      console.log("Submitting form");
                     }}
                   >
                     {isSubmitting ? (
                       <LoadingPoints color="text-gray-100" />
                     ) : (
-                      'Pedir'
+                      "Pedir"
                     )}
                   </button>
                 )}
@@ -329,7 +330,7 @@ const FormCustom = ({ cart, total }) => {
               }
             }
           } catch (error) {
-            console.error('Error al procesar el pedido pendiente:', error);
+            console.error("Error al procesar el pedido pendiente:", error);
           } finally {
             setIsModalConfirmLoading(false);
             closeCloseRestrictedModal();
@@ -342,7 +343,7 @@ const FormCustom = ({ cart, total }) => {
       {/* esperas? */}
       <AppleModal
         isOpen={
-          showHighDemandModal && pendingValues?.paymentMethod === 'efectivo'
+          showHighDemandModal && pendingValues?.paymentMethod === "efectivo"
         }
         onClose={() => setShowHighDemandModal(false)}
         title="Alta Demanda"
@@ -351,7 +352,7 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== '';
+            const isReserva = pendingValues.hora.trim() !== "";
             await processPedido(pendingValues, isReserva);
           }
           setIsModalConfirmLoading(false);
@@ -359,7 +360,7 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p className="font-medium text-center">
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{' '}
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
           {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
@@ -374,7 +375,7 @@ const FormCustom = ({ cart, total }) => {
         onConfirm={async () => {
           setIsModalConfirmLoading(true);
           if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== '';
+            const isReserva = pendingValues.hora.trim() !== "";
             const orderId = await handleSubmit(
               pendingValues,
               cart,
@@ -382,7 +383,7 @@ const FormCustom = ({ cart, total }) => {
               mapUrl,
               descuento,
               false,
-              altaDemanda?.message || ''
+              altaDemanda?.message || ""
             );
 
             if (orderId) {

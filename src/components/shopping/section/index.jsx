@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { useClient } from '../../../contexts/ClientContext';
-import Card from '../card';
-import LoadingPoints from '../../LoadingPoints';
+import React, { useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { useClient } from "../../../contexts/ClientContext";
+import Card from "../card";
+import LoadingPoints from "../../LoadingPoints";
 
 const Section = () => {
   const { category } = useParams();
@@ -22,7 +22,7 @@ const Section = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mt-8 mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 px-4 mt-8 mb-10">
       {products.length > 0 ? (
         products.map((p) => <Card key={p.id} data={p} path={category} />)
       ) : (

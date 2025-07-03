@@ -1,6 +1,6 @@
-import currencyFormat from '../../helpers/currencyFormat';
-import Toggle from '../Toggle';
-import Tooltip from '../Tooltip';
+import currencyFormat from "../../helpers/currencyFormat";
+import Toggle from "../Toggle";
+import Tooltip from "../Tooltip";
 
 const OrderSummary = ({
   productsTotal,
@@ -14,8 +14,8 @@ const OrderSummary = ({
 }) => {
   return (
     <div className="flex justify-center flex-col mt-8 items-center">
-      <p className="text-2xl font-bold w-full text-center">Resumen</p>
-      <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
+      <p className="text-2xl font-bold w-full text-center mb-4">Resumen</p>
+      {/* <div className="w-full flex flex-row justify-between items-center mb-4 mt-4">
         <div className="flex flex-row items-center gap-2">
           <Tooltip
             text={`Si priorizas la <b>velocidad</b>, esta opción es para vos: tu pedido pasa al frente y, en caso de delivery, sale solo con tu cadete.`}
@@ -30,7 +30,7 @@ const OrderSummary = ({
           </p>
         </div>
         <Toggle isOn={isEnabled} onToggle={handleExpressToggle} />
-      </div>
+      </div> */}
       <div className="flex flex-row justify-between w-full">
         <p>Productos</p>
         <p>{currencyFormat(productsTotal)}</p>

@@ -1,16 +1,16 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { addOneItem, removeOneItem } from '../../../redux/cart/cartSlice';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useClient } from '../../../contexts/ClientContext';
-import Items from '../../../pages/menu/Items';
-import CartCard from './CartCard';
-import carrusel from '../../../assets/carrusel3.jpg';
-import MovingRibbon from '../MovingRibbon';
-import FormCustom from '../../form';
-import { getImageSrc } from '../../../helpers/getImageSrc';
-import VideoSlider from '../detail/VideoSlider';
-import arrowIcon from '../../../assets/arrowIcon.png';
+import { useSelector, useDispatch } from "react-redux";
+import { addOneItem, removeOneItem } from "../../../redux/cart/cartSlice";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useClient } from "../../../contexts/ClientContext";
+import Items from "../../../pages/menu/Items";
+import CartCard from "./CartCard";
+import carrusel from "../../../assets/carrusel3.jpg";
+import MovingRibbon from "../MovingRibbon";
+import FormCustom from "../../form";
+import { getImageSrc } from "../../../helpers/getImageSrc";
+import VideoSlider from "../detail/VideoSlider";
+import arrowIcon from "../../../assets/arrowIcon.png";
 
 const CartItems = () => {
   const { cart, total } = useSelector((state) => state.cartState);
@@ -22,26 +22,26 @@ const CartItems = () => {
   const reels = clientAssets?.reels || [];
 
   useEffect(() => {
-    console.log('🛒 Cart actualizado:', cart);
+    console.log("🛒 Cart actualizado:", cart);
 
     if (cart.length > 0) {
-      console.log('✅ Productos añadidos al carrito:');
+      console.log("✅ Productos añadidos al carrito:");
       cart.forEach((item) => {
         console.log(`- ${item.name} | Cantidad: ${item.quantity}`);
       });
     } else {
-      console.log('⚠️ Carrito vacío');
+      console.log("⚠️ Carrito vacío");
     }
   }, [cart]);
 
   useEffect(() => {
-    if (cart.length <= 0 && pathname.includes('/carrito')) {
+    if (cart.length <= 0 && pathname.includes("/carrito")) {
       navigate(`/${slugEmpresa}/${slugSucursal}/menu`);
     }
   }, [cart.length, pathname, navigate, slugEmpresa, slugSucursal]);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const decrementQuantity = (index, quantity) => {
@@ -69,19 +69,29 @@ const CartItems = () => {
   return (
     <div className="flex flex-col font-coolvetica overflow-x-hidden">
       <div className="flex justify-center flex-col mt-8 items-center w-full">
-        <button
-          onClick={handleGoBack}
-          className="text-xs font-coolvetica flex flex-row gap-2 items-center justify-center opacity-50 hover:opacity-75 transition-opacity cursor-pointer"
-        >
-          <img src={arrowIcon} className="h-2 rotate-180" alt="" />
-          Volver
-        </button>
-        <p className="text-2xl font-bold">Tu pedido</p>
+        <div className="flex flex-row items-center gap-2">
+          <svg
+            onClick={handleGoBack}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-6 text-gray-400"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 19.5 8.25 12l7.5-7.5"
+            />
+          </svg>
+          <p className="text-2xl font-bold">Tu pedido</p>
+        </div>
         <div
           className="flex flex-col md:flex-row gap-2 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
           style={{
-            scrollBehavior: 'smooth',
-            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: "smooth",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           <div className="flex flex-col md:flex-row gap-2 md:w-max">
@@ -109,30 +119,25 @@ const CartItems = () => {
             <div
               className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
               style={{
-                maxHeight: '220px',
-                paddingBottom: '1rem',
-                scrollBehavior: 'smooth',
-                WebkitOverflowScrolling: 'touch',
-                width: '100%',
+                maxHeight: "220px",
+                paddingBottom: "1rem",
+                scrollBehavior: "smooth",
+                WebkitOverflowScrolling: "touch",
+                width: "100%",
               }}
             >
-              <div className="flex gap-2" style={{ width: 'max-content' }}>
+              <div className="flex gap-2" style={{ width: "max-content" }}>
                 {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
 
-                  const handleItemClick = () => {
-                    navigate(
-                      `/${slugEmpresa}/${slugSucursal}/menu/${product.category}/`
-                    );
-                  };
-
+                  // ✅ Ya no necesitas definir handleItemClick, el componente Items lo manejará automáticamente
                   return (
                     <Items
                       key={product.id || index}
-                      selectedItem={product}
+                      selectedItem={product} // ✅ Pasar el objeto producto completo
                       img={productImg}
                       name={product.name}
-                      handleItemClick={handleItemClick}
+                      handleItemClick={() => {}} // ✅ Pasar una función vacía para que Items detecte que debe ser clickeable
                       isCart={true}
                     />
                   );

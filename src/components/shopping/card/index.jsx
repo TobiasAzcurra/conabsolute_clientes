@@ -4,14 +4,14 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from 'react';
-import QuickAddToCart from './quickAddToCart';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { Link, useParams } from 'react-router-dom';
-import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
-import LoadingPoints from '../../LoadingPoints';
-import { getImageSrc } from '../../../helpers/getImageSrc';
-import { useClient } from '../../../contexts/ClientContext';
+} from "react";
+import QuickAddToCart from "./quickAddToCart";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { Link, useParams } from "react-router-dom";
+import { listenToAltaDemanda } from "../../../firebase/constants/altaDemanda";
+import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
+import { useClient } from "../../../contexts/ClientContext";
 
 const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal, clientConfig } = useClient();
@@ -32,8 +32,8 @@ const Card = ({ data, path }) => {
 
   const {
     id,
-    name = 'Producto sin nombre',
-    description = '',
+    name = "Producto sin nombre",
+    description = "",
     category,
     variants,
   } = data;
@@ -114,30 +114,65 @@ const Card = ({ data, path }) => {
   const basePrice = data.price || 0;
   const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
-  const cuotaText = useMemo(() => {
-    if (!installments?.enabled || !installments.quantity) return null;
+  // Nueva lógica de precios
+  const pricingInfo = useMemo(() => {
+    const hasInstallments = installments?.enabled && installments.quantity;
+    const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
-    const base = adjustedPrice;
-    const interestRate = installments.interest || 0;
-    const finalAmount = base * (1 + interestRate);
-    const perCuota = finalAmount / installments.quantity;
+    if (hasCashDiscount) {
+      // Caso 1: Con descuento en efectivo - precio principal es el más barato
+      const cashPrice = Math.ceil(
+        adjustedPrice * (1 - cashDiscount.percentage)
+      );
+      const result = {
+        mainPrice: cashPrice,
+        primaryText: "en efectivo/transferencia",
+        secondaryText: null,
+      };
 
-    return (
-      `en ${installments.quantity} cuota${
-        installments.quantity > 1 ? 's' : ''
-      } de $${Math.ceil(perCuota)}` +
-      (interestRate === 0
-        ? ' sin interés'
-        : ` (con ${Math.floor(interestRate * 100)}% interés)`)
-    );
-  }, [adjustedPrice, installments]);
+      if (hasInstallments) {
+        const interestRate = installments.interest || 0;
+        const finalAmount = adjustedPrice * (1 + interestRate);
+        const perCuota = finalAmount / installments.quantity;
 
-  const efectivoText = useMemo(() => {
-    if (!cashDiscount?.enabled || !cashDiscount.percentage) return null;
+        result.secondaryText = `o por ${installments.quantity} cuota${
+          installments.quantity > 1 ? "s" : ""
+        } de ${currencyFormat(Math.ceil(perCuota))}${
+          interestRate === 0
+            ? " (sin interés)"
+            : ` (con ${Math.floor(interestRate * 100)}% interés)`
+        }`;
+      }
 
-    const discountAmount = adjustedPrice * (1 - cashDiscount.percentage);
-    return `o en transferencia / efectivo por $${Math.ceil(discountAmount)}`;
-  }, [adjustedPrice, cashDiscount]);
+      return result;
+    }
+
+    if (hasInstallments) {
+      // Caso 2: Solo cuotas - precio principal es el normal
+      const interestRate = installments.interest || 0;
+      const finalAmount = adjustedPrice * (1 + interestRate);
+      const perCuota = finalAmount / installments.quantity;
+
+      return {
+        mainPrice: adjustedPrice,
+        primaryText: null,
+        secondaryText: `o en ${installments.quantity} cuota${
+          installments.quantity > 1 ? "s" : ""
+        } de ${currencyFormat(Math.ceil(perCuota))}${
+          interestRate === 0
+            ? " (sin interés)"
+            : ` (con ${Math.floor(interestRate * 100)}% interés)`
+        }`,
+      };
+    }
+
+    // Caso 3: Simple - solo precio
+    return {
+      mainPrice: adjustedPrice,
+      primaryText: null,
+      secondaryText: null,
+    };
+  }, [adjustedPrice, installments, cashDiscount]);
 
   const resolvedImages = useMemo(() => {
     const imgs =
@@ -165,12 +200,12 @@ const Card = ({ data, path }) => {
       }
     };
 
-    window.addEventListener('scroll', throttledScroll);
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener("scroll", throttledScroll);
+    window.addEventListener("resize", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', throttledScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", throttledScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, [checkIfCentered]);
 
@@ -207,7 +242,7 @@ const Card = ({ data, path }) => {
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
+      className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50 pb-2 transition duration-300 w-full max-w-[400px] text-black z-50"
     >
       {(!variants || variants.length === 0) && (
         <div className="absolute right-3.5 top-2.5 z-40">
@@ -215,7 +250,7 @@ const Card = ({ data, path }) => {
             product={{
               name,
               description: data.cardDescription || description,
-              price: adjustedPrice,
+              price: pricingInfo.mainPrice,
               img: currentImageSrc,
               path,
               id,
@@ -230,7 +265,8 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
+        {/* loading */}
+        <div className="relative h-[160px]  overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
               <LoadingPoints />
@@ -259,28 +295,28 @@ const Card = ({ data, path }) => {
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-400 via-transparent to-transparent opacity-50"></div>
-
+          {/* indicador de variante */}
           <div className="absolute bottom-0 left-2 z-30 flex gap-2">
             {visibleLabels.map((label, index) => (
               <span
                 key={`${label.key}-${index}`}
-                className="text-gray-600 text-[10px] font-medium bg-gray-50 px-2 py-1 rounded-t-xl"
+                className="text-gray-400 text-[10px] font-light bg-gray-50 px-2 py-1 rounded-t-xl"
               >
-                {label.text}
+                {label.text.toLowerCase()}
               </span>
             ))}
           </div>
 
-          {isInViewport && (
-            <div className="absolute top-4 left-1/2 z-30 flex gap-1">
+          {/* indicador de imagenes */}
+          {isInViewport && images.length > 1 && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
                 <div
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? 'bg-white opacity-100'
-                      : 'bg-white opacity-50'
+                      ? "bg-gray-50 opacity-100"
+                      : "bg-gray-50 opacity-30"
                   }`}
                 />
               ))}
@@ -289,9 +325,9 @@ const Card = ({ data, path }) => {
 
           <img
             src={currentImageSrc}
-            alt={name || 'Producto'}
+            alt={name || "Producto"}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+              isLoaded && !imageError ? "opacity-100" : "opacity-0"
             }`}
             onLoad={() => {
               setIsLoaded(true);
@@ -304,25 +340,36 @@ const Card = ({ data, path }) => {
           />
         </div>
 
+        {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {name || 'Producto sin nombre'}
+              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
+                (name || "Producto sin nombre").slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-600 font-light font-coolvetica leading-tight ">
+            <p className="text-center text-xs text-gray-400 font-light font-coolvetica leading-tight ">
               {data.cardDescription}
             </p>
           )}
-          <div className="flex w-full mt-4 flex-col mb-6">
+          <div className="flex w-full mt-4 flex-col mb-4">
             <span className="font-bold text-4xl text-black">
-              {currencyFormat(adjustedPrice)}
+              {currencyFormat(pricingInfo.mainPrice)}
             </span>
-            {(cuotaText || efectivoText) && (
-              <div className="font-light pr-12 text-xs text-green-500 flex flex-col items-start">
-                {cuotaText && <span>{cuotaText}</span>}
-                {efectivoText && <span>{efectivoText}</span>}
+
+            {(pricingInfo.primaryText || pricingInfo.secondaryText) && (
+              <div className="font-light pr-12   flex flex-col items-start">
+                {pricingInfo.primaryText && (
+                  <span className="text-gray-400 font-light text-xs">
+                    {pricingInfo.primaryText}
+                  </span>
+                )}
+                {pricingInfo.secondaryText && (
+                  <span className="text-gray-400 text-xs">
+                    {pricingInfo.secondaryText}
+                  </span>
+                )}
               </div>
             )}
           </div>

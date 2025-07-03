@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 
 const VideoSlider = ({ reels = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,7 +34,7 @@ const VideoSlider = ({ reels = [] }) => {
       className="relative overflow-hidden w-full max-w-4xl mx-auto pl-4 pr-2"
     >
       <div
-        className="flex transition-transform gap-4 ease-in-out duration-500 rounded-3xl"
+        className="flex transition-transform gap-2 ease-in-out duration-500 rounded-3xl"
         style={{ transform: `translateX(-${currentIndex * 83.33}%)` }}
       >
         {slides.map((src, index) => (
