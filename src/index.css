@@ -3,43 +3,43 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaRg-Regular.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaRg-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaRg-Italic.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaRg-Italic.ttf") format("truetype");
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaRg-Bold.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaRg-Bold.ttf") format("truetype");
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaRg-BoldItalic.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaRg-BoldItalic.ttf") format("truetype");
   font-weight: bold;
   font-style: italic;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaLt-Regular.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaLt-Regular.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Coolvetica';
-  src: url('/fonts/coolvetica/CoolveticaHv-Regular.ttf') format('truetype');
+  font-family: "Coolvetica";
+  src: url("/fonts/coolvetica/CoolveticaHv-Regular.ttf") format("truetype");
   font-weight: 900;
   font-style: normal;
 }
@@ -60,21 +60,47 @@
   -webkit-text-size-adjust: 100%;
 }
 
-::-webkit-scrollbar {
-  width: 0.5rem;
+/* Ocultar scrollbars completamente */
+html,
+body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow: -moz-scrollbars-none !important;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: black;
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type='number']::-moz-number-spin-box {
+input[type="number"]::-moz-number-spin-box {
   -moz-appearance: textfield;
 }
 
@@ -84,10 +110,8 @@ input[type='number']::-moz-number-spin-box {
   input:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0 30px transparent inset !important;
     -webkit-text-fill-color: rgba(3, 3, 3, 0.87) !important;
-    /* Usando el mismo color que tienes en :root */
     transition: background-color 5000s ease-in-out 0s;
     caret-color: rgba(3, 3, 3, 0.87);
-    /* Para que el cursor también sea visible */
   }
 }
 
@@ -128,8 +152,8 @@ input[type='number']::-moz-number-spin-box {
 }
 
 .nav-scroll-hide {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .nav-scroll-hide::-webkit-scrollbar {
   display: none;
