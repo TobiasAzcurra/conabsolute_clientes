@@ -17,24 +17,12 @@ const Items = ({
   handleItemClick,
   selectedItem,
 }) => {
-  const [priceFactor, setPriceFactor] = useState(1);
-  const [itemsOut, setItemsOut] = useState({});
-
   const { slugEmpresa, slugSucursal } = useClient();
 
   const { category: selectedItemParam } = useParams();
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const unsubscribe = listenToAltaDemanda((altaDemanda) => {
-      setPriceFactor(altaDemanda.priceFactor);
-      setItemsOut(altaDemanda.itemsOut);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const isCarrito = location.pathname.includes('/carrito');
   const isSelected = selectedItemParam === name;
