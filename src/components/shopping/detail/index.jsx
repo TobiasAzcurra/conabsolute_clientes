@@ -69,14 +69,33 @@ const DetailCard = () => {
 
   const availableOptions = useMemo(() => {
     const options = {};
-    const filteredVariants =
-      product.variants?.filter((variant) => {
-        return Object.entries(selectedVariants).every(([key, value]) => {
-          if (!value) return true;
-          const vAttr = variant.attributes?.[key];
-          return vAttr && vAttr.toLowerCase() === value;
-        });
-      }) || [];
+
+    // Si no hay selecciones, mostrar todas las opciones disponibles
+    const hasSelections = Object.values(selectedVariants).some(
+      (value) => value !== null && value !== undefined
+    );
+
+    const filteredVariants = hasSelections
+      ? product.variants?.filter((variant) => {
+          const match = Object.entries(selectedVariants).every(
+            ([key, value]) => {
+              if (!value) return true;
+
+              const attributeKey = Object.keys(variant.attributes || {}).find(
+                (attrKey) => attrKey.toLowerCase() === key.toLowerCase()
+              );
+              const vAttr = attributeKey
+                ? variant.attributes[attributeKey]
+                : undefined;
+              const matches =
+                vAttr && vAttr.toLowerCase() === value.toLowerCase();
+
+              return matches;
+            }
+          );
+          return match;
+        }) || []
+      : product.variants || [];
 
     for (const variant of filteredVariants) {
       if (!variant.attributes) continue;
@@ -92,6 +111,7 @@ const DetailCard = () => {
     for (const key in options) {
       result[key] = Array.from(options[key]);
     }
+
     return result;
   }, [product.variants, selectedVariants]);
 
@@ -104,6 +124,7 @@ const DetailCard = () => {
         changed = true;
       }
     }
+
     if (changed) setSelectedVariants(newSelection);
   }, [availableOptions]);
 
@@ -111,8 +132,14 @@ const DetailCard = () => {
     const matched = product.variants.find((variant) => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return false;
-        const vAttr = variant.attributes?.[key];
-        return vAttr && vAttr.toLowerCase() === value;
+
+        const attributeKey = Object.keys(variant.attributes || {}).find(
+          (attrKey) => attrKey.toLowerCase() === key.toLowerCase()
+        );
+        const vAttr = attributeKey
+          ? variant.attributes[attributeKey]
+          : undefined;
+        return vAttr && vAttr.toLowerCase() === value.toLowerCase();
       });
     });
     setSelectedVariant(matched || null);
@@ -120,19 +147,42 @@ const DetailCard = () => {
 
   useEffect(() => {
     if (!product?.variants || Object.keys(selectedVariants).length > 0) return;
+
     const initialSelection = {};
-    const firstVariant = product.variants[0];
-    if (firstVariant?.attributes) {
-      Object.entries(firstVariant.attributes).forEach(([key, value]) => {
+
+    const defaultVariant = product.variants.find((v) => v.default);
+
+    if (
+      defaultVariant?.attributes &&
+      Object.keys(defaultVariant.attributes).length > 0 &&
+      defaultVariant.stockSummary?.totalStock > 0
+    ) {
+      Object.entries(defaultVariant.attributes).forEach(([key, value]) => {
         initialSelection[key.toLowerCase()] = value.toLowerCase();
       });
+    } else {
+      const firstAvailableVariant = product.variants.find(
+        (v) =>
+          v.attributes &&
+          Object.keys(v.attributes).length > 0 &&
+          v.stockSummary?.totalStock > 0
+      );
+
+      if (firstAvailableVariant?.attributes) {
+        Object.entries(firstAvailableVariant.attributes).forEach(
+          ([key, value]) => {
+            initialSelection[key.toLowerCase()] = value.toLowerCase();
+          }
+        );
+      }
     }
+
     setSelectedVariants(initialSelection);
   }, [product?.variants]);
 
   const productImages = useMemo(() => {
-    const imgs = selectedVariant?.productImage?.length
-      ? selectedVariant.productImage
+    const imgs = selectedVariant?.images?.length
+      ? selectedVariant.images
       : product?.img || product?.image || product?.images || [];
     const normalized = Array.isArray(imgs) ? imgs : [imgs];
     const isSame =
@@ -180,6 +230,11 @@ const DetailCard = () => {
     };
   }, [product, finalName, selectedVariant, totalPrice, basePrice]);
 
+  const outOfStock =
+    selectedVariant &&
+    selectedVariant.stockSummary &&
+    selectedVariant.stockSummary.totalStock === 0;
+
   useEffect(() => {
     const unsubscribe = listenToAltaDemanda((alta) => {
       setAltaDemanda(alta);
@@ -188,10 +243,89 @@ const DetailCard = () => {
   }, []);
 
   const handleVariantSelect = (key, value) => {
-    setSelectedVariants((prev) => ({
-      ...prev,
-      [key]: prev[key] === value ? null : value,
-    }));
+    setSelectedVariants((prev) => {
+      const newSelections = { ...prev };
+
+      if (newSelections[key] === value) {
+        newSelections[key] = null;
+        return newSelections;
+      }
+
+      newSelections[key] = value;
+
+      const isCurrentSelectionValid = (product.variants || []).some(
+        (variant) => {
+          if (!variant.attributes) return false;
+
+          return Object.entries(newSelections).every(([attrKey, attrValue]) => {
+            if (!attrValue) return true;
+
+            const variantAttrKey = Object.keys(variant.attributes).find(
+              (vKey) => vKey.toLowerCase() === attrKey.toLowerCase()
+            );
+            const variantAttrValue = variantAttrKey
+              ? variant.attributes[variantAttrKey]
+              : undefined;
+
+            return (
+              variantAttrValue &&
+              variantAttrValue.toLowerCase() === attrValue.toLowerCase()
+            );
+          });
+        }
+      );
+
+      if (!isCurrentSelectionValid) {
+        const cleanedSelections = { [key]: value };
+
+        const variantsWithNewValue = (product.variants || []).filter(
+          (variant) => {
+            if (!variant.attributes) return false;
+
+            const variantAttrKey = Object.keys(variant.attributes).find(
+              (vKey) => vKey.toLowerCase() === key.toLowerCase()
+            );
+            const variantAttrValue = variantAttrKey
+              ? variant.attributes[variantAttrKey]
+              : undefined;
+
+            return (
+              variantAttrValue &&
+              variantAttrValue.toLowerCase() === value.toLowerCase()
+            );
+          }
+        );
+
+        if (variantsWithNewValue.length > 0) {
+          const availableVariants = variantsWithNewValue.filter(
+            (v) => v.stockSummary?.totalStock > 0
+          );
+          const targetVariants =
+            availableVariants.length > 0
+              ? availableVariants
+              : variantsWithNewValue;
+
+          const referenceVariant = targetVariants[0];
+
+          if (referenceVariant.attributes) {
+            Object.entries(referenceVariant.attributes).forEach(
+              ([attrKey, attrValue]) => {
+                const normalizedKey = attrKey.toLowerCase();
+                const normalizedValue = attrValue.toLowerCase();
+
+                if (normalizedKey !== key.toLowerCase()) {
+                  cleanedSelections[normalizedKey] = normalizedValue;
+                }
+              }
+            );
+          }
+        }
+
+        return cleanedSelections;
+      }
+
+      return newSelections;
+    });
   };
 
   const handleGoBack = () => {
@@ -270,7 +404,7 @@ const DetailCard = () => {
             )}
 
             {customization && (
-              <div className="gap-2 w-full mt-8 flex justify-center px-4 flex flex-col">
+              <div className="gap-2 w-full mt-8 flex flex-col justify-center px-4">
                 {Object.entries(variantStats).map(([key, values]) => (
                   <div key={key}>
                     <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
@@ -280,8 +414,77 @@ const DetailCard = () => {
                       <div className="flex">
                         {values.map((value, index) => {
                           const isSelected = selectedVariants[key] === value;
-                          const isDisabled =
-                            !availableOptions[key]?.includes(value);
+
+                          const isCompatible = (product.variants || []).some(
+                            (variant) => {
+                              if (!variant.attributes) return false;
+
+                              const attributeKey = Object.keys(
+                                variant.attributes
+                              ).find(
+                                (attrKey) =>
+                                  attrKey.toLowerCase() === key.toLowerCase()
+                              );
+                              const attrValue = attributeKey
+                                ? variant.attributes[attributeKey]
+                                : undefined;
+
+                              if (
+                                !attrValue ||
+                                attrValue.toLowerCase() !== value.toLowerCase()
+                              ) {
+                                return false;
+                              }
+
+                              return Object.entries(selectedVariants).every(
+                                ([otherKey, otherValue]) => {
+                                  if (!otherValue || otherKey === key)
+                                    return true;
+
+                                  const otherAttributeKey = Object.keys(
+                                    variant.attributes || {}
+                                  ).find(
+                                    (attrKey) =>
+                                      attrKey.toLowerCase() ===
+                                      otherKey.toLowerCase()
+                                  );
+                                  const otherAttrValue = otherAttributeKey
+                                    ? variant.attributes[otherAttributeKey]
+                                    : undefined;
+                                  return (
+                                    otherAttrValue &&
+                                    otherAttrValue.toLowerCase() ===
+                                      otherValue.toLowerCase()
+                                  );
+                                }
+                              );
+                            }
+                          );
+
+                          const variantForValue = (product.variants || []).find(
+                            (v) => {
+                              if (!v.attributes) return false;
+
+                              const attributeKey = Object.keys(
+                                v.attributes
+                              ).find(
+                                (attrKey) =>
+                                  attrKey.toLowerCase() === key.toLowerCase()
+                              );
+                              const attrValue = attributeKey
+                                ? v.attributes[attributeKey]
+                                : undefined;
+                              return (
+                                attrValue &&
+                                attrValue.toLowerCase() === value.toLowerCase()
+                              );
+                            }
+                          );
+
+                          const hasStock =
+                            variantForValue?.stockSummary?.totalStock > 0;
+
+                          const isClickable = hasStock;
 
                           const isFirst = index === 0;
                           const isLast = index === values.length - 1;
@@ -295,36 +498,43 @@ const DetailCard = () => {
                             ? 'rounded-r-full'
                             : 'rounded-none';
 
-                          const variant = (product.variants || []).find(
-                            (v) =>
-                              v.attributes?.[key] &&
-                              v.attributes[key].toLowerCase() === value
-                          );
-
                           const hasAttributeImage =
-                            variant &&
-                            Array.isArray(variant.attributeImage) &&
-                            variant.attributeImage.length > 0;
+                            variantForValue &&
+                            variantForValue.attributeImages &&
+                            variantForValue.attributeImages[key];
+
+                          let borderStyle = 'border-gray-200';
+                          let backgroundStyle = '';
+                          let textStyle = '';
+                          let cursorStyle = '';
+
+                          if (isSelected) {
+                            backgroundStyle = 'bg-black';
+                            textStyle = 'text-white';
+                          } else if (!hasStock) {
+                            borderStyle = 'border-red-200 border-dashed';
+                            backgroundStyle = 'bg-red-50';
+                            textStyle = 'text-red-300';
+                            cursorStyle = 'cursor-not-allowed';
+                          } else if (!isCompatible) {
+                            borderStyle = 'border-gray-300 border-dashed';
+                            backgroundStyle = 'bg-gray-50';
+                            textStyle = 'text-gray-400';
+                          } else {
+                            backgroundStyle = 'bg-gray-50';
+                            textStyle = 'text-gray-400';
+                          }
 
                           return (
                             <button
                               key={value}
                               onClick={() =>
-                                !isDisabled && handleVariantSelect(key, value)
+                                isClickable && handleVariantSelect(key, value)
                               }
-                              disabled={isDisabled}
-                              className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border border-gray-200 font-light ${borderRadiusClass} ${
+                              disabled={!isClickable}
+                              className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border ${borderStyle} font-light ${borderRadiusClass} ${
                                 index > 0 ? '-ml-px' : ''
-                              } flex items-center justify-center
-                ${
-                  !hasAttributeImage
-                    ? isSelected
-                      ? 'bg-black text-white'
-                      : 'bg-gray-50 text-gray-400'
-                    : ''
-                }
-                ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
-              `}
+                              } flex items-center justify-center ${backgroundStyle} ${textStyle} ${cursorStyle}`}
                               style={
                                 hasAttributeImage
                                   ? {
@@ -338,10 +548,16 @@ const DetailCard = () => {
                             >
                               {hasAttributeImage ? (
                                 <img
-                                  src={variant.attributeImage[0]}
+                                  src={variantForValue.attributeImages[key]}
                                   alt={value}
                                   className={`w-full h-full object-cover transition-opacity duration-200 ${
-                                    isSelected ? 'opacity-100' : 'opacity-50'
+                                    isSelected
+                                      ? 'opacity-100'
+                                      : !hasStock
+                                      ? 'opacity-20 grayscale'
+                                      : !isCompatible
+                                      ? 'opacity-40'
+                                      : 'opacity-50'
                                   }`}
                                   style={{ width: '100%', height: '100%' }}
                                 />
@@ -358,11 +574,18 @@ const DetailCard = () => {
               </div>
             )}
 
+            {outOfStock && (
+              <p className="text-xs text-red-500 font-coolvetica font-light mt-4 px-4">
+                Sin stock
+              </p>
+            )}
+
             <div className="flex flex-row items-center w-full mt-6 px-3 ">
               <QuickAddToCart
                 product={productToSend}
                 calculatedPrice={totalPrice}
                 displayAsFullButton={true}
+                disabled={outOfStock}
               />
               <p className="text-xs pl-2 font-coolvetica font-light text-gray-900">
                 Por {currencyFormat(totalPrice)}
@@ -400,7 +623,6 @@ const DetailCard = () => {
           className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50"
           onClick={() => setIsModalOpen(false)}
         >
-          {/* Flecha superior izquierda para cerrar */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -428,7 +650,6 @@ const DetailCard = () => {
             className="relative flex items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Botón izquierda (solo si hay más de una imagen) */}
             {productImages.length > 1 && (
               <button
                 onClick={(e) => {
@@ -444,14 +665,12 @@ const DetailCard = () => {
               </button>
             )}
 
-            {/* Imagen ampliada */}
             <img
               src={productImages[selectedImageIndex]}
               alt={product.name}
               className="max-h-[90vh] max-w-[90vw] object-contain"
             />
 
-            {/* Botón derecha (solo si hay más de una imagen) */}
             {productImages.length > 1 && (
               <button
                 onClick={(e) => {
@@ -467,7 +686,6 @@ const DetailCard = () => {
             )}
           </div>
 
-          {/* Circulitos dentro del modal (solo si hay más de una imagen) */}
           {productImages.length > 1 && (
             <div className="flex flex-row gap-2 mt-4">
               {productImages.map((image, index) => (
