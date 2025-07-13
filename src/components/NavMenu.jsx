@@ -1,13 +1,13 @@
-import { useEffect, useRef } from "react";
-import Items from "../pages/menu/Items";
-import { useClient } from "../contexts/ClientContext";
+import { useEffect, useRef } from 'react';
+import Items from '../pages/menu/Items';
+import { useClient } from '../contexts/ClientContext';
 
 const NavMenu = () => {
   const navRef = useRef(null);
   const animationRef = useRef(null);
   const interactionTimeoutRef = useRef(null);
   const isUserInteracting = useRef(false);
-  const { categories } = useClient();
+  const { categories, clientAssets } = useClient();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -70,18 +70,18 @@ const NavMenu = () => {
     };
 
     // Eventos para desktop
-    nav.addEventListener("mousedown", startInteraction);
-    nav.addEventListener("mousemove", startInteraction);
-    nav.addEventListener("mouseup", endInteraction);
-    nav.addEventListener("wheel", () => {
+    nav.addEventListener('mousedown', startInteraction);
+    nav.addEventListener('mousemove', startInteraction);
+    nav.addEventListener('mouseup', endInteraction);
+    nav.addEventListener('wheel', () => {
       startInteraction();
       endInteraction();
     });
 
     // Eventos para mobile
-    nav.addEventListener("touchstart", startInteraction);
-    nav.addEventListener("touchmove", startInteraction);
-    nav.addEventListener("touchend", endInteraction);
+    nav.addEventListener('touchstart', startInteraction);
+    nav.addEventListener('touchmove', startInteraction);
+    nav.addEventListener('touchend', endInteraction);
 
     animationRef.current = requestAnimationFrame(scroll);
 
@@ -89,31 +89,31 @@ const NavMenu = () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
       clearTimeout(interactionTimeoutRef.current);
 
-      nav.removeEventListener("mousedown", startInteraction);
-      nav.removeEventListener("mousemove", startInteraction);
-      nav.removeEventListener("mouseup", endInteraction);
-      nav.removeEventListener("wheel", endInteraction);
+      nav.removeEventListener('mousedown', startInteraction);
+      nav.removeEventListener('mousemove', startInteraction);
+      nav.removeEventListener('mouseup', endInteraction);
+      nav.removeEventListener('wheel', endInteraction);
 
-      nav.removeEventListener("touchstart", startInteraction);
-      nav.removeEventListener("touchmove", startInteraction);
-      nav.removeEventListener("touchend", endInteraction);
+      nav.removeEventListener('touchstart', startInteraction);
+      nav.removeEventListener('touchmove', startInteraction);
+      nav.removeEventListener('touchend', endInteraction);
     };
   }, []);
 
   return (
     <div className="relative z-[99]">
       <p className="text-gray-100 px-4 text-center text-2xl mb-3 font-medium font-coolvetica">
-        ¿Salen unos mates?
+        {clientAssets?.heroTitle || 'Elegí lo que más te guste'}
       </p>
       <nav
         ref={navRef}
         className="flex flex-row w-full gap-1 px-4 overflow-x-auto nav-scroll-hide"
-        style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
+        style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
       >
         {categories.map((cat) => (
           <Items
             key={cat.id}
-            img={cat.image || cat.img || "/menu/defaultPortada.jpeg"}
+            img={cat.image || cat.img || '/menu/defaultPortada.jpeg'}
             name={cat.id}
           />
         ))}

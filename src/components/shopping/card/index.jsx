@@ -4,21 +4,19 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from "react";
-import QuickAddToCart from "./quickAddToCart";
-import currencyFormat from "../../../helpers/currencyFormat";
-import { Link, useParams } from "react-router-dom";
-import { listenToAltaDemanda } from "../../../firebase/constants/altaDemanda";
-import LoadingPoints from "../../LoadingPoints";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-import { useClient } from "../../../contexts/ClientContext";
+} from 'react';
+import QuickAddToCart from './quickAddToCart';
+import currencyFormat from '../../../helpers/currencyFormat';
+import { Link } from 'react-router-dom';
+import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
+import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal, clientConfig } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [showConsultStock, setShowConsultStock] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -32,36 +30,25 @@ const Card = ({ data, path }) => {
 
   const {
     id,
-    name = "Producto sin nombre",
-    description = "",
+    name = 'Producto sin nombre',
+    description = '',
     category,
     variants,
   } = data;
-
-  const images = useMemo(() => {
-    const raw = data?.img || data?.image || data?.images || [];
-
-    if (Array.isArray(raw)) {
-      return raw;
-    }
-
-    const resolved = getImageSrc(raw);
-    return [resolved];
-  }, [data]);
 
   const variantStats = useMemo(() => {
     const stats = {};
 
     for (const variant of variants || []) {
-      const key = variant.linkedTo;
-      const value = variant.name;
-      if (!key || !value) continue;
+      if (!variant.attributes) continue;
 
-      const stringKey = String(key).toLowerCase();
-      const stringValue = String(value).toLowerCase();
+      Object.entries(variant.attributes).forEach(([key, value]) => {
+        const stringKey = String(key).toLowerCase();
+        const stringValue = String(value).toLowerCase();
 
-      if (!stats[stringKey]) stats[stringKey] = new Set();
-      stats[stringKey].add(stringValue);
+        if (!stats[stringKey]) stats[stringKey] = new Set();
+        stats[stringKey].add(stringValue);
+      });
     }
 
     const result = {};
@@ -103,7 +90,11 @@ const Card = ({ data, path }) => {
 
   const getDefaultVariant = (variants) => {
     if (!Array.isArray(variants) || variants.length === 0) return null;
-    return variants.find((v) => v.stock > 0) || variants[0];
+    return (
+      variants.find((v) => v.default) ||
+      variants.find((v) => v.stock > 0) ||
+      variants[0]
+    );
   };
 
   const selectedVariant = useMemo(
@@ -111,7 +102,7 @@ const Card = ({ data, path }) => {
     [data.variants]
   );
 
-  const basePrice = data.price || 0;
+  const basePrice = selectedVariant?.price || data.price || 0;
   const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
 
   // Nueva lógica de precios
@@ -126,7 +117,7 @@ const Card = ({ data, path }) => {
       );
       const result = {
         mainPrice: cashPrice,
-        primaryText: "en efectivo/transferencia",
+        primaryText: 'en efectivo/transferencia',
         secondaryText: null,
       };
 
@@ -136,10 +127,10 @@ const Card = ({ data, path }) => {
         const perCuota = finalAmount / installments.quantity;
 
         result.secondaryText = `o por ${installments.quantity} cuota${
-          installments.quantity > 1 ? "s" : ""
+          installments.quantity > 1 ? 's' : ''
         } de ${currencyFormat(Math.ceil(perCuota))}${
           interestRate === 0
-            ? " (sin interés)"
+            ? ' (sin interés)'
             : ` (con ${Math.floor(interestRate * 100)}% interés)`
         }`;
       }
@@ -157,10 +148,10 @@ const Card = ({ data, path }) => {
         mainPrice: adjustedPrice,
         primaryText: null,
         secondaryText: `o en ${installments.quantity} cuota${
-          installments.quantity > 1 ? "s" : ""
+          installments.quantity > 1 ? 's' : ''
         } de ${currencyFormat(Math.ceil(perCuota))}${
           interestRate === 0
-            ? " (sin interés)"
+            ? ' (sin interés)'
             : ` (con ${Math.floor(interestRate * 100)}% interés)`
         }`,
       };
@@ -174,9 +165,10 @@ const Card = ({ data, path }) => {
     };
   }, [adjustedPrice, installments, cashDiscount]);
 
-  const resolvedImages = useMemo(() => {
+  const images = useMemo(() => {
     const imgs =
       selectedVariant?.images || data?.img || data?.image || data?.images || [];
+
     if (Array.isArray(imgs)) return imgs;
     return [getImageSrc(imgs)];
   }, [selectedVariant, data]);
@@ -200,12 +192,12 @@ const Card = ({ data, path }) => {
       }
     };
 
-    window.addEventListener("scroll", throttledScroll);
-    window.addEventListener("resize", handleScroll);
+    window.addEventListener('scroll', throttledScroll);
+    window.addEventListener('resize', handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", throttledScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener('scroll', throttledScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, [checkIfCentered]);
 
@@ -315,8 +307,8 @@ const Card = ({ data, path }) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? "bg-gray-50 opacity-100"
-                      : "bg-gray-50 opacity-30"
+                      ? 'bg-gray-50 opacity-100'
+                      : 'bg-gray-50 opacity-30'
                   }`}
                 />
               ))}
@@ -325,9 +317,9 @@ const Card = ({ data, path }) => {
 
           <img
             src={currentImageSrc}
-            alt={name || "Producto"}
+            alt={name || 'Producto'}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? "opacity-100" : "opacity-0"
+              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => {
               setIsLoaded(true);
@@ -344,8 +336,8 @@ const Card = ({ data, path }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
-                (name || "Producto sin nombre").slice(1).toLowerCase()}
+              {(name || 'Producto sin nombre').charAt(0).toUpperCase() +
+                (name || 'Producto sin nombre').slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
@@ -370,6 +362,25 @@ const Card = ({ data, path }) => {
                     {pricingInfo.secondaryText}
                   </span>
                 )}
+              </div>
+            )}
+            {data.deliveryDelay && (
+              <div className="mt-1">
+                {(() => {
+                  const delayHours = data.deliveryDelay;
+                  const delayText =
+                    delayHours < 24
+                      ? `${delayHours} hora${delayHours !== 1 ? 's' : ''}`
+                      : `${Math.ceil(delayHours / 24)} día${
+                          Math.ceil(delayHours / 24) !== 1 ? 's' : ''
+                        }`;
+                  return (
+                    <p className="text-gray-500 text-xs font-light">
+                      Este producto está en otra sucursal y demora {delayText}{' '}
+                      en llegar.
+                    </p>
+                  );
+                })()}
               </div>
             )}
           </div>
