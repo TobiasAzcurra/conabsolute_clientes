@@ -14,7 +14,7 @@ import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
-  const { slugEmpresa, slugSucursal, clientConfig } = useClient();
+  const { slugEmpresa, slugSucursal } = useClient();
   const [priceFactor, setPriceFactor] = useState(1);
   const [itemsOut, setItemsOut] = useState({});
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -59,18 +59,6 @@ const Card = ({ data, path }) => {
     return result;
   }, [variants]);
 
-  const visibleLabels = useMemo(() => {
-    return Object.entries(variantStats)
-      .filter(([, values]) => values.length > 0)
-      .map(([key, values]) => {
-        const translatedKey = clientConfig?.labels?.[key] || key;
-        return {
-          key,
-          text: `${values.length} ${translatedKey}`,
-        };
-      });
-  }, [variantStats, clientConfig]);
-
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
 
@@ -92,7 +80,7 @@ const Card = ({ data, path }) => {
     if (!Array.isArray(variants) || variants.length === 0) return null;
     return (
       variants.find((v) => v.default) ||
-      variants.find((v) => v.stock > 0) ||
+      variants.find((v) => v.stockSummary?.totalStock > 0) ||
       variants[0]
     );
   };
@@ -102,16 +90,16 @@ const Card = ({ data, path }) => {
     [data.variants]
   );
 
-  const basePrice = selectedVariant?.price || data.price || 0;
-  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+  const basePrice = data.price || 0;
+  const variantDiff = selectedVariant?.price || 0;
+  const adjustedPrice =
+    Math.ceil(((basePrice + variantDiff) * priceFactor) / 100) * 100;
 
-  // Nueva lógica de precios
   const pricingInfo = useMemo(() => {
     const hasInstallments = installments?.enabled && installments.quantity;
     const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
     if (hasCashDiscount) {
-      // Caso 1: Con descuento en efectivo - precio principal es el más barato
       const cashPrice = Math.ceil(
         adjustedPrice * (1 - cashDiscount.percentage)
       );
@@ -139,7 +127,6 @@ const Card = ({ data, path }) => {
     }
 
     if (hasInstallments) {
-      // Caso 2: Solo cuotas - precio principal es el normal
       const interestRate = installments.interest || 0;
       const finalAmount = adjustedPrice * (1 + interestRate);
       const perCuota = finalAmount / installments.quantity;
@@ -157,7 +144,6 @@ const Card = ({ data, path }) => {
       };
     }
 
-    // Caso 3: Simple - solo precio
     return {
       mainPrice: adjustedPrice,
       primaryText: null,
@@ -166,8 +152,9 @@ const Card = ({ data, path }) => {
   }, [adjustedPrice, installments, cashDiscount]);
 
   const images = useMemo(() => {
-    const imgs =
-      selectedVariant?.images || data?.img || data?.image || data?.images || [];
+    const imgs = selectedVariant?.images?.length
+      ? selectedVariant.images
+      : data?.img || data?.image || data?.images || [];
 
     if (Array.isArray(imgs)) return imgs;
     return [getImageSrc(imgs)];
@@ -231,6 +218,13 @@ const Card = ({ data, path }) => {
 
   const currentImageSrc = images[currentImageIndex];
 
+  const outOfStock = selectedVariant?.stockSummary?.totalStock === 0;
+
+  const finalName =
+    selectedVariant?.name && !selectedVariant?.default
+      ? selectedVariant.name
+      : name;
+
   return (
     <div
       ref={cardRef}
@@ -240,7 +234,7 @@ const Card = ({ data, path }) => {
         <div className="absolute right-3.5 top-2.5 z-40">
           <QuickAddToCart
             product={{
-              name,
+              name: finalName,
               description: data.cardDescription || description,
               price: pricingInfo.mainPrice,
               img: currentImageSrc,
@@ -248,7 +242,13 @@ const Card = ({ data, path }) => {
               id,
               category,
             }}
+            disabled={outOfStock}
           />
+          {outOfStock && (
+            <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs rounded-full z-50">
+              SIN STOCK
+            </span>
+          )}
         </div>
       )}
 
@@ -257,7 +257,6 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        {/* loading */}
         <div className="relative h-[160px]  overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
@@ -287,19 +286,42 @@ const Card = ({ data, path }) => {
             </div>
           )}
 
-          {/* indicador de variante */}
-          <div className="absolute bottom-0 left-2 z-30 flex gap-2">
-            {visibleLabels.map((label, index) => (
-              <span
-                key={`${label.key}-${index}`}
-                className="text-gray-400 text-[10px] font-light bg-gray-50 px-2 py-1 rounded-t-xl"
-              >
-                {label.text.toLowerCase()}
-              </span>
-            ))}
-          </div>
+          {Object.keys(variantStats).filter(
+            (key) => variantStats[key].length > 0
+          ).length > 0 && (
+            <div className="absolute bottom-0 left-3 right-3 z-30">
+              <div className="flex flex-wrap gap-1 justify-start">
+                {(() => {
+                  const attributes = Object.keys(variantStats)
+                    .filter((key) => variantStats[key].length > 0)
+                    .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
 
-          {/* indicador de imagenes */}
+                  const maxVisible = 3;
+                  const visibleAttributes = attributes.slice(0, maxVisible);
+                  const hasMore = attributes.length > maxVisible;
+
+                  return (
+                    <>
+                      {visibleAttributes.map((attr, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm"
+                        >
+                          {attr}
+                        </div>
+                      ))}
+                      {hasMore && (
+                        <div className="bg-gray-300 text-gray-600 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm">
+                          +{attributes.length - maxVisible}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
           {isInViewport && images.length > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
@@ -332,7 +354,6 @@ const Card = ({ data, path }) => {
           />
         </div>
 
-        {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
