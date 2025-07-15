@@ -17,28 +17,29 @@ const CartItems = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const { products, productsSorted, slugEmpresa, slugSucursal, clientAssets } =
+  const { products, productsSorted, slugEmpresa, slugSucursal, clientAssets, categories, productsByCategory } =
     useClient();
   const reels = clientAssets?.reels || [];
 
-  useEffect(() => {
-    console.log("🛒 Cart actualizado:", cart);
-
-    if (cart.length > 0) {
-      console.log("✅ Productos añadidos al carrito:");
-      cart.forEach((item) => {
-        console.log(`- ${item.name} | Cantidad: ${item.quantity}`);
-      });
-    } else {
-      console.log("⚠️ Carrito vacío");
+  const findCategoryWithProducts = () => {
+    if (!categories || !productsByCategory) return 'default';
+    
+    for (const category of categories) {
+      const categoryProducts = productsByCategory[category.id];
+      if (categoryProducts && categoryProducts.length > 0) {
+        return category.id;
+      }
     }
-  }, [cart]);
+    
+    return categories[0]?.id || 'default';
+  };
 
   useEffect(() => {
     if (cart.length <= 0 && pathname.includes("/carrito")) {
-      navigate(`/${slugEmpresa}/${slugSucursal}/menu`);
+      const categoryWithProducts = findCategoryWithProducts();
+      navigate(`/${slugEmpresa}/${slugSucursal}/menu/${categoryWithProducts}`);
     }
-  }, [cart.length, pathname, navigate, slugEmpresa, slugSucursal]);
+  }, [cart.length, pathname, navigate, slugEmpresa, slugSucursal, categories, productsByCategory]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -75,13 +76,13 @@ const CartItems = () => {
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            strokeWidth="1.5"
             stroke="currentColor"
-            class="h-6 text-gray-400"
+            className="h-6 text-gray-400"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
@@ -130,14 +131,13 @@ const CartItems = () => {
                 {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
 
-                  // ✅ Ya no necesitas definir handleItemClick, el componente Items lo manejará automáticamente
                   return (
                     <Items
                       key={product.id || index}
-                      selectedItem={product} // ✅ Pasar el objeto producto completo
+                      selectedItem={product}
                       img={productImg}
                       name={product.name}
-                      handleItemClick={() => {}} // ✅ Pasar una función vacía para que Items detecte que debe ser clickeable
+                      handleItemClick={() => {}}
                       isCart={true}
                     />
                   );
