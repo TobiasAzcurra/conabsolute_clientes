@@ -8,15 +8,13 @@ import React, {
 import QuickAddToCart from './quickAddToCart';
 import currencyFormat from '../../../helpers/currencyFormat';
 import { Link } from 'react-router-dom';
-import { listenToAltaDemanda } from '../../../firebase/constants/altaDemanda';
 import LoadingPoints from '../../LoadingPoints';
 import { getImageSrc } from '../../../helpers/getImageSrc';
 import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal } = useClient();
-  const [priceFactor, setPriceFactor] = useState(1);
-  const [itemsOut, setItemsOut] = useState({});
+  
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -92,63 +90,57 @@ const Card = ({ data, path }) => {
 
   const basePrice = data.price || 0;
   const variantDiff = selectedVariant?.price || 0;
-  const adjustedPrice =
-    Math.ceil(((basePrice + variantDiff) * priceFactor) / 100) * 100;
+  const adjustedPrice = basePrice + variantDiff;
 
   const pricingInfo = useMemo(() => {
     const hasInstallments = installments?.enabled && installments.quantity;
     const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
-    if (hasCashDiscount) {
-      const cashPrice = Math.ceil(
-        adjustedPrice * (1 - cashDiscount.percentage)
-      );
-      const result = {
-        mainPrice: cashPrice,
-        primaryText: 'en efectivo/transferencia',
-        secondaryText: null,
-      };
-
-      if (hasInstallments) {
-        const interestRate = installments.interest || 0;
-        const finalAmount = adjustedPrice * (1 + interestRate);
-        const perCuota = finalAmount / installments.quantity;
-
-        result.secondaryText = `o por ${installments.quantity} cuota${
-          installments.quantity > 1 ? 's' : ''
-        } de ${currencyFormat(Math.ceil(perCuota))}${
-          interestRate === 0
-            ? ' (sin interés)'
-            : ` (con ${Math.floor(interestRate * 100)}% interés)`
-        }`;
-      }
-
-      return result;
-    }
-
-    if (hasInstallments) {
-      const interestRate = installments.interest || 0;
-      const finalAmount = adjustedPrice * (1 + interestRate);
-      const perCuota = finalAmount / installments.quantity;
-
-      return {
-        mainPrice: adjustedPrice,
-        primaryText: null,
-        secondaryText: `o en ${installments.quantity} cuota${
-          installments.quantity > 1 ? 's' : ''
-        } de ${currencyFormat(Math.ceil(perCuota))}${
-          interestRate === 0
-            ? ' (sin interés)'
-            : ` (con ${Math.floor(interestRate * 100)}% interés)`
-        }`,
-      };
-    }
-
-    return {
-      mainPrice: adjustedPrice,
+    const result = {
+      mainPrice: adjustedPrice, // Precio principal siempre es el precio original
       primaryText: null,
       secondaryText: null,
     };
+
+    // Generar textos de opciones de pago
+    const paymentOptions = [];
+
+    if (hasCashDiscount) {
+      // Convertir porcentaje a decimal si es necesario
+      const discountPercentage = cashDiscount.percentage > 1 
+        ? cashDiscount.percentage / 100 
+        : cashDiscount.percentage;
+        
+      const cashPrice = Math.ceil(adjustedPrice * (1 - discountPercentage));
+      paymentOptions.push(`${currencyFormat(cashPrice)} en efectivo/transferencia`);
+    }
+
+    if (hasInstallments) {
+      const interestRate = installments.interest > 1 
+        ? installments.interest / 100 
+        : installments.interest;
+        
+      const finalAmount = adjustedPrice * (1 + interestRate);
+      const perCuota = finalAmount / installments.quantity;
+
+      const installmentText = `${installments.quantity} cuota${
+        installments.quantity > 1 ? 's' : ''
+      } de ${currencyFormat(Math.ceil(perCuota))}${
+        interestRate === 0 ? ' (sin interés)' : ''
+      }`;
+      
+      paymentOptions.push(installmentText);
+    }
+
+    // Asignar opciones de pago
+    if (paymentOptions.length === 1) {
+      result.primaryText = `o ${paymentOptions[0]}`;
+    } else if (paymentOptions.length === 2) {
+      result.primaryText = `o ${paymentOptions[0]}`;
+      result.secondaryText = `o ${paymentOptions[1]}`;
+    }
+
+    return result;
   }, [adjustedPrice, installments, cashDiscount]);
 
   const images = useMemo(() => {
@@ -207,14 +199,6 @@ const Card = ({ data, path }) => {
       }
     };
   }, [isInViewport, images]);
-
-  useEffect(() => {
-    const unsubscribe = listenToAltaDemanda((altaDemanda) => {
-      setPriceFactor(altaDemanda.priceFactor);
-      setItemsOut(altaDemanda.itemsOut);
-    });
-    return () => unsubscribe();
-  }, []);
 
   const currentImageSrc = images[currentImageIndex];
 
