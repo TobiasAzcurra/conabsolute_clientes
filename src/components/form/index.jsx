@@ -36,7 +36,6 @@ const FormCustom = ({ cart, total }) => {
   const [noEncontre, setNoEncontre] = useState(false);
 
   const {
-    altaDemanda,
     isEnabled,
     handleExpressToggle,
     showHighDemandModal,
@@ -63,7 +62,7 @@ const FormCustom = ({ cart, total }) => {
     couponCodes: [],
     descuento: 0,
     isPending: clientConfig?.logistics?.pendingOfBeingAccepted || false,
-    priceFactor: altaDemanda?.priceFactor || 1,
+    priceFactor: 1,
   };
 
   const processPedido = async (values, isReserva, message = "") => {
@@ -360,8 +359,7 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p className="font-medium text-center">
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
-          {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de 0 minutos, ¿Lo esperas?
         </p>
       </AppleModal>
 
@@ -383,7 +381,7 @@ const FormCustom = ({ cart, total }) => {
               mapUrl,
               descuento,
               false,
-              altaDemanda?.message || ""
+              ""
             );
 
             if (orderId) {
@@ -396,7 +394,7 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p className="font-medium text-center">
-          {altaDemanda?.message} <br />
+          Mensaje de sistema <br />
           Tendras un boton para pedir tu compensacion ❤️‍🔥 Aceptas?
         </p>
       </AppleModal>
