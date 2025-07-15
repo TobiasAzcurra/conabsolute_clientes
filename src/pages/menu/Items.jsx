@@ -1,7 +1,6 @@
 import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import QuickAddToCart from '../../components/shopping/card/quickAddToCart';
 import { useState } from 'react';
-import { listenToAltaDemanda } from '../../firebase/constants/altaDemanda';
 import { useEffect } from 'react';
 import { useClient } from '../../contexts/ClientContext';
 
