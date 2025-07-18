@@ -4,11 +4,24 @@ import { useClient } from '../contexts/ClientContext';
 
 const NotFound = () => {
   const navigate = useNavigate();
-  const { slugEmpresa, slugSucursal, categories } = useClient();
+  const { slugEmpresa, slugSucursal, categories, productsByCategory } = useClient();
+
+  const findCategoryWithProducts = () => {
+    if (!categories || !productsByCategory) return 'default';
+    
+    for (const category of categories) {
+      const categoryProducts = productsByCategory[category.id];
+      if (categoryProducts && categoryProducts.length > 0) {
+        return category.id;
+      }
+    }
+    
+    return categories[0]?.id || 'default';
+  };
 
   const handleGoHome = () => {
-    const firstCategory = categories?.[0]?.id || 'default';
-    navigate(`/${slugEmpresa}/${slugSucursal}/menu/${firstCategory}`);
+    const categoryWithProducts = findCategoryWithProducts();
+    navigate(`/${slugEmpresa}/${slugSucursal}/menu/${categoryWithProducts}`);
   };
 
   return (

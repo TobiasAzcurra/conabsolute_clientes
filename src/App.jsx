@@ -1,6 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './Router';
-import VersionChecker from './components/VersionChecker';
 import { HelmetProvider } from 'react-helmet-async';
 import { ClientProvider } from './contexts/ClientContext';
 import './fontAwesome';
@@ -8,13 +7,11 @@ import './fontAwesome';
 function App() {
   return (
     <BrowserRouter>
-      <VersionChecker>
-        <HelmetProvider>
-          <ClientProvider>
-            <AppRouter />
-          </ClientProvider>
-        </HelmetProvider>
-      </VersionChecker>
+      <HelmetProvider>
+        <ClientProvider>
+          <AppRouter />
+        </ClientProvider>
+      </HelmetProvider>
     </BrowserRouter>
   );
 }
