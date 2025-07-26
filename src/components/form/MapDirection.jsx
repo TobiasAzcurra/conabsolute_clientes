@@ -30,13 +30,15 @@ export const MapDirection = ({
       const formattedAddress = selectedPlace.formatted_address;
       const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
 
-      const formattedGoogleMapsUrl =
-        `https://www.google.com/maps?q=${lat},${lng}`.replace(
-          'https://',
-          'https ://'
-        );
+      const postalCode = selectedPlace.address_components?.find((component) =>
+        component.types.includes('postal_code')
+      )?.long_name;
+
       setUrl(googleMapsUrl);
       setFieldValue('address', formattedAddress); // Actualiza la dirección en Formik
+      if (postalCode) {
+        setFieldValue('postalCode', postalCode); // Actualiza el código postal en Formik
+      }
     }
   }, [selectedPlace]);
 

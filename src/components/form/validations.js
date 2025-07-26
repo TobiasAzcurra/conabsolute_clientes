@@ -6,6 +6,10 @@ const validations = (total, cart = []) =>
       .required("Telefono obligatorio")
       .min(6, "Debe de tener 6 caracteres o más"),
 
+    postalCode: Yup.string()
+      .required("Código postal obligatorio")
+      .matches(/^[0-9]{4,5}$/, "Debe ser un código postal válido"),
+
     // deliveryMethod: Yup.string()
     //   .required('Método de entrega es obligatorio')
     //   .oneOf(['delivery', 'retiro']),
