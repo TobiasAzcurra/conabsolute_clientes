@@ -580,7 +580,6 @@ const DetailCard = () => {
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
-
             {customization && (
               <div className="gap-2 w-full mt-8 flex flex-col justify-center px-4">
                 {Object.entries(variantStats).map(([key, values]) => (
@@ -757,7 +756,20 @@ const DetailCard = () => {
                 Sin stock
               </p>
             )}
-
+            {typeof product.deliveryAvailable === 'boolean' && (
+              <div className="pl-4 pr-4 mt-3 mb-1 flex items-center">
+                <span
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-coolvetica text-xs font-medium shadow-sm
+                    ${product.deliveryAvailable
+                      ? 'bg-green-100 text-green-700 border border-green-300'
+                      : 'bg-gray-100 text-gray-400 border border-gray-200'}`}
+                  aria-label={product.deliveryAvailable ? 'Disponible para delivery' : 'No disponible para delivery'}
+                >
+                  {product.deliveryAvailable ? 'Delivery Disponible' : 'Delivery No disponible'}
+                </span>
+              </div>
+            )}
+            
             <div className="flex flex-row items-center w-full mt-6 px-3 ">
               <QuickAddToCart
                 product={productToSend}
