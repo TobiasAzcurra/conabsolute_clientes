@@ -809,7 +809,7 @@ const DetailCard = () => {
             {logo && (
               <img
                 src={logo}
-                className="invert brightness-0 w-1/3 mx-auto flex justify-center my-16"
+                className="w-1/3 mx-auto flex justify-center my-16"
                 alt=""
               />
             )}
