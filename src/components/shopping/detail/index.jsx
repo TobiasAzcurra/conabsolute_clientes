@@ -479,6 +479,14 @@ const DetailCard = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const productVideos = useMemo(() => {
+    if (product?.vid?.length) return product.vid;
+
+    if (selectedVariant?.videos?.length) return selectedVariant.videos;
+
+    return reels;
+  }, [product?.vid, selectedVariant?.videos, reels]);
+
   return (
     <div>
       <Toast toasts={toasts} onRemove={removeToast} />
@@ -796,7 +804,7 @@ const DetailCard = () => {
               </p>
             )}
             <div className="mt-12">
-              <VideoSlider reels={reels} />
+              <VideoSlider reels={productVideos} />
             </div>
             {logo && (
               <img
