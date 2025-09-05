@@ -52,7 +52,6 @@ const DetailCard = () => {
     if (!empresaId || !sucursalId || !id) return;
 
     const updateProductStock = async () => {
-      // Verificar si necesitamos actualizar (cache inteligente)
       const now = Date.now();
       if (lastStockUpdate && (now - lastStockUpdate) < STOCK_CACHE_DURATION) {
         console.log('📦 Stock en cache, saltando actualización');
@@ -63,17 +62,12 @@ const DetailCard = () => {
       try {
         const freshProduct = await getProductById(empresaId, sucursalId, id);
         if (freshProduct) {
-          // Aplicar el mismo filtro de variantes que en MenuIntro
           const filteredProduct = {
             ...freshProduct,
             variants: freshProduct.variants?.filter(variant => {
-              // Si la variante no tiene precio, es válida
-              if (!variant.price && variant.price !== 0) return true;
-              
-              // Verificar que el precio de la variante sea un número
+              if (!variant.price && variant.price !== 0) return true;              
               if (typeof variant.price !== 'number') return false;
               
-              // El precio final debe ser >= 0
               const basePrice = freshProduct.price || 0;
               const finalPrice = basePrice + variant.price;
               return finalPrice >= 0;
@@ -131,7 +125,6 @@ const DetailCard = () => {
   const availableOptions = useMemo(() => {
     const options = {};
 
-    // Si no hay selecciones, mostrar todas las opciones disponibles
     const hasSelections = Object.values(selectedVariants).some(
       (value) => value !== null && value !== undefined
     );
@@ -289,10 +282,12 @@ const DetailCard = () => {
     };
   }, [product, finalName, selectedVariant, totalPrice, basePrice]);
 
-  const outOfStock =
+  const outOfStock = product.infiniteStock 
+  ? false 
+  : (
     selectedVariant &&
     selectedVariant.stockSummary &&
-    selectedVariant.stockSummary.totalStock === 0;
+    selectedVariant.stockSummary.totalStock === 0)
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -488,7 +483,7 @@ const DetailCard = () => {
   }, [product?.vid, selectedVariant?.videos, reels]);
 
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <Toast toasts={toasts} onRemove={removeToast} />
       <div className="flex flex-col">
         <div className="flex flex-col justify-items-center items-center ">
@@ -588,6 +583,7 @@ const DetailCard = () => {
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
+
             {customization && (
               <div className="gap-2 w-full mt-8 flex flex-col justify-center px-4">
                 {Object.entries(variantStats).map(([key, values]) => (
@@ -595,8 +591,8 @@ const DetailCard = () => {
                     <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
                       {clientConfig?.labels?.[key] || capitalizeWords(key)}
                     </h5>
-                    <div className="flex w-full overflow-auto">
-                      <div className="flex">
+                    <div className="flex w-full">
+                      <div className="grid grid-cols-3 gap-2">
                         {values.map((value, index) => {
                           const isSelected = selectedVariants[key] === value;
 
@@ -675,13 +671,13 @@ const DetailCard = () => {
                           const isLast = index === values.length - 1;
                           const isOnly = values.length === 1;
 
-                          const borderRadiusClass = isOnly
-                            ? 'rounded-full'
-                            : isFirst
-                            ? 'rounded-l-full'
-                            : isLast
-                            ? 'rounded-r-full'
-                            : 'rounded-none';
+                          const borderRadiusClass = 'rounded-full' // isOnly
+                            // ? 'rounded-full'
+                            // : isFirst
+                            // ? 'rounded-l-full'
+                            // : isLast
+                            // ? 'rounded-r-full'
+                            // : 'rounded-none';
 
                           const hasAttributeImage =
                             variantForValue &&
@@ -764,6 +760,7 @@ const DetailCard = () => {
                 Sin stock
               </p>
             )}
+
             {typeof product.deliveryAvailable === 'boolean' && (
               <div className="pl-4 pr-4 mt-3 mb-1 flex items-center">
                 <span
