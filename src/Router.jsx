@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import EmpresaRouter from "./EmpresaRouter";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AgregarProductoPage from "./pages/admin/AgregarProductoPage";
 
 function NavigateConabsolute() {
   useEffect(() => {

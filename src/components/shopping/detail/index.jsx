@@ -20,6 +20,8 @@ const DetailCard = () => {
   const cart = useSelector((state) => state.cartState.cart);
   const { toasts, addToast, removeToast } = useToast();
 
+  console.log("DetailCard params:", { category, id }); // ✅ Debug
+
   const [selectedVariants, setSelectedVariants] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -37,7 +39,7 @@ const DetailCard = () => {
   const STOCK_CACHE_DURATION = 30 * 1000;
 
   const reels = clientAssets?.reels || [];
-  const logo = clientAssets?.logoFooter || clientAssets?.logo || '';
+  const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
 
   const product = useMemo(() => {
     // Si tenemos producto actualizado, usarlo; sino usar el de cache
@@ -95,6 +97,21 @@ const DetailCard = () => {
         <div className="text-center font-coolvetica text-gray-900">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p>Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ VERIFICACIÓN TEMPRANA - ANTES de cualquier cálculo que use product
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center font-coolvetica text-gray-900">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Cargando producto...</p>
+          <p className="text-xs text-gray-500 mt-2">
+            Buscando en categoría: {category} | ID: {id}
+          </p>
         </div>
       </div>
     );

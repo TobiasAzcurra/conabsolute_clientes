@@ -134,7 +134,7 @@ const CartItems = () => {
                   return (
                     <Items
                       key={product.id || index}
-                      selectedItem={product}
+                      selectedItem={product} // ✅ Pasar el objeto producto completo
                       img={productImg}
                       name={product.name}
                       handleItemClick={() => {}}

@@ -28,8 +28,8 @@ const Card = ({ data, path }) => {
 
   const {
     id,
-    name = 'Producto sin nombre',
-    description = '',
+    name = "Producto sin nombre",
+    description = "",
     category,
     variants,
   } = data;
@@ -171,12 +171,12 @@ const Card = ({ data, path }) => {
       }
     };
 
-    window.addEventListener('scroll', throttledScroll);
-    window.addEventListener('resize', handleScroll);
+    window.addEventListener("scroll", throttledScroll);
+    window.addEventListener("resize", handleScroll);
 
     return () => {
-      window.removeEventListener('scroll', throttledScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", throttledScroll);
+      window.removeEventListener("resize", handleScroll);
     };
   }, [checkIfCentered]);
 
@@ -323,9 +323,9 @@ const Card = ({ data, path }) => {
 
           <img
             src={currentImageSrc}
-            alt={name || 'Producto'}
+            alt={name || "Producto"}
             className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? 'opacity-100' : 'opacity-0'
+              isLoaded && !imageError ? "opacity-100" : "opacity-0"
             }`}
             onLoad={() => {
               setIsLoaded(true);
@@ -338,6 +338,7 @@ const Card = ({ data, path }) => {
           />
         </div>
 
+        {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">

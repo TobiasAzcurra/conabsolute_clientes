@@ -123,6 +123,8 @@ const CartCard = ({
 
   const imageSrc = getImageSrc(item || img);
 
+  console.log(name, "acaaaa");
+
   return (
     <div className="relative">
       <div
