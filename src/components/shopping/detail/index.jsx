@@ -20,12 +20,18 @@ const DetailCard = () => {
   const cart = useSelector((state) => state.cartState.cart);
   const { toasts, addToast, removeToast } = useToast();
 
+  console.log("DetailCard params:", { category, id }); // ✅ Debug
+
   const [selectedVariants, setSelectedVariants] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [updatedProduct, setUpdatedProduct] = useState(null);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [lastStockUpdate, setLastStockUpdate] = useState(null);
+  const [altaDemanda, setAltaDemanda] = useState(null);
+  const [itemsOut, setItemsOut] = useState({});
+  const [disable, setDisable] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const prevImagesRef = useRef([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -37,7 +43,7 @@ const DetailCard = () => {
   const STOCK_CACHE_DURATION = 30 * 1000;
 
   const reels = clientAssets?.reels || [];
-  const logo = clientAssets?.logoFooter || clientAssets?.logo || '';
+  const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
 
   const product = useMemo(() => {
     // Si tenemos producto actualizado, usarlo; sino usar el de cache
@@ -46,6 +52,18 @@ const DetailCard = () => {
     const list = productsByCategory?.[category] || [];
     return list.find((p) => p.id === id);
   }, [updatedProduct, location?.state, productsByCategory, category, id]);
+
+  console.log("Looking for product in category:", category, "with id:", id);
+    console.log(
+      "Available products:",
+      list.map((p) => ({ id: p.id, name: p.name }))
+    );
+
+    const foundProduct = list.find((p) => p.id === id);
+    console.log(
+      "Found product:",
+      foundProduct ? foundProduct.name : "NOT FOUND"
+    );
 
   // Efecto para actualizar el stock del producto al entrar al detalle
   useEffect(() => {
@@ -95,6 +113,21 @@ const DetailCard = () => {
         <div className="text-center font-coolvetica text-gray-900">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p>Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ VERIFICACIÓN TEMPRANA - ANTES de cualquier cálculo que use product
+  if (!product) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center font-coolvetica text-gray-900">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Cargando producto...</p>
+          <p className="text-xs text-gray-500 mt-2">
+            Buscando en categoría: {category} | ID: {id}
+          </p>
         </div>
       </div>
     );
@@ -168,6 +201,14 @@ const DetailCard = () => {
 
     return result;
   }, [product.variants, selectedVariants]);
+
+  // Determinar si hay customización disponible basándose en variantStats
+  const customization = useMemo(() => {
+    return (
+      Object.keys(variantStats).length > 0 &&
+      Object.values(variantStats).some((values) => values.length > 0)
+    );
+  }, [variantStats]);
 
   useEffect(() => {
     const newSelection = { ...selectedVariants };
@@ -261,6 +302,28 @@ const DetailCard = () => {
   const basePrice = product.price || 0;
   const variantPrice = selectedVariant?.price || 0;
   const totalPrice = basePrice + variantPrice;
+  const totalBeforeFactor = basePrice + variantTotalPrice;
+  const priceFactor = altaDemanda?.priceFactor || 1;
+  const totalPrice = Math.ceil((totalBeforeFactor * priceFactor) / 100) * 100;
+
+  const variantNames = useMemo(() => {
+    return Object.values(selectedVariants)
+      .filter(Boolean)
+      .map((v) => capitalizeWords(v))
+      .join(" ");
+  }, [selectedVariants]);
+
+  const combinedName = useMemo(() => {
+    return variantNames ? `${product.name} ${variantNames}` : product.name;
+  }, [product?.name, variantNames]);
+
+  const firstVariantWithImage = useMemo(() => {
+    return product.variants?.find(
+      (v) =>
+        selectedVariants[v.linkedTo?.toLowerCase()] === v.name?.toLowerCase() &&
+        v.productImage?.length > 0
+    );
+  }, [product.variants, selectedVariants]);
 
   const finalName =
     selectedVariant?.name && !selectedVariant?.default
@@ -666,7 +729,6 @@ const DetailCard = () => {
                             variantForValue?.stockSummary?.totalStock > 0;
 
                           const isClickable = hasStock;
-
                           const isFirst = index === 0;
                           const isLast = index === values.length - 1;
                           const isOnly = values.length === 1;

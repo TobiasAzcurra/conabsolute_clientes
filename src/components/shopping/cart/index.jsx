@@ -130,11 +130,10 @@ const CartItems = () => {
               <div className="flex gap-2" style={{ width: "max-content" }}>
                 {productsSorted.map((product, index) => {
                   const productImg = getImageSrc(product);
-
                   return (
                     <Items
                       key={product.id || index}
-                      selectedItem={product}
+                      selectedItem={product} // ✅ Pasar el objeto producto completo
                       img={productImg}
                       name={product.name}
                       handleItemClick={() => {}}

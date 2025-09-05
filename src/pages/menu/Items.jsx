@@ -27,20 +27,23 @@ const Items = ({
   const isSelected = selectedItemParam === name;
 
   const borderStyle = isSelected
-    ? 'border-2 border-black border-opacity-100'
-    : 'border border-black border-opacity-20';
+    ? "border-2 border-black border-opacity-100"
+    : "border border-black border-opacity-20";
 
   const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
-      ? 'w-[110px]'
-      : 'min-w-[110px] max-w-[200px]'
+      ? "w-[110px]"
+      : "min-w-[110px] max-w-[200px]"
   }`;
 
   let imageSrc = img;
   if (isCarrito) {
     imageSrc =
-      img.startsWith('/menu/') || img.startsWith('http') ? img : `/menu/${img}`;
+      img.startsWith("/menu/") || img.startsWith("http") ? img : `/menu/${img}`;
   }
+
+  // Console.log para ver la imagen que se va a mostrar
+  console.log("Image Source:", imageSrc);
 
   const content = (
     <>
@@ -54,8 +57,8 @@ const Items = ({
       <div
         className={`font-coolvetica text-center ${
           isCarrito || isPedidoComponente
-            ? 'flex flex-col items-center justify-between h-[43px]'
-            : 'h-[50px]'
+            ? "flex flex-col items-center justify-between h-[43px]"
+            : "h-[50px]"
         }`}
       >
         <h5 className="mt-1 text-xs font-medium tracking-tight">
@@ -96,6 +99,7 @@ const Items = ({
     </>
   );
 
+  // ✅ Lógica de redirección inteligente
   if (isCarrito || isPedidoComponente) {
     const smartHandleClick = handleItemClick
       ? () => {

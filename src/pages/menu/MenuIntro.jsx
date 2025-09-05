@@ -1,13 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useClient } from '../../contexts/ClientContext';
-import { getClientData } from '../../firebase/clients/getClientData';
-import { getClientAssets } from '../../firebase/clients/getClientAssets';
-import { getCategoriesByClient } from '../../firebase/categories/getCategories';
-import { getProductsByClient } from '../../firebase/products/getProductsByClient';
-import { getProductsByCategoryPosition } from '../../firebase/products/getProductsByCategory';
-import { getClientIds } from '../../firebase/clients/getClientIds';
-import { getClientConfig } from '../../firebase/clients/getClientConfig';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useClient } from "../../contexts/ClientContext";
+import { getClientData } from "../../firebase/clients/getClientData";
+import { getClientAssets } from "../../firebase/clients/getClientAssets";
+import { getCategoriesByClient } from "../../firebase/categories/getCategories";
+import { getProductsByClient } from "../../firebase/products/getProductsByClient";
+import { getProductsByCategoryPosition } from "../../firebase/products/getProductsByCategory";
+import { getClientIds } from "../../firebase/clients/getClientIds";
+import { getClientConfig } from "../../firebase/clients/getClientConfig";
+
+// Constantes para mejorar mantenibilidad
+const DEFAULT_INTRO_DURATION = 0;
+// si no tiene duracion la animacion lo ponemos en 0 por las dudas
+const REDIRECT_BUFFER = 300;
+// para asegurar que termine la animacion
 
 // Constantes para mejorar mantenibilidad
 const DEFAULT_INTRO_DURATION = 0;
@@ -43,7 +49,7 @@ const MenuIntro = () => {
       try {
         const ids = await getClientIds(slugEmpresa, slugSucursal);
         if (!ids) {
-          console.error('❌ Empresa o sucursal no encontrada');
+          console.error("❌ Empresa o sucursal no encontrada");
           return;
         }
 
@@ -137,9 +143,8 @@ const MenuIntro = () => {
         };
 
         const introDuration = assets?.loadingDuration || DEFAULT_INTRO_DURATION;
-
         const normalizePath = (path) =>
-          path.endsWith('/') ? path.slice(0, -1) : path;
+          path.endsWith("/") ? path.slice(0, -1) : path;
 
         setTimeout(() => {
           setIsLoaded(true);
@@ -154,7 +159,7 @@ const MenuIntro = () => {
           }
         }, introDuration + REDIRECT_BUFFER);
       } catch (error) {
-        console.error('❌ Error cargando datos:', error);
+        console.error("❌ Error cargando datos:", error);
       }
     };
 
@@ -167,9 +172,9 @@ const MenuIntro = () => {
         <img
           src={introGif}
           className={`w-full h-full object-cover absolute top-0 left-0 z-10 transition-opacity duration-700 ${
-            imgLoaded ? 'opacity-100' : 'opacity-0'
+            imgLoaded ? "opacity-100" : "opacity-0"
           }`}
-          style={{ minHeight: '100vh', minWidth: '100vw' }}
+          style={{ minHeight: "100vh", minWidth: "100vw" }}
           onLoad={() => setImgLoaded(true)}
           alt="Loading animation"
         />

@@ -1,15 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   addItem,
   updateItemQuantity,
   removeItem,
-} from '../../../redux/cart/cartSlice';
-import { ReadMateriales, ReadData } from '../../../firebase/orders/uploadOrder';
-import { addProductToOrder } from '../../../firebase/orders/addProductToOrder';
-import { calcularCostoHamburguesa } from '../../../helpers/currencyFormat';
+} from "../../../redux/cart/cartSlice";
+import { ReadMateriales, ReadData } from "../../../firebase/orders/uploadOrder";
+import { addProductToOrder } from "../../../firebase/orders/addProductToOrder";
+import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 
 const QuickAddToCart = ({
   product,
@@ -22,7 +22,7 @@ const QuickAddToCart = ({
   currentOrder = null,
   calculatedPrice = null,
   disabled = false,
-  animateFrom = 'right',
+  animateFrom = "right",
 }) => {
   const dispatch = useDispatch();
   const { cart } = useSelector((state) => state.cartState);
@@ -130,7 +130,7 @@ const QuickAddToCart = ({
         }
         if (onOrderQuantityChange) onOrderQuantityChange(quantityRef.current);
       } catch (error) {
-        console.error('Error al actualizar producto:', error);
+        console.error("Error al actualizar producto:", error);
       } finally {
         setIsAdding(false);
         setTimeout(() => setIsEditing(false), 300);
@@ -142,8 +142,8 @@ const QuickAddToCart = ({
     <div
       className={`relative ${
         displayAsFullButton
-          ? 'w-[182px] h-[72px]'
-          : 'w-[35px] h-[35px] pt-0.5 text-center cursor-pointer'
+          ? "w-[182px] h-[72px]"
+          : "w-[35px] h-[35px] pt-0.5 text-center cursor-pointer"
       } flex items-center justify-center`}
     >
       <AnimatePresence>
@@ -156,13 +156,13 @@ const QuickAddToCart = ({
             transition={{ duration: 0.3 }}
             className={`absolute z-50 overflow-hidden rounded-3xl border-black border-2 bg-gray-50 flex items-center ${
               displayAsFullButton
-                ? ''
-                : animateFrom === 'right'
-                ? 'right-0'
-                : 'left-0'
+                ? ""
+                : animateFrom === "right"
+                ? "right-0"
+                : "left-0"
             }`}
             style={{
-              transformOrigin: displayAsFullButton ? 'center' : animateFrom,
+              transformOrigin: displayAsFullButton ? "center" : animateFrom,
             }}
           >
             <div className="flex w-[105px] h-[35px]">
@@ -192,7 +192,7 @@ const QuickAddToCart = ({
               <button
                 disabled={disabled}
                 className={`bg-black flex flex-row items-center gap-2 font-coolvetica  text-gray-50 rounded-2xl h-20 p-8 text-2xl ${
-                  disabled ? 'opacity-50 cursor-not-allowed' : ''
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 onClick={!disabled ? startAddingProcess : undefined}
               >
@@ -218,7 +218,7 @@ const QuickAddToCart = ({
               <button
                 disabled={disabled}
                 className={`bg-black w-44 justify-center flex flex-row items-center gap-2 font-coolvetica  text-gray-50 rounded-2xl h-20 p-8 text-2xl ${
-                  disabled ? 'opacity-50 cursor-not-allowed' : ''
+                  disabled ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 onClick={!disabled ? startAddingProcess : undefined}
               >
@@ -242,11 +242,11 @@ const QuickAddToCart = ({
           ) : (
             <div
               className={`${
-                quantity > 0 ? 'bg-black border text-gray-100' : 'bg-gray-50'
+                quantity > 0 ? "bg-black border text-gray-100" : "bg-gray-50"
               } rounded-3xl font-black border border-black border-opacity-20 flex items-center justify-center pb-0.5 w-[35px] h-[35px] text-center cursor-pointer`}
               onClick={startAddingProcess}
             >
-              {quantity > 0 ? quantity : '+'}
+              {quantity > 0 ? quantity : "+"}
             </div>
           )}
         </>

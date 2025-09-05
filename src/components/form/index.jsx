@@ -359,7 +359,8 @@ const FormCustom = ({ cart, total }) => {
         }}
       >
         <p className="font-medium text-center">
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de 0 minutos, ¿Lo esperas?
+          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
+          {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
         </p>
       </AppleModal>
 
@@ -381,7 +382,7 @@ const FormCustom = ({ cart, total }) => {
               mapUrl,
               descuento,
               false,
-              ""
+              altaDemanda?.message || ""
             );
 
             if (orderId) {
