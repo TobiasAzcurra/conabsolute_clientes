@@ -136,7 +136,6 @@ const MenuIntro = () => {
         };
 
         const introDuration = assets?.loadingDuration || DEFAULT_INTRO_DURATION;
-
         const normalizePath = (path) =>
           path.endsWith("/") ? path.slice(0, -1) : path;
 

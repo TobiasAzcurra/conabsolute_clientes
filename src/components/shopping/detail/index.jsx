@@ -28,6 +28,10 @@ const DetailCard = () => {
   const [updatedProduct, setUpdatedProduct] = useState(null);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [lastStockUpdate, setLastStockUpdate] = useState(null);
+  const [altaDemanda, setAltaDemanda] = useState(null);
+  const [itemsOut, setItemsOut] = useState({});
+  const [disable, setDisable] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const prevImagesRef = useRef([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -48,6 +52,18 @@ const DetailCard = () => {
     const list = productsByCategory?.[category] || [];
     return list.find((p) => p.id === id);
   }, [updatedProduct, location?.state, productsByCategory, category, id]);
+
+  console.log("Looking for product in category:", category, "with id:", id);
+    console.log(
+      "Available products:",
+      list.map((p) => ({ id: p.id, name: p.name }))
+    );
+
+    const foundProduct = list.find((p) => p.id === id);
+    console.log(
+      "Found product:",
+      foundProduct ? foundProduct.name : "NOT FOUND"
+    );
 
   // Efecto para actualizar el stock del producto al entrar al detalle
   useEffect(() => {
@@ -186,6 +202,7 @@ const DetailCard = () => {
     return result;
   }, [product.variants, selectedVariants]);
 
+
   useEffect(() => {
     const newSelection = { ...selectedVariants };
     let changed = false;
@@ -278,6 +295,25 @@ const DetailCard = () => {
   const basePrice = product.price || 0;
   const variantPrice = selectedVariant?.price || 0;
   const totalPrice = basePrice + variantPrice;
+
+  const variantNames = useMemo(() => {
+    return Object.values(selectedVariants)
+      .filter(Boolean)
+      .map((v) => capitalizeWords(v))
+      .join(" ");
+  }, [selectedVariants]);
+
+  const combinedName = useMemo(() => {
+    return variantNames ? `${product.name} ${variantNames}` : product.name;
+  }, [product?.name, variantNames]);
+
+  const firstVariantWithImage = useMemo(() => {
+    return product.variants?.find(
+      (v) =>
+        selectedVariants[v.linkedTo?.toLowerCase()] === v.name?.toLowerCase() &&
+        v.productImage?.length > 0
+    );
+  }, [product.variants, selectedVariants]);
 
   const finalName =
     selectedVariant?.name && !selectedVariant?.default
@@ -683,7 +719,6 @@ const DetailCard = () => {
                             variantForValue?.stockSummary?.totalStock > 0;
 
                           const isClickable = hasStock;
-
                           const isFirst = index === 0;
                           const isLast = index === values.length - 1;
                           const isOnly = values.length === 1;
