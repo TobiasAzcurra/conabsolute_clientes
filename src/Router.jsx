@@ -1,20 +1,27 @@
+import { useEffect } from "react";
 import EmpresaRouter from "./EmpresaRouter";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AgregarProductoPage from "./pages/admin/AgregarProductoPage";
+
+function NavigateConabsolute() {
+  useEffect(() => {
+    window.location.href = "https://conabsolute.com/";
+  }, []);
+
+  return <div>Redirigiendo...</div>;
+}
 
 const AppRouter = () => {
   return (
     <Routes>
-      {/* Redirección temporal desde la raíz a la empresa/sucursal por defecto */}
       <Route
         path="/"
-        element={<Navigate to="/a-puro-mate/rio-cuarto" replace />}
+        element={<NavigateConabsolute />}
       />
 
-      <Route
+      {/* <Route
         path="/:slugEmpresa/:slugSucursal/admin/agregar-producto"
         element={<AgregarProductoPage />}
-      />
+      /> */}
       <Route path="/:slugEmpresa/:slugSucursal/*" element={<EmpresaRouter />} />
     </Routes>
   );

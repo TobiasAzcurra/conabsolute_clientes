@@ -7,7 +7,7 @@ const NavMenu = () => {
   const animationRef = useRef(null);
   const interactionTimeoutRef = useRef(null);
   const isUserInteracting = useRef(false);
-  const { categories } = useClient();
+  const { categories, clientAssets } = useClient();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -103,12 +103,12 @@ const NavMenu = () => {
   return (
     <div className="relative z-[99]">
       <p className="text-gray-100 px-4 text-center text-2xl mb-3 font-medium font-coolvetica">
-        ¿Salen unos mates?
+        {clientAssets?.heroTitle || 'Elegí lo que más te guste'}
       </p>
       <nav
         ref={navRef}
         className="flex flex-row w-full gap-1 px-4 overflow-x-auto nav-scroll-hide"
-        style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
+        style={{ scrollBehavior: 'auto', WebkitOverflowScrolling: 'touch' }}
       >
         {categories.map((cat) => (
           <Items

@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { listenToAltaDemanda } from '../firebase/constants/altaDemanda';
 import { useDispatch } from 'react-redux';
 import { setEnvioExpress } from '../redux/cart/cartSlice';
 
 export function useFormStates(expressDeliveryFee) {
-  const [altaDemanda, setAltaDemanda] = useState(null);
   const [isEnabled, setIsEnabled] = useState(false);
   const [showHighDemandModal, setShowHighDemandModal] = useState(false);
   const [pendingValues, setPendingValues] = useState(null);
@@ -15,28 +13,9 @@ export function useFormStates(expressDeliveryFee) {
     useState(false);
   const [isCloseRestrictedModalOpen, setIsCloseRestrictedModalOpen] =
     useState(false);
-  const [isOpenPaymentMethod, setIsOpenPaymentMethod] = useState(false);
+  const [isOpenPaymentMethod, setIsOpenPaymentMethod] = useState(true);
 
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    let unsubscribe = null;
-    const init = async () => {
-      try {
-        unsubscribe = listenToAltaDemanda((data) => {
-          setAltaDemanda(data);
-        });
-      } catch (error) {
-        console.error('❌ Error Alta Demanda:', error);
-      }
-    };
-    init();
-    return () => unsubscribe && unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    setIsOpenPaymentMethod(altaDemanda?.open || false);
-  }, [altaDemanda]);
 
   const handleExpressToggle = () => {
     const newValue = !isEnabled;
@@ -45,7 +24,6 @@ export function useFormStates(expressDeliveryFee) {
   };
 
   return {
-    altaDemanda,
     isEnabled,
     handleExpressToggle,
     showHighDemandModal,

@@ -162,16 +162,9 @@ const CartCard = ({
               imageError ? "opacity-0" : "opacity-100"
             }`}
             onLoad={() => {
-              console.log(
-                `✅ CartCard: Imagen cargada exitosamente para ${name}`
-              );
               setImageError(false);
             }}
             onError={(e) => {
-              console.error(
-                `❌ CartCard: Error al cargar imagen para ${name}:`,
-                imageSrc
-              );
               setImageError(true);
             }}
           />
@@ -200,10 +193,9 @@ const CartCard = ({
               <QuickAddToCart
                 product={{
                   ...item,
-                  // 🔥 Asegurar que el producto tenga todas las propiedades necesarias
                   name: item.name || item.data?.name || "Producto sin nombre",
                   price: item.price || item.data?.price || 0,
-                  img: imageSrc, // Pasar la URL correcta
+                  img: imageSrc,
                   category:
                     item.category ||
                     item.categoria ||

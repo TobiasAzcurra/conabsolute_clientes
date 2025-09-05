@@ -4,21 +4,17 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from "react";
-import QuickAddToCart from "./quickAddToCart";
-import currencyFormat from "../../../helpers/currencyFormat";
-import { Link, useParams } from "react-router-dom";
-import { listenToAltaDemanda } from "../../../firebase/constants/altaDemanda";
-import LoadingPoints from "../../LoadingPoints";
-import { getImageSrc } from "../../../helpers/getImageSrc";
-import { useClient } from "../../../contexts/ClientContext";
+} from 'react';
+import QuickAddToCart from './quickAddToCart';
+import currencyFormat from '../../../helpers/currencyFormat';
+import { Link } from 'react-router-dom';
+import LoadingPoints from '../../LoadingPoints';
+import { getImageSrc } from '../../../helpers/getImageSrc';
+import { useClient } from '../../../contexts/ClientContext';
 
 const Card = ({ data, path }) => {
-  const { slugEmpresa, slugSucursal, clientConfig } = useClient();
-  const [priceFactor, setPriceFactor] = useState(1);
-  const [itemsOut, setItemsOut] = useState({});
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [showConsultStock, setShowConsultStock] = useState(false);
+  const { slugEmpresa, slugSucursal } = useClient();
+  
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -38,30 +34,19 @@ const Card = ({ data, path }) => {
     variants,
   } = data;
 
-  const images = useMemo(() => {
-    const raw = data?.img || data?.image || data?.images || [];
-
-    if (Array.isArray(raw)) {
-      return raw;
-    }
-
-    const resolved = getImageSrc(raw);
-    return [resolved];
-  }, [data]);
-
   const variantStats = useMemo(() => {
     const stats = {};
 
     for (const variant of variants || []) {
-      const key = variant.linkedTo;
-      const value = variant.name;
-      if (!key || !value) continue;
+      if (!variant.attributes) continue;
 
-      const stringKey = String(key).toLowerCase();
-      const stringValue = String(value).toLowerCase();
+      Object.entries(variant.attributes).forEach(([key, value]) => {
+        const stringKey = String(key).toLowerCase();
+        const stringValue = String(value).toLowerCase();
 
-      if (!stats[stringKey]) stats[stringKey] = new Set();
-      stats[stringKey].add(stringValue);
+        if (!stats[stringKey]) stats[stringKey] = new Set();
+        stats[stringKey].add(stringValue);
+      });
     }
 
     const result = {};
@@ -71,18 +56,6 @@ const Card = ({ data, path }) => {
 
     return result;
   }, [variants]);
-
-  const visibleLabels = useMemo(() => {
-    return Object.entries(variantStats)
-      .filter(([, values]) => values.length > 0)
-      .map(([key, values]) => {
-        const translatedKey = clientConfig?.labels?.[key] || key;
-        return {
-          key,
-          text: `${values.length} ${translatedKey}`,
-        };
-      });
-  }, [variantStats, clientConfig]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
@@ -103,7 +76,11 @@ const Card = ({ data, path }) => {
 
   const getDefaultVariant = (variants) => {
     if (!Array.isArray(variants) || variants.length === 0) return null;
-    return variants.find((v) => v.stock > 0) || variants[0];
+    return (
+      variants.find((v) => v.default) ||
+      variants.find((v) => v.stockSummary?.totalStock > 0) ||
+      variants[0]
+    );
   };
 
   const selectedVariant = useMemo(
@@ -112,71 +89,65 @@ const Card = ({ data, path }) => {
   );
 
   const basePrice = data.price || 0;
-  const adjustedPrice = Math.ceil((basePrice * priceFactor) / 100) * 100;
+  const variantDiff = selectedVariant?.price || 0;
+  const adjustedPrice = basePrice + variantDiff;
 
-  // Nueva lógica de precios
   const pricingInfo = useMemo(() => {
     const hasInstallments = installments?.enabled && installments.quantity;
     const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
-    if (hasCashDiscount) {
-      // Caso 1: Con descuento en efectivo - precio principal es el más barato
-      const cashPrice = Math.ceil(
-        adjustedPrice * (1 - cashDiscount.percentage)
-      );
-      const result = {
-        mainPrice: cashPrice,
-        primaryText: "en efectivo/transferencia",
-        secondaryText: null,
-      };
-
-      if (hasInstallments) {
-        const interestRate = installments.interest || 0;
-        const finalAmount = adjustedPrice * (1 + interestRate);
-        const perCuota = finalAmount / installments.quantity;
-
-        result.secondaryText = `o por ${installments.quantity} cuota${
-          installments.quantity > 1 ? "s" : ""
-        } de ${currencyFormat(Math.ceil(perCuota))}${
-          interestRate === 0
-            ? " (sin interés)"
-            : ` (con ${Math.floor(interestRate * 100)}% interés)`
-        }`;
-      }
-
-      return result;
-    }
-
-    if (hasInstallments) {
-      // Caso 2: Solo cuotas - precio principal es el normal
-      const interestRate = installments.interest || 0;
-      const finalAmount = adjustedPrice * (1 + interestRate);
-      const perCuota = finalAmount / installments.quantity;
-
-      return {
-        mainPrice: adjustedPrice,
-        primaryText: null,
-        secondaryText: `o en ${installments.quantity} cuota${
-          installments.quantity > 1 ? "s" : ""
-        } de ${currencyFormat(Math.ceil(perCuota))}${
-          interestRate === 0
-            ? " (sin interés)"
-            : ` (con ${Math.floor(interestRate * 100)}% interés)`
-        }`,
-      };
-    }
-
-    // Caso 3: Simple - solo precio
-    return {
-      mainPrice: adjustedPrice,
+    const result = {
+      mainPrice: adjustedPrice, // Precio principal siempre es el precio original
       primaryText: null,
       secondaryText: null,
     };
+
+    // Generar textos de opciones de pago
+    const paymentOptions = [];
+
+    if (hasCashDiscount) {
+      // Convertir porcentaje a decimal si es necesario
+      const discountPercentage = cashDiscount.percentage > 1 
+        ? cashDiscount.percentage / 100 
+        : cashDiscount.percentage;
+        
+      const cashPrice = Math.ceil(adjustedPrice * (1 - discountPercentage));
+      paymentOptions.push(`${currencyFormat(cashPrice)} en efectivo/transferencia`);
+    }
+
+    if (hasInstallments) {
+      const interestRate = installments.interest > 1 
+        ? installments.interest / 100 
+        : installments.interest;
+        
+      const finalAmount = adjustedPrice * (1 + interestRate);
+      const perCuota = finalAmount / installments.quantity;
+
+      const installmentText = `${installments.quantity} cuota${
+        installments.quantity > 1 ? 's' : ''
+      } de ${currencyFormat(Math.ceil(perCuota))}${
+        interestRate === 0 ? ' (sin interés)' : ''
+      }`;
+      
+      paymentOptions.push(installmentText);
+    }
+
+    // Asignar opciones de pago
+    if (paymentOptions.length === 1) {
+      result.primaryText = `o ${paymentOptions[0]}`;
+    } else if (paymentOptions.length === 2) {
+      result.primaryText = `o ${paymentOptions[0]}`;
+      result.secondaryText = `o ${paymentOptions[1]}`;
+    }
+
+    return result;
   }, [adjustedPrice, installments, cashDiscount]);
 
-  const resolvedImages = useMemo(() => {
-    const imgs =
-      selectedVariant?.images || data?.img || data?.image || data?.images || [];
+  const images = useMemo(() => {
+    const imgs = selectedVariant?.images?.length
+      ? selectedVariant.images
+      : data?.img || data?.image || data?.images || [];
+
     if (Array.isArray(imgs)) return imgs;
     return [getImageSrc(imgs)];
   }, [selectedVariant, data]);
@@ -229,15 +200,14 @@ const Card = ({ data, path }) => {
     };
   }, [isInViewport, images]);
 
-  useEffect(() => {
-    const unsubscribe = listenToAltaDemanda((altaDemanda) => {
-      setPriceFactor(altaDemanda.priceFactor);
-      setItemsOut(altaDemanda.itemsOut);
-    });
-    return () => unsubscribe();
-  }, []);
-
   const currentImageSrc = images[currentImageIndex];
+
+  const outOfStock = selectedVariant?.stockSummary?.totalStock === 0;
+
+  const finalName =
+    selectedVariant?.name && !selectedVariant?.default
+      ? selectedVariant.name
+      : name;
 
   return (
     <div
@@ -248,7 +218,7 @@ const Card = ({ data, path }) => {
         <div className="absolute right-3.5 top-2.5 z-40">
           <QuickAddToCart
             product={{
-              name,
+              name: finalName,
               description: data.cardDescription || description,
               price: pricingInfo.mainPrice,
               img: currentImageSrc,
@@ -256,7 +226,13 @@ const Card = ({ data, path }) => {
               id,
               category,
             }}
+            disabled={outOfStock}
           />
+          {outOfStock && (
+            <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs rounded-full z-50">
+              SIN STOCK
+            </span>
+          )}
         </div>
       )}
 
@@ -265,7 +241,6 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        {/* loading */}
         <div className="relative h-[160px]  overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
@@ -295,19 +270,42 @@ const Card = ({ data, path }) => {
             </div>
           )}
 
-          {/* indicador de variante */}
-          <div className="absolute bottom-0 left-2 z-30 flex gap-2">
-            {visibleLabels.map((label, index) => (
-              <span
-                key={`${label.key}-${index}`}
-                className="text-gray-400 text-[10px] font-light bg-gray-50 px-2 py-1 rounded-t-xl"
-              >
-                {label.text.toLowerCase()}
-              </span>
-            ))}
-          </div>
+          {Object.keys(variantStats).filter(
+            (key) => variantStats[key].length > 0
+          ).length > 0 && (
+            <div className="absolute bottom-0 left-3 right-3 z-30">
+              <div className="flex flex-wrap gap-1 justify-start">
+                {(() => {
+                  const attributes = Object.keys(variantStats)
+                    .filter((key) => variantStats[key].length > 0)
+                    .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
 
-          {/* indicador de imagenes */}
+                  const maxVisible = 3;
+                  const visibleAttributes = attributes.slice(0, maxVisible);
+                  const hasMore = attributes.length > maxVisible;
+
+                  return (
+                    <>
+                      {visibleAttributes.map((attr, index) => (
+                        <div
+                          key={index}
+                          className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm"
+                        >
+                          {attr}
+                        </div>
+                      ))}
+                      {hasMore && (
+                        <div className="bg-gray-300 text-gray-600 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm">
+                          +{attributes.length - maxVisible}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
           {isInViewport && images.length > 1 && (
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex gap-1">
               {images.map((_, index) => (
@@ -315,8 +313,8 @@ const Card = ({ data, path }) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? "bg-gray-50 opacity-100"
-                      : "bg-gray-50 opacity-30"
+                      ? 'bg-gray-50 opacity-100'
+                      : 'bg-gray-50 opacity-30'
                   }`}
                 />
               ))}
@@ -344,8 +342,8 @@ const Card = ({ data, path }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
-                (name || "Producto sin nombre").slice(1).toLowerCase()}
+              {(name || 'Producto sin nombre').charAt(0).toUpperCase() +
+                (name || 'Producto sin nombre').slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
@@ -370,6 +368,25 @@ const Card = ({ data, path }) => {
                     {pricingInfo.secondaryText}
                   </span>
                 )}
+              </div>
+            )}
+            {data.deliveryDelay && (
+              <div className="mt-1">
+                {(() => {
+                  const delayHours = data.deliveryDelay;
+                  const delayText =
+                    delayHours < 24
+                      ? `${delayHours} hora${delayHours !== 1 ? 's' : ''}`
+                      : `${Math.ceil(delayHours / 24)} día${
+                          Math.ceil(delayHours / 24) !== 1 ? 's' : ''
+                        }`;
+                  return (
+                    <p className="text-gray-500 text-xs font-light">
+                      Este producto está en otra sucursal y demora {delayText}{' '}
+                      en llegar.
+                    </p>
+                  );
+                })()}
               </div>
             )}
           </div>

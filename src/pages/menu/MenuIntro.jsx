@@ -9,11 +9,8 @@ import { getProductsByCategoryPosition } from "../../firebase/products/getProduc
 import { getClientIds } from "../../firebase/clients/getClientIds";
 import { getClientConfig } from "../../firebase/clients/getClientConfig";
 
-// Constantes para mejorar mantenibilidad
 const DEFAULT_INTRO_DURATION = 0;
-// si no tiene duracion la animacion lo ponemos en 0 por las dudas
 const REDIRECT_BUFFER = 300;
-// para asegurar que termine la animacion
 
 const MenuIntro = () => {
   const { slugEmpresa, slugSucursal } = useParams();
@@ -70,17 +67,75 @@ const MenuIntro = () => {
         setClientData(data);
         setClientConfig(config);
         setCategories(categories);
-        setProducts(productsData.todos);
         setProductsByCategory(productsData.porCategoria);
         setProductsSorted(sortedProducts);
 
-        console.log("clientData:", data);
-        console.log("clientConfig:", config);
+        const relatedStores = config?.logistics?.relatedStores;
+        let relatedProducts = [];
 
-        // Obtener duración desde assets (configurada por el cliente)
+        if (relatedStores && Object.keys(relatedStores).length > 0) {
+          for (const storeId of Object.keys(relatedStores)) {
+            const delay = relatedStores[storeId].deliveryDelay;
+
+            const extraProducts = await getProductsByClient(empresaId, storeId);
+
+            const enriched = extraProducts.todos.map((p) => ({
+              ...p,
+              sourceStoreId: storeId,
+              deliveryDelay: delay,
+            }));
+
+            relatedProducts = [...relatedProducts, ...enriched];
+          }
+        }
+
+        const allProducts = [...productsData.todos, ...relatedProducts];
+
+        const validProducts = allProducts.filter(product => {
+          const isValidPrice = product.price && typeof product.price === 'number' && product.price >= 0;
+          return isValidPrice;
+        }).map(product => {
+          if (product.variants && Array.isArray(product.variants)) {
+            const basePrice = product.price || 0;
+            
+            const validVariants = product.variants.filter((variant) => {
+              if (!variant.price && variant.price !== 0) {
+                return true;
+              }
+              
+              if (typeof variant.price !== 'number') {
+                return false;
+              }
+              
+              const finalPrice = basePrice + variant.price;
+              return finalPrice >= 0;
+            });
+            
+            return {
+              ...product,
+              variants: validVariants
+            };
+          }
+          
+          return product;
+        });
+
+        setProducts(validProducts);
+
+        const findCategoryWithProducts = () => {
+          if (!categories || !productsData.porCategoria) return 'default';
+          
+          for (const category of categories) {
+            const categoryProducts = productsData.porCategoria[category.id];
+            if (categoryProducts && categoryProducts.length > 0) {
+              return category.id;
+            }
+          }
+          
+          return categories[0]?.id || 'default';
+        };
+
         const introDuration = assets?.loadingDuration || DEFAULT_INTRO_DURATION;
-        console.log(`⏱️  Duración de intro: ${introDuration}ms`);
-
         const normalizePath = (path) =>
           path.endsWith("/") ? path.slice(0, -1) : path;
 
@@ -88,7 +143,8 @@ const MenuIntro = () => {
           setIsLoaded(true);
           const rootPath = `/${slugEmpresa}/${slugSucursal}`;
           if (normalizePath(location.pathname) === rootPath) {
-            navigate(`menu/${categories?.[0]?.id || "default"}`, {
+            const categoryWithProducts = findCategoryWithProducts();
+            navigate(`menu/${categoryWithProducts}`, {
               replace: true,
             });
           } else {
