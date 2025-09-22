@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { useClient } from '../../../contexts/ClientContext';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { getProductById } from '../../../firebase/products/getProductById';
-import { useToast, Toast } from '../../../hooks/useToast.jsx';
-import VideoSlider from './VideoSlider';
-import QuickAddToCart from '../card/quickAddToCart';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useClient } from "../../../contexts/ClientContext";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { getProductById } from "../../../firebase/products/getProductById";
+import { useToast, Toast } from "../../../hooks/useToast.jsx";
+import VideoSlider from "./VideoSlider";
+import QuickAddToCart from "../card/quickAddToCart";
 
 const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -14,7 +14,13 @@ const capitalizeWords = (str) => {
 
 const DetailCard = () => {
   const { category, id } = useParams();
-  const { productsByCategory, clientAssets, clientConfig, empresaId, sucursalId } = useClient();
+  const {
+    productsByCategory,
+    clientAssets,
+    clientConfig,
+    empresaId,
+    sucursalId,
+  } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
   const cart = useSelector((state) => state.cartState.cart);
@@ -45,25 +51,24 @@ const DetailCard = () => {
   const reels = clientAssets?.reels || [];
   const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
 
+  // Definir list fuera del useMemo para que sea accesible en los console.log
+  const list = productsByCategory?.[category] || [];
+
   const product = useMemo(() => {
     // Si tenemos producto actualizado, usarlo; sino usar el de cache
     if (updatedProduct) return updatedProduct;
     if (location?.state?.product) return location.state.product;
-    const list = productsByCategory?.[category] || [];
     return list.find((p) => p.id === id);
-  }, [updatedProduct, location?.state, productsByCategory, category, id]);
+  }, [updatedProduct, location?.state, list, id]);
 
   console.log("Looking for product in category:", category, "with id:", id);
-    console.log(
-      "Available products:",
-      list.map((p) => ({ id: p.id, name: p.name }))
-    );
+  console.log(
+    "Available products:",
+    list.map((p) => ({ id: p.id, name: p.name }))
+  );
 
-    const foundProduct = list.find((p) => p.id === id);
-    console.log(
-      "Found product:",
-      foundProduct ? foundProduct.name : "NOT FOUND"
-    );
+  const foundProduct = list.find((p) => p.id === id);
+  console.log("Found product:", foundProduct ? foundProduct.name : "NOT FOUND");
 
   // Efecto para actualizar el stock del producto al entrar al detalle
   useEffect(() => {
@@ -71,8 +76,8 @@ const DetailCard = () => {
 
     const updateProductStock = async () => {
       const now = Date.now();
-      if (lastStockUpdate && (now - lastStockUpdate) < STOCK_CACHE_DURATION) {
-        console.log('📦 Stock en cache, saltando actualización');
+      if (lastStockUpdate && now - lastStockUpdate < STOCK_CACHE_DURATION) {
+        console.log("📦 Stock en cache, saltando actualización");
         return;
       }
 
@@ -82,23 +87,26 @@ const DetailCard = () => {
         if (freshProduct) {
           const filteredProduct = {
             ...freshProduct,
-            variants: freshProduct.variants?.filter(variant => {
-              if (!variant.price && variant.price !== 0) return true;              
-              if (typeof variant.price !== 'number') return false;
-              
-              const basePrice = freshProduct.price || 0;
-              const finalPrice = basePrice + variant.price;
-              return finalPrice >= 0;
-            }) || []
+            variants:
+              freshProduct.variants?.filter((variant) => {
+                if (!variant.price && variant.price !== 0) return true;
+                if (typeof variant.price !== "number") return false;
+
+                const basePrice = freshProduct.price || 0;
+                const finalPrice = basePrice + variant.price;
+                return finalPrice >= 0;
+              }) || [],
           };
-          
+
           setUpdatedProduct(filteredProduct);
           setLastStockUpdate(now);
-          console.log('✅ Stock del producto actualizado y variantes filtradas');
+          console.log(
+            "✅ Stock del producto actualizado y variantes filtradas"
+          );
         }
       } catch (error) {
-        console.error('❌ Error actualizando stock:', error);
-        addToast('Error al actualizar stock', 'error');
+        console.error("❌ Error actualizando stock:", error);
+        addToast("Error al actualizar stock", "error");
       } finally {
         setIsUpdatingStock(false);
       }
@@ -113,18 +121,6 @@ const DetailCard = () => {
         <div className="text-center font-coolvetica text-gray-900">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p>Cargando producto...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ VERIFICACIÓN TEMPRANA - ANTES de cualquier cálculo que use product
-  if (!product) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center font-coolvetica text-gray-900">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p>Cargando producto...</p>
           <p className="text-xs text-gray-500 mt-2">
             Buscando en categoría: {category} | ID: {id}
           </p>
@@ -132,7 +128,6 @@ const DetailCard = () => {
       </div>
     );
   }
-
   const variantStats = useMemo(() => {
     const stats = {};
     for (const variant of product?.variants || []) {
@@ -201,7 +196,6 @@ const DetailCard = () => {
 
     return result;
   }, [product.variants, selectedVariants]);
-
 
   useEffect(() => {
     const newSelection = { ...selectedVariants };
@@ -276,7 +270,7 @@ const DetailCard = () => {
     const isSame =
       prevImagesRef.current.length === normalized.length &&
       prevImagesRef.current.every((img, i) => img === normalized[i]);
-    if (!isSame)      prevImagesRef.current = normalized;
+    if (!isSame) prevImagesRef.current = normalized;
     return prevImagesRef.current;
   }, [selectedVariant, product]);
 
@@ -335,12 +329,11 @@ const DetailCard = () => {
     };
   }, [product, finalName, selectedVariant, totalPrice, basePrice]);
 
-  const outOfStock = product.infiniteStock 
-  ? false 
-  : (
-    selectedVariant &&
-    selectedVariant.stockSummary &&
-    selectedVariant.stockSummary.totalStock === 0)
+  const outOfStock = product.infiniteStock
+    ? false
+    : selectedVariant &&
+      selectedVariant.stockSummary &&
+      selectedVariant.stockSummary.totalStock === 0;
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -434,19 +427,19 @@ const DetailCard = () => {
 
   const handleRefreshStock = async () => {
     if (!empresaId || !sucursalId || !id || isUpdatingStock) return;
-    
+
     setIsUpdatingStock(true);
     try {
       const freshProduct = await getProductById(empresaId, sucursalId, id);
       if (freshProduct) {
         setUpdatedProduct(freshProduct);
         setLastStockUpdate(Date.now());
-        console.log('✅ Stock actualizado manualmente');
-        addToast('Stock actualizado', 'success');
+        console.log("✅ Stock actualizado manualmente");
+        addToast("Stock actualizado", "success");
       }
     } catch (error) {
-      console.error('❌ Error actualizando stock:', error);
-      addToast('Error al actualizar stock', 'error');
+      console.error("❌ Error actualizando stock:", error);
+      addToast("Error al actualizar stock", "error");
     } finally {
       setIsUpdatingStock(false);
     }
@@ -470,17 +463,20 @@ const DetailCard = () => {
   const handleTouchEnd = (e) => {
     e.stopPropagation();
     const diff = touchStartXRef.current - touchEndXRef.current;
-    
+
     lastTouchTimeRef.current = Date.now();
-    
+
     if (Math.abs(diff) < 50) {
       if (e.changedTouches && e.changedTouches[0]) {
         const rect = e.currentTarget.getBoundingClientRect();
         const tapX = e.changedTouches[0].clientX - rect.left;
         const imageWidth = rect.width;
-        
+
         if (tapX < imageWidth / 2) {
-          const newIndex = modalImageIndex === 0 ? productImages.length - 1 : modalImageIndex - 1;
+          const newIndex =
+            modalImageIndex === 0
+              ? productImages.length - 1
+              : modalImageIndex - 1;
           setModalImageIndex(newIndex);
         } else {
           const newIndex = (modalImageIndex + 1) % productImages.length;
@@ -492,7 +488,10 @@ const DetailCard = () => {
         const newIndex = (modalImageIndex + 1) % productImages.length;
         setModalImageIndex(newIndex);
       } else if (diff < -50) {
-        const newIndex = modalImageIndex === 0 ? productImages.length - 1 : modalImageIndex - 1;
+        const newIndex =
+          modalImageIndex === 0
+            ? productImages.length - 1
+            : modalImageIndex - 1;
         setModalImageIndex(newIndex);
       }
     }
@@ -500,22 +499,23 @@ const DetailCard = () => {
 
   const handleImageTap = (e) => {
     e.stopPropagation();
-    
+
     const timeSinceLastTouch = Date.now() - lastTouchTimeRef.current;
     if (timeSinceLastTouch < 500) {
       return;
     }
-    
-    if (productImages.length <= 1 || e.type === 'touchend') {
+
+    if (productImages.length <= 1 || e.type === "touchend") {
       return;
     }
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const tapX = e.clientX - rect.left;
     const imageWidth = rect.width;
-    
+
     if (tapX < imageWidth / 2) {
-      const newIndex = modalImageIndex === 0 ? productImages.length - 1 : modalImageIndex - 1;
+      const newIndex =
+        modalImageIndex === 0 ? productImages.length - 1 : modalImageIndex - 1;
       setModalImageIndex(newIndex);
     } else {
       const newIndex = (modalImageIndex + 1) % productImages.length;
@@ -555,8 +555,8 @@ const DetailCard = () => {
                     onClick={() => setSelectedImageIndex(index)}
                     className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
                       selectedImageIndex === index
-                        ? 'border-white opacity-100 shadow-lg'
-                        : 'border-white opacity-70 hover:opacity-90'
+                        ? "border-white opacity-100 shadow-lg"
+                        : "border-white opacity-70 hover:opacity-90"
                     }`}
                   >
                     <img
@@ -596,17 +596,17 @@ const DetailCard = () => {
                     </svg>
                   </button>
                 )}
-                
+
                 {lastStockUpdate && (
                   <span className="text-xs text-gray-400 font-light">
-                    {new Date(lastStockUpdate).toLocaleTimeString('es-ES', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {new Date(lastStockUpdate).toLocaleTimeString("es-ES", {
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </span>
                 )}
               </div>
-              
+
               <div className="flex flex-row gap-2 items-center">
                 <button onClick={handleGoBack}>
                   <svg
@@ -723,39 +723,39 @@ const DetailCard = () => {
                           const isLast = index === values.length - 1;
                           const isOnly = values.length === 1;
 
-                          const borderRadiusClass = 'rounded-full' // isOnly
-                            // ? 'rounded-full'
-                            // : isFirst
-                            // ? 'rounded-l-full'
-                            // : isLast
-                            // ? 'rounded-r-full'
-                            // : 'rounded-none';
+                          const borderRadiusClass = "rounded-full"; // isOnly
+                          // ? 'rounded-full'
+                          // : isFirst
+                          // ? 'rounded-l-full'
+                          // : isLast
+                          // ? 'rounded-r-full'
+                          // : 'rounded-none';
 
                           const hasAttributeImage =
                             variantForValue &&
                             variantForValue.attributeImages &&
                             variantForValue.attributeImages[key];
 
-                          let borderStyle = 'border-gray-200';
-                          let backgroundStyle = '';
-                          let textStyle = '';
-                          let cursorStyle = '';
+                          let borderStyle = "border-gray-200";
+                          let backgroundStyle = "";
+                          let textStyle = "";
+                          let cursorStyle = "";
 
                           if (isSelected) {
-                            backgroundStyle = 'bg-black';
-                            textStyle = 'text-white';
+                            backgroundStyle = "bg-black";
+                            textStyle = "text-white";
                           } else if (!hasStock) {
-                            borderStyle = 'border-red-200 border-dashed';
-                            backgroundStyle = 'bg-red-50';
-                            textStyle = 'text-red-300';
-                            cursorStyle = 'cursor-not-allowed';
+                            borderStyle = "border-red-200 border-dashed";
+                            backgroundStyle = "bg-red-50";
+                            textStyle = "text-red-300";
+                            cursorStyle = "cursor-not-allowed";
                           } else if (!isCompatible) {
-                            borderStyle = 'border-gray-300 border-dashed';
-                            backgroundStyle = 'bg-gray-50';
-                            textStyle = 'text-gray-400';
+                            borderStyle = "border-gray-300 border-dashed";
+                            backgroundStyle = "bg-gray-50";
+                            textStyle = "text-gray-400";
                           } else {
-                            backgroundStyle = 'bg-gray-50';
-                            textStyle = 'text-gray-400';
+                            backgroundStyle = "bg-gray-50";
+                            textStyle = "text-gray-400";
                           }
 
                           return (
@@ -766,15 +766,15 @@ const DetailCard = () => {
                               }
                               disabled={!isClickable}
                               className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border ${borderStyle} font-light ${borderRadiusClass} ${
-                                index > 0 ? '-ml-px' : ''
+                                index > 0 ? "-ml-px" : ""
                               } flex items-center justify-center ${backgroundStyle} ${textStyle} ${cursorStyle}`}
                               style={
                                 hasAttributeImage
                                   ? {
                                       padding: 0,
-                                      width: '100%',
+                                      width: "100%",
                                       height: 40,
-                                      overflow: 'hidden',
+                                      overflow: "hidden",
                                     }
                                   : {}
                               }
@@ -785,14 +785,14 @@ const DetailCard = () => {
                                   alt={value}
                                   className={`w-full h-full object-cover transition-opacity duration-200 ${
                                     isSelected
-                                      ? 'opacity-100'
+                                      ? "opacity-100"
                                       : !hasStock
-                                      ? 'opacity-20 grayscale'
+                                      ? "opacity-20 grayscale"
                                       : !isCompatible
-                                      ? 'opacity-40'
-                                      : 'opacity-50'
+                                      ? "opacity-40"
+                                      : "opacity-50"
                                   }`}
-                                  style={{ width: '100%', height: '100%' }}
+                                  style={{ width: "100%", height: "100%" }}
                                 />
                               ) : (
                                 capitalizeWords(value)
@@ -813,20 +813,28 @@ const DetailCard = () => {
               </p>
             )}
 
-            {typeof product.deliveryAvailable === 'boolean' && (
+            {typeof product.deliveryAvailable === "boolean" && (
               <div className="pl-4 pr-4 mt-3 mb-1 flex items-center">
                 <span
                   className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-coolvetica text-xs font-medium shadow-sm
-                    ${product.deliveryAvailable
-                      ? 'bg-green-100 text-green-700 border border-green-300'
-                      : 'bg-gray-100 text-gray-400 border border-gray-200'}`}
-                  aria-label={product.deliveryAvailable ? 'Disponible para delivery' : 'No disponible para delivery'}
+                    ${
+                      product.deliveryAvailable
+                        ? "bg-green-100 text-green-700 border border-green-300"
+                        : "bg-gray-100 text-gray-400 border border-gray-200"
+                    }`}
+                  aria-label={
+                    product.deliveryAvailable
+                      ? "Disponible para delivery"
+                      : "No disponible para delivery"
+                  }
                 >
-                  {product.deliveryAvailable ? 'Delivery Disponible' : 'Delivery No disponible'}
+                  {product.deliveryAvailable
+                    ? "Delivery Disponible"
+                    : "Delivery No disponible"}
                 </span>
               </div>
             )}
-            
+
             <div className="flex flex-row items-center w-full mt-6 px-3 ">
               <QuickAddToCart
                 product={productToSend}
@@ -844,9 +852,9 @@ const DetailCard = () => {
                   const delayHours = product.deliveryDelay;
                   const delayText =
                     delayHours < 24
-                      ? `${delayHours} hora${delayHours !== 1 ? 's' : ''}`
+                      ? `${delayHours} hora${delayHours !== 1 ? "s" : ""}`
                       : `${Math.ceil(delayHours / 24)} día${
-                          Math.ceil(delayHours / 24) !== 1 ? 's' : ''
+                          Math.ceil(delayHours / 24) !== 1 ? "s" : ""
                         }`;
                   return `Este producto está en otra sucursal y demora ${delayText} en llegar.`;
                 })()}
@@ -870,18 +878,16 @@ const DetailCard = () => {
           className="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50"
           onClick={() => setIsModalOpen(false)}
         >
-          <div
-            className="relative w-full h-full overflow-hidden"
-          >
+          <div className="relative w-full h-full overflow-hidden">
             <div
               className="flex transition-transform ease-out duration-500 h-full"
-              style={{ 
-                transform: `translateX(-${modalImageIndex * 100}%)`
+              style={{
+                transform: `translateX(-${modalImageIndex * 100}%)`,
               }}
             >
               {productImages.map((image, index) => (
-                <div 
-                  className="w-full h-full flex-shrink-0 flex items-center justify-center p-8" 
+                <div
+                  className="w-full h-full flex-shrink-0 flex items-center justify-center p-8"
                   key={index}
                 >
                   <img
@@ -904,8 +910,8 @@ const DetailCard = () => {
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all duration-200 ${
                       modalImageIndex === index
-                        ? 'bg-white opacity-100'
-                        : 'bg-white opacity-30'
+                        ? "bg-white opacity-100"
+                        : "bg-white opacity-30"
                     }`}
                   />
                 ))}
