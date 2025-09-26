@@ -292,7 +292,7 @@ const Card = ({ data, path }) => {
           {Object.keys(variantStats).filter(
             (key) => variantStats[key].length > 0
           ).length > 0 && (
-            <div className="absolute bottom-0 left-3 right-3 z-30">
+            <div className="absolute bottom-2 left-4 right-4 z-30">
               <div className="flex flex-wrap gap-1 justify-start">
                 {(() => {
                   const attributes = Object.keys(variantStats)
@@ -308,13 +308,13 @@ const Card = ({ data, path }) => {
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-50 text-gray-400 font-coolvetica  text-xs font-light px-2 py-1 rounded-t-lg rounded-b-none shadow-sm"
+                          className="bg-gray-50 bg-opacity-40 text-gray-50 font-coolvetica  text-xs font-light px-2 py-1  rounded-full shadow-lg shadow-gray-900"
                         >
                           {attr}
                         </div>
                       ))}
                       {hasMore && (
-                        <div className="bg-gray-50 text-gray-400 font-coolvetica  text-xs font-light px-2 py-1 rounded-t-lg rounded-b-none shadow-sm">
+                        <div className="bg-gray-50 bg-opacity-70 text-gray-50 font-coolvetica  text-xs font-light px-2 py-1  rounded-full shadow-lg shadow-gray-900">
                           +{attributes.length - maxVisible}
                         </div>
                       )}
@@ -377,12 +377,12 @@ const Card = ({ data, path }) => {
               </span>
               {/* Indicador de stock - arriba derecha sobre imagen */}
               {!stockStatus.available && (
-                <span className=" bg-red-500 text-gray-50 px-3 py-1 text-xs font-light rounded-full z-40 shadow-lg">
+                <span className=" bg-red-500 text-gray-50 px-4 py-2 text-xs font-light rounded-full z-40 shadow-lg">
                   Agotado
                 </span>
               )}
               {stockStatus.limited && (
-                <span className=" bg-yellow-500 text-gray-50 px-3 py-1 text-xs font-light rounded-full z-40 shadow-lg">
+                <span className=" bg-yellow-500 text-gray-50 px-4 py-2 text-xs font-light rounded-full z-40 shadow-lg">
                   Stock limitado
                 </span>
               )}
