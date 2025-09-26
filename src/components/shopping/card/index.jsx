@@ -97,16 +97,14 @@ const Card = ({ data, path }) => {
     const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
 
     const result = {
-      mainPrice: adjustedPrice, // Precio principal siempre es el precio original
+      mainPrice: adjustedPrice,
       primaryText: null,
       secondaryText: null,
     };
 
-    // Generar textos de opciones de pago
     const paymentOptions = [];
 
     if (hasCashDiscount) {
-      // Convertir porcentaje a decimal si es necesario
       const discountPercentage =
         cashDiscount.percentage > 1
           ? cashDiscount.percentage / 100
@@ -136,7 +134,6 @@ const Card = ({ data, path }) => {
       paymentOptions.push(installmentText);
     }
 
-    // Asignar opciones de pago
     if (paymentOptions.length === 1) {
       result.primaryText = `o ${paymentOptions[0]}`;
     } else if (paymentOptions.length === 2) {
@@ -206,7 +203,31 @@ const Card = ({ data, path }) => {
 
   const currentImageSrc = images[currentImageIndex];
 
-  const outOfStock = selectedVariant?.stockSummary?.totalStock === 0;
+  // Lógica de stock mejorada
+  const stockStatus = useMemo(() => {
+    // Si tiene stock infinito, siempre hay stock
+    if (data.infiniteStock) {
+      return { available: true, limited: false };
+    }
+
+    // Si no hay variantes, verificar stock del producto
+    if (!variants || variants.length === 0) {
+      const hasStock = data.stockSummary?.totalStock > 0;
+      return { available: hasStock, limited: false };
+    }
+
+    // Si hay variantes, analizar su stock
+    const variantsWithStock = variants.filter(
+      (v) => v.stockSummary?.totalStock > 0
+    );
+    const allOutOfStock = variantsWithStock.length === 0;
+    const someOutOfStock = variantsWithStock.length < variants.length;
+
+    return {
+      available: !allOutOfStock,
+      limited: someOutOfStock && !allOutOfStock,
+    };
+  }, [data.infiniteStock, data.stockSummary, variants]);
 
   const finalName =
     selectedVariant?.name && !selectedVariant?.default
@@ -230,13 +251,7 @@ const Card = ({ data, path }) => {
               id,
               category,
             }}
-            disabled={outOfStock}
           />
-          {outOfStock && (
-            <span className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-xs rounded-full z-50">
-              SIN STOCK
-            </span>
-          )}
         </div>
       )}
 
@@ -356,10 +371,22 @@ const Card = ({ data, path }) => {
             </p>
           )}
           <div className="flex w-full mt-4 flex-col mb-4">
-            <span className="font-bold text-4xl text-black">
-              {currencyFormat(pricingInfo.mainPrice)}
-            </span>
-
+            <div className="flex flex-row justify-between items-center">
+              <span className="font-bold text-4xl text-black">
+                {currencyFormat(pricingInfo.mainPrice)}
+              </span>
+              {/* Indicador de stock - arriba derecha sobre imagen */}
+              {!stockStatus.available && (
+                <span className=" bg-red-500 text-gray-50 px-3 py-1 text-xs font-light rounded-full z-40 shadow-lg">
+                  Agotado
+                </span>
+              )}
+              {stockStatus.limited && (
+                <span className=" bg-yellow-500 text-gray-50 px-3 py-1 text-xs font-light rounded-full z-40 shadow-lg">
+                  Stock limitado
+                </span>
+              )}
+            </div>
             {(pricingInfo.primaryText || pricingInfo.secondaryText) && (
               <div className="font-light pr-12   flex flex-col items-start">
                 {pricingInfo.primaryText && (

@@ -809,7 +809,7 @@ const DetailCard = () => {
 
             {outOfStock && (
               <p className="text-xs text-red-500 font-coolvetica font-light mt-4 px-4">
-                Sin stock
+                Agotado
               </p>
             )}
 
