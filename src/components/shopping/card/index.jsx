@@ -4,17 +4,17 @@ import React, {
   useMemo,
   useRef,
   useCallback,
-} from 'react';
-import QuickAddToCart from './quickAddToCart';
-import currencyFormat from '../../../helpers/currencyFormat';
-import { Link } from 'react-router-dom';
-import LoadingPoints from '../../LoadingPoints';
-import { getImageSrc } from '../../../helpers/getImageSrc';
-import { useClient } from '../../../contexts/ClientContext';
+} from "react";
+import QuickAddToCart from "./quickAddToCart";
+import currencyFormat from "../../../helpers/currencyFormat";
+import { Link } from "react-router-dom";
+import LoadingPoints from "../../LoadingPoints";
+import { getImageSrc } from "../../../helpers/getImageSrc";
+import { useClient } from "../../../contexts/ClientContext";
 
 const Card = ({ data, path }) => {
   const { slugEmpresa, slugSucursal } = useClient();
-  
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isInViewport, setIsInViewport] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -107,28 +107,32 @@ const Card = ({ data, path }) => {
 
     if (hasCashDiscount) {
       // Convertir porcentaje a decimal si es necesario
-      const discountPercentage = cashDiscount.percentage > 1 
-        ? cashDiscount.percentage / 100 
-        : cashDiscount.percentage;
-        
+      const discountPercentage =
+        cashDiscount.percentage > 1
+          ? cashDiscount.percentage / 100
+          : cashDiscount.percentage;
+
       const cashPrice = Math.ceil(adjustedPrice * (1 - discountPercentage));
-      paymentOptions.push(`${currencyFormat(cashPrice)} en efectivo/transferencia`);
+      paymentOptions.push(
+        `${currencyFormat(cashPrice)} en efectivo/transferencia`
+      );
     }
 
     if (hasInstallments) {
-      const interestRate = installments.interest > 1 
-        ? installments.interest / 100 
-        : installments.interest;
-        
+      const interestRate =
+        installments.interest > 1
+          ? installments.interest / 100
+          : installments.interest;
+
       const finalAmount = adjustedPrice * (1 + interestRate);
       const perCuota = finalAmount / installments.quantity;
 
       const installmentText = `${installments.quantity} cuota${
-        installments.quantity > 1 ? 's' : ''
+        installments.quantity > 1 ? "s" : ""
       } de ${currencyFormat(Math.ceil(perCuota))}${
-        interestRate === 0 ? ' (sin interés)' : ''
+        interestRate === 0 ? " (sin interés)" : ""
       }`;
-      
+
       paymentOptions.push(installmentText);
     }
 
@@ -289,13 +293,13 @@ const Card = ({ data, path }) => {
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm"
+                          className="bg-gray-50 text-gray-400 font-coolvetica  text-xs font-light px-2 py-1 rounded-t-lg rounded-b-none shadow-sm"
                         >
                           {attr}
                         </div>
                       ))}
                       {hasMore && (
-                        <div className="bg-gray-300 text-gray-600 text-xs font-medium px-2 py-1 rounded-t-lg rounded-b-none shadow-sm">
+                        <div className="bg-gray-50 text-gray-400 font-coolvetica  text-xs font-light px-2 py-1 rounded-t-lg rounded-b-none shadow-sm">
                           +{attributes.length - maxVisible}
                         </div>
                       )}
@@ -313,8 +317,8 @@ const Card = ({ data, path }) => {
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     index === currentImageIndex
-                      ? 'bg-gray-50 opacity-100'
-                      : 'bg-gray-50 opacity-30'
+                      ? "bg-gray-50 opacity-100"
+                      : "bg-gray-50 opacity-30"
                   }`}
                 />
               ))}
@@ -342,12 +346,12 @@ const Card = ({ data, path }) => {
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
           <div className="flex mt-4 flex-col w-full items-center justify-center ">
             <h5 className=" text-lg   font-medium  text-center">
-              {(name || 'Producto sin nombre').charAt(0).toUpperCase() +
-                (name || 'Producto sin nombre').slice(1).toLowerCase()}
+              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
+                (name || "Producto sin nombre").slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-center text-xs text-gray-400 font-light font-coolvetica leading-tight ">
+            <p className="text-center text-xs text-gray-400 font-light font-coolvetica  ">
               {data.cardDescription}
             </p>
           )}
@@ -376,13 +380,13 @@ const Card = ({ data, path }) => {
                   const delayHours = data.deliveryDelay;
                   const delayText =
                     delayHours < 24
-                      ? `${delayHours} hora${delayHours !== 1 ? 's' : ''}`
+                      ? `${delayHours} hora${delayHours !== 1 ? "s" : ""}`
                       : `${Math.ceil(delayHours / 24)} día${
-                          Math.ceil(delayHours / 24) !== 1 ? 's' : ''
+                          Math.ceil(delayHours / 24) !== 1 ? "s" : ""
                         }`;
                   return (
                     <p className="text-gray-500 text-xs font-light">
-                      Este producto está en otra sucursal y demora {delayText}{' '}
+                      Este producto está en otra sucursal y demora {delayText}{" "}
                       en llegar.
                     </p>
                   );

@@ -26,7 +26,7 @@ const Section = () => {
       {products.length > 0 ? (
         products.map((p) => <Card key={p.id} data={p} path={category} />)
       ) : (
-        <p className="font-coolvetica text-center text-xs col-span-full">
+        <p className="font-coolvetica text-center text-xs font-light text-gray-400">
           No hay productos en esta categoría.
         </p>
       )}
