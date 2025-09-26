@@ -120,7 +120,7 @@ const CartItems = () => {
 
       <div className="flex justify-center flex-col mt-8 items-start w-full">
         <p className="text-2xl font-bold mx-auto mb-2">
-          Agrega. Inverti en tu felicidad
+          {clientAssets?.upsellsTitle || "Elegí lo que más te guste"}
         </p>
 
         <div className="w-full mb-4">
