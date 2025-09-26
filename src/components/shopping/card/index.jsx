@@ -216,7 +216,7 @@ const Card = ({ data, path }) => {
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-3xl items-center border border-black border-opacity-30 bg-gray-50 pb-2 transition duration-300 w-full max-w-[400px] text-black z-50"
+      className="group relative flex flex-col rounded-3xl items-center shadow-md bg-gray-50 pb-2 transition duration-300 w-full max-w-[400px] text-black z-50"
     >
       {(!variants || variants.length === 0) && (
         <div className="absolute right-3.5 top-2.5 z-40">

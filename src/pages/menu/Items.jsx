@@ -28,7 +28,7 @@ const Items = ({
 
   const borderStyle = isSelected
     ? "border-2 border-black border-opacity-100"
-    : "border border-black border-opacity-20";
+    : "";
 
   const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
