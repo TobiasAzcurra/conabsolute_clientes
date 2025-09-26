@@ -869,7 +869,7 @@ const DetailCard = () => {
       </div>
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-90 flex flex-col items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex flex-col items-center justify-center z-50"
           onClick={() => setIsModalOpen(false)}
         >
           <div className="relative w-full h-full overflow-hidden">
