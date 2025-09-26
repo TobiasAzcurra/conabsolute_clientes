@@ -887,7 +887,7 @@ const DetailCard = () => {
                   <img
                     src={image}
                     alt={`${product.name} - imagen ${index + 1}`}
-                    className="max-w-full max-h-full object-contain cursor-pointer"
+                    className="max-w-full max-h-full rounded-3xl  object-contain cursor-pointer"
                     onClick={handleImageTap}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
