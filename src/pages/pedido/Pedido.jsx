@@ -297,8 +297,7 @@ const Pedido = () => {
   const handleTransferenciaClick = async (total, telefono) => {
     const phoneNumber = clientConfig?.logistics?.phone || "543584306832";
     const alias = clientConfig?.logistics?.alias || "AbsoluteHSAS.mp";
-    const nameAlias =
-      clientConfig?.logistics?.name || "Absolute Holdings S.A.S.";
+    const nameAlias = clientConfig?.logistics?.nameAlias || "________";
     const message = `Hola! Hice un pedido de $${total} para el numero ${telefono}, en breve envio foto del comprobante asi controlan que esta pago y transfiero al alias: ${alias} a nombre de ${nameAlias}`;
 
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
@@ -468,7 +467,7 @@ const Pedido = () => {
           <div className="mt-4 text-red-600 text-xs font-medium">{error}</div>
         )}
         {message && (
-          <div className="mt-4 text-green-600 text-xs  font-medium text-center">
+          <div className="mt-4 text-green-500 text-xs  font-light text-center">
             {message}
           </div>
         )}
