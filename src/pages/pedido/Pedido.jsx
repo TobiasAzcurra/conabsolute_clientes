@@ -464,7 +464,9 @@ const Pedido = () => {
         )}
 
         {error && (
-          <div className="mt-4 text-red-600 text-xs font-medium">{error}</div>
+          <div className="mt-4 text-red-500 font-coolvetica text-xs  font-light text-center">
+            {error}
+          </div>
         )}
         {message && (
           <div className="mt-4 text-green-500 font-coolvetica text-xs  font-light text-center">
