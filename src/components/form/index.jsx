@@ -339,31 +339,6 @@ const FormCustom = ({ cart, total }) => {
         <p className="font-medium text-center">Confirmar compra</p>
       </AppleModal>
 
-      {/* esperas? */}
-      <AppleModal
-        isOpen={
-          showHighDemandModal && pendingValues?.paymentMethod === "efectivo"
-        }
-        onClose={() => setShowHighDemandModal(false)}
-        title="Alta Demanda"
-        twoOptions={true}
-        isLoading={isModalConfirmLoading}
-        onConfirm={async () => {
-          setIsModalConfirmLoading(true);
-          if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== "";
-            await processPedido(pendingValues, isReserva);
-          }
-          setIsModalConfirmLoading(false);
-          setShowHighDemandModal(false);
-        }}
-      >
-        <p className="font-medium text-center">
-          Estamos en alta demanda, tu pedido comenzará a cocinarse dentro de{" "}
-          {altaDemanda?.delayMinutes} minutos, ¿Lo esperas?
-        </p>
-      </AppleModal>
-
       {/* mensaje */}
       <AppleModal
         isOpen={showMessageModal}
