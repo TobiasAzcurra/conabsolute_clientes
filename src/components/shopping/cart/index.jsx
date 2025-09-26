@@ -17,21 +17,28 @@ const CartItems = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { pathname } = useLocation();
-  const { products, productsSorted, slugEmpresa, slugSucursal, clientAssets, categories, productsByCategory } =
-    useClient();
+  const {
+    products,
+    productsSorted,
+    slugEmpresa,
+    slugSucursal,
+    clientAssets,
+    categories,
+    productsByCategory,
+  } = useClient();
   const reels = clientAssets?.reels || [];
 
   const findCategoryWithProducts = () => {
-    if (!categories || !productsByCategory) return 'default';
-    
+    if (!categories || !productsByCategory) return "default";
+
     for (const category of categories) {
       const categoryProducts = productsByCategory[category.id];
       if (categoryProducts && categoryProducts.length > 0) {
         return category.id;
       }
     }
-    
-    return categories[0]?.id || 'default';
+
+    return categories[0]?.id || "default";
   };
 
   useEffect(() => {
@@ -39,7 +46,15 @@ const CartItems = () => {
       const categoryWithProducts = findCategoryWithProducts();
       navigate(`/${slugEmpresa}/${slugSucursal}/menu/${categoryWithProducts}`);
     }
-  }, [cart.length, pathname, navigate, slugEmpresa, slugSucursal, categories, productsByCategory]);
+  }, [
+    cart.length,
+    pathname,
+    navigate,
+    slugEmpresa,
+    slugSucursal,
+    categories,
+    productsByCategory,
+  ]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -58,10 +73,6 @@ const CartItems = () => {
   const deleteItem = (index) => {
     dispatch(removeOneItem(index));
   };
-
-  const availableProducts = products.filter(
-    (product) => !cart.some((cartItem) => cartItem.name === product.name)
-  );
 
   const handleGoBack = () => {
     navigate(-1);
@@ -89,13 +100,13 @@ const CartItems = () => {
           <p className="text-2xl font-bold">Tu pedido</p>
         </div>
         <div
-          className="flex flex-col md:flex-row gap-2 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
+          className="flex flex-col md:flex-row gap-1 w-full mt-2 px-4 overflow-x-auto custom-scrollbar"
           style={{
             scrollBehavior: "smooth",
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <div className="flex flex-col md:flex-row gap-2 md:w-max">
+          <div className="flex flex-col md:flex-row gap-1 md:w-max">
             {cart.map((item, index) => (
               <CartCard
                 key={item.id || index}

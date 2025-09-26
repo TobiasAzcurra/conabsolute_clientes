@@ -123,12 +123,12 @@ const CartCard = ({
 
   const imageSrc = getImageSrc(item || img);
 
-  console.log(name, "acaaaa");
+  console.log(item, "acaaaa");
 
   return (
     <div className="relative">
       <div
-        className={`flex flex-row border bg-gray-50 w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
+        className={`flex flex-row border bg-gray-50 w-full h-[250px] shadow-md rounded-3xl md:w-[450px] ${
           isDisabled ? "blur-sm cursor-not-allowed bg-gray-50 " : ""
         }`}
       >
@@ -179,11 +179,6 @@ const CartCard = ({
             >
               {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
             </h3>
-            {toppings && toppings.length > 0 && (
-              <p className="text-xs mb-4 font-medium">
-                Toppings: {formatToppings(toppings)}.
-              </p>
-            )}
           </div>
           <div className="flex flex-col items-start">
             <p className="text-2xl font-bold mb-4 mt-[-5px]">

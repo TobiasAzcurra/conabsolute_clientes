@@ -30,7 +30,7 @@ const Items = ({
     ? "border-2 border-black border-opacity-100"
     : "";
 
-  const className = `flex flex-col items-center ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
+  const className = `flex flex-col items-center shadow-md ${borderStyle} rounded-3xl bg-gray-50  p-1 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
       ? "w-[110px]"
       : "min-w-[110px] max-w-[200px]"
