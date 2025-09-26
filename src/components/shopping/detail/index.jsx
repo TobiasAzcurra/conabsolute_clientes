@@ -807,12 +807,6 @@ const DetailCard = () => {
               </div>
             )}
 
-            {outOfStock && (
-              <p className="text-xs text-red-500 font-coolvetica font-light mt-4 px-4">
-                Agotado
-              </p>
-            )}
-
             {typeof product.deliveryAvailable === "boolean" && (
               <div className="pl-4 pr-4 mt-3 mb-1 flex items-center">
                 <span
