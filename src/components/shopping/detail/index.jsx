@@ -625,7 +625,7 @@ const DetailCard = () => {
                   </svg>
                 </button>
                 <h4 className="font-coolvetica font-bold text-3xl text-gray-900 leading-9">
-                  {finalName}
+                  {capitalizeWords(product.name)}
                 </h4>
               </div>
             </div>
@@ -645,7 +645,7 @@ const DetailCard = () => {
                       {clientConfig?.labels?.[key] || capitalizeWords(key)}
                     </h5>
                     <div className="flex w-full">
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="flex flex-row gap-1">
                         {values.map((value, index) => {
                           const isSelected = selectedVariants[key] === value;
 
@@ -723,7 +723,7 @@ const DetailCard = () => {
                           const isLast = index === values.length - 1;
                           const isOnly = values.length === 1;
 
-                          const borderRadiusClass = "rounded-full"; // isOnly
+                          const borderRadiusClass = "rounded-xl"; // isOnly
                           // ? 'rounded-full'
                           // : isFirst
                           // ? 'rounded-l-full'
