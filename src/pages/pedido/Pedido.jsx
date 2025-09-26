@@ -4,17 +4,17 @@ import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints";
 // import UpdatedPedidoSection from './UpdatedPedidoSection';
 import AppleModal from "../../components/AppleModal";
-import isologo from "../../assets/isologo.png";
 import EditAddressModal from "./EditAddressModal";
 import { doc, runTransaction, getFirestore } from "firebase/firestore";
 import Payment from "../../components/mercadopago/Payment";
 import { listenOrderById } from "../../firebase/orders/listenOrderById";
 import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
 import { cancelOrder } from "../../firebase/orders/cancelOrder";
-import { useClient } from "../../contexts/ClientContext";
+import { ClientContext, useClient } from "../../contexts/ClientContext";
 
 const Pedido = () => {
-  const { empresaId, sucursalId, clientConfig, clientData } = useClient();
+  const { empresaId, sucursalId, clientConfig, clientData, clientAssets } =
+    useClient();
   const [order, setOrder] = useState(null);
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -412,12 +412,15 @@ const Pedido = () => {
     setTimeout(() => setMessage(null), 3000);
   };
 
+  {
+    console.log("acaa", clientAssets);
+  }
+
   return (
     <div
       ref={containerRef}
       className="bg-gray-150  relative flex justify-between flex-col h-screen"
     >
-      {console.log("[Pedido] Render: pedidosPagados", pedidosPagados)}
       <style>
         {`
                     @keyframes loadingBar {
@@ -450,17 +453,12 @@ const Pedido = () => {
       />
       <div className="justify-center my-auto items-center flex flex-col">
         <div className="flex items-center flex-col pt-16">
-          <img
-            src={isologo}
-            className="w-2/3"
-            alt="Logo"
-            style={{ filter: "invert(1)" }}
-          />
+          <img src={clientAssets?.logo} className="w-2/3" alt="Logo" />
         </div>
 
         {loading && (
-          <div className="flex flex-col items-center justify-center mt-2 px-8">
-            <p className="text-black text-center font-coolvetica text-xs">
+          <div className="flex flex-col items-center justify-center mt-8 px-8">
+            <p className="font-light text-gray-400 text-center font-coolvetica text-xs">
               Estamos buscando tus pedidos, Esto puede tomar unos segundos...
             </p>
           </div>
@@ -484,8 +482,11 @@ const Pedido = () => {
               .map((currentOrder, index) => {
                 if (currentOrder.rechazado) {
                   return (
-                    <div key={currentOrder.id} className="px-4 w-full">
-                      <p className="text-red-600 font-medium mb-4 text-center">
+                    <div
+                      key={currentOrder.id}
+                      className="flex flex-col items-center justify-center mt-8 px-8"
+                    >
+                      <p className="text-red-600 text-center font-light font-coolvetica text-xs">
                         {clientData?.name || "El local"} rechazó tu pedido por
                         falta de stock.
                       </p>
@@ -855,8 +856,8 @@ const Pedido = () => {
         )}
 
         {!loading && isInitialized && pedidosPagados.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-2 px-8">
-            <p className="text-black text-center font-coolvetica text-xs">
+          <div className="flex flex-col items-center justify-center mt-8 px-8">
+            <p className="font-light text-gray-400 text-center font-coolvetica text-xs">
               No se encontraron pedidos para hoy.
             </p>
           </div>

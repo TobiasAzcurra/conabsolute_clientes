@@ -5,12 +5,9 @@ import { useEffect } from "react";
 import { useClient } from "../../../contexts/ClientContext";
 import Items from "../../../pages/menu/Items";
 import CartCard from "./CartCard";
-import carrusel from "../../../assets/carrusel3.jpg";
-import MovingRibbon from "../MovingRibbon";
 import FormCustom from "../../form";
 import { getImageSrc } from "../../../helpers/getImageSrc";
 import VideoSlider from "../detail/VideoSlider";
-import arrowIcon from "../../../assets/arrowIcon.png";
 
 const CartItems = () => {
   const { cart, total } = useSelector((state) => state.cartState);
