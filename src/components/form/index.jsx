@@ -101,7 +101,7 @@ const FormCustom = ({ cart, total }) => {
   };
 
   return (
-    <div className="flex mt-2 mr-4  min-h-screen ml-4 flex-col">
+    <div className="flex   px-4    flex-col">
       <style>{`
         .custom-select {
           appearance: none;
@@ -165,8 +165,8 @@ const FormCustom = ({ cart, total }) => {
           if (isEnabled) finalTotal += expressDeliveryFee;
           return (
             <Form>
-              <div className="flex flex-col mb-2">
-                <div className="flex flex-row w-full gap-2 mb-4">
+              <div className="flex flex-col ">
+                <div className="flex flex-row w-full  gap-1 mb-4">
                   <button
                     type="button"
                     className={`h-20 flex-1 font-bold flex items-center justify-center gap-2 rounded-2xl ${
@@ -280,100 +280,6 @@ const FormCustom = ({ cart, total }) => {
           );
         }}
       </Formik>
-
-      {/* Modales */}
-      {/* por horario */}
-      <AppleModal
-        isOpen={isTimeRestrictedModalOpen}
-        onClose={closeTimeRestrictedModal}
-        title="Está cerrado"
-      >
-        <p className="font-medium text-center">
-          Abrimos de lunes a domingo de 11:00 hs a 14:00 hs y de 20:00 hs a
-          00:00 hs.
-        </p>
-      </AppleModal>
-
-      {/* <AppleModal
-        isOpen={showOutOfStockModal}
-        onClose={() => setShowOutOfStockModal(false)}
-        title="Sin stock"
-      >
-        <p className="font-medium text-center">
-          Se vendieron +400 burgers ❤️‍🔥 No hay mas stock! Te esperamos esta noche{' '}
-        </p>
-      </AppleModal> */}
-
-      {/* pendiente de confirmar */}
-      <AppleModal
-        isOpen={isCloseRestrictedModalOpen}
-        onClose={closeCloseRestrictedModal}
-        title="Pendiente de confirmar"
-        twoOptions={true}
-        isLoading={isModalConfirmLoading}
-        onConfirm={async () => {
-          setIsModalConfirmLoading(true);
-          try {
-            if (pendingValues) {
-              const orderId = await handleSubmit(
-                pendingValues,
-                cart,
-                envio,
-                mapUrl,
-                descuento,
-                true // isPending
-              );
-              if (orderId) {
-                navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
-                dispatch(addLastCart());
-              }
-            }
-          } catch (error) {
-            console.error("Error al procesar el pedido pendiente:", error);
-          } finally {
-            setIsModalConfirmLoading(false);
-            closeCloseRestrictedModal();
-          }
-        }}
-      >
-        <p className="font-medium text-center">Confirmar compra</p>
-      </AppleModal>
-
-      {/* mensaje */}
-      <AppleModal
-        isOpen={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        title="Aviso importante"
-        twoOptions={true}
-        isLoading={isModalConfirmLoading}
-        onConfirm={async () => {
-          setIsModalConfirmLoading(true);
-          if (pendingValues) {
-            const isReserva = pendingValues.hora.trim() !== "";
-            const orderId = await handleSubmit(
-              pendingValues,
-              cart,
-              envio,
-              mapUrl,
-              descuento,
-              false,
-              altaDemanda?.message || ""
-            );
-
-            if (orderId) {
-              navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
-              dispatch(addLastCart());
-            }
-          }
-          setIsModalConfirmLoading(false);
-          setShowMessageModal(false);
-        }}
-      >
-        <p className="font-medium text-center">
-          Mensaje de sistema <br />
-          Tendras un boton para pedir tu compensacion ❤️‍🔥 Aceptas?
-        </p>
-      </AppleModal>
     </div>
   );
 };

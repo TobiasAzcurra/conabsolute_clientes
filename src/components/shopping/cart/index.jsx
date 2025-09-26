@@ -121,7 +121,7 @@ const CartItems = () => {
         </div>
       </div>
 
-      <div className="flex justify-center flex-col mt-6 items-start w-full">
+      <div className="flex justify-center flex-col mt-8 items-start w-full">
         <p className="text-2xl font-bold mx-auto mb-2">
           Agrega. Inverti en tu felicidad
         </p>
@@ -170,7 +170,7 @@ const CartItems = () => {
         <MovingRibbon angle={0} />
         <img src={carrusel} className="w-full md:hidden" alt="" />
       </div> */}
-      <div className="my-10">
+      <div className="mb-4 mt-12">
         <VideoSlider reels={reels} />
       </div>
 
