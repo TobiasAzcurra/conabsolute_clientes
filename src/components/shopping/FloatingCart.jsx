@@ -13,7 +13,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
   return (
     <div className="fixed border border-black border-opacity-30 bottom-4 rounded-2xl left-4 right-4 h-20 bg-white bg-opacity-80 backdrop-blur-sm pl-4 flex flex-row items-center justify-between md:justify-center gap-4 font-coolvetica z-50">
       <div className="flex flex-col items-center">
-        <p className="text-xs font-medium">
+        <p className="text-xs font-light text-gray-700">
           {totalQuantity} {totalQuantity === 1 ? "producto" : "productos"}
         </p>
         <p className="text-4xl font-bold mt-[-5px]">
