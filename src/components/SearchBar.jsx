@@ -2,14 +2,7 @@ import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useClient } from "../contexts/ClientContext";
 
-const SearchBar = ({
-  phoneNumber,
-  setPhoneNumber,
-  showSuggestion,
-  setShowSuggestion,
-  previousPhone,
-  onSuggestionClick,
-}) => {
+const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   const { slugEmpresa, slugSucursal } = useClient();
   const navigate = useNavigate();
 
@@ -21,20 +14,18 @@ const SearchBar = ({
   };
 
   return (
-    <div className="fixed z-[60] bottom-4 right-4 left-4  h-10 rounded-xl bg-gray-200 flex items-center ">
+    <div className="fixed z-[60] bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
       <input
         type="tel"
-        value={phoneNumber}
+        value={phoneNumber || previousPhone || ""}
         onChange={(e) => setPhoneNumber(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
-        onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
         placeholder="Busca tu pedido. Ej: 3585168275"
         className="text-gray-900 font-light px-4 placeholder:text-gray-400 font-coolvetica text-sm bg-transparent outline-none w-full"
       />
       <button
         onClick={handleSearch}
-        className="text-blue-700  h-10 w-20 flex items-center justify-center rounded-r-xl rounded-l-none"
+        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-xl rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -49,17 +40,6 @@ const SearchBar = ({
           />
         </svg>
       </button>
-
-      {showSuggestion && previousPhone && (
-        <div className="absolute left-0 right-0 bottom-12 h-10 bg-gray-50  shadow-lg rounded-xl border border-gray-200 z-50">
-          <button
-            onClick={onSuggestionClick}
-            className="w-full font-bold font-coolvetica font-light text-left px-4 h-10 text-xs flex items-center"
-          >
-            Último: {previousPhone}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
