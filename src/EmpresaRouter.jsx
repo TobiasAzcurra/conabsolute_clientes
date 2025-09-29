@@ -9,9 +9,34 @@ import CartItems from "./components/shopping/cart/CartItems.jsx";
 import NotFound from "./components/NotFound.jsx";
 import SuccessPage from "./pages/menu/SuccessPage.jsx";
 import Pedido from "./pages/pedido/Pedido.jsx";
+import { useMediaQuery } from "react-responsive";
+import Absolute from "./assets/isologoAbsolte.png";
+
+const PcBlock = () => (
+  <div className="bg-black font-coolvetica flex items-center justify-center flex-col h-screen w-screen">
+    <img className="h-56" src={Absolute} alt="" />
+    <div className="flex flex-col">
+      <div className="flex flex-row gap-1">
+        <p className="text-gray-50 opacity-50 font-light text-xs">
+          Interfaz web
+        </p>
+        <p className="text-gray-50 font-light text-xs">proximamente,</p>
+      </div>
+      <p className="text-gray-50 opacity-50 font-light text-xs">
+        ingresa por tu celular.
+      </p>
+    </div>
+  </div>
+);
 
 const EmpresaRouter = () => {
   const { isLoaded } = useClient();
+  const isDesktop = useMediaQuery({ minWidth: 1024 }); // Ajusta el breakpoint a lo que consideres "PC"
+
+  if (isDesktop) {
+    return <PcBlock />;
+  }
+
   if (!isLoaded) {
     return <MenuIntro />;
   }
