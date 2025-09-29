@@ -630,8 +630,8 @@ const DetailCard = () => {
                     />
                   </svg>
                 </button>
-                <h4 className="font-coolvetica font-bold text-xl text-gray-900 leading-tight">
-                  {capitalizeWords(product.name)}
+                <h4 className="font-coolvetica font-bold capitalize text-xl text-gray-900 leading-tight">
+                  {product.name}
                 </h4>
               </div>
 
