@@ -5,7 +5,6 @@ import React, {
   useRef,
   useCallback,
 } from "react";
-import QuickAddToCart from "./quickAddToCart";
 import currencyFormat from "../../../helpers/currencyFormat";
 import { Link } from "react-router-dom";
 import LoadingPoints from "../../LoadingPoints";
@@ -228,11 +227,6 @@ const Card = ({ data, path }) => {
       limited: someOutOfStock && !allOutOfStock,
     };
   }, [data.infiniteStock, data.stockSummary, variants]);
-
-  const finalName =
-    selectedVariant?.name && !selectedVariant?.default
-      ? selectedVariant.name
-      : name;
 
   return (
     <div
