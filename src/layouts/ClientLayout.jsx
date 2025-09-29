@@ -106,7 +106,9 @@ const ClientLayout = ({ children }) => {
 
         <div
           className={`${!shouldHideHeader ? "mt-[100px]" : ""} ${
-            shouldShowFloatingCart && totalQuantity > 0 ? "pb-[155px]" : ""
+            shouldShowFloatingCart && totalQuantity > 0
+              ? "pb-[125px]"
+              : " pb-[75px]"
           } z-[5]`}
         >
           {children}
