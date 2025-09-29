@@ -107,7 +107,24 @@ const FormCustom = ({ cart, total }) => {
       }
     } catch (err) {
       console.error("❌ Error al procesar el pedido:", err);
-      alert("Error al procesar el pedido. Por favor intenta nuevamente.");
+
+      // Mensajes específicos según tipo de error
+      if (err.message.includes("RACE_CONDITION")) {
+        alert(
+          "⚠️ Alguien compró este producto antes que vos.\n\n" +
+            "Por favor recargá la página para ver el stock actualizado."
+        );
+        // Opcional: recargar automáticamente después de 2 segundos
+        setTimeout(() => window.location.reload(), 2000);
+      } else if (err.message.includes("INSUFFICIENT_STOCK")) {
+        alert(
+          "❌ No hay suficiente stock disponible.\n\n" +
+            "Por favor recargá la página para ver el stock actualizado."
+        );
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        alert("Error al procesar el pedido. Por favor intenta nuevamente.");
+      }
     } finally {
       setIsProcessingStock(false);
     }
@@ -121,16 +138,16 @@ const FormCustom = ({ cart, total }) => {
     const isReserva = values.hora.trim() !== "";
 
     // 1. Validar horarios si NO es reserva
-    if (!isReserva) {
-      const businessHours = clientConfig?.logistics?.businessHours;
-      const status = isBusinessOpen(businessHours);
+    // if (!isReserva) {
+    //   const businessHours = clientConfig?.logistics?.businessHours;
+    //   const status = isBusinessOpen(businessHours);
 
-      if (!status.isOpen) {
-        setClosedMessage(status.message);
-        setShowClosedModal(true);
-        return;
-      }
-    }
+    //   if (!status.isOpen) {
+    //     setClosedMessage(status.message);
+    //     setShowClosedModal(true);
+    //     return;
+    //   }
+    // }
 
     // 2. Verificar código de descuento
     let appliedDiscount = null;

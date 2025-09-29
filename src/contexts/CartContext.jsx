@@ -4,7 +4,6 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  // Estado del carrito - mismo patrón que POS (object con itemId como key)
   const [cartItems, setCartItems] = useState(() => {
     try {
       const saved = localStorage.getItem("cartItems");
@@ -15,7 +14,6 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // Auto-persistir en localStorage cuando cambie el carrito
   useEffect(() => {
     try {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
@@ -24,21 +22,17 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
-  // Generar ID único para items del carrito
   const generateCartItemId = (productId, variantId) => {
     return `${productId}-${variantId || "default"}`;
   };
 
-  // Calcular total del carrito
   const total = Object.values(cartItems).reduce(
     (sum, item) => sum + item.finalPrice * item.quantity,
     0
   );
 
-  // Convertir a array para compatibilidad con componentes existentes
   const cartArray = Object.values(cartItems);
 
-  // Función para agregar item al carrito
   const addToCart = (item) => {
     const cartItemId = generateCartItemId(item.productId, item.variantId);
 
@@ -46,7 +40,6 @@ export const CartProvider = ({ children }) => {
       const existingItem = prevCart[cartItemId];
 
       if (existingItem) {
-        // Si ya existe, sumar cantidades
         return {
           ...prevCart,
           [cartItemId]: {
@@ -55,7 +48,6 @@ export const CartProvider = ({ children }) => {
           },
         };
       } else {
-        // Nuevo item
         return {
           ...prevCart,
           [cartItemId]: {
@@ -67,7 +59,6 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Función para actualizar cantidad
   const updateQuantity = (itemId, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(itemId);
@@ -88,7 +79,6 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Función para remover item del carrito
   const removeFromCart = (itemId) => {
     setCartItems((prevCart) => {
       const newCart = { ...prevCart };
@@ -97,14 +87,11 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // Función para limpiar carrito
   const clearCart = () => {
     setCartItems({});
   };
 
-  // Funciones para compatibilidad con Redux existente
   const addItem = (item) => {
-    // Convertir formato Redux a formato nuevo
     const cartItem = {
       productId: item.productId || item.id,
       productName: item.name,
@@ -116,11 +103,12 @@ export const CartProvider = ({ children }) => {
         (item.finalPrice || item.price) - (item.basePrice || item.price),
       finalPrice: item.finalPrice || item.price,
       category: item.category,
-      name: item.name, // Para compatibilidad
+      name: item.name,
       variants: item.variants || [],
       isInfiniteStock: item.isInfiniteStock || false,
       stockReference: item.stockReference || "",
       availableStock: item.availableStock || 0,
+      stockVersion: item.stockVersion || 0, // NUEVO
     };
     addToCart(cartItem);
   };
@@ -146,7 +134,6 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Estado adicional para compatibilidad
   const [lastCart, setLastCart] = useState([]);
   const [envioExpress, setEnvioExpress] = useState(0);
 
@@ -155,12 +142,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const changeLastCart = () => {
-    // Limpiar carrito actual y cargar lastCart
     clearCart();
     lastCart.forEach((item) => addItem(item));
   };
 
-  // ← NUEVO: Función para manejar envío express (requerida por useFormStates)
   const setEnvioExpressValue = (value) => {
     setEnvioExpress(value);
   };
@@ -168,7 +153,6 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider
       value={{
-        // Nuevo patrón (preferido)
         cartItems,
         cartArray,
         total,
@@ -176,9 +160,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeFromCart,
         clearCart,
-
-        // Compatibilidad con Redux existente
-        cart: cartArray, // Para useSelector((state) => state.cartState.cart)
+        cart: cartArray,
         addItem,
         removeOneItem,
         addOneItem,
@@ -209,7 +191,6 @@ export const createCartItem = (
   selectedVariant = null,
   quantity = 1
 ) => {
-  // Encontrar variante (seleccionada o default)
   const variant =
     selectedVariant ||
     product.variants?.find((v) => v.default) ||
@@ -219,16 +200,11 @@ export const createCartItem = (
   const variantPrice = variant?.price || 0;
   const finalPrice = basePrice + variantPrice;
 
-  // ← NUEVO: Obtener imagen del producto base
   const getProductImage = () => {
     if (!product.img) return "";
-
-    // Si es array, tomar la primera
     if (Array.isArray(product.img)) {
       return product.img[0] || "";
     }
-
-    // Si es string, devolverla directamente
     return product.img;
   };
 
@@ -242,18 +218,13 @@ export const createCartItem = (
     variantPrice: variantPrice,
     finalPrice: finalPrice,
     category: product.category,
-
-    // Para compatibilidad con sistema actual
     name: product.name,
     price: finalPrice,
     variants: selectedVariant ? [selectedVariant] : [],
-
-    // ← NUEVO: Agregar imagen del producto
     img: getProductImage(),
-
-    // Para futuro con StockManager
     isInfiniteStock: product.infiniteStock || false,
     stockReference: variant?.stockReference || "",
     availableStock: variant?.stockSummary?.totalStock || 0,
+    stockVersion: variant?.stockSummary?.version || 0, // CAPTURAR VERSIÓN AQUÍ
   };
 };

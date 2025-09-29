@@ -1,4 +1,4 @@
-// utils/orderProcessing.js - Versión final limpia
+// utils/orderProcessing.js - Con optimistic locking completo
 import { db } from "../firebase/config";
 import {
   collection,
@@ -89,9 +89,20 @@ export const consumeStockForOrderAndReturnTraces = async (
         );
       }
 
+      // CRÍTICO: Pasar la versión capturada en el carrito al StockManager
+      const variantWithCapturedVersion = {
+        ...variant,
+        stockSummary: {
+          ...(variant?.stockSummary || {}),
+          version: item.stockVersion || 0, // Versión del momento en que se agregó al carrito
+        },
+      };
+
+      console.log(`🔒 Versión capturada en carrito: ${item.stockVersion}`);
+
       const saleResult = await stockManager.simulateVenta(
         productData,
-        variant,
+        variantWithCapturedVersion,
         item.quantity
       );
 
@@ -106,6 +117,21 @@ export const consumeStockForOrderAndReturnTraces = async (
       console.log(`✅ Item procesado exitosamente: ${item.productName}`);
     } catch (error) {
       console.error(`❌ Error procesando item ${item.id}:`, error);
+
+      if (error.message.includes("STOCK_VERSION_MISMATCH")) {
+        throw new Error(
+          `RACE_CONDITION: ${
+            item.productName || item.name
+          } fue comprado por alguien más. Por favor recarga la página para ver stock actualizado.`
+        );
+      } else if (error.message.includes("INSUFFICIENT_STOCK")) {
+        throw new Error(
+          `INSUFFICIENT_STOCK: No hay suficiente stock de ${
+            item.productName || item.name
+          }`
+        );
+      }
+
       throw error;
     }
   }
@@ -351,5 +377,6 @@ export const adaptCartToPOSFormat = (contextCartItems) => {
     isInfiniteStock: item.isInfiniteStock || false,
     stockReference: item.stockReference || "",
     availableStock: item.availableStock || 0,
+    stockVersion: item.stockVersion || 0, // PASAR VERSIÓN AL PROCESSING
   }));
 };
