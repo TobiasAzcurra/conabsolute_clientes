@@ -9,6 +9,7 @@ const Section = () => {
   const { productsByCategory } = useClient();
 
   const products = useMemo(() => {
+    // Ya vienen ordenados del Context, no re-ordenar
     if (!productsByCategory || !productsByCategory[category]) return [];
     return productsByCategory[category];
   }, [productsByCategory, category]);
@@ -22,7 +23,7 @@ const Section = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 px-4  mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 px-4 mb-10">
       {products.length > 0 ? (
         products.map((p) => <Card key={p.id} data={p} path={category} />)
       ) : (
