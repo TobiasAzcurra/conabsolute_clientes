@@ -564,7 +564,7 @@ const DetailCard = () => {
                         key="more-left"
                         className=" flex items-center justify-center font-coolvetica mr-2  "
                       >
-                        <span className="text-white text-xs font-medium">
+                        <span className="text-white text-xs font-light">
                           +{startIndex}
                         </span>
                       </div>
@@ -599,7 +599,7 @@ const DetailCard = () => {
                         key="more-right"
                         className=" flex items-center ml-2 justify-center font-coolvetica  "
                       >
-                        <span className="text-white text-xs font-medium">
+                        <span className="text-white text-xs font-light">
                           +{totalImages - endIndex}
                         </span>
                       </div>
