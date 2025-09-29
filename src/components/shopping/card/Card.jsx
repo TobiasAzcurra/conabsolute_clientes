@@ -35,37 +35,28 @@ const Card = ({ data, path }) => {
 
   const variantStats = useMemo(() => {
     const stats = {};
-
     for (const variant of variants || []) {
       if (!variant.attributes) continue;
-
       Object.entries(variant.attributes).forEach(([key, value]) => {
         const stringKey = String(key).toLowerCase();
         const stringValue = String(value).toLowerCase();
-
         if (!stats[stringKey]) stats[stringKey] = new Set();
         stats[stringKey].add(stringValue);
       });
     }
-
     const result = {};
-    for (const key in stats) {
-      result[key] = Array.from(stats[key]);
-    }
-
+    for (const key in stats) result[key] = Array.from(stats[key]);
     return result;
   }, [variants]);
 
   const checkIfCentered = useCallback(() => {
     if (!cardRef.current) return false;
-
     const rect = cardRef.current.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportCenterY = viewportHeight / 2;
     const cardCenterY = rect.top + rect.height / 2;
     const distanceFromCenter = Math.abs(cardCenterY - viewportCenterY);
     const threshold = 140;
-
     return (
       distanceFromCenter < threshold &&
       rect.top < viewportHeight &&
@@ -89,77 +80,76 @@ const Card = ({ data, path }) => {
 
   const basePrice = data.price || 0;
   const variantDiff = selectedVariant?.price || 0;
-  const adjustedPrice = basePrice + variantDiff;
+  const adjustedPrice = basePrice + variantDiff; // precio de lista base
 
+  // >>> NUEVA LÓGICA DE PRICING (Reglas 1–3)
   const pricingInfo = useMemo(() => {
-    const hasInstallments = installments?.enabled && installments.quantity;
-    const hasCashDiscount = cashDiscount?.enabled && cashDiscount.percentage;
+    const hasInstallments = Boolean(
+      installments?.enabled && installments.quantity
+    );
+    const hasCashDiscount = Boolean(
+      cashDiscount?.enabled && cashDiscount.percentage
+    );
 
-    const result = {
-      mainPrice: adjustedPrice,
-      primaryText: null,
-      secondaryText: null,
-    };
+    // Normalizo porcentaje (permite 10 ó 0.10)
+    const discountPct = hasCashDiscount
+      ? cashDiscount.percentage > 1
+        ? cashDiscount.percentage / 100
+        : cashDiscount.percentage
+      : 0;
 
-    const paymentOptions = [];
+    const cashPrice = hasCashDiscount
+      ? Math.ceil(adjustedPrice * (1 - discountPct))
+      : null;
 
-    if (hasCashDiscount) {
-      const discountPercentage =
-        cashDiscount.percentage > 1
-          ? cashDiscount.percentage / 100
-          : cashDiscount.percentage;
-
-      const cashPrice = Math.ceil(adjustedPrice * (1 - discountPercentage));
-      paymentOptions.push(
-        `${currencyFormat(cashPrice)} en efectivo/transferencia`
-      );
-    }
-
+    // Texto de cuotas si aplica
+    let installmentText = null;
     if (hasInstallments) {
       const interestRate =
         installments.interest > 1
           ? installments.interest / 100
-          : installments.interest;
-
+          : installments.interest || 0;
       const finalAmount = adjustedPrice * (1 + interestRate);
-      const perCuota = finalAmount / installments.quantity;
-
-      const installmentText = `${installments.quantity} cuota${
+      const perCuota = Math.ceil(finalAmount / installments.quantity);
+      installmentText = `${installments.quantity} cuota${
         installments.quantity > 1 ? "s" : ""
-      } de ${currencyFormat(Math.ceil(perCuota))}${
+      } de ${currencyFormat(perCuota)}${
         interestRate === 0 ? " (sin interés)" : ""
       }`;
-
-      paymentOptions.push(installmentText);
     }
 
-    if (paymentOptions.length === 1) {
-      result.primaryText = `o ${paymentOptions[0]}`;
-    } else if (paymentOptions.length === 2) {
-      result.primaryText = `o ${paymentOptions[0]}`;
-      result.secondaryText = `o ${paymentOptions[1]}`;
+    // Regla 1 + 2 + 3 → Jerarquía y no redundancia
+    // - Si hay descuento en efectivo, el precio principal es el de efectivo.
+    // - Si hay descuento, NO muestro el precio original como alternativa; sólo tachado.
+    // - Si NO hay descuento, el precio principal es el de lista, y las alternativas pueden ser cuotas.
+
+    if (hasCashDiscount) {
+      return {
+        mainPrice: cashPrice, // grande
+        strikeThroughOldPrice: adjustedPrice, // pequeño, tachado
+        installmentText, // alternativa (si existe)
+      };
     }
 
-    return result;
+    // Sin descuento efectivo
+    return {
+      mainPrice: adjustedPrice, // grande
+      strikeThroughOldPrice: null, // no hay
+      installmentText, // si hay, se muestra como alternativa
+    };
   }, [adjustedPrice, installments, cashDiscount]);
 
   const images = useMemo(() => {
     const imgs = selectedVariant?.images?.length
       ? selectedVariant.images
       : data?.img || data?.image || data?.images || [];
-
     if (Array.isArray(imgs)) return imgs;
     return [getImageSrc(imgs)];
   }, [selectedVariant, data]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const isCentered = checkIfCentered();
-      setIsInViewport(isCentered);
-    };
-
+    const handleScroll = () => setIsInViewport(checkIfCentered());
     handleScroll();
-
     let ticking = false;
     const throttledScroll = () => {
       if (!ticking) {
@@ -170,10 +160,8 @@ const Card = ({ data, path }) => {
         ticking = true;
       }
     };
-
     window.addEventListener("scroll", throttledScroll);
     window.addEventListener("resize", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", throttledScroll);
       window.removeEventListener("resize", handleScroll);
@@ -192,11 +180,8 @@ const Card = ({ data, path }) => {
       }
       setCurrentImageIndex(0);
     }
-
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isInViewport, images]);
 
@@ -204,24 +189,16 @@ const Card = ({ data, path }) => {
 
   // Lógica de stock mejorada
   const stockStatus = useMemo(() => {
-    // Si tiene stock infinito, siempre hay stock
-    if (data.infiniteStock) {
-      return { available: true, limited: false };
-    }
-
-    // Si no hay variantes, verificar stock del producto
+    if (data.infiniteStock) return { available: true, limited: false };
     if (!variants || variants.length === 0) {
       const hasStock = data.stockSummary?.totalStock > 0;
       return { available: hasStock, limited: false };
     }
-
-    // Si hay variantes, analizar su stock
     const variantsWithStock = variants.filter(
       (v) => v.stockSummary?.totalStock > 0
     );
     const allOutOfStock = variantsWithStock.length === 0;
     const someOutOfStock = variantsWithStock.length < variants.length;
-
     return {
       available: !allOutOfStock,
       limited: someOutOfStock && !allOutOfStock,
@@ -238,7 +215,7 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        <div className="relative h-[160px]  overflow-hidden rounded-t-3xl w-full">
+        <div className="relative h-[160px] overflow-hidden rounded-t-3xl w-full">
           {!isLoaded && !imageError && (
             <div className="h-full w-full items-center justify-center flex">
               <LoadingPoints />
@@ -278,23 +255,21 @@ const Card = ({ data, path }) => {
                   const attributes = Object.keys(variantStats)
                     .filter((key) => variantStats[key].length > 0)
                     .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
-
                   const maxVisible = 3;
                   const visibleAttributes = attributes.slice(0, maxVisible);
                   const hasMore = attributes.length > maxVisible;
-
                   return (
                     <>
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-50 bg-opacity-40 text-gray-50 font-coolvetica  text-xs font-light px-2 py-1  rounded-lg  shadow-gray-900"
+                          className="bg-gray-50 bg-opacity-40 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
                         >
                           {attr}
                         </div>
                       ))}
                       {hasMore && (
-                        <div className="bg-gray-50 bg-opacity-70 text-gray-50 font-coolvetica  text-xs font-light px-2 py-1  rounded-lg  shadow-gray-900">
+                        <div className="bg-gray-50 bg-opacity-70 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900">
                           +{attributes.length - maxVisible}
                         </div>
                       )}
@@ -315,7 +290,7 @@ const Card = ({ data, path }) => {
               setIsLoaded(true);
               setImageError(false);
             }}
-            onError={(e) => {
+            onError={() => {
               setImageError(true);
               setIsLoaded(false);
             }}
@@ -323,49 +298,52 @@ const Card = ({ data, path }) => {
         </div>
 
         {/* datos */}
-        <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left ">
-          <div className="flex mt-4 flex-col w-full  ">
-            <h5 className=" text-lg   font-medium  ">
+        <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left">
+          <div className="flex mt-4 flex-col w-full">
+            <h5 className="text-lg font-medium">
               {(name || "Producto sin nombre").charAt(0).toUpperCase() +
                 (name || "Producto sin nombre").slice(1).toLowerCase()}
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-xs text-gray-400 font-light font-coolvetica  ">
+            <p className="text-xs text-gray-400 font-light font-coolvetica">
               {data.cardDescription}
             </p>
           )}
+
           <div className="flex w-full mt-4 flex-col mb-4">
             <div className="flex flex-row justify-between items-center">
-              <span className="font-bold text-4xl text-black">
-                {currencyFormat(pricingInfo.mainPrice)}
-              </span>
-              {/* Indicador de stock - arriba derecha sobre imagen */}
+              <div className="flex flex-col">
+                <span className="font-bold text-4xl text-black">
+                  {currencyFormat(pricingInfo.mainPrice)}
+                </span>
+                {pricingInfo.strikeThroughOldPrice && (
+                  <span className="text-xs text-gray-400 font-light">
+                    en efectivo/transferencia
+                  </span>
+                )}
+              </div>
+
+              {/* Indicadores de stock */}
               {!stockStatus.available && (
-                <span className=" bg-red-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40 ">
+                <span className="bg-red-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40">
                   Agotado
                 </span>
               )}
               {stockStatus.limited && (
-                <span className=" bg-yellow-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40 ">
+                <span className="bg-yellow-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40">
                   Stock limitado
                 </span>
               )}
             </div>
-            {(pricingInfo.primaryText || pricingInfo.secondaryText) && (
-              <div className="font-light pr-12   flex flex-col items-start">
-                {pricingInfo.primaryText && (
-                  <span className="text-gray-400 font-light text-xs">
-                    {pricingInfo.primaryText}
-                  </span>
-                )}
-                {pricingInfo.secondaryText && (
-                  <span className="text-gray-400 text-xs">
-                    {pricingInfo.secondaryText}
-                  </span>
-                )}
+
+            {/* Alternativas de pago (sin redundancias) */}
+            {pricingInfo.installmentText && (
+              <div className="font-light pr-12 flex flex-col items-start">
+                <span className="text-gray-400 text-xs">{`o ${pricingInfo.installmentText}`}</span>
               </div>
             )}
+
             {data.deliveryDelay && (
               <div className="mt-1">
                 {(() => {
