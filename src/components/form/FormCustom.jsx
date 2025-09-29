@@ -18,6 +18,7 @@ import { adjustHora } from "../../helpers/time";
 import { cleanPhoneNumber } from "../../firebase/utils/phoneUtils"; // Asegurar import
 import { addTelefonoCliente } from "../../firebase/orders/uploadOrder"; // Asegurar import
 import { obtenerFechaActual } from "../../firebase/utils/dateHelpers"; // Asegurar import
+import { extractCoordinates } from "../../helpers/currencyFormat";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -56,12 +57,15 @@ const FormCustom = ({ cart, total }) => {
       let hora = values.hora;
       if (isReserva) hora = adjustHora(values.hora);
 
+      // Extraer coordenadas del mapUrl si está disponible
+      const coordinates = mapUrl ? extractCoordinates(mapUrl) : [0, 0];
+
       const updatedValues = {
         ...values,
         hora,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
         shipping: values.deliveryMethod === "delivery" ? envio : 0,
-        coordinates: [0, 0], // TODO: Extraer desde mapUrl si es necesario
+        coordinates, // Ahora usa las coordenadas extraídas
       };
 
       console.log("🚀 Iniciando procesamiento con nuevo schema POS");
