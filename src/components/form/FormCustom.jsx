@@ -1,8 +1,10 @@
-// components/form/FormCustom.jsx - Versión final simplificada
+// components/form/FormCustom.jsx - Con actualización de stock sin recargar
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../../contexts/CartContext";
+import { db } from "../../firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 import validations from "./validations";
 import {
   handlePOSSubmit,
@@ -21,7 +23,7 @@ import SimpleModal from "../ui/SimpleModal";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
-  const { addLastCart, clearCart, cartItems } = useCart();
+  const { addLastCart, clearCart, cartItems, updateCartItem } = useCart();
 
   const {
     slugEmpresa,
@@ -42,6 +44,7 @@ const FormCustom = ({ cart, total }) => {
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
   const [showDiscountWarning, setShowDiscountWarning] = useState(false);
+  const [showStockUpdateModal, setShowStockUpdateModal] = useState(false);
   const [pendingSubmitValues, setPendingSubmitValues] = useState(null);
 
   const [currentDeliveryMethod, setCurrentDeliveryMethod] =
@@ -61,6 +64,65 @@ const FormCustom = ({ cart, total }) => {
   const enterpriseData = {
     id: empresaId,
     selectedSucursal: { id: sucursalId },
+  };
+
+  // Función para actualizar versiones de stock del carrito
+  const updateCartStockVersions = async () => {
+    try {
+      setIsProcessingStock(true);
+
+      for (const itemId in cartItems) {
+        const item = cartItems[itemId];
+
+        const productRef = doc(
+          db,
+          "absoluteClientes",
+          empresaId,
+          "sucursales",
+          sucursalId,
+          "productos",
+          item.productId
+        );
+
+        const productDoc = await getDoc(productRef);
+        if (productDoc.exists()) {
+          const productData = productDoc.data();
+          const variant = productData.variants?.find(
+            (v) => v.id === item.variantId
+          );
+
+          if (variant) {
+            // Actualizar usando updateCartItem
+            updateCartItem(itemId, {
+              stockVersion: variant.stockSummary?.version || 0,
+              availableStock: variant.stockSummary?.totalStock || 0,
+            });
+
+            console.log(
+              `✅ Actualizado ${item.productName}: version ${item.stockVersion} → ${variant.stockSummary?.version}`
+            );
+          }
+        }
+      }
+
+      console.log("✅ Versiones de stock actualizadas exitosamente");
+
+      setShowStockUpdateModal(false);
+
+      // Reintentar el submit
+      if (pendingSubmitValues) {
+        await processPedido(
+          pendingSubmitValues.values,
+          pendingSubmitValues.isReserva,
+          pendingSubmitValues.appliedDiscount
+        );
+      }
+    } catch (error) {
+      console.error("Error actualizando versiones de stock:", error);
+      alert("Error al actualizar el stock. Por favor intenta nuevamente.");
+    } finally {
+      setIsProcessingStock(false);
+    }
   };
 
   const processPedido = async (values, isReserva, appliedDiscount = null) => {
@@ -108,20 +170,15 @@ const FormCustom = ({ cart, total }) => {
     } catch (err) {
       console.error("❌ Error al procesar el pedido:", err);
 
-      // Mensajes específicos según tipo de error
       if (err.message.includes("RACE_CONDITION")) {
-        alert(
-          "⚠️ Alguien compró este producto antes que vos.\n\n" +
-            "Por favor recargá la página para ver el stock actualizado."
-        );
-        // Opcional: recargar automáticamente después de 2 segundos
-        setTimeout(() => window.location.reload(), 2000);
+        // Guardar valores para reintentar después de actualizar
+        setPendingSubmitValues({ values, isReserva, appliedDiscount });
+        setShowStockUpdateModal(true);
       } else if (err.message.includes("INSUFFICIENT_STOCK")) {
         alert(
           "❌ No hay suficiente stock disponible.\n\n" +
-            "Por favor recargá la página para ver el stock actualizado."
+            "Por favor verificá las cantidades disponibles."
         );
-        setTimeout(() => window.location.reload(), 2000);
       } else {
         alert("Error al procesar el pedido. Por favor intenta nuevamente.");
       }
@@ -206,6 +263,20 @@ const FormCustom = ({ cart, total }) => {
         }}
       />
 
+      <SimpleModal
+        isOpen={showStockUpdateModal}
+        onClose={() => {
+          setShowStockUpdateModal(false);
+          setPendingSubmitValues(null);
+        }}
+        title="Stock actualizado"
+        message="Alguien compró antes que vos. Actualizá tu versión de stock para poder continuar."
+        twoButtons={true}
+        cancelText="Cancelar"
+        confirmText="Actualizar stock"
+        onConfirm={updateCartStockVersions}
+      />
+
       <div className="flex px-4 flex-col">
         <style>{`
           .custom-select {
@@ -224,17 +295,6 @@ const FormCustom = ({ cart, total }) => {
             color: rgba(0, 0, 0, 0.5);
           }
         `}</style>
-
-        {isProcessingStock && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              <p className="text-sm text-blue-600">
-                Procesando stock y creando pedido...
-              </p>
-            </div>
-          </div>
-        )}
 
         <Formik
           initialValues={{

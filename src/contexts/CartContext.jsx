@@ -79,6 +79,22 @@ export const CartProvider = ({ children }) => {
     });
   };
 
+  // NUEVO: Actualizar propiedades específicas de un item
+  const updateCartItem = (itemId, updates) => {
+    setCartItems((prevCart) => {
+      const item = prevCart[itemId];
+      if (!item) return prevCart;
+
+      return {
+        ...prevCart,
+        [itemId]: {
+          ...item,
+          ...updates,
+        },
+      };
+    });
+  };
+
   const removeFromCart = (itemId) => {
     setCartItems((prevCart) => {
       const newCart = { ...prevCart };
@@ -108,7 +124,7 @@ export const CartProvider = ({ children }) => {
       isInfiniteStock: item.isInfiniteStock || false,
       stockReference: item.stockReference || "",
       availableStock: item.availableStock || 0,
-      stockVersion: item.stockVersion || 0, // NUEVO
+      stockVersion: item.stockVersion || 0,
     };
     addToCart(cartItem);
   };
@@ -158,6 +174,7 @@ export const CartProvider = ({ children }) => {
         total,
         addToCart,
         updateQuantity,
+        updateCartItem, // NUEVO
         removeFromCart,
         clearCart,
         cart: cartArray,
@@ -185,7 +202,6 @@ export const useCart = () => {
   return context;
 };
 
-// Helper function para crear items del carrito desde productos
 export const createCartItem = (
   product,
   selectedVariant = null,
@@ -225,6 +241,6 @@ export const createCartItem = (
     isInfiniteStock: product.infiniteStock || false,
     stockReference: variant?.stockReference || "",
     availableStock: variant?.stockSummary?.totalStock || 0,
-    stockVersion: variant?.stockSummary?.version || 0, // CAPTURAR VERSIÓN AQUÍ
+    stockVersion: variant?.stockSummary?.version || 0,
   };
 };
