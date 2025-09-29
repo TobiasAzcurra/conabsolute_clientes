@@ -337,14 +337,6 @@ const MenuIntro = () => {
 
   return (
     <div className="flex items-center justify-center w-full h-screen bg-gray-50 relative overflow-hidden">
-      {/* Dev stats - comentar/remover en producción */}
-      {preloadStats && (
-        <div className="absolute top-4 right-4 z-50 bg-black bg-opacity-50 text-white text-xs p-2 rounded">
-          Precarga: {preloadStats.loaded}/{preloadStats.total} (
-          {preloadStats.successRate}%)
-        </div>
-      )}
-
       {introGif ? (
         renderMedia()
       ) : (
