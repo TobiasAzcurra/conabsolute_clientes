@@ -26,7 +26,10 @@ const ClientLayout = ({ children }) => {
 
   const shouldHideHeader =
     isProductDetail || isCart || isSuccessPage || isPedidoPage;
+
   const shouldShowFloatingCart = !isCart && !isSuccessPage && !isPedidoPage;
+
+  const shouldHideSearch = isCart && isSuccessPage && isPedidoPage;
 
   // ← FUNCIONA IGUAL: cart viene del Context ahora
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -72,17 +75,17 @@ const ClientLayout = ({ children }) => {
           </>
         )}
 
-        <div
-          className={`${!shouldHideHeader ? "mt-[100px]" : ""} ${
-            shouldShowFloatingCart && totalQuantity > 0 ? "pb-[155px]" : ""
-          } z-[5]`}
-        >
-          {children}
-        </div>
-
-        {shouldShowFloatingCart && totalQuantity > 0 && (
+        {!shouldHideSearch && shouldShowFloatingCart && (
           <>
-            <div className="fixed inset-x-0 bottom-0 z-40 h-[155px] border-t-1 border-gray-400  bg-gray-200 bg-opacity-60 pointer-events-none backdrop-blur-md" />
+            <div
+              className={`fixed inset-x-0 bottom-0 z-40 
+            ${totalQuantity > 0 ? "h-[125px]" : "h-[75px]"} 
+            
+            bg-gray-200 bg-opacity-60 
+            pointer-events-none 
+            backdrop-blur-md`}
+            />
+
             <SearchBar
               phoneNumber={phoneNumber}
               setPhoneNumber={setPhoneNumber}
@@ -91,10 +94,23 @@ const ClientLayout = ({ children }) => {
               previousPhone={previousPhone}
               onSuggestionClick={onSuggestionClick}
             />
-            {/* ← FUNCIONA IGUAL: FloatingCart recibe cart del Context */}
-            <FloatingCart totalQuantity={totalQuantity} cart={cart} />
+
+            {shouldShowFloatingCart && totalQuantity > 0 && (
+              <>
+                {/* ← FUNCIONA IGUAL: FloatingCart recibe cart del Context */}
+                <FloatingCart totalQuantity={totalQuantity} cart={cart} />
+              </>
+            )}
           </>
         )}
+
+        <div
+          className={`${!shouldHideHeader ? "mt-[100px]" : ""} ${
+            shouldShowFloatingCart && totalQuantity > 0 ? "pb-[155px]" : ""
+          } z-[5]`}
+        >
+          {children}
+        </div>
       </div>
     </>
   );
