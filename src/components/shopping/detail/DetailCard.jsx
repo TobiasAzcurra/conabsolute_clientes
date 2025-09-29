@@ -8,6 +8,7 @@ import { getProductById } from "../../../firebase/products/getProductById.js";
 import { useToast, Toast } from "../../../hooks/useToast.jsx";
 import VideoSlider from "./VideoSlider.jsx";
 import QuickAddToCart from "../card/quickAddToCart.jsx";
+import { createPortal } from "react-dom";
 
 const capitalizeWords = (str) => {
   return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
@@ -897,53 +898,55 @@ const DetailCard = () => {
         </div>
       </div>
 
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex flex-col items-center justify-center z-50"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div className="relative w-full h-full overflow-hidden">
-            <div
-              className="flex transition-transform ease-out duration-500 h-full"
-              style={{
-                transform: `translateX(-${modalImageIndex * 100}%)`,
-              }}
-            >
-              {productImages.map((image, index) => (
-                <div
-                  className="w-full h-full flex-shrink-0 flex items-center justify-center p-8"
-                  key={index}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} - imagen ${index + 1}`}
-                    className="max-w-full max-h-full rounded-3xl object-contain cursor-pointer"
-                    onClick={handleImageTap}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {productImages.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                {productImages.map((_, index) => (
+      {isModalOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-50 bg-black bg-opacity-30 backdrop-blur-sm flex flex-col items-center justify-center"
+            onClick={() => setIsModalOpen(false)}
+          >
+            <div className="relative w-full h-full overflow-hidden">
+              <div
+                className="flex transition-transform ease-out duration-500 h-full"
+                style={{
+                  transform: `translateX(-${modalImageIndex * 100}%)`,
+                }}
+              >
+                {productImages.map((image, index) => (
                   <div
+                    className="w-full h-full flex-shrink-0 flex items-center justify-center p-8"
                     key={index}
-                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                      modalImageIndex === index
-                        ? "bg-gray-50 opacity-100"
-                        : "bg-gray-50 opacity-30"
-                    }`}
-                  />
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} - imagen ${index + 1}`}
+                      className="max-w-full max-h-full rounded-3xl object-contain cursor-pointer"
+                      onClick={handleImageTap}
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                    />
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
-      )}
+
+              {productImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  {productImages.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        modalImageIndex === index
+                          ? "bg-gray-50 opacity-100"
+                          : "bg-gray-50 opacity-30"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body // ← AGREGAR ESTO
+        )}
     </div>
   );
 };

@@ -20,7 +20,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   };
 
   return (
-    <div className="fixed z-[60] bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
+    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
       <input
         type="tel"
         value={phoneNumber}
