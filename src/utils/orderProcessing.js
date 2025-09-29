@@ -1,6 +1,13 @@
 // utils/orderProcessing.js - Con descuentos desde Firebase
 import { db } from "../firebase/config";
-import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 import { StockManager } from "./stockManager";
 
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -133,16 +140,14 @@ const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
     );
 
     await updateDoc(discountRef, {
-      [`usage.usageTracking.${orderId}`]: new Date().toISOString(),
+      "usage.usageTracking": arrayUnion(orderId), // ← SOLUCIÓN
     });
 
     console.log(`✅ Uso de descuento registrado para orden ${orderId}`);
   } catch (error) {
     console.error("Error registrando uso de descuento:", error);
-    // No lanzar error, el pedido ya se creó exitosamente
   }
 };
-
 export const handlePOSSubmit = async (
   formData,
   cartItems,

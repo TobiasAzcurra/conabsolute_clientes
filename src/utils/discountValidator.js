@@ -248,9 +248,7 @@ export const validateAndCalculateDiscount = async (
   }
 
   // 7. Verificar usos máximos
-  const currentUses = Object.keys(
-    discountData.usage?.usageTracking || {}
-  ).length;
+  const currentUses = discountData.usage?.usageTracking?.length || 0;
   const maxUses = discountData.usage?.maxUses;
 
   if (maxUses && currentUses >= maxUses) {
