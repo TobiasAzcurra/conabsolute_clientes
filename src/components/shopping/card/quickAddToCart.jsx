@@ -123,6 +123,18 @@ const QuickAddToCart = ({
   };
 
   const startAddingProcess = async () => {
+    // NUEVO: Validar que haya variante seleccionada si el producto tiene variantes
+    const requiresVariant = product.variants && product.variants.length > 0;
+    const hasVariantSelected =
+      product.selectedVariant !== null && product.selectedVariant !== undefined;
+
+    if (requiresVariant && !hasVariantSelected) {
+      console.warn(
+        "⚠️ No se puede agregar al carrito sin seleccionar variante"
+      );
+      return;
+    }
+
     if (disabled) return;
 
     setIsEditing(true);

@@ -1,7 +1,6 @@
 // components/shopping/detail/DetailCard.js - MIGRADO
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useCart } from "../../../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
 import { useClient } from "../../../contexts/ClientContext.jsx";
 import currencyFormat from "../../../helpers/currencyFormat.js";
 import { getProductById } from "../../../firebase/products/getProductById.js";
@@ -25,10 +24,6 @@ const DetailCard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ← CAMBIO: Reemplazar Redux con Context
-  // OLD: const cart = useSelector((state) => state.cartState.cart);
-  const { cart } = useCart(); // ← NUEVO
-
   const { toasts, addToast, removeToast } = useToast();
 
   console.log("DetailCard params:", { category, id });
@@ -39,10 +34,6 @@ const DetailCard = () => {
   const [updatedProduct, setUpdatedProduct] = useState(null);
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [lastStockUpdate, setLastStockUpdate] = useState(null);
-  const [altaDemanda, setAltaDemanda] = useState(null);
-  const [itemsOut, setItemsOut] = useState({});
-  const [disable, setDisable] = useState(false);
-  const [quantity, setQuantity] = useState(1);
   const prevImagesRef = useRef([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -295,25 +286,6 @@ const DetailCard = () => {
   const basePrice = product.price || 0;
   const variantPrice = selectedVariant?.price || 0;
   const totalPrice = basePrice + variantPrice;
-
-  const variantNames = useMemo(() => {
-    return Object.values(selectedVariants)
-      .filter(Boolean)
-      .map((v) => capitalizeWords(v))
-      .join(" ");
-  }, [selectedVariants]);
-
-  const combinedName = useMemo(() => {
-    return variantNames ? `${product.name} ${variantNames}` : product.name;
-  }, [product?.name, variantNames]);
-
-  const firstVariantWithImage = useMemo(() => {
-    return product.variants?.find(
-      (v) =>
-        selectedVariants[v.linkedTo?.toLowerCase()] === v.name?.toLowerCase() &&
-        v.productImage?.length > 0
-    );
-  }, [product.variants, selectedVariants]);
 
   // ← MEJORA: Crear productToSend compatible con nuevo formato del carrito
   const productToSend = useMemo(() => {
