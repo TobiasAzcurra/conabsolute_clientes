@@ -184,7 +184,7 @@ const Pedido = () => {
     const totalSteps = 4;
 
     return (
-      <div className="w-full bg-gray-300 p-0.5 rounded-full flex gap-1 mb-4">
+      <div className="w-full bg-gray-300 p-0.5 rounded-full flex gap-1 mb-2">
         {Array.from({ length: totalSteps }).map((_, index) => (
           <div
             key={index}
