@@ -517,23 +517,97 @@ const DetailCard = () => {
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
               {productImages.length > 1 &&
-                productImages.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
-                      selectedImageIndex === index
-                        ? "border-white opacity-100 shadow-lg"
-                        : "border-white opacity-70 hover:opacity-90"
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`${product.name} - imagen ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
+                (() => {
+                  const totalImages = productImages.length;
+                  const maxVisible = 5;
+
+                  // Si hay 5 o menos, mostrar todas
+                  if (totalImages <= maxVisible) {
+                    return productImages.map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                          selectedImageIndex === index
+                            ? "border-white opacity-100 shadow-lg"
+                            : "border-white opacity-70 hover:opacity-90"
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${product.name} - imagen ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ));
+                  }
+
+                  // Si hay más de 5, mostrar las cercanas a la actual
+                  const halfVisible = Math.floor(maxVisible / 2);
+                  let startIndex = Math.max(
+                    0,
+                    selectedImageIndex - halfVisible
+                  );
+                  let endIndex = Math.min(totalImages, startIndex + maxVisible);
+
+                  // Ajustar si estamos cerca del final
+                  if (endIndex === totalImages) {
+                    startIndex = Math.max(0, totalImages - maxVisible);
+                  }
+
+                  const visibleImages = [];
+
+                  // Indicador de "hay más a la izquierda"
+                  if (startIndex > 0) {
+                    visibleImages.push(
+                      <div
+                        key="more-left"
+                        className=" flex items-center justify-center font-coolvetica mr-2  "
+                      >
+                        <span className="text-white text-xs font-medium">
+                          +{startIndex}
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  // Miniaturas visibles
+                  for (let i = startIndex; i < endIndex; i++) {
+                    visibleImages.push(
+                      <button
+                        key={i}
+                        onClick={() => setSelectedImageIndex(i)}
+                        className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                          selectedImageIndex === i
+                            ? "border-white opacity-100 shadow-lg scale-110"
+                            : "border-white opacity-70 hover:opacity-90"
+                        }`}
+                      >
+                        <img
+                          src={productImages[i]}
+                          alt={`${product.name} - imagen ${i + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    );
+                  }
+
+                  // Indicador de "hay más a la derecha"
+                  if (endIndex < totalImages) {
+                    visibleImages.push(
+                      <div
+                        key="more-right"
+                        className=" flex items-center ml-2 justify-center font-coolvetica  "
+                      >
+                        <span className="text-white text-xs font-medium">
+                          +{totalImages - endIndex}
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return visibleImages;
+                })()}
             </div>
           </div>
 
