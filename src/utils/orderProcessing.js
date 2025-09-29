@@ -1,4 +1,4 @@
-// utils/orderProcessing.js - Con descuentos desde Firebase
+// utils/orderProcessing.js - Versión final limpia
 import { db } from "../firebase/config";
 import {
   collection,
@@ -126,7 +126,6 @@ export const computeItemFinancials = (item, unitCostAvg) => {
   return { unitCost, totalCost, unitMargin, totalMargin, totalPrice };
 };
 
-// Registrar uso del código de descuento en Firebase
 const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
   try {
     const discountRef = doc(
@@ -140,7 +139,7 @@ const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
     );
 
     await updateDoc(discountRef, {
-      "usage.usageTracking": arrayUnion(orderId), // ← SOLUCIÓN
+      "usage.usageTracking": arrayUnion(orderId),
     });
 
     console.log(`✅ Uso de descuento registrado para orden ${orderId}`);
@@ -148,6 +147,7 @@ const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
     console.error("Error registrando uso de descuento:", error);
   }
 };
+
 export const handlePOSSubmit = async (
   formData,
   cartItems,
@@ -155,19 +155,17 @@ export const handlePOSSubmit = async (
   clientData
 ) => {
   try {
-    console.log("🚀 Procesando pedido con nuevo schema POS");
+    console.log("🚀 Procesando pedido con schema POS");
 
     const now = new Date().toISOString();
     const orderId = generateUUID();
 
-    // 1. Consumir stock y obtener traces
     console.log("📦 Consumiendo stock...");
     const traces = await consumeStockForOrderAndReturnTraces(
       cartItems,
       enterpriseData
     );
 
-    // 2. Construir items con financeSummary y stockSummary
     const itemsForOrder = cartItems.map((item) => {
       const trace = traces.find((t) => t.itemId === item.id);
       const financials = computeItemFinancials(item, trace?.unitCostAvg || 0);
@@ -198,7 +196,6 @@ export const handlePOSSubmit = async (
       };
     });
 
-    // 3. Calcular subtotal
     const subtotal = round2(
       itemsForOrder.reduce(
         (sum, item) => sum + (item.financeSummary?.totalPrice || 0),
@@ -206,15 +203,12 @@ export const handlePOSSubmit = async (
       )
     );
 
-    // 4. Procesar descuento desde appliedDiscount (validado previamente)
     let descuento = 0;
     let discountArray = [];
-    let discountMetadata = null; // NUEVO: para metadata adicional
 
     if (formData.appliedDiscount && formData.appliedDiscount.isValid) {
       descuento = round2(formData.appliedDiscount.discount);
 
-      // Array con schema correcto
       discountArray.push({
         type: "coupon",
         reason: formData.appliedDiscount.discountData.code,
@@ -222,19 +216,12 @@ export const handlePOSSubmit = async (
         timestamp: now,
       });
 
-      // Metadata adicional (fuera del array)
-      discountMetadata = {
-        discountId: formData.appliedDiscount.discountId,
-        code: formData.appliedDiscount.discountData.code,
-      };
-
       console.log("🎫 Descuento aplicado:", {
         code: formData.appliedDiscount.discountData.code,
         value: descuento,
       });
     }
 
-    // 5. Calcular envío
     const shippingCost =
       formData.deliveryMethod === "delivery"
         ? round2(parseFloat(formData.shipping) || 0)
@@ -242,7 +229,6 @@ export const handlePOSSubmit = async (
 
     const envioExpress = round2(parseFloat(formData.envioExpress) || 0);
 
-    // 6. Totales finales
     const totalAfterDiscounts = round2(subtotal - descuento);
     const total = round2(totalAfterDiscounts + shippingCost + envioExpress);
 
@@ -256,7 +242,6 @@ export const handlePOSSubmit = async (
     const finalProfitMarginPercentage =
       totalAfterDiscounts > 0 ? round2(grossMargin / totalAfterDiscounts) : 0;
 
-    // 7. Construir orderData con schema POS
     const orderData = {
       status: "Confirmed",
       statusNote: "",
@@ -312,7 +297,6 @@ export const handlePOSSubmit = async (
       },
     };
 
-    // 8. Guardar en Firebase
     const pedidoRef = doc(
       db,
       "absoluteClientes",
@@ -337,7 +321,6 @@ export const handlePOSSubmit = async (
       console.log("🎫 Descuento aplicado:", descuento);
     }
 
-    // 9. Registrar uso del código de descuento
     if (formData.appliedDiscount?.discountId) {
       await registerDiscountUsage(
         formData.appliedDiscount.discountId,

@@ -33,7 +33,6 @@ const AddressInputs = ({
     <div className="w-full items-center rounded-2xl bg-gray-300 transition-all duration-300 overflow-hidden">
       {values.deliveryMethod === "delivery" && (
         <>
-          {/* Mapa y dirección */}
           <MapDirection
             setUrl={setUrl}
             setValidarUbi={setValidarUbi}
@@ -42,7 +41,6 @@ const AddressInputs = ({
           />
           <ErrorMessage name="address" component={AppleErrorMessage} />
 
-          {/* Campo referencias */}
           <div className="flex flex-row gap-2 pl-4 h-10 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -63,7 +61,6 @@ const AddressInputs = ({
         </>
       )}
 
-      {/* Aclaraciones */}
       <div className="flex flex-row justify-between px-4 h-auto items-start ">
         <div className="flex flex-row w-full items-center gap-2">
           <svg
@@ -85,7 +82,6 @@ const AddressInputs = ({
         </div>
       </div>
 
-      {/* Teléfono */}
       <div className="flex flex-col justify-between h-auto items-start ">
         <div className="flex flex-row items-center px-4 gap-2 w-full">
           <svg
@@ -118,7 +114,7 @@ const AddressInputs = ({
       </div>
 
       {/* Cupón de descuento */}
-      <div className="flex flex-col justify-between h-auto items-start ">
+      <div className="flex flex-col justify-between h-auto items-start">
         <div className="flex flex-row items-center px-4 gap-2 w-full relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -142,14 +138,12 @@ const AddressInputs = ({
             className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full pr-8"
           />
 
-          {/* Spinner */}
           {discountHook.isValidating && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
             </div>
           )}
 
-          {/* Tilde verde */}
           {showCheckmark && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <svg
@@ -167,12 +161,11 @@ const AddressInputs = ({
           )}
         </div>
 
+        {/* ✅ USAR AppleErrorMessage en lugar de <p> */}
         {showError && (
-          <div className="w-full px-4 pb-2">
-            <p className="text-xs text-red-600 font-medium">
-              {discountHook.validation.message}
-            </p>
-          </div>
+          <AppleErrorMessage>
+            {discountHook.validation.message}
+          </AppleErrorMessage>
         )}
       </div>
     </div>
