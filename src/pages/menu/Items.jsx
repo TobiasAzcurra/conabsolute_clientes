@@ -11,6 +11,7 @@ const capitalizeWords = (str) => {
 const Items = ({
   img,
   name,
+  categoryId,
   currentOrder,
   isPedidoComponente = false,
   handleItemClick,
@@ -24,7 +25,9 @@ const Items = ({
   const navigate = useNavigate();
 
   const isCarrito = location.pathname.includes("/carrito");
-  const isSelected = selectedItemParam === name;
+  // Usar categoryId si está disponible, sino usar name (para mantener compatibilidad)
+  const itemId = categoryId || name;
+  const isSelected = selectedItemParam === itemId;
 
   const className = `flex flex-col items-center shadow-lg shadow-gray-200 rounded-2xl bg-gray-50   transition duration-300 text-black ${
     isCarrito || isPedidoComponente
@@ -51,13 +54,13 @@ const Items = ({
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            strokeWidth="1.5"
             stroke="currentColor"
             className="h-6 text-gray-400"
           >
             <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
             />
           </svg>
@@ -82,7 +85,7 @@ const Items = ({
           if (isCarrito) {
             const productCategory = selectedItem?.category || "general";
             const productId =
-              selectedItem?.id || selectedItem?.productId || name;
+              selectedItem?.id || selectedItem?.productId || itemId;
             const productUrl = `/${slugEmpresa}/${slugSucursal}/menu/${productCategory}/${productId}`;
             navigate(productUrl);
           } else {
@@ -100,7 +103,7 @@ const Items = ({
       </div>
     );
   } else {
-    const category = selectedItem?.category || name;
+    const category = selectedItem?.category || itemId;
     const redirectUrl = `/${slugEmpresa}/${slugSucursal}/menu/${category}`;
     return (
       <Link className={className} to={redirectUrl}>

@@ -114,7 +114,8 @@ const NavMenu = () => {
           <Items
             key={cat.id}
             img={cat.image || cat.img || "/menu/defaultPortada.jpeg"}
-            name={cat.id}
+            categoryId={cat.id}
+            name={cat.name || cat.id}
           />
         ))}
       </nav>
