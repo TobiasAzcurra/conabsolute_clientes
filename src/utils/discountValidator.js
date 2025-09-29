@@ -295,7 +295,7 @@ export const validateAndCalculateDiscount = async (
       console.log(`  Limitado a máximo: $${config.maxDiscountAmount}`);
       discount = config.maxDiscountAmount;
     }
-  } else if (config.type === "fixed") {
+  } else if (config.type === "fixed_amount") {
     discount = round2(config.value);
 
     if (discount > eligibleSubtotal) {
