@@ -807,7 +807,27 @@ const DetailCard = () => {
                                   style={{ width: "100%", height: "100%" }}
                                 />
                               ) : (
-                                capitalizeWords(value)
+                                <div className="flex items-center gap-1">
+                                  <span>{capitalizeWords(value)}</span>
+                                  {!product.infiniteStock &&
+                                    variantForValue?.stockSummary
+                                      ?.totalStock !== undefined && (
+                                      <span
+                                        className={`text-[10px] font-light ${
+                                          hasStock
+                                            ? "text-gray-500"
+                                            : "text-red-400"
+                                        }`}
+                                      >
+                                        (
+                                        {
+                                          variantForValue.stockSummary
+                                            .totalStock
+                                        }
+                                        u.)
+                                      </span>
+                                    )}
+                                </div>
                               )}
                             </button>
                           );

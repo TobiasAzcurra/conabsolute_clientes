@@ -1,7 +1,7 @@
-// components/shopping/card/quickAddToCart.jsx - MIGRADO
+// components/shopping/card/quickAddToCart.jsx - Con límite de stock
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useCart, createCartItem } from "../../../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
+import { useCart, createCartItem } from "../../../contexts/CartContext";
 import { ReadMateriales, ReadData } from "../../../firebase/orders/uploadOrder";
 import { addProductToOrder } from "../../../firebase/orders/addProductToOrder";
 import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
@@ -19,22 +19,16 @@ const QuickAddToCart = ({
   disabled = false,
   animateFrom = "right",
 }) => {
-  // ← CAMBIO: Reemplazar Redux con Context
-  // OLD: const dispatch = useDispatch();
-  // OLD: const { cart } = useSelector((state) => state.cartState);
-  const { cart, addToCart, updateQuantity, removeFromCart } = useCart(); // ← NUEVO
+  const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
 
-  // ← CAMBIO: Buscar item en carrito usando nuevo formato
   const cartItem = !isOrderItem
     ? cart.find((item) => {
-        // Buscar por productId y variantId si están disponibles
         if (product.id && product.variantId) {
           return (
             item.productId === product.id &&
             item.variantId === product.variantId
           );
         }
-        // Fallback: buscar por nombre y categoría (compatibilidad)
         return item.name === product.name && item.category === product.category;
       })
     : null;
@@ -43,9 +37,15 @@ const QuickAddToCart = ({
     ? initialOrderQuantity || product.quantity
     : cartItem?.quantity || 0;
 
+  // NUEVO: Calcular stock máximo
+  const maxStock = product.infiniteStock
+    ? Infinity
+    : product.availableStock || 0;
+
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showStockWarning, setShowStockWarning] = useState(false);
   const quantityRef = useRef(quantity);
   const pendingUpdateRef = useRef(null);
 
@@ -61,28 +61,32 @@ const QuickAddToCart = ({
 
   const handleQuantityChange = (delta) => {
     setQuantity((prev) => {
-      const updated = prev + delta;
-      quantityRef.current = updated;
-      return updated;
+      const newQuantity = prev + delta;
+
+      // NUEVO: Validar límite de stock
+      if (newQuantity > maxStock) {
+        setShowStockWarning(true);
+        setTimeout(() => setShowStockWarning(false), 2000);
+        quantityRef.current = maxStock;
+        return maxStock;
+      }
+
+      quantityRef.current = newQuantity;
+      return newQuantity;
     });
   };
 
-  // ← CAMBIO: Nueva función para actualizar carrito usando Context
   const handleCartUpdate = () => {
     const qty = quantityRef.current;
 
     if (qty === 0 && cartItem) {
-      // Remover item del carrito
       removeFromCart(cartItem.id);
     } else if (qty >= 1) {
       if (cartItem) {
-        // Actualizar cantidad existente
         updateQuantity(cartItem.id, qty);
       } else {
-        // Agregar nuevo item al carrito
         const newCartItem = createCartItem(
           {
-            // Usar datos del product para crear el item
             id: product.id || product.productId,
             name: product.name,
             price: product.basePrice || product.price || 0,
@@ -91,17 +95,15 @@ const QuickAddToCart = ({
             infiniteStock: product.infiniteStock || false,
             img: product.img,
           },
-          product.selectedVariant || (product.variants && product.variants[0]), // Variante seleccionada
+          product.selectedVariant || (product.variants && product.variants[0]),
           qty
         );
 
-        // Override del precio final si se proporciona calculatedPrice
         if (calculatedPrice !== null) {
           newCartItem.finalPrice = calculatedPrice;
-          newCartItem.price = calculatedPrice; // Para compatibilidad
+          newCartItem.price = calculatedPrice;
         }
 
-        // Agregar información adicional del product
         newCartItem.variantPrice = product.variantPrice || 0;
         newCartItem.stockReference = product.stockReference || "";
         newCartItem.availableStock = product.availableStock || 0;
@@ -112,6 +114,7 @@ const QuickAddToCart = ({
           quantity: newCartItem.quantity,
           finalPrice: newCartItem.finalPrice,
           isInfiniteStock: newCartItem.isInfiniteStock,
+          availableStock: newCartItem.availableStock,
         });
 
         addToCart(newCartItem);
@@ -157,7 +160,6 @@ const QuickAddToCart = ({
             );
           }
         } else if (!isOrderItem) {
-          // ← CAMBIO: Usar nueva función en lugar de dispatch
           handleCartUpdate();
         }
         if (onOrderQuantityChange) onOrderQuantityChange(quantityRef.current);
@@ -171,84 +173,111 @@ const QuickAddToCart = ({
   };
 
   return (
-    <div
-      className={`relative flex items-center w-[80px]  h-[35px] pt-0.5  text-center cursor-pointer `}
-    >
-      <AnimatePresence>
-        {isEditing ? (
-          <motion.div
-            key="edit-qty"
-            initial={{ opacity: 0, scaleX: 0.33 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            exit={{ scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.3 }}
-            className={`absolute z-50 overflow-hidden rounded-full bg-gray-300 flex items-center ${
-              displayAsFullButton
-                ? ""
-                : animateFrom === "right"
-                ? "right-0"
-                : "left-0"
-            }`}
-            style={{
-              transformOrigin: displayAsFullButton ? "center" : animateFrom,
-            }}
-          >
-            <div className="flex w-fit h-10">
-              <div
-                className="text-blue-700 font-coolvetica font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
-                onClick={() => handleQuantityChange(-1)}
-              >
-                -
-              </div>
-              <div className="font-coolvetica font-medium text-blue-700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="h-6 flex-shrink-0"
+    <div className="relative">
+      <div
+        className={`relative flex items-center w-[80px] h-[35px] pt-0.5 text-center cursor-pointer`}
+      >
+        <AnimatePresence>
+          {isEditing ? (
+            <motion.div
+              key="edit-qty"
+              initial={{ opacity: 0, scaleX: 0.33 }}
+              animate={{ opacity: 1, scaleX: 1 }}
+              exit={{ scaleX: 0.33, opacity: 0, transition: { duration: 0.2 } }}
+              transition={{ duration: 0.3 }}
+              className={`absolute z-50 overflow-hidden rounded-full bg-gray-300 flex items-center ${
+                displayAsFullButton
+                  ? ""
+                  : animateFrom === "right"
+                  ? "right-0"
+                  : "left-0"
+              }`}
+              style={{
+                transformOrigin: displayAsFullButton ? "center" : animateFrom,
+              }}
+            >
+              <div className="flex w-fit h-10">
+                <div
+                  className="text-blue-700 font-coolvetica font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
+                  onClick={() => handleQuantityChange(-1)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                  />
-                </svg>
-                {quantity}
+                  -
+                </div>
+                <div className="font-coolvetica font-medium text-blue-700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="h-6 flex-shrink-0"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                    />
+                  </svg>
+                  {quantity}
+                </div>
+                <div
+                  className={`font-coolvetica font-medium flex justify-center text-center items-center w-[35px] h-10 ${
+                    quantity >= maxStock
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-700 cursor-pointer"
+                  }`}
+                  onClick={() => quantity < maxStock && handleQuantityChange(1)}
+                >
+                  +
+                </div>
               </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+        {!isEditing && (
+          <>
+            {displayAsFullButton && quantity === 0 && !isOrderItem ? (
+              <div className="absolute z-[60]">
+                <button
+                  disabled={disabled}
+                  className={`bg-blue-700 text-sm flex flex-row items-center gap-2 font-coolvetica text-gray-50 rounded-full h-10 px-4 font-medium ${
+                    disabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  onClick={!disabled ? startAddingProcess : undefined}
+                >
+                  Agregar
+                </button>
+              </div>
+            ) : displayAsFullButton && quantity > 0 && !isOrderItem ? (
+              <div className="absolute z-[60]">
+                <button
+                  disabled={disabled}
+                  className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-coolvetica text-blue-700 rounded-full h-10 px-4 font-medium ${
+                    disabled ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  onClick={!disabled ? startAddingProcess : undefined}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="h-6 text-blue-700"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                    />
+                  </svg>
+                  {quantity}
+                </button>
+              </div>
+            ) : (
               <div
-                className="text-blue-700 font-coolvetica font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
-                onClick={() => handleQuantityChange(1)}
-              >
-                +
-              </div>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-      {!isEditing && (
-        <>
-          {displayAsFullButton && quantity === 0 && !isOrderItem ? (
-            <div className="absolute z-[60]">
-              <button
-                disabled={disabled}
-                className={`bg-blue-700 text-sm flex flex-row items-center gap-2 font-coolvetica  text-gray-50 rounded-full h-10 px-4 font-medium ${
-                  disabled ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={!disabled ? startAddingProcess : undefined}
-              >
-                Agregar
-              </button>
-            </div>
-          ) : displayAsFullButton && quantity > 0 && !isOrderItem ? (
-            <div className="absolute z-[60]">
-              <button
-                disabled={disabled}
-                className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-coolvetica  text-blue-700 rounded-full h-10 px-4 font-medium ${
-                  disabled ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                onClick={!disabled ? startAddingProcess : undefined}
+                className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-coolvetica text-blue-700 rounded-full h-10 px-4 font-medium`}
+                onClick={startAddingProcess}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -264,33 +293,12 @@ const QuickAddToCart = ({
                     d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
                   />
                 </svg>
-                {quantity}
-              </button>
-            </div>
-          ) : (
-            <div
-              className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-coolvetica  text-blue-700 rounded-full h-10 px-4 font-medium`}
-              onClick={startAddingProcess}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="h-6 text-blue-700"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                />
-              </svg>
-              {quantity > 0 ? quantity : "+"}
-            </div>
-          )}
-        </>
-      )}
+                {quantity > 0 ? quantity : "+"}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
