@@ -1,10 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useRef, useState, useEffect } from "react";
+import { useParams, useLocation } from "react-router-dom";
 import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints";
 // import UpdatedPedidoSection from './UpdatedPedidoSection';
 import AppleModal from "../../components/AppleModal";
-import EditAddressModal from "./EditAddressModal";
 import { doc, runTransaction, getFirestore } from "firebase/firestore";
 import { listenOrderById } from "../../firebase/orders/listenOrderById";
 import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
@@ -15,18 +14,14 @@ const Pedido = () => {
   const { empresaId, sucursalId, clientConfig, clientData, clientAssets } =
     useClient();
   const [order, setOrder] = useState(null);
-  const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hasBeenRated, setHasBeenRated] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const navigate = useNavigate();
   const { orderId } = useParams();
   const location = useLocation();
   const [pedidosPagados, setPedidosPagados] = useState([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isEditAddressModalOpen, setIsEditAddressModalOpen] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState(null);
-  const [pedidosNoPagados, setPedidosNoPagados] = useState([]);
   const [showFullAddress, setShowFullAddress] = useState(false);
   const [isEditTimeModalOpen, setIsEditTimeModalOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -36,17 +31,14 @@ const Pedido = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isEditPaymentMethodModalOpen, setIsEditPaymentMethodModalOpen] =
-    useState(false);
+
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [isUpdatingTime, setIsUpdatingTime] = useState(false);
   const [isRatingLoading, setIsRatingLoading] = useState(false);
-  const [orderRatings, setOrderRatings] = useState({});
   const [selectedOrderProducts, setSelectedOrderProducts] = useState([]);
   const [additionalProducts, setAdditionalProducts] = useState([]);
   const containerRef = useRef(null);
-  const [modalAdditionalProducts, setModalAdditionalProducts] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -315,11 +307,6 @@ const Pedido = () => {
     window.open(whatsappUrl, "_blank");
   };
 
-  const handleEditAddress = (orderId) => {
-    setEditingOrderId(orderId);
-    setIsEditAddressModalOpen(true);
-  };
-
   const handleAddressUpdateSuccess = (newAddress) => {
     // Opcional: Puedes mostrar un mensaje de éxito aquí
     setMessage("¡Dirección actualizada exitosamente!");
@@ -397,12 +384,6 @@ const Pedido = () => {
       window.removeEventListener("resize", updateSize);
     };
   }, []);
-
-  const handleEditTime = (orderId) => {
-    console.log("[Pedido] handleEditTime:", orderId);
-    setEditingOrderId(orderId);
-    setIsEditTimeModalOpen(true);
-  };
 
   const handleTimeUpdateSuccess = (newTime) => {
     console.log("[Pedido] handleTimeUpdateSuccess:", newTime);
