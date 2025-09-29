@@ -1,6 +1,7 @@
-// components/shopping/detail/DetailCard.js - MIGRADO
+// components/shopping/detail/DetailCard.js - Con validación de variante requerida
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useCart } from "../../../contexts/CartContext";
 import { useClient } from "../../../contexts/ClientContext.jsx";
 import currencyFormat from "../../../helpers/currencyFormat.js";
 import { getProductById } from "../../../firebase/products/getProductById.js";
@@ -23,10 +24,8 @@ const DetailCard = () => {
   } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { cart } = useCart();
   const { toasts, addToast, removeToast } = useToast();
-
-  console.log("DetailCard params:", { category, id });
 
   const [selectedVariants, setSelectedVariants] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -41,32 +40,18 @@ const DetailCard = () => {
   const touchEndXRef = useRef(0);
   const lastTouchTimeRef = useRef(0);
 
-  // Cache de 30 segundos para el stock
   const STOCK_CACHE_DURATION = 30 * 1000;
 
   const reels = clientAssets?.reels || [];
   const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
-
-  // Definir list fuera del useMemo para que sea accesible en los console.log
   const list = productsByCategory?.[category] || [];
 
   const product = useMemo(() => {
-    // Si tenemos producto actualizado, usarlo; sino usar el de cache
     if (updatedProduct) return updatedProduct;
     if (location?.state?.product) return location.state.product;
     return list.find((p) => p.id === id);
   }, [updatedProduct, location?.state, list, id]);
 
-  console.log("Looking for product in category:", category, "with id:", id);
-  console.log(
-    "Available products:",
-    list.map((p) => ({ id: p.id, name: p.name }))
-  );
-
-  const foundProduct = list.find((p) => p.id === id);
-  console.log("Found product:", foundProduct ? foundProduct.name : "NOT FOUND");
-
-  // Efecto para actualizar el stock del producto al entrar al detalle
   useEffect(() => {
     if (!empresaId || !sucursalId || !id) return;
 
@@ -287,53 +272,38 @@ const DetailCard = () => {
   const variantPrice = selectedVariant?.price || 0;
   const totalPrice = basePrice + variantPrice;
 
-  // ← MEJORA: Crear productToSend compatible con nuevo formato del carrito
   const productToSend = useMemo(() => {
     return {
-      // Datos básicos del producto
       id: product.id,
-
-      // ✅ CORRECCIÓN: Siempre usar el nombre del producto base
-      name: product.name, // ← CORREGIDO: No usar finalName
+      name: product.name,
       category: product.category,
       price: basePrice,
-
-      // Datos de la variante seleccionada
       selectedVariant: selectedVariant,
       variantId: selectedVariant?.id || "default",
       variantName: selectedVariant?.name || "default",
       variantPrice: variantPrice,
-
-      // Precio final calculado
       basePrice: basePrice,
       finalPrice: totalPrice,
-
-      // Imágenes
       img:
         selectedVariant?.productImage?.[0] || product.img?.[0] || product.img,
-
-      // Stock y disponibilidad
       infiniteStock: product.infiniteStock || false,
       availableStock: selectedVariant?.stockSummary?.totalStock || 0,
       stockReference: selectedVariant?.stockReference || "",
-
-      // Para compatibilidad con formato anterior
       variants: selectedVariant ? [selectedVariant] : [],
     };
-  }, [
-    product,
-    selectedVariant,
-    totalPrice,
-    basePrice,
-    variantPrice,
-    // ← ELIMINAR finalName de las dependencias
-  ]);
+  }, [product, selectedVariant, totalPrice, basePrice, variantPrice]);
 
   const outOfStock = product.infiniteStock
     ? false
     : selectedVariant &&
       selectedVariant.stockSummary &&
       selectedVariant.stockSummary.totalStock === 0;
+
+  const shouldDisable = useMemo(() => {
+    if (outOfStock) return true;
+    if (customization && !selectedVariant) return true;
+    return false;
+  }, [outOfStock, customization, selectedVariant]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -529,9 +499,7 @@ const DetailCard = () => {
 
   const productVideos = useMemo(() => {
     if (product?.vid?.length) return product.vid;
-
     if (selectedVariant?.videos?.length) return selectedVariant.videos;
-
     return reels;
   }, [product?.vid, selectedVariant?.videos, reels]);
 
@@ -539,7 +507,7 @@ const DetailCard = () => {
     <div className="overflow-x-hidden">
       <Toast toasts={toasts} onRemove={removeToast} />
       <div className="flex flex-col">
-        <div className="flex flex-col justify-items-center items-center ">
+        <div className="flex flex-col justify-items-center items-center">
           <div className="w-full h-[200px] flex items-center justify-center relative">
             <img
               className="w-full h-[250px] object-cover object-center cursor-zoom-in"
@@ -569,9 +537,8 @@ const DetailCard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl ">
-            {/* header */}
-            <div className="flex flex-row px-4 pt-4 items-center justify-between ">
+          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl">
+            <div className="flex flex-row px-4 pt-4 items-center justify-between">
               <div className="flex flex-row gap-2 items-center">
                 <button onClick={handleGoBack}>
                   <svg
@@ -590,8 +557,7 @@ const DetailCard = () => {
                   </svg>
                 </button>
                 <h4 className="font-coolvetica font-bold text-xl text-gray-900 leading-tight">
-                  {capitalizeWords(product.name)}{" "}
-                  {/* ← Usar product.name directamente */}
+                  {capitalizeWords(product.name)}
                 </h4>
               </div>
 
@@ -709,10 +675,6 @@ const DetailCard = () => {
                             variantForValue?.stockSummary?.totalStock > 0;
 
                           const isClickable = hasStock;
-                          const isFirst = index === 0;
-                          const isLast = index === values.length - 1;
-                          const isOnly = values.length === 1;
-
                           const borderRadiusClass = "rounded-full";
 
                           const hasAttributeImage =
@@ -726,7 +688,7 @@ const DetailCard = () => {
                           let cursorStyle = "";
 
                           if (isSelected) {
-                            backgroundStyle = "bg-gray-300 ";
+                            backgroundStyle = "bg-gray-300";
                             textStyle = "text-gray-700";
                           } else if (!hasStock) {
                             borderStyle = "border-red-200 border-dashed";
@@ -820,11 +782,6 @@ const DetailCard = () => {
                         ? "bg-green-100 text-green-700 border border-green-300"
                         : "bg-gray-100 text-gray-400 border border-gray-200"
                     }`}
-                  aria-label={
-                    product.deliveryAvailable
-                      ? "Disponible para delivery"
-                      : "No disponible para delivery"
-                  }
                 >
                   {product.deliveryAvailable
                     ? "Delivery Disponible"
@@ -833,18 +790,18 @@ const DetailCard = () => {
               </div>
             )}
 
-            <div className="flex flex-col  w-full mt-6 px-4 ">
-              {/* ← CAMBIO: QuickAddToCart ahora recibirá productToSend mejorado */}
+            <div className="flex flex-col w-full mt-6 px-4">
               <QuickAddToCart
                 product={productToSend}
                 calculatedPrice={totalPrice}
                 displayAsFullButton={true}
-                disabled={outOfStock}
+                disabled={shouldDisable}
               />
-              <p className="text-xs  font-coolvetica pt-2 font-light text-gray-400">
+              <p className="text-xs font-coolvetica pt-2 font-light text-gray-400">
                 Por {currencyFormat(totalPrice)}
               </p>
             </div>
+
             {product.deliveryDelay && (
               <p className="text-gray-500 text-xs font-light mt-3 px-4">
                 {(() => {
@@ -859,9 +816,11 @@ const DetailCard = () => {
                 })()}
               </p>
             )}
+
             <div className="mt-12">
               <VideoSlider reels={productVideos} />
             </div>
+
             {logo && (
               <img
                 src={logo}
@@ -872,6 +831,7 @@ const DetailCard = () => {
           </div>
         </div>
       </div>
+
       {isModalOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex flex-col items-center justify-center z-50"
@@ -892,7 +852,7 @@ const DetailCard = () => {
                   <img
                     src={image}
                     alt={`${product.name} - imagen ${index + 1}`}
-                    className="max-w-full max-h-full rounded-3xl  object-contain cursor-pointer"
+                    className="max-w-full max-h-full rounded-3xl object-contain cursor-pointer"
                     onClick={handleImageTap}
                     onTouchStart={handleTouchStart}
                     onTouchMove={handleTouchMove}
@@ -909,8 +869,8 @@ const DetailCard = () => {
                     key={index}
                     className={`w-2 h-2 rounded-full transition-all duration-200 ${
                       modalImageIndex === index
-                        ? "bg-gray-50  opacity-100"
-                        : "bg-gray-50  opacity-30"
+                        ? "bg-gray-50 opacity-100"
+                        : "bg-gray-50 opacity-30"
                     }`}
                   />
                 ))}
