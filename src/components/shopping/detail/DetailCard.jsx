@@ -504,10 +504,10 @@ const DetailCard = () => {
   }, [product?.vid, selectedVariant?.videos, reels]);
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden ">
       <Toast toasts={toasts} onRemove={removeToast} />
-      <div className="flex flex-col">
-        <div className="flex flex-col justify-items-center items-center">
+      <div className="flex flex-col ">
+        <div className="flex flex-col  justify-items-center items-center">
           <div className="w-full h-[200px] flex items-center justify-center relative">
             <img
               className="w-full h-[250px] object-cover object-center cursor-zoom-in"
@@ -537,7 +537,7 @@ const DetailCard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col bg-gray-50 z-50 rounded-t-3xl">
+          <div className="flex flex-col bg-gray-50 w-full overflow-hidden z-50 rounded-t-3xl">
             <div className="flex flex-row px-4 pt-4 items-center justify-between">
               <div className="flex flex-row gap-2 items-center">
                 <button onClick={handleGoBack}>
@@ -594,14 +594,14 @@ const DetailCard = () => {
             )}
 
             {customization && (
-              <div className="gap-2 w-full mt-8 flex flex-col justify-center px-4">
+              <div className="gap-2 w-full mt-8 flex flex-col justify-center ">
                 {Object.entries(variantStats).map(([key, values]) => (
                   <div key={key}>
-                    <h5 className="font-coolvetica font-light mb-2 text-xs w-full text-gray-900">
+                    <h5 className="font-coolvetica px-4 font-light mb-2 text-xs w-full text-gray-900">
                       {clientConfig?.labels?.[key] || capitalizeWords(key)}
                     </h5>
                     <div className="flex w-full">
-                      <div className="flex flex-row gap-1">
+                      <div className="flex flex-row gap-1 overflow-x-auto px-4 scrollbar-hide">
                         {values.map((value, index) => {
                           const isSelected = selectedVariants[key] === value;
 
@@ -711,19 +711,37 @@ const DetailCard = () => {
                                 isClickable && handleVariantSelect(key, value)
                               }
                               disabled={!isClickable}
-                              className={`px-4 h-10 font-coolvetica text-xs transition-all duration-200 border ${borderStyle} font-light ${borderRadiusClass} ${
-                                index > 0 ? "-ml-px" : ""
-                              } flex items-center justify-center ${backgroundStyle} ${textStyle} ${cursorStyle}`}
-                              style={
-                                hasAttributeImage
+                              className={`
+            ${hasAttributeImage ? "w-10" : "px-4"} 
+            h-10 
+            font-coolvetica 
+            flex-shrink-0 
+            text-xs 
+            transition-all 
+            duration-200 
+            border 
+            ${borderStyle} 
+            font-light 
+            ${borderRadiusClass} 
+            ${index > 0 ? "-ml-px" : ""} 
+            flex 
+            items-center 
+            justify-center 
+            ${backgroundStyle} 
+            ${textStyle} 
+            ${cursorStyle}
+          `}
+                              style={{
+                                scrollbarWidth: "none",
+                                msOverflowStyle: "none",
+                                ...(hasAttributeImage
                                   ? {
                                       padding: 0,
-                                      width: "100%",
+                                      // ❌ ELIMINAR: width: "100%",
                                       height: 40,
-                                      overflow: "hidden",
                                     }
-                                  : {}
-                              }
+                                  : {}),
+                              }}
                             >
                               {hasAttributeImage ? (
                                 <img
@@ -738,7 +756,6 @@ const DetailCard = () => {
                                       ? "opacity-40"
                                       : "opacity-50"
                                   }`}
-                                  style={{ width: "100%", height: "100%" }}
                                 />
                               ) : (
                                 <div className="flex items-center gap-1">
@@ -770,23 +787,6 @@ const DetailCard = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-
-            {typeof product.deliveryAvailable === "boolean" && (
-              <div className="pl-4 pr-4 mt-3 mb-1 flex items-center">
-                <span
-                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-coolvetica text-xs font-medium shadow-sm
-                    ${
-                      product.deliveryAvailable
-                        ? "bg-green-100 text-green-700 border border-green-300"
-                        : "bg-gray-100 text-gray-400 border border-gray-200"
-                    }`}
-                >
-                  {product.deliveryAvailable
-                    ? "Delivery Disponible"
-                    : "Delivery No disponible"}
-                </span>
               </div>
             )}
 
