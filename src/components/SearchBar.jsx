@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useClient } from "../contexts/ClientContext";
 
 const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   const { slugEmpresa, slugSucursal } = useClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (previousPhone && !phoneNumber) {
+      setPhoneNumber(previousPhone);
+    }
+  }, [previousPhone]);
 
   const handleSearch = () => {
     if (phoneNumber.trim().length < 8) return;
@@ -17,7 +23,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
     <div className="fixed z-[60] bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
       <input
         type="tel"
-        value={phoneNumber || previousPhone || ""}
+        value={phoneNumber}
         onChange={(e) => setPhoneNumber(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         placeholder="Busca tu pedido. Ej: 3585168275"
