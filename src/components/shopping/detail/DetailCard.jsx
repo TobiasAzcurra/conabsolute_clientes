@@ -193,6 +193,25 @@ const DetailCard = () => {
   }, [availableOptions]);
 
   useEffect(() => {
+    const hasUserSelections = Object.values(selectedVariants).some(
+      (value) => value !== null && value !== undefined && value !== ""
+    );
+
+    // Si no hay customización real (variantStats vacío), autoseleccionar la primera/default
+    if (!hasUserSelections && Object.keys(variantStats).length === 0) {
+      const defaultVariant =
+        product.variants?.find((v) => v.default) || product.variants?.[0];
+      setSelectedVariant(defaultVariant || null);
+      return;
+    }
+
+    // Si no hay selecciones pero SÍ hay customización, no seleccionar nada
+    if (!hasUserSelections) {
+      setSelectedVariant(null);
+      return;
+    }
+
+    // Si hay selecciones, buscar match
     const matched = product.variants.find((variant) => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return false;
@@ -207,42 +226,9 @@ const DetailCard = () => {
       });
     });
     setSelectedVariant(matched || null);
-  }, [selectedVariants, product.variants]);
+  }, [selectedVariants, product.variants, variantStats]);
 
-  useEffect(() => {
-    if (!product?.variants || Object.keys(selectedVariants).length > 0) return;
-
-    const initialSelection = {};
-
-    const defaultVariant = product.variants.find((v) => v.default);
-
-    if (
-      defaultVariant?.attributes &&
-      Object.keys(defaultVariant.attributes).length > 0 &&
-      defaultVariant.stockSummary?.totalStock > 0
-    ) {
-      Object.entries(defaultVariant.attributes).forEach(([key, value]) => {
-        initialSelection[key.toLowerCase()] = value.toLowerCase();
-      });
-    } else {
-      const firstAvailableVariant = product.variants.find(
-        (v) =>
-          v.attributes &&
-          Object.keys(v.attributes).length > 0 &&
-          v.stockSummary?.totalStock > 0
-      );
-
-      if (firstAvailableVariant?.attributes) {
-        Object.entries(firstAvailableVariant.attributes).forEach(
-          ([key, value]) => {
-            initialSelection[key.toLowerCase()] = value.toLowerCase();
-          }
-        );
-      }
-    }
-
-    setSelectedVariants(initialSelection);
-  }, [product?.variants]);
+  console.log("product:", product, "variantStats", variantStats);
 
   const productImages = useMemo(() => {
     const imgs = selectedVariant?.images?.length
@@ -300,10 +286,15 @@ const DetailCard = () => {
       selectedVariant.stockSummary.totalStock === 0;
 
   const shouldDisable = useMemo(() => {
-    if (outOfStock) return true;
-    if (customization && !selectedVariant) return true;
+    // 1. Si hay variantes, DEBE seleccionar una
+    const hasVariants = product?.variants?.length > 0;
+    if (hasVariants && !selectedVariant) return true;
+
+    // 2. Solo validar stock si NO es infinito
+    if (!product.infiniteStock && outOfStock) return true;
+
     return false;
-  }, [outOfStock, customization, selectedVariant]);
+  }, [product, selectedVariant, outOfStock]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -746,8 +737,8 @@ const DetailCard = () => {
                           );
 
                           const hasStock =
+                            product.infiniteStock ||
                             variantForValue?.stockSummary?.totalStock > 0;
-
                           const isClickable = hasStock;
                           const borderRadiusClass = "rounded-full";
 

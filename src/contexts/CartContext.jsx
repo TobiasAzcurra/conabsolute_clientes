@@ -121,7 +121,7 @@ export const CartProvider = ({ children }) => {
       category: item.category,
       name: item.name,
       variants: item.variants || [],
-      isInfiniteStock: item.isInfiniteStock || false,
+      infiniteStock: item.infiniteStock || false, // ← CAMBIO AQUÍ
       stockReference: item.stockReference || "",
       availableStock: item.availableStock || 0,
       stockVersion: item.stockVersion || 0,
@@ -238,7 +238,7 @@ export const createCartItem = (
     price: finalPrice,
     variants: selectedVariant ? [selectedVariant] : [],
     img: getProductImage(),
-    isInfiniteStock: product.infiniteStock || false,
+    infiniteStock: product.infiniteStock || false, // ← CAMBIO AQUÍ
     stockReference: variant?.stockReference || "",
     availableStock: variant?.stockSummary?.totalStock || 0,
     stockVersion: variant?.stockSummary?.version || 0,

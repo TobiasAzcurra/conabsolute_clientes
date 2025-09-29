@@ -65,7 +65,7 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
 
   const imageSrc = getImageSrc(item || img);
 
-  console.log(item, "esteeee");
+  console.log(item, "el item");
 
   return (
     <div className="relative">

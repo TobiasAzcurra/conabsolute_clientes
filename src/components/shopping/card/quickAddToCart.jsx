@@ -1,4 +1,4 @@
-// components/shopping/card/quickAddToCart.jsx - Con límite de stock
+// components/shopping/card/quickAddToCart.jsx - Con límite de stock y validación de variantes
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart, createCartItem } from "../../../contexts/CartContext";
@@ -37,7 +37,7 @@ const QuickAddToCart = ({
     ? initialOrderQuantity || product.quantity
     : cartItem?.quantity || 0;
 
-  // NUEVO: Calcular stock máximo
+  // Calcular stock máximo (infinito si infiniteStock es true)
   const maxStock = product.infiniteStock
     ? Infinity
     : product.availableStock || 0;
@@ -63,7 +63,7 @@ const QuickAddToCart = ({
     setQuantity((prev) => {
       const newQuantity = prev + delta;
 
-      // NUEVO: Validar límite de stock
+      // Validar límite de stock
       if (newQuantity > maxStock) {
         setShowStockWarning(true);
         setTimeout(() => setShowStockWarning(false), 2000);
@@ -113,7 +113,7 @@ const QuickAddToCart = ({
           variantName: newCartItem.variantName,
           quantity: newCartItem.quantity,
           finalPrice: newCartItem.finalPrice,
-          isInfiniteStock: newCartItem.isInfiniteStock,
+          infiniteStock: newCartItem.infiniteStock,
           availableStock: newCartItem.availableStock,
         });
 
@@ -123,16 +123,20 @@ const QuickAddToCart = ({
   };
 
   const startAddingProcess = async () => {
-    // NUEVO: Validar que haya variante seleccionada si el producto tiene variantes
-    const requiresVariant = product.variants && product.variants.length > 0;
-    const hasVariantSelected =
-      product.selectedVariant !== null && product.selectedVariant !== undefined;
+    // Solo validar variante cuando estamos agregando un producto NUEVO
+    // (no cuando es un item que ya está en carrito/pedido)
+    if (!isOrderItem && !isPedidoComponente) {
+      const requiresVariant = product.variants && product.variants.length > 0;
+      const hasVariantSelected =
+        product.selectedVariant !== null &&
+        product.selectedVariant !== undefined;
 
-    if (requiresVariant && !hasVariantSelected) {
-      console.warn(
-        "⚠️ No se puede agregar al carrito sin seleccionar variante"
-      );
-      return;
+      if (requiresVariant && !hasVariantSelected) {
+        console.warn(
+          "⚠️ No se puede agregar al carrito sin seleccionar variante"
+        );
+        return;
+      }
     }
 
     if (disabled) return;
