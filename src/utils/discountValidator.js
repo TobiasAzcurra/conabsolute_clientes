@@ -13,7 +13,8 @@ export const validateDiscountCodeBasic = async (code, enterpriseData) => {
   try {
     const codeUpper = code.trim().toUpperCase();
 
-    // Buscar el código en Firebase
+    console.log("🔍 VALIDACIÓN BÁSICA:", codeUpper);
+
     const discountCodesRef = collection(
       db,
       "absoluteClientes",
@@ -27,23 +28,32 @@ export const validateDiscountCodeBasic = async (code, enterpriseData) => {
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
+      console.log("❌ Código no encontrado");
       return { isValid: false, reason: "not_found" };
     }
 
     const discountDoc = snapshot.docs[0];
     const discountData = discountDoc.data();
 
-    // Validaciones básicas
+    console.log("✅ Código encontrado:", {
+      code: discountData.code,
+      status: discountData.status,
+      itemsExcluded: discountData.restrictions?.itemsExcluded || [],
+      type: discountData.discountConfig?.type,
+      value: discountData.discountConfig?.value,
+    });
+
     if (discountData.status !== "active") {
+      console.log("❌ Código inactivo");
       return { isValid: false, reason: "inactive" };
     }
 
-    // Verificar fechas
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const today = new Date().toISOString().split("T")[0];
     if (
       discountData.validity?.startDate &&
       today < discountData.validity.startDate
     ) {
+      console.log("❌ Código aún no válido");
       return { isValid: false, reason: "not_started" };
     }
 
@@ -51,17 +61,18 @@ export const validateDiscountCodeBasic = async (code, enterpriseData) => {
       discountData.validity?.endDate &&
       today > discountData.validity.endDate
     ) {
+      console.log("❌ Código expirado");
       return { isValid: false, reason: "expired" };
     }
 
-    // Si pasa validaciones básicas
+    console.log("✅ Validación básica APROBADA");
     return {
       isValid: true,
       discountId: discountDoc.id,
       discountData,
     };
   } catch (error) {
-    console.error("Error validando código básico:", error);
+    console.error("❌ Error validando código básico:", error);
     return { isValid: false, reason: "error" };
   }
 };
@@ -75,7 +86,10 @@ export const validateAndCalculateDiscount = async (
   paymentMethod,
   enterpriseData
 ) => {
-  // 1. Primero validación básica
+  console.log("\n========================================");
+  console.log("🎫 VALIDACIÓN COMPLETA DE DESCUENTO");
+  console.log("========================================");
+
   const basicValidation = await validateDiscountCodeBasic(code, enterpriseData);
 
   if (!basicValidation.isValid) {
@@ -91,8 +105,46 @@ export const validateAndCalculateDiscount = async (
   const config = discountData.discountConfig;
   const restrictions = discountData.restrictions || {};
 
+  console.log("\n📋 DATOS DEL DESCUENTO:");
+  console.log("  Código:", discountData.code);
+  console.log("  Tipo:", config.type);
+  console.log(
+    "  Valor:",
+    config.value + (config.type === "percentage" ? "%" : "")
+  );
+  console.log("  Monto mínimo:", config.minOrderAmount || "Sin mínimo");
+  console.log("  Descuento máximo:", config.maxDiscountAmount || "Sin máximo");
+
+  console.log("\n🚫 RESTRICCIONES:");
+  console.log("  Items excluidos:", restrictions.itemsExcluded || []);
+  console.log(
+    "  Métodos entrega excluidos:",
+    restrictions.fulfillmentsMethodsExcluded || []
+  );
+  console.log(
+    "  Métodos pago excluidos:",
+    restrictions.paymentMethodsExcluded || []
+  );
+
+  console.log("\n🛒 CARRITO:");
+  cartItems.forEach((item, i) => {
+    console.log(`  [${i}] ${item.productName || item.name}`);
+    console.log(`      productId: "${item.productId}"`);
+    console.log(`      variantId: "${item.variantId}"`);
+    console.log(
+      `      precio: $${
+        (item.basePrice || item.price || 0) + (item.variantPrice || 0)
+      }`
+    );
+    console.log(`      cantidad: ${item.quantity}`);
+  });
+
   // 2. Validar monto mínimo
+  console.log("\n💵 VALIDANDO MONTO MÍNIMO:");
   if (config.minOrderAmount && subtotal < config.minOrderAmount) {
+    console.log(
+      `  ❌ Subtotal ($${subtotal}) < Mínimo requerido ($${config.minOrderAmount})`
+    );
     return {
       isValid: false,
       discount: 0,
@@ -100,9 +152,15 @@ export const validateAndCalculateDiscount = async (
       message: `Monto mínimo requerido: $${config.minOrderAmount}`,
     };
   }
+  console.log(
+    `  ✅ Subtotal ($${subtotal}) >= Mínimo ($${config.minOrderAmount || 0})`
+  );
 
   // 3. Validar método de entrega
+  console.log("\n🚚 VALIDANDO MÉTODO DE ENTREGA:");
+  console.log(`  Método actual: "${deliveryMethod}"`);
   if (restrictions.fulfillmentsMethodsExcluded?.includes(deliveryMethod)) {
+    console.log(`  ❌ Método excluido`);
     return {
       isValid: false,
       discount: 0,
@@ -110,9 +168,13 @@ export const validateAndCalculateDiscount = async (
       message: "Código no válido para este método de entrega",
     };
   }
+  console.log(`  ✅ Método permitido`);
 
   // 4. Validar método de pago
+  console.log("\n💳 VALIDANDO MÉTODO DE PAGO:");
+  console.log(`  Método actual: "${paymentMethod}"`);
   if (restrictions.paymentMethodsExcluded?.includes(paymentMethod)) {
+    console.log(`  ❌ Método excluido`);
     return {
       isValid: false,
       discount: 0,
@@ -120,13 +182,36 @@ export const validateAndCalculateDiscount = async (
       message: "Código no válido para este método de pago",
     };
   }
+  console.log(`  ✅ Método permitido`);
 
-  // 5. Validar items excluidos
-  const hasExcludedItem = cartItems.some((item) =>
-    restrictions.itemsExcluded?.includes(item.productId)
-  );
+  // 5. Validar items/variantes excluidos
+  console.log("\n🔍 VALIDANDO ITEMS EXCLUIDOS:");
+  const hasExcludedItem = cartItems.some((item) => {
+    const isProductExcluded = restrictions.itemsExcluded?.includes(
+      item.productId
+    );
+    const isVariantExcluded = restrictions.itemsExcluded?.includes(
+      item.variantId
+    );
+
+    console.log(`  Item: "${item.productName || item.name}"`);
+    console.log(
+      `    productId "${item.productId}" excluido: ${isProductExcluded}`
+    );
+    console.log(
+      `    variantId "${item.variantId}" excluido: ${isVariantExcluded}`
+    );
+
+    if (isProductExcluded || isVariantExcluded) {
+      console.log(`    ❌ ITEM EXCLUIDO`);
+      return true;
+    }
+    console.log(`    ✅ Item permitido`);
+    return false;
+  });
 
   if (hasExcludedItem) {
+    console.log("\n❌ RESULTADO: Carrito contiene items excluidos");
     return {
       isValid: false,
       discount: 0,
@@ -134,6 +219,7 @@ export const validateAndCalculateDiscount = async (
       message: "Algunos productos no aplican para este descuento",
     };
   }
+  console.log("\n✅ Todos los items son elegibles");
 
   // 6. Validar horarios excluidos
   if (restrictions.timeExcluded && restrictions.timeExcluded.length > 0) {
@@ -177,27 +263,51 @@ export const validateAndCalculateDiscount = async (
   }
 
   // 8. Calcular descuento
+  console.log("\n💰 CALCULANDO DESCUENTO:");
+
+  const eligibleItems = cartItems.filter((item) => {
+    const isProductExcluded = restrictions.itemsExcluded?.includes(
+      item.productId
+    );
+    const isVariantExcluded = restrictions.itemsExcluded?.includes(
+      item.variantId
+    );
+    return !isProductExcluded && !isVariantExcluded;
+  });
+
+  const eligibleSubtotal = eligibleItems.reduce((sum, item) => {
+    const itemPrice =
+      (item.basePrice || item.price || 0) + (item.variantPrice || 0);
+    const itemTotal = itemPrice * item.quantity;
+    console.log(
+      `  ${item.productName}: $${itemPrice} x ${item.quantity} = $${itemTotal}`
+    );
+    return sum + itemTotal;
+  }, 0);
+
+  console.log(`\n  Subtotal elegible: $${eligibleSubtotal}`);
+
   let discount = 0;
 
   if (config.type === "percentage") {
-    // Porcentaje sobre el subtotal
-    discount = round2((subtotal * config.value) / 100);
+    discount = round2((eligibleSubtotal * config.value) / 100);
+    console.log(`  ${config.value}% de $${eligibleSubtotal} = $${discount}`);
 
-    // Respetar máximo si existe
     if (config.maxDiscountAmount && discount > config.maxDiscountAmount) {
+      console.log(`  Limitado a máximo: $${config.maxDiscountAmount}`);
       discount = config.maxDiscountAmount;
     }
   } else if (config.type === "fixed") {
-    // Monto fijo
     discount = round2(config.value);
 
-    // No puede ser mayor que el subtotal
-    if (discount > subtotal) {
-      discount = subtotal;
+    if (discount > eligibleSubtotal) {
+      discount = eligibleSubtotal;
     }
   }
 
-  // 9. Retornar resultado exitoso
+  console.log(`\n✅ DESCUENTO FINAL: $${discount}`);
+  console.log("========================================\n");
+
   return {
     isValid: true,
     discount,
@@ -208,6 +318,7 @@ export const validateAndCalculateDiscount = async (
       value: config.value,
       appliedDiscount: discount,
       stackable: restrictions.stackable || false,
+      eligibleSubtotal,
     },
     message: `¡Descuento aplicado: -$${discount}!`,
   };

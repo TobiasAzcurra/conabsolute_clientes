@@ -1,7 +1,7 @@
-// components/form/FormCustom.jsx - Con validación de descuentos desde Firebase
+// components/form/FormCustom.jsx - Versión completa con validación de descuentos en tiempo real
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../../contexts/CartContext";
 import validations from "./validations";
 import handleSubmit from "./handleSubmit";
@@ -46,12 +46,24 @@ const FormCustom = ({ cart, total }) => {
   const [isProcessingStock, setIsProcessingStock] = useState(false);
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
-  const [discountError, setDiscountError] = useState("");
+  const [showDiscountWarning, setShowDiscountWarning] = useState(false);
+  const [pendingSubmitValues, setPendingSubmitValues] = useState(null);
+
+  // Estado para método de entrega y pago (para el hook de descuentos)
+  const [currentDeliveryMethod, setCurrentDeliveryMethod] =
+    useState("delivery");
+  const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
 
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
 
-  // Hook de descuentos
-  const discountHook = useDiscountCode(empresaId, sucursalId);
+  // Hook de descuentos con todas las dependencias
+  const discountHook = useDiscountCode(
+    empresaId,
+    sucursalId,
+    cart,
+    currentDeliveryMethod,
+    currentPaymentMethod
+  );
 
   // Crear enterpriseData para StockManager
   const enterpriseData = {
@@ -84,7 +96,6 @@ const FormCustom = ({ cart, total }) => {
         envioExpress: isEnabled ? expressDeliveryFee : 0,
         shipping: values.deliveryMethod === "delivery" ? envio : 0,
         coordinates,
-        // Agregar info de descuento si existe
         appliedDiscount,
       };
 
@@ -167,6 +178,10 @@ const FormCustom = ({ cart, total }) => {
     }
   };
 
+  const processPedidoWithoutDiscount = async (values, isReserva) => {
+    await processPedido(values, isReserva, "", null);
+  };
+
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
 
@@ -182,30 +197,27 @@ const FormCustom = ({ cart, total }) => {
       }
     }
 
-    // 2. Validar código de descuento si existe
+    // 2. Verificar código de descuento
     let appliedDiscount = null;
-    setDiscountError("");
 
     if (discountHook.code && discountHook.code.trim()) {
-      const productsTotal = cart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      );
-
-      const discountResult = await discountHook.validateFull(
-        cart,
-        productsTotal,
-        values.deliveryMethod,
-        values.paymentMethod
-      );
-
-      if (!discountResult.isValid) {
-        setDiscountError(discountResult.message);
-        return; // Detener envío si código inválido
+      // Si el código está escrito pero es inválido
+      if (!discountHook.validation.isValid && discountHook.validation.checked) {
+        setPendingSubmitValues({ values, isReserva });
+        setShowDiscountWarning(true);
+        return; // Esperar decisión del usuario
       }
 
-      appliedDiscount = discountResult;
-      console.log("✅ Descuento aplicado:", appliedDiscount);
+      // Si el código es válido, preparar datos
+      if (discountHook.validation.isValid) {
+        appliedDiscount = {
+          isValid: true,
+          discount: discountHook.validation.discount,
+          discountId: discountHook.validation.discountId,
+          discountData: discountHook.validation.discountData,
+          message: discountHook.validation.message,
+        };
+      }
     }
 
     // 3. Procesar pedido
@@ -223,12 +235,27 @@ const FormCustom = ({ cart, total }) => {
         message={closedMessage}
       />
 
-      {/* Modal de error de descuento */}
+      {/* Modal de advertencia de descuento */}
       <SimpleModal
-        isOpen={!!discountError}
-        onClose={() => setDiscountError("")}
+        isOpen={showDiscountWarning}
+        onClose={() => {
+          setShowDiscountWarning(false);
+          setPendingSubmitValues(null);
+        }}
         title="Código de descuento"
-        message={discountError}
+        message={`${discountHook.validation.message}. ¿Querés continuar sin descuento?`}
+        twoButtons={true}
+        cancelText="Corregir código"
+        confirmText="Continuar"
+        onConfirm={async () => {
+          setShowDiscountWarning(false);
+          if (pendingSubmitValues) {
+            await processPedidoWithoutDiscount(
+              pendingSubmitValues.values,
+              pendingSubmitValues.isReserva
+            );
+          }
+        }}
       />
 
       <div className="flex px-4 flex-col">
@@ -278,20 +305,21 @@ const FormCustom = ({ cart, total }) => {
           onSubmit={handleFormSubmit}
         >
           {({ values, setFieldValue, isSubmitting, submitForm, errors }) => {
+            // Sincronizar métodos con hook de descuentos
+            useEffect(() => {
+              setCurrentDeliveryMethod(values.deliveryMethod);
+              setCurrentPaymentMethod(values.paymentMethod);
+            }, [values.deliveryMethod, values.paymentMethod]);
+
             const productsTotal = cart.reduce(
               (acc, item) => acc + item.price * item.quantity,
               0
             );
 
-            // Calcular descuento solo para UI (validación real en submit)
-            let descuento = 0;
-            if (
-              discountHook.basicValidation.isValid &&
-              discountHook.basicValidation.checked
-            ) {
-              // Mostrar descuento aproximado (se validará exacto en submit)
-              descuento = Math.round(productsTotal * 0.1); // Placeholder visual
-            }
+            // Usar descuento validado del hook
+            const descuento = discountHook.validation.isValid
+              ? discountHook.validation.discount
+              : 0;
 
             let finalTotal = productsTotal - descuento;
             if (values.deliveryMethod === "delivery") finalTotal += envio;
@@ -341,7 +369,6 @@ const FormCustom = ({ cart, total }) => {
                     discountHook={discountHook}
                   />
 
-                  {/* Resumen */}
                   <OrderSummary
                     productsTotal={productsTotal}
                     envio={envio}
@@ -351,6 +378,7 @@ const FormCustom = ({ cart, total }) => {
                     descuento={descuento}
                     handleExpressToggle={handleExpressToggle}
                     isEnabled={isEnabled}
+                    deliveryMethod={values.deliveryMethod} // AGREGAR
                   />
 
                   <button

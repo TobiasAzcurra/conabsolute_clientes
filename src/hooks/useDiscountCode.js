@@ -1,71 +1,77 @@
 import { useState, useEffect } from "react";
-import {
-  validateDiscountCodeBasic,
-  validateAndCalculateDiscount,
-} from "../utils/discountValidator";
+import { validateAndCalculateDiscount } from "../utils/discountValidator";
 
-// Recibir IDs directamente en lugar de objeto
-export const useDiscountCode = (empresaId, sucursalId) => {
+export const useDiscountCode = (
+  empresaId,
+  sucursalId,
+  cartItems,
+  deliveryMethod,
+  paymentMethod
+) => {
   const [code, setCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
-  const [basicValidation, setBasicValidation] = useState({
+  const [validation, setValidation] = useState({
     isValid: false,
     checked: false,
+    discount: 0,
+    message: "",
+    reason: "",
   });
 
-  // Validación básica en tiempo real (con debounce)
   useEffect(() => {
     if (!code || code.length < 3) {
-      setBasicValidation({ isValid: false, checked: false });
+      setValidation({
+        isValid: false,
+        checked: false,
+        discount: 0,
+        message: "",
+        reason: "",
+      });
       return;
     }
 
     const timer = setTimeout(async () => {
       setIsValidating(true);
 
-      // Construir enterpriseData aquí
+      // Calcular subtotal
+      const subtotal = cartItems.reduce((sum, item) => {
+        const price =
+          (item.basePrice || item.price || 0) + (item.variantPrice || 0);
+        return sum + price * item.quantity;
+      }, 0);
+
       const enterpriseData = { empresaId, sucursalId };
 
-      const result = await validateDiscountCodeBasic(code, enterpriseData);
-      setBasicValidation({
+      // Validación COMPLETA en tiempo real
+      const result = await validateAndCalculateDiscount(
+        code,
+        cartItems,
+        subtotal,
+        deliveryMethod,
+        paymentMethod,
+        enterpriseData
+      );
+
+      setValidation({
         isValid: result.isValid,
         checked: true,
-        reason: result.reason,
+        discount: result.discount || 0,
+        message: result.message,
+        reason: result.reason || "",
+        discountData: result.discountData,
+        discountId: result.discountId,
       });
+
       setIsValidating(false);
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [code, empresaId, sucursalId]); // Dependencias primitivas, no objetos
-
-  // Validación completa (llamar manualmente al hacer submit)
-  const validateFull = async (
-    cartItems,
-    subtotal,
-    deliveryMethod,
-    paymentMethod
-  ) => {
-    if (!code) {
-      return { isValid: false, discount: 0 };
-    }
-
-    const enterpriseData = { empresaId, sucursalId };
-
-    return await validateAndCalculateDiscount(
-      code,
-      cartItems,
-      subtotal,
-      deliveryMethod,
-      paymentMethod,
-      enterpriseData
-    );
-  };
+  }, [code, empresaId, sucursalId, cartItems, deliveryMethod, paymentMethod]);
 
   return {
     code,
     setCode,
     isValidating,
-    basicValidation,
-    validateFull,
+    validation,
   };
 };

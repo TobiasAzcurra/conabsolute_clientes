@@ -10,20 +10,24 @@ const AddressInputs = ({
   setValidarUbi,
   setNoEncontre,
   cart,
-  discountHook, // NUEVO: recibir hook de descuentos
+  discountHook,
 }) => {
-  // Sincronizar código de descuento con el hook
   const handleCouponChange = (e) => {
     const newCode = e.target.value;
     setFieldValue("couponCode", newCode);
     discountHook.setCode(newCode);
   };
 
-  // Determinar si mostrar el tilde verde
   const showCheckmark =
-    discountHook.basicValidation.isValid &&
-    discountHook.basicValidation.checked &&
+    discountHook.validation.isValid &&
+    discountHook.validation.checked &&
     !discountHook.isValidating;
+
+  const showError =
+    !discountHook.validation.isValid &&
+    discountHook.validation.checked &&
+    !discountHook.isValidating &&
+    discountHook.code.length >= 3;
 
   return (
     <div className="w-full items-center rounded-2xl bg-gray-300 transition-all duration-300 overflow-hidden">
@@ -138,14 +142,14 @@ const AddressInputs = ({
             className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full pr-8"
           />
 
-          {/* Spinner mientras valida */}
+          {/* Spinner */}
           {discountHook.isValidating && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
             </div>
           )}
 
-          {/* Tilde verde cuando es válido */}
+          {/* Tilde verde */}
           {showCheckmark && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <svg
@@ -163,12 +167,13 @@ const AddressInputs = ({
           )}
         </div>
 
-        <div className="w-full">
-          <ErrorMessage
-            name="couponCode"
-            render={(msg) => <AppleErrorMessage>{msg}</AppleErrorMessage>}
-          />
-        </div>
+        {showError && (
+          <div className="w-full px-4 pb-2">
+            <p className="text-xs text-red-600 font-medium">
+              {discountHook.validation.message}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

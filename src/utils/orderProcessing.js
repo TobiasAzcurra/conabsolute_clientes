@@ -204,18 +204,24 @@ export const handlePOSSubmit = async (
     // 4. Procesar descuento desde appliedDiscount (validado previamente)
     let descuento = 0;
     let discountArray = [];
+    let discountMetadata = null; // NUEVO: para metadata adicional
 
     if (formData.appliedDiscount && formData.appliedDiscount.isValid) {
       descuento = round2(formData.appliedDiscount.discount);
 
+      // Array con schema correcto
       discountArray.push({
         type: "coupon",
-        code: formData.appliedDiscount.discountData.code,
         reason: formData.appliedDiscount.discountData.code,
         value: descuento,
         timestamp: now,
-        discountId: formData.appliedDiscount.discountId,
       });
+
+      // Metadata adicional (fuera del array)
+      discountMetadata = {
+        discountId: formData.appliedDiscount.discountId,
+        code: formData.appliedDiscount.discountData.code,
+      };
 
       console.log("🎫 Descuento aplicado:", {
         code: formData.appliedDiscount.discountData.code,
