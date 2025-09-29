@@ -1,4 +1,4 @@
-// components/form/FormCustom.jsx - Con StockManager, coordenadas y validación de horarios
+// components/form/FormCustom.jsx - Con validación de descuentos desde Firebase
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -20,6 +20,7 @@ import { cleanPhoneNumber } from "../../firebase/utils/phoneUtils";
 import { addTelefonoCliente } from "../../firebase/orders/uploadOrder";
 import { obtenerFechaActual } from "../../firebase/utils/dateHelpers";
 import { isBusinessOpen } from "../../utils/businessHoursValidator";
+import { useDiscountCode } from "../../hooks/useDiscountCode";
 import SimpleModal from "../ui/SimpleModal";
 
 const FormCustom = ({ cart, total }) => {
@@ -45,8 +46,12 @@ const FormCustom = ({ cart, total }) => {
   const [isProcessingStock, setIsProcessingStock] = useState(false);
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
+  const [discountError, setDiscountError] = useState("");
 
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
+
+  // Hook de descuentos
+  const discountHook = useDiscountCode(empresaId, sucursalId);
 
   // Crear enterpriseData para StockManager
   const enterpriseData = {
@@ -54,7 +59,12 @@ const FormCustom = ({ cart, total }) => {
     selectedSucursal: { id: sucursalId },
   };
 
-  const processPedido = async (values, isReserva, message = "") => {
+  const processPedido = async (
+    values,
+    isReserva,
+    message = "",
+    appliedDiscount = null
+  ) => {
     try {
       setIsProcessingStock(true);
 
@@ -64,7 +74,6 @@ const FormCustom = ({ cart, total }) => {
       // Extraer coordenadas del mapUrl
       const coordinates = mapUrl ? extractCoordinates(mapUrl) : [0, 0];
 
-      // Log para verificar coordenadas en delivery
       if (values.deliveryMethod === "delivery" && mapUrl) {
         console.log("📍 Coordenadas extraídas:", coordinates);
       }
@@ -75,18 +84,18 @@ const FormCustom = ({ cart, total }) => {
         envioExpress: isEnabled ? expressDeliveryFee : 0,
         shipping: values.deliveryMethod === "delivery" ? envio : 0,
         coordinates,
+        // Agregar info de descuento si existe
+        appliedDiscount,
       };
 
       console.log("🚀 Iniciando procesamiento con nuevo schema POS");
 
       // Intentar usar el nuevo sistema con StockManager
       try {
-        // Convertir carrito Context a formato POS
         const posCartItems = adaptCartToPOSFormat(cartItems);
 
         console.log("📦 Items para procesar:", posCartItems.length);
 
-        // Usar nuevo handleSubmit con StockManager
         const orderId = await handlePOSSubmit(
           updatedValues,
           posCartItems,
@@ -113,7 +122,6 @@ const FormCustom = ({ cart, total }) => {
 
           console.log("✅ Pedido procesado exitosamente con ID:", orderId);
 
-          // Navegar a success y limpiar carrito
           navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
           addLastCart();
           clearCart();
@@ -132,7 +140,7 @@ const FormCustom = ({ cart, total }) => {
           envio,
           mapUrl,
           couponCodes: [],
-          descuento: 0,
+          descuento: appliedDiscount?.discount || 0,
           isPending: clientConfig?.logistics?.pendingOfBeingAccepted || false,
           priceFactor: 1,
         };
@@ -162,7 +170,7 @@ const FormCustom = ({ cart, total }) => {
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
 
-    // Solo validar horarios si NO es una reserva
+    // 1. Validar horarios si NO es reserva
     if (!isReserva) {
       const businessHours = clientConfig?.logistics?.businessHours;
       const status = isBusinessOpen(businessHours);
@@ -170,13 +178,39 @@ const FormCustom = ({ cart, total }) => {
       if (!status.isOpen) {
         setClosedMessage(status.message);
         setShowClosedModal(true);
-        return; // Detener el envío
+        return;
       }
     }
 
-    // Si pasa validación o es reserva, procesar pedido
+    // 2. Validar código de descuento si existe
+    let appliedDiscount = null;
+    setDiscountError("");
+
+    if (discountHook.code && discountHook.code.trim()) {
+      const productsTotal = cart.reduce(
+        (acc, item) => acc + item.price * item.quantity,
+        0
+      );
+
+      const discountResult = await discountHook.validateFull(
+        cart,
+        productsTotal,
+        values.deliveryMethod,
+        values.paymentMethod
+      );
+
+      if (!discountResult.isValid) {
+        setDiscountError(discountResult.message);
+        return; // Detener envío si código inválido
+      }
+
+      appliedDiscount = discountResult;
+      console.log("✅ Descuento aplicado:", appliedDiscount);
+    }
+
+    // 3. Procesar pedido
     console.log("Submitting form with values:", values);
-    await processPedido(values, isReserva);
+    await processPedido(values, isReserva, "", appliedDiscount);
   };
 
   return (
@@ -187,6 +221,14 @@ const FormCustom = ({ cart, total }) => {
         onClose={() => setShowClosedModal(false)}
         title="Estamos cerrados"
         message={closedMessage}
+      />
+
+      {/* Modal de error de descuento */}
+      <SimpleModal
+        isOpen={!!discountError}
+        onClose={() => setDiscountError("")}
+        title="Código de descuento"
+        message={discountError}
       />
 
       <div className="flex px-4 flex-col">
@@ -236,29 +278,19 @@ const FormCustom = ({ cart, total }) => {
           onSubmit={handleFormSubmit}
         >
           {({ values, setFieldValue, isSubmitting, submitForm, errors }) => {
-            console.log("Formik errors:", errors);
-
             const productsTotal = cart.reduce(
               (acc, item) => acc + item.price * item.quantity,
               0
             );
 
+            // Calcular descuento solo para UI (validación real en submit)
             let descuento = 0;
-            const activeCoupons = [
-              "APMCONKINGCAKES",
-              "APMCONANHELO",
-              "APMCONPROVIMARK",
-              "APMCONLATABLITA",
-            ];
             if (
-              activeCoupons.includes(values.couponCode.trim().toUpperCase())
+              discountHook.basicValidation.isValid &&
+              discountHook.basicValidation.checked
             ) {
-              const hasYerba = cart.some(
-                (item) => item.category?.toLowerCase() === "yerba"
-              );
-              if (!hasYerba) {
-                descuento = Math.round(productsTotal * 0.3);
-              }
+              // Mostrar descuento aproximado (se validará exacto en submit)
+              descuento = Math.round(productsTotal * 0.1); // Placeholder visual
             }
 
             let finalTotal = productsTotal - descuento;
@@ -306,6 +338,7 @@ const FormCustom = ({ cart, total }) => {
                     setValidarUbi={setValidarUbi}
                     setNoEncontre={setNoEncontre}
                     cart={cart}
+                    discountHook={discountHook}
                   />
 
                   {/* Resumen */}

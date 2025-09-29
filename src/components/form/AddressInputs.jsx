@@ -9,29 +9,21 @@ const AddressInputs = ({
   setUrl,
   setValidarUbi,
   setNoEncontre,
-  cart, // Necesitamos agregar cart como prop
+  cart,
+  discountHook, // NUEVO: recibir hook de descuentos
 }) => {
-  // Función para validar el cupón (misma lógica que en validations.js)
-  const validateCoupon = (couponCode, cart) => {
-    if (!couponCode || !couponCode.trim()) return false;
-
-    const activeCoupons = [
-      "APMCONKINGCAKES",
-      "APMCONANHELO",
-      "APMCONPROVIMARK",
-      "APMCONLATABLITA",
-    ];
-
-    const couponCodeUpper = couponCode.trim().toUpperCase();
-    const hasYerba = cart.some(
-      (item) => item.category?.toLowerCase() === "yerba"
-    );
-
-    // Solo mostrar el tilde si es un cupón activo Y no hay yerba
-    return activeCoupons.includes(couponCodeUpper) && !hasYerba;
+  // Sincronizar código de descuento con el hook
+  const handleCouponChange = (e) => {
+    const newCode = e.target.value;
+    setFieldValue("couponCode", newCode);
+    discountHook.setCode(newCode);
   };
 
-  const isCouponValid = validateCoupon(values.couponCode, cart || []);
+  // Determinar si mostrar el tilde verde
+  const showCheckmark =
+    discountHook.basicValidation.isValid &&
+    discountHook.basicValidation.checked &&
+    !discountHook.isValidating;
 
   return (
     <div className="w-full items-center rounded-2xl bg-gray-300 transition-all duration-300 overflow-hidden">
@@ -47,7 +39,7 @@ const AddressInputs = ({
           <ErrorMessage name="address" component={AppleErrorMessage} />
 
           {/* Campo referencias */}
-          <div className="flex flex-row  gap-2 pl-4 h-10 items-center">
+          <div className="flex flex-row gap-2 pl-4 h-10 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -136,16 +128,25 @@ const AddressInputs = ({
               clipRule="evenodd"
             />
           </svg>
-          <MyTextInput
+          <input
             name="couponCode"
             type="text"
+            value={discountHook.code}
+            onChange={handleCouponChange}
             placeholder="¿Tenés un código de descuento?"
             autoComplete="off"
             className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full pr-8"
           />
 
-          {/* Tilde verde cuando el cupón es válido */}
-          {isCouponValid && (
+          {/* Spinner mientras valida */}
+          {discountHook.isValidating && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+            </div>
+          )}
+
+          {/* Tilde verde cuando es válido */}
+          {showCheckmark && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <svg
                 className="w-5 h-5 text-green-500"

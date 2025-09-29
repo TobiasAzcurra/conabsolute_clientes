@@ -1,12 +1,10 @@
-// utils/orderProcessing.js - SINTAXIS FIREBASE V9 CORREGIDA
+// utils/orderProcessing.js - Con descuentos desde Firebase
 import { db } from "../firebase/config";
-import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { StockManager } from "./stockManager";
 
-// Helper de redondeo para consistencia financiera
 const round2 = (n) => Math.round(n * 100) / 100;
 
-// Generar UUID para pedidos
 export const generateUUID = () => {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
     const r = (Math.random() * 16) | 0;
@@ -15,10 +13,8 @@ export const generateUUID = () => {
   });
 };
 
-// ✅ CORREGIDO: Obtener datos del producto con sintaxis v9 correcta
 const getProductData = async (enterpriseData, productId) => {
   try {
-    // ✅ SINTAXIS CORRECTA: doc(db, "collection", "doc", "subcollection", "subdoc", ...)
     const productRef = doc(
       db,
       "absoluteClientes",
@@ -47,7 +43,6 @@ const getProductData = async (enterpriseData, productId) => {
   }
 };
 
-// Función principal: Consumir stock y devolver traces enriquecidas
 export const consumeStockForOrderAndReturnTraces = async (
   cartItems,
   enterpriseData
@@ -63,13 +58,11 @@ export const consumeStockForOrderAndReturnTraces = async (
         `🔍 Procesando item: ${item.productName} (ID: ${item.productId})`
       );
 
-      // Obtener producto fresco desde Firebase
       const productData = await getProductData(enterpriseData, item.productId);
       if (!productData) {
         throw new Error(`Producto ${item.productId} no encontrado`);
       }
 
-      // Encontrar variante específica
       let variant = null;
       if (item.variantId && item.variantId !== "default") {
         variant = productData.variants?.find((v) => v.id === item.variantId);
@@ -80,18 +73,15 @@ export const consumeStockForOrderAndReturnTraces = async (
           variant = productData.variants?.find((v) => v.default === true);
         }
       } else {
-        // Buscar variante default
         variant = productData.variants?.find((v) => v.default === true);
       }
 
-      // Log para debug de productos con stock infinito
       if (productData.infiniteStock === true) {
         console.log(
           `♾️ Producto con stock infinito detectado: ${productData.name}`
         );
       }
 
-      // Consumir stock usando StockManager
       const saleResult = await stockManager.simulateVenta(
         productData,
         variant,
@@ -116,7 +106,6 @@ export const consumeStockForOrderAndReturnTraces = async (
   return results;
 };
 
-// Calcular financieros de un item con costos reales
 export const computeItemFinancials = (item, unitCostAvg) => {
   const unitPrice = (item.basePrice || 0) + (item.variantPrice || 0);
   const quantity = item.quantity || 0;
@@ -130,7 +119,30 @@ export const computeItemFinancials = (item, unitCostAvg) => {
   return { unitCost, totalCost, unitMargin, totalMargin, totalPrice };
 };
 
-// Nuevo handleSubmit con schema POS
+// Registrar uso del código de descuento en Firebase
+const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
+  try {
+    const discountRef = doc(
+      db,
+      "absoluteClientes",
+      enterpriseData.id,
+      "sucursales",
+      enterpriseData.selectedSucursal.id,
+      "discountCodes",
+      discountId
+    );
+
+    await updateDoc(discountRef, {
+      [`usage.usageTracking.${orderId}`]: new Date().toISOString(),
+    });
+
+    console.log(`✅ Uso de descuento registrado para orden ${orderId}`);
+  } catch (error) {
+    console.error("Error registrando uso de descuento:", error);
+    // No lanzar error, el pedido ya se creó exitosamente
+  }
+};
+
 export const handlePOSSubmit = async (
   formData,
   cartItems,
@@ -143,14 +155,14 @@ export const handlePOSSubmit = async (
     const now = new Date().toISOString();
     const orderId = generateUUID();
 
-    // 1. Consumir stock y obtener traces enriquecidas
+    // 1. Consumir stock y obtener traces
     console.log("📦 Consumiendo stock...");
     const traces = await consumeStockForOrderAndReturnTraces(
       cartItems,
       enterpriseData
     );
 
-    // 2. Construir items con financeSummary y stockSummary completo
+    // 2. Construir items con financeSummary y stockSummary
     const itemsForOrder = cartItems.map((item) => {
       const trace = traces.find((t) => t.itemId === item.id);
       const financials = computeItemFinancials(item, trace?.unitCostAvg || 0);
@@ -162,7 +174,6 @@ export const handlePOSSubmit = async (
         variantId: item.variantId || "default",
         variantName: item.variantName || "default",
 
-        // Financiero completo con costos reales
         financeSummary: {
           unitBasePrice: item.basePrice || 0,
           unitVariantPrice: item.variantPrice || 0,
@@ -173,7 +184,6 @@ export const handlePOSSubmit = async (
           totalMargin: financials.totalMargin,
         },
 
-        // Trazabilidad completa de stock
         stockSummary: {
           stockReference: item.stockReference || "",
           totalStockBefore: trace?.totalStockBefore || 0,
@@ -183,7 +193,7 @@ export const handlePOSSubmit = async (
       };
     });
 
-    // 3. Calcular totales del pedido
+    // 3. Calcular subtotal
     const subtotal = round2(
       itemsForOrder.reduce(
         (sum, item) => sum + (item.financeSummary?.totalPrice || 0),
@@ -191,25 +201,29 @@ export const handlePOSSubmit = async (
       )
     );
 
-    // Descuentos (lógica del handleSubmit original)
+    // 4. Procesar descuento desde appliedDiscount (validado previamente)
     let descuento = 0;
-    const validCoupons = [
-      "APMCONKINGCAKES",
-      "APMCONANHELO",
-      "APMCONPROVIMARK",
-      "APMCONLATABLITA",
-    ];
+    let discountArray = [];
 
-    if (validCoupons.includes(formData.couponCode?.trim().toUpperCase())) {
-      const hasYerba = cartItems.some(
-        (item) => item.category?.toLowerCase() === "yerba"
-      );
-      if (!hasYerba) {
-        descuento = round2(subtotal * 0.3);
-      }
+    if (formData.appliedDiscount && formData.appliedDiscount.isValid) {
+      descuento = round2(formData.appliedDiscount.discount);
+
+      discountArray.push({
+        type: "coupon",
+        code: formData.appliedDiscount.discountData.code,
+        reason: formData.appliedDiscount.discountData.code,
+        value: descuento,
+        timestamp: now,
+        discountId: formData.appliedDiscount.discountId,
+      });
+
+      console.log("🎫 Descuento aplicado:", {
+        code: formData.appliedDiscount.discountData.code,
+        value: descuento,
+      });
     }
 
-    // Envío
+    // 5. Calcular envío
     const shippingCost =
       formData.deliveryMethod === "delivery"
         ? round2(parseFloat(formData.shipping) || 0)
@@ -217,11 +231,10 @@ export const handlePOSSubmit = async (
 
     const envioExpress = round2(parseFloat(formData.envioExpress) || 0);
 
-    // Totales finales
+    // 6. Totales finales
     const totalAfterDiscounts = round2(subtotal - descuento);
     const total = round2(totalAfterDiscounts + shippingCost + envioExpress);
 
-    // Costos y márgenes totales
     const totalCosts = round2(
       itemsForOrder.reduce(
         (sum, item) => sum + (item.financeSummary?.totalCost || 0),
@@ -232,7 +245,7 @@ export const handlePOSSubmit = async (
     const finalProfitMarginPercentage =
       totalAfterDiscounts > 0 ? round2(grossMargin / totalAfterDiscounts) : 0;
 
-    // 4. Construir orderData con schema POS completo
+    // 7. Construir orderData con schema POS
     const orderData = {
       status: "Confirmed",
       statusNote: "",
@@ -284,24 +297,11 @@ export const handlePOSSubmit = async (
           finalProfitMarginPercentage: finalProfitMarginPercentage,
         },
 
-        discounts: formData.couponCode
-          ? [
-              {
-                type: validCoupons.includes(
-                  formData.couponCode?.trim().toUpperCase()
-                )
-                  ? "coupon"
-                  : "others",
-                reason: formData.couponCode,
-                value: descuento,
-                timestamp: now,
-              },
-            ]
-          : [],
+        discounts: discountArray,
       },
     };
 
-    // 5. ✅ CORREGIDO: Guardar en Firebase con sintaxis v9 correcta
+    // 8. Guardar en Firebase
     const pedidoRef = doc(
       db,
       "absoluteClientes",
@@ -322,17 +322,16 @@ export const handlePOSSubmit = async (
       (finalProfitMarginPercentage * 100).toFixed(1) + "%"
     );
 
-    // Log especial para productos con stock infinito
-    const infiniteItems = itemsForOrder.filter((item) =>
-      item.stockSummary.purchaseTrace.some((trace) =>
-        trace.compraId.startsWith("infinite-stock-")
-      )
-    );
+    if (descuento > 0) {
+      console.log("🎫 Descuento aplicado:", descuento);
+    }
 
-    if (infiniteItems.length > 0) {
-      console.log(
-        "♾️ Productos con stock infinito en pedido:",
-        infiniteItems.length
+    // 9. Registrar uso del código de descuento
+    if (formData.appliedDiscount?.discountId) {
+      await registerDiscountUsage(
+        formData.appliedDiscount.discountId,
+        orderId,
+        enterpriseData
       );
     }
 
@@ -343,7 +342,6 @@ export const handlePOSSubmit = async (
   }
 };
 
-// Adapter: Convertir carrito Context a formato POS
 export const adaptCartToPOSFormat = (contextCartItems) => {
   return Object.values(contextCartItems).map((item) => ({
     id: item.id,

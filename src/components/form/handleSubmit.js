@@ -1,3 +1,4 @@
+// handleSubmit.js - Sistema fallback con descuentos desde Firebase
 import { extractCoordinates } from "../../helpers/currencyFormat";
 import { cleanPhoneNumber } from "../../firebase/utils/phoneUtils";
 import {
@@ -5,13 +6,37 @@ import {
   UploadOrder,
 } from "../../firebase/orders/uploadOrder";
 import { obtenerFechaActual } from "../../firebase/utils/dateHelpers";
+import { db } from "../../firebase/config";
+import { doc, updateDoc } from "firebase/firestore";
 
-const VALID_COUPONS = [
-  "APMCONKINGCAKES",
-  "APMCONANHELO",
-  "APMCONPROVIMARK",
-  "APMCONLATABLITA",
-];
+// Registrar uso del código de descuento
+const registerDiscountUsage = async (
+  discountId,
+  orderId,
+  empresaId,
+  sucursalId
+) => {
+  try {
+    const discountRef = doc(
+      db,
+      "absoluteClientes",
+      empresaId,
+      "sucursales",
+      sucursalId,
+      "discountCodes",
+      discountId
+    );
+
+    await updateDoc(discountRef, {
+      [`usage.usageTracking.${orderId}`]: new Date().toISOString(),
+    });
+
+    console.log(`✅ Uso de descuento registrado para orden ${orderId}`);
+  } catch (error) {
+    console.error("Error registrando uso de descuento:", error);
+    // No lanzar error, el pedido ya se creó
+  }
+};
 
 const handleSubmit = async (values, cart, config, message = "", clientData) => {
   const { empresaId, sucursalId, mapUrl, isPending, priceFactor } = config;
@@ -25,30 +50,31 @@ const handleSubmit = async (values, cart, config, message = "", clientData) => {
   const phone = String(values.phone) || "";
   const envio = values.deliveryMethod === "takeaway" ? 0 : config.envio || 0;
 
-  const hasYerbas = cart.some(
-    (item) => item.category?.toLowerCase() === "yerba"
+  // Calcular subtotal
+  const subtotal = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
   );
 
+  // Usar descuento validado desde appliedDiscount
   let descuento = 0;
   let couponCodes = [];
+  let discountMetadata = null;
 
-  if (VALID_COUPONS.includes(values.couponCode)) {
-    if (!hasYerbas) {
-      // Aplicar 30% de descuento al subtotal del carrito
-      const subtotal = cart.reduce(
-        (acc, item) => acc + item.price * item.quantity,
-        0
-      );
-      descuento = subtotal * 0.3;
-      couponCodes.push(values.couponCode);
-      console.log(
-        `✅ Cupón ${values.couponCode} aplicado con 30% de descuento`
-      );
-    } else {
-      console.log(
-        `❌ Cupón ${values.couponCode} no válido porque hay productos de yerbas`
-      );
-    }
+  if (values.appliedDiscount && values.appliedDiscount.isValid) {
+    descuento = values.appliedDiscount.discount;
+    couponCodes.push(values.appliedDiscount.discountData.code);
+    discountMetadata = {
+      discountId: values.appliedDiscount.discountId,
+      code: values.appliedDiscount.discountData.code,
+      type: values.appliedDiscount.discountData.type,
+      value: values.appliedDiscount.discountData.value,
+      appliedDiscount: descuento,
+    };
+
+    console.log(
+      `✅ Descuento aplicado (fallback): ${discountMetadata.code} = $${descuento}`
+    );
   }
 
   const orderDetail = {
@@ -78,16 +104,21 @@ const handleSubmit = async (values, cart, config, message = "", clientData) => {
     referencias: values.references,
     telefono: cleanPhoneNumber(phone),
     total:
-      cart.reduce((total, item) => total + item.price * item.quantity, 0) -
+      subtotal -
       descuento +
       (values.deliveryMethod === "delivery" ? envio : 0) +
       (values.envioExpress || 0),
+
+    // Metadata del descuento para trazabilidad
+    discountMetadata: discountMetadata || null,
   };
 
-  console.log("orderDetail to upload:", orderDetail);
+  console.log("📦 Order detail (fallback) to upload:", orderDetail);
 
   try {
     const orderId = await UploadOrder(empresaId, sucursalId, orderDetail);
+
+    // Registrar teléfono
     await addTelefonoCliente(
       empresaId,
       sucursalId,
@@ -96,13 +127,21 @@ const handleSubmit = async (values, cart, config, message = "", clientData) => {
     );
     localStorage.setItem("customerPhone", cleanPhoneNumber(phone));
 
-    console.log("Order uploaded successfully. orderId:", orderId);
-    // console.log('Order uploaded successfully. orderDetail:', orderDetail);
+    // Registrar uso del código de descuento
+    if (discountMetadata?.discountId) {
+      await registerDiscountUsage(
+        discountMetadata.discountId,
+        orderId,
+        empresaId,
+        sucursalId
+      );
+    }
+
+    console.log("✅ Order uploaded successfully (fallback). orderId:", orderId);
 
     return orderId;
-    // return orderDetail; // Return the order detail instead of orderId
   } catch (error) {
-    console.error("Error al subir la orden: ", error);
+    console.error("❌ Error al subir la orden (fallback):", error);
     return null;
   }
 };
