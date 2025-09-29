@@ -1,17 +1,17 @@
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
 export const getClientAssets = async (empresa, sucursal) => {
   const ref = doc(
     db,
-    'absoluteClientes',
+    "absoluteClientes",
     empresa,
-    'sucursales',
+    "sucursales",
     sucursal,
-    'config',
-    'assets'
+    "config",
+    "assets"
   );
   const snapshot = await getDoc(ref);
   return snapshot.exists() ? snapshot.data() : null;

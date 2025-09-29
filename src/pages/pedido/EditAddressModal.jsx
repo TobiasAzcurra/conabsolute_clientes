@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { MapDirection } from '../../components/form/MapDirection';
+import React, { useState } from "react";
+import { MapDirection } from "../../components/form/MapDirection";
 import {
   doc,
   runTransaction,
   collection,
   getFirestore,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 
 const EditAddressModal = ({
   isOpen,
@@ -14,31 +14,31 @@ const EditAddressModal = ({
   currentAddress,
   onSuccess,
 }) => {
-  const [newAddress, setNewAddress] = useState('');
-  const [mapUrl, setMapUrl] = useState('');
+  const [newAddress, setNewAddress] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleUpdateAddress = async () => {
     if (!newAddress) {
-      setError('Por favor selecciona una dirección válida');
+      setError("Por favor selecciona una dirección válida");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const firestore = getFirestore();
       const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split('/');
-      const pedidosCollectionRef = collection(firestore, 'pedidos', anio, mes);
+      const [dia, mes, anio] = fechaActual.split("/");
+      const pedidosCollectionRef = collection(firestore, "pedidos", anio, mes);
       const pedidoDocRef = doc(pedidosCollectionRef, dia);
 
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe para la fecha especificada.');
+          throw new Error("El pedido no existe para la fecha especificada.");
         }
 
         const existingData = docSnapshot.data();
@@ -48,7 +48,7 @@ const EditAddressModal = ({
         );
 
         if (pedidoIndex === -1) {
-          throw new Error('Pedido no encontrado');
+          throw new Error("Pedido no encontrado");
         }
 
         // Actualizamos la dirección y la URL del mapa
@@ -73,9 +73,9 @@ const EditAddressModal = ({
       onSuccess?.(newAddress);
       onClose();
     } catch (error) {
-      console.error('Error al actualizar la dirección:', error);
+      console.error("Error al actualizar la dirección:", error);
       setError(
-        'Hubo un error al actualizar la dirección. Por favor intenta nuevamente.'
+        "Hubo un error al actualizar la dirección. Por favor intenta nuevamente."
       );
     } finally {
       setIsLoading(false);
@@ -86,7 +86,7 @@ const EditAddressModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg">
+      <div className="bg-gray-50  rounded-3xl w-full max-w-lg">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-4">Editar dirección</h2>
           <p className="text-gray-600 mb-4">
@@ -100,7 +100,7 @@ const EditAddressModal = ({
               setValidarUbi={() => {}}
               setNoEncontre={() => {}}
               setFieldValue={(field, value) => {
-                if (field === 'address') {
+                if (field === "address") {
                   setNewAddress(value);
                 }
               }}
@@ -146,7 +146,7 @@ const EditAddressModal = ({
                   Actualizando...
                 </span>
               ) : (
-                'Actualizar dirección'
+                "Actualizar dirección"
               )}
             </button>
           </div>

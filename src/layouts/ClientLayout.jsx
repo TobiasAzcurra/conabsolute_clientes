@@ -1,15 +1,20 @@
+// layouts/ClientLayout.js - MIGRADO
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useClient } from "../contexts/ClientContext";
+import { useCart } from "../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
 import Carrusel from "../components/Carrusel";
 import NavMenu from "../components/NavMenu";
 import FloatingCart from "../components/shopping/FloatingCart";
-import { useSelector } from "react-redux";
 import SearchBar from "../components/SearchBar";
 import { useLocation } from "react-router-dom";
 
 const ClientLayout = ({ children }) => {
   const { clientData, clientAssets } = useClient();
+
+  // ← CAMBIO: Reemplazar Redux con Context
+  // OLD: const cart = useSelector((state) => state.cartState.cart);
+  const { cart } = useCart(); // ← NUEVO
 
   const location = useLocation();
   const pathname = location.pathname;
@@ -23,7 +28,7 @@ const ClientLayout = ({ children }) => {
     isProductDetail || isCart || isSuccessPage || isPedidoPage;
   const shouldShowFloatingCart = !isCart && !isSuccessPage && !isPedidoPage;
 
-  const cart = useSelector((state) => state.cartState.cart);
+  // ← FUNCIONA IGUAL: cart viene del Context ahora
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -42,16 +47,6 @@ const ClientLayout = ({ children }) => {
     setShowSuggestion(false);
   };
 
-  const handleInputFocus = () => {
-    if (previousPhone && !phoneNumber) {
-      setShowSuggestion(true);
-    }
-  };
-
-  const handleInputBlur = () => {
-    setTimeout(() => setShowSuggestion(false), 300);
-  };
-
   return (
     <>
       <Helmet>
@@ -68,16 +63,6 @@ const ClientLayout = ({ children }) => {
       <div className="flex flex-col relative ">
         {!shouldHideHeader && (
           <>
-            <div className="fixed inset-x-0 top-0 z-50 h-10 bg-gradient-to-b from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
-            <SearchBar
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              showSuggestion={showSuggestion}
-              setShowSuggestion={setShowSuggestion}
-              previousPhone={previousPhone}
-              onSuggestionClick={onSuggestionClick}
-            />
-
             <div className="relative z-[10]">
               <Carrusel images={clientAssets?.hero || []} />
               <div className="top-[215px] inset-0 absolute">
@@ -89,7 +74,7 @@ const ClientLayout = ({ children }) => {
 
         <div
           className={`${!shouldHideHeader ? "mt-[100px]" : ""} ${
-            shouldShowFloatingCart && totalQuantity > 0 ? "pb-20" : ""
+            shouldShowFloatingCart && totalQuantity > 0 ? "pb-[155px]" : ""
           } z-[5]`}
         >
           {children}
@@ -97,7 +82,16 @@ const ClientLayout = ({ children }) => {
 
         {shouldShowFloatingCart && totalQuantity > 0 && (
           <>
-            <div className="fixed inset-x-0 bottom-0 z-40 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
+            <div className="fixed inset-x-0 bottom-0 z-40 h-[155px] border-t-1 border-gray-400  bg-gray-200 bg-opacity-60 pointer-events-none backdrop-blur-md" />
+            <SearchBar
+              phoneNumber={phoneNumber}
+              setPhoneNumber={setPhoneNumber}
+              showSuggestion={showSuggestion}
+              setShowSuggestion={setShowSuggestion}
+              previousPhone={previousPhone}
+              onSuggestionClick={onSuggestionClick}
+            />
+            {/* ← FUNCIONA IGUAL: FloatingCart recibe cart del Context */}
             <FloatingCart totalQuantity={totalQuantity} cart={cart} />
           </>
         )}

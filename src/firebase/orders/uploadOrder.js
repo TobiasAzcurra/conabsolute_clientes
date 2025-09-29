@@ -10,10 +10,10 @@ import {
   addDoc,
   serverTimestamp,
   setDoc,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
-import { v4 as uuidv4 } from 'uuid';
-import { cleanPhoneNumber } from '../utils/phoneUtils';
+} from "firebase/firestore";
+import { app } from "../config";
+import { v4 as uuidv4 } from "uuid";
+import { cleanPhoneNumber } from "../utils/phoneUtils";
 
 const db = getFirestore(app);
 
@@ -21,11 +21,11 @@ export const UploadOrder = async (empresaId, sucursalId, orderDetail) => {
   const pedidoId = uuidv4();
   const pedidosCollectionRef = collection(
     db,
-    'absoluteClientes',
+    "absoluteClientes",
     empresaId,
-    'sucursales',
+    "sucursales",
     sucursalId,
-    'pedidos'
+    "pedidos"
   );
   const pedidoDocRef = doc(pedidosCollectionRef, pedidoId);
   try {
@@ -35,17 +35,17 @@ export const UploadOrder = async (empresaId, sucursalId, orderDetail) => {
       createdAt: serverTimestamp(),
       enCamino: false,
     });
-    console.log('✅ Pedido subido exitosamente con ID:', pedidoId);
+    console.log("✅ Pedido subido exitosamente con ID:", pedidoId);
     return pedidoId;
   } catch (error) {
-    console.error('❌ Error al subir el pedido:', error);
+    console.error("❌ Error al subir el pedido:", error);
     throw error;
   }
 };
 
 export const ReadMateriales = async () => {
   const firestore = getFirestore();
-  const collections = ['materiales'];
+  const collections = ["materiales"];
   const fetchedData = await Promise.all(
     collections.map(async (collectionName) => {
       const collectionRef = collection(firestore, collectionName);
@@ -71,7 +71,7 @@ export const ReadMateriales = async () => {
 
 export const ReadData = async () => {
   const firestore = getFirestore();
-  const collections = ['burgers', 'drinks', 'fries', 'toppings'];
+  const collections = ["burgers", "drinks", "fries", "toppings"];
   const fetchedData = await Promise.all(
     collections.map(async (collectionName) => {
       const collectionRef = collection(firestore, collectionName);
@@ -99,11 +99,11 @@ export const addTelefonoCliente = async (
 
   const clienteDocRef = doc(
     db,
-    'absoluteClientes',
+    "absoluteClientes",
     empresaId,
-    'sucursales',
+    "sucursales",
     sucursalId,
-    'clientes',
+    "clientes",
     cleanPhone
   );
 
@@ -112,13 +112,13 @@ export const addTelefonoCliente = async (
       query(
         collection(
           db,
-          'absoluteClientes',
+          "absoluteClientes",
           empresaId,
-          'sucursales',
+          "sucursales",
           sucursalId,
-          'clientes'
+          "clientes"
         ),
-        where('telefono', '==', cleanPhone)
+        where("telefono", "==", cleanPhone)
       )
     );
 
@@ -137,6 +137,6 @@ export const addTelefonoCliente = async (
       console.log(`✅ Cliente ${cleanPhone} creado en Firebase`);
     }
   } catch (error) {
-    console.error('❌ Error al agregar o actualizar cliente:', error);
+    console.error("❌ Error al agregar o actualizar cliente:", error);
   }
 };

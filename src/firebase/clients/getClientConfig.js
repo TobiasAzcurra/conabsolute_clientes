@@ -1,19 +1,19 @@
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
 export const getClientConfig = async (empresa, sucursal) => {
-  const configPaths = ['labels', 'logistics'];
+  const configPaths = ["labels", "logistics"];
 
   const promises = configPaths.map(async (subdoc) => {
     const ref = doc(
       db,
-      'absoluteClientes',
+      "absoluteClientes",
       empresa,
-      'sucursales',
+      "sucursales",
       sucursal,
-      'config',
+      "config",
       subdoc
     );
     const snapshot = await getDoc(ref);

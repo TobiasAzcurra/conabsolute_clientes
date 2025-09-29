@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StarRating } from './StarRating';
+import React, { useState } from "react";
+import { StarRating } from "./StarRating";
 
 const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
   const [rating, setRating] = useState({
@@ -9,7 +9,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
     pagina: 0,
     burgers: 0,
     papas: 0,
-    comentario: '',
+    comentario: "",
   });
 
   const handleRatingChange = (category, value) => {
@@ -36,7 +36,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+      <div className="bg-gray-50  p-8 rounded-lg shadow-lg max-w-md w-full">
         <h2 className="text-2xl font-bold mb-6">Calificar Pedido</h2>
 
         {/* Rating por Tiempo */}
@@ -44,7 +44,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <label className="block mb-2">Tiempo:</label>
           <StarRating
             rating={rating.tiempo}
-            onRatingChange={(value) => handleRatingChange('tiempo', value)}
+            onRatingChange={(value) => handleRatingChange("tiempo", value)}
           />
         </div>
 
@@ -53,7 +53,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <label className="block mb-2">Temperatura:</label>
           <StarRating
             rating={rating.temperatura}
-            onRatingChange={(value) => handleRatingChange('temperatura', value)}
+            onRatingChange={(value) => handleRatingChange("temperatura", value)}
           />
         </div>
 
@@ -63,7 +63,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <StarRating
             rating={rating.presentacion}
             onRatingChange={(value) =>
-              handleRatingChange('presentacion', value)
+              handleRatingChange("presentacion", value)
             }
           />
         </div>
@@ -73,7 +73,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <label className="block mb-2">Página:</label>
           <StarRating
             rating={rating.pagina}
-            onRatingChange={(value) => handleRatingChange('pagina', value)}
+            onRatingChange={(value) => handleRatingChange("pagina", value)}
           />
         </div>
 
@@ -82,7 +82,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <label className="block mb-2">Burgers:</label>
           <StarRating
             rating={rating.burgers}
-            onRatingChange={(value) => handleRatingChange('burgers', value)}
+            onRatingChange={(value) => handleRatingChange("burgers", value)}
           />
         </div>
 
@@ -91,7 +91,7 @@ const RatingModal = ({ isOpen, onClose, onSubmitRating, currentOrder }) => {
           <label className="block mb-2">Papas:</label>
           <StarRating
             rating={rating.papas}
-            onRatingChange={(value) => handleRatingChange('papas', value)}
+            onRatingChange={(value) => handleRatingChange("papas", value)}
           />
         </div>
 

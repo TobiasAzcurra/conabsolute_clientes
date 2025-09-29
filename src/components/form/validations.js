@@ -61,24 +61,24 @@ const validations = (total, cart = []) =>
 
     paymentMethod: Yup.string()
       .required("Método de pago es obligatorio")
-      .oneOf(["mercadopago", "efectivo", "ambos"]),
+      .oneOf(["mercadopago", "cash", "ambos"]),
 
     // money: Yup.number().when('paymentMethod', {
-    //   is: 'efectivo',
+    //   is: 'cash',
     //   then: () =>
     //     Yup.number()
     //       .min(total, `El monto debe ser mayor o igual a ${total}`)
     //       .required('El monto es obligatorio'),
     // }),
 
-    efectivoCantidad: Yup.number().when("paymentMethod", {
+    cashCantidad: Yup.number().when("paymentMethod", {
       is: "ambos",
       then: () =>
         Yup.number()
           .min(0, "El monto debe ser mayor o igual a 0")
           .test(
-            "efectivo-max",
-            `El monto en efectivo no puede exceder el total (${total})`,
+            "cash-max",
+            `El monto en cash no puede exceder el total (${total})`,
             (value) => !value || value <= total
           ),
     }),

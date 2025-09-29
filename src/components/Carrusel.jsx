@@ -1,17 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 
 const DEFAULT_INTERVAL = 3000;
-
-const GradientOverlay = ({ position = "top" }) => (
-  <div
-    className={`absolute left-0 right-0 h-1/3 ${
-      position === "top"
-        ? "top-0 bg-gradient-to-b from-black to-transparent opacity-30"
-        : "bottom-0 bg-gradient-to-t from-black to-transparent opacity-50"
-    }`}
-  />
-);
 
 const Carrusel = ({ images = [], interval = DEFAULT_INTERVAL }) => {
   const location = useLocation();
@@ -62,51 +52,21 @@ const Carrusel = ({ images = [], interval = DEFAULT_INTERVAL }) => {
     return () => clearTimeout(timer);
   }, [currentIndex, images, currentLayer, interval]);
 
-  if (images.length === 0) {
-    return (
-      <div className="w-full h-[300px] overflow-hidden relative bg-gray-50  flex items-center justify-center"></div>
-    );
-  }
-
-  if (images.length === 1) {
-    return (
-      <div className="w-full h-[300px] overflow-hidden relative">
-        <img
-          src={images[0]}
-          alt="Hero"
-          className={`absolute top-0 left-0 w-full h-full object-cover z-10 ${
-            isCarritoPage ? "brightness-50" : ""
-          }`}
-        />
-        {!isCarritoPage && (
-          <>
-            <GradientOverlay position="top" />
-            <GradientOverlay position="bottom" />
-          </>
-        )}
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-[300px] overflow-hidden relative">
+    <div className="w-full h-[300px]  overflow-hidden relative">
       {imagesState.map((img, i) => (
         <img
           key={i}
           src={img.src}
           alt={`Carrusel ${i}`}
-          className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-500 ${
+          className={`absolute  w-full h-full object-cover transition-opacity duration-500 ${
             img.visible ? "opacity-100 z-10" : "opacity-0 z-0"
           } ${isCarritoPage ? "brightness-50" : ""}`}
         />
       ))}
 
-      {!isCarritoPage && (
-        <>
-          <GradientOverlay position="top" />
-          <GradientOverlay position="bottom" />
-        </>
-      )}
+      {/* Overlay con gradiente */}
+      <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-gray-200  via-gray-200/30 to-transparent z-20 pointer-events-none" />
     </div>
   );
 };

@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { addProduct } from '../../firebase/products/addProducts';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import heic2any from 'heic2any';
+import React, { useState } from "react";
+import { addProduct } from "../../firebase/products/addProducts";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import heic2any from "heic2any";
 
 const ProductForm = ({ empresa, sucursal, onSuccess }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    category: '',
+    name: "",
+    price: "",
+    category: "",
     img: [],
     installments: {
       enabled: false,
@@ -20,17 +20,17 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
     },
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [variants, setVariants] = useState([]);
 
   const addVariant = () => {
     setVariants([
       ...variants,
       {
-        name: '',
-        linkedTo: '',
-        price: '',
-        stock: '',
+        name: "",
+        linkedTo: "",
+        price: "",
+        stock: "",
         productImage: [],
         attributeImage: null,
       },
@@ -48,19 +48,19 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
     const processed = [];
     for (const file of files) {
       if (
-        file.type === 'image/heic' ||
-        file.name.toLowerCase().endsWith('.heic')
+        file.type === "image/heic" ||
+        file.name.toLowerCase().endsWith(".heic")
       ) {
         try {
           const convertedBlob = await heic2any({
             blob: file,
-            toType: 'image/jpeg',
+            toType: "image/jpeg",
             quality: 0.9,
           });
           const jpgFile = new File(
             [convertedBlob],
-            file.name.replace(/\.heic$/i, '.jpg'),
-            { type: 'image/jpeg' }
+            file.name.replace(/\.heic$/i, ".jpg"),
+            { type: "image/jpeg" }
           );
           processed.push(jpgFile);
         } catch (err) {
@@ -91,25 +91,25 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
   };
 
   const handleFileChange = async (e) => {
-    setError('');
+    setError("");
     const files = Array.from(e.target.files);
     const processedFiles = [];
 
     for (const file of files) {
       if (
-        file.type === 'image/heic' ||
-        file.name.toLowerCase().endsWith('.heic')
+        file.type === "image/heic" ||
+        file.name.toLowerCase().endsWith(".heic")
       ) {
         try {
           const convertedBlob = await heic2any({
             blob: file,
-            toType: 'image/jpeg',
+            toType: "image/jpeg",
             quality: 0.9,
           });
           const jpgFile = new File(
             [convertedBlob],
-            file.name.replace(/\.heic$/i, '.jpg'),
-            { type: 'image/jpeg' }
+            file.name.replace(/\.heic$/i, ".jpg"),
+            { type: "image/jpeg" }
           );
           processedFiles.push(jpgFile);
         } catch (err) {
@@ -129,7 +129,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const storage = getStorage();
@@ -161,7 +161,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
           productImageUrls.push(url);
         }
 
-        let attributeImageUrl = '';
+        let attributeImageUrl = "";
         if (variant.attributeImage) {
           const attrRef = ref(
             storage,
@@ -204,10 +204,10 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
       };
 
       await addProduct(empresa, sucursal, productData);
-      setFormData({ name: '', price: '', category: '', img: [] });
+      setFormData({ name: "", price: "", category: "", img: [] });
       onSuccess?.();
     } catch (err) {
-      setError('Error al guardar el producto');
+      setError("Error al guardar el producto");
       console.error(err);
     } finally {
       setLoading(false);
@@ -363,7 +363,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
               placeholder="Nombre de la variante (ej: Azul)"
               value={variant.name}
               onChange={(e) =>
-                handleVariantChange(index, 'name', e.target.value)
+                handleVariantChange(index, "name", e.target.value)
               }
               className="w-full border p-2 rounded"
             />
@@ -372,7 +372,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
               placeholder="Tipo de atributo (ej: Color)"
               value={variant.linkedTo}
               onChange={(e) =>
-                handleVariantChange(index, 'linkedTo', e.target.value)
+                handleVariantChange(index, "linkedTo", e.target.value)
               }
               className="w-full border p-2 rounded"
             />
@@ -381,7 +381,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
               placeholder="Precio (opcional, usa el general si se deja vacío)"
               value={variant.price}
               onChange={(e) =>
-                handleVariantChange(index, 'price', e.target.value)
+                handleVariantChange(index, "price", e.target.value)
               }
               className="w-full border p-2 rounded"
             />
@@ -390,7 +390,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
               placeholder="Stock (opcional)"
               value={variant.stock}
               onChange={(e) =>
-                handleVariantChange(index, 'stock', e.target.value)
+                handleVariantChange(index, "stock", e.target.value)
               }
               className="w-full border p-2 rounded"
             />
@@ -418,7 +418,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
         <button
           type="button"
           onClick={addVariant}
-          className="bg-blue-500 text-white px-4 py-1 rounded"
+          className="bg-blue-700 text-white px-4 py-1 rounded"
         >
           + Agregar Variante
         </button>
@@ -429,7 +429,7 @@ const ProductForm = ({ empresa, sucursal, onSuccess }) => {
         disabled={loading}
         className="bg-green-600 text-white px-4 py-2 rounded"
       >
-        {loading ? 'Guardando...' : 'Agregar Producto'}
+        {loading ? "Guardando..." : "Agregar Producto"}
       </button>
     </form>
   );

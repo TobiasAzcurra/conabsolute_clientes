@@ -6,7 +6,6 @@ import LoadingPoints from "../../components/LoadingPoints";
 import AppleModal from "../../components/AppleModal";
 import EditAddressModal from "./EditAddressModal";
 import { doc, runTransaction, getFirestore } from "firebase/firestore";
-import Payment from "../../components/mercadopago/Payment";
 import { listenOrderById } from "../../firebase/orders/listenOrderById";
 import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
 import { cancelOrder } from "../../firebase/orders/cancelOrder";
@@ -760,7 +759,7 @@ const Pedido = () => {
                       {/* Pago virtual */}
                       {!currentOrder.paid && (
                         <div
-                          className="bg-gray-300 text-blue-500 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
+                          className="bg-gray-300 text-blue-700 w-full font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold cursor-pointer transition-colors duration-300"
                           onClick={(e) => {
                             handleTransferenciaClick(
                               currentOrder.total,
@@ -770,7 +769,7 @@ const Pedido = () => {
                         >
                           <div className="flex items-center">
                             {isPaymentLoading ? (
-                              <LoadingPoints className="text-blue-500" />
+                              <LoadingPoints className="text-blue-700" />
                             ) : (
                               <>
                                 <svg
@@ -911,59 +910,6 @@ const Pedido = () => {
           }
           onAddressSuccess={handleAddressUpdateSuccess}
         />
-        <AppleModal
-          isOpen={isEditPaymentMethodModalOpen}
-          onClose={() => setIsEditPaymentMethodModalOpen(false)}
-          title="Cambiar método de pago"
-        >
-          <div className="flex flex-col space-y-4">
-            {pedidosPagados.find((p) => p.id === editingOrderId) && (
-              <Payment
-                cart={
-                  pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.detallePedido || []
-                }
-                values={{
-                  ...pedidosPagados.find((p) => p.id === editingOrderId),
-                  paymentMethod: "mercadopago",
-                  phone: pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.telefono,
-                  address: pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.direccion,
-                  deliveryMethod: pedidosPagados.find(
-                    (p) => p.id === editingOrderId
-                  )?.direccion
-                    ? "delivery"
-                    : "takeaway",
-                  references: pedidosPagados.find(
-                    (p) => p.id === editingOrderId
-                  )?.referencias,
-                }}
-                discountedTotal={
-                  pedidosPagados.find((p) => p.id === editingOrderId)?.total ||
-                  0
-                }
-                envio={
-                  pedidosPagados.find((p) => p.id === editingOrderId)?.envio ||
-                  0
-                }
-                mapUrl={
-                  pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.ubicacion || ""
-                }
-                couponCodes={
-                  pedidosPagados.find((p) => p.id === editingOrderId)
-                    ?.couponCodes || []
-                }
-                calculateFinalTotal={() =>
-                  pedidosPagados.find((p) => p.id === editingOrderId)?.total ||
-                  0
-                }
-                isEnabled={false}
-              />
-            )}
-          </div>
-        </AppleModal>
       </div>
     </div>
   );

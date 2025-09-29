@@ -4,17 +4,17 @@ import {
   query,
   where,
   getDocs,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+} from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
 export const getClientIds = async (slugEmpresa, slugSucursal) => {
   try {
-    const empresasRef = collection(db, 'absoluteClientes');
+    const empresasRef = collection(db, "absoluteClientes");
     const empresaQuery = query(
       empresasRef,
-      where('slugEmpresa', '==', slugEmpresa)
+      where("slugEmpresa", "==", slugEmpresa)
     );
     const empresaSnapshot = await getDocs(empresaQuery);
 
@@ -25,13 +25,13 @@ export const getClientIds = async (slugEmpresa, slugSucursal) => {
 
     const sucursalesRef = collection(
       db,
-      'absoluteClientes',
+      "absoluteClientes",
       empresaId,
-      'sucursales'
+      "sucursales"
     );
     const sucursalQuery = query(
       sucursalesRef,
-      where('slugSucursal', '==', slugSucursal)
+      where("slugSucursal", "==", slugSucursal)
     );
     const sucursalSnapshot = await getDocs(sucursalQuery);
 
@@ -45,7 +45,7 @@ export const getClientIds = async (slugEmpresa, slugSucursal) => {
       sucursalId,
     };
   } catch (error) {
-    console.error('Error getting client IDs:', error);
+    console.error("Error getting client IDs:", error);
     return null;
   }
 };

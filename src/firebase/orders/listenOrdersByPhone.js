@@ -4,8 +4,8 @@ import {
   onSnapshot,
   query,
   where,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+} from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
@@ -17,16 +17,16 @@ export const listenOrdersByPhone = (
 ) => {
   const pedidosCollectionRef = collection(
     db,
-    'absoluteClientes',
+    "absoluteClientes",
     empresaId,
-    'sucursales',
+    "sucursales",
     sucursalId,
-    'pedidos'
+    "pedidos"
   );
 
   const pedidosQuery = query(
     pedidosCollectionRef,
-    where('telefono', '==', phoneNumber)
+    where("telefono", "==", phoneNumber)
   );
   return onSnapshot(
     pedidosQuery,
@@ -42,7 +42,7 @@ export const listenOrdersByPhone = (
     },
     (error) => {
       console.error(
-        '[listenOrdersByPhone] ❌ Error al escuchar los pedidos por teléfono:',
+        "[listenOrdersByPhone] ❌ Error al escuchar los pedidos por teléfono:",
         error
       );
       callback([]);

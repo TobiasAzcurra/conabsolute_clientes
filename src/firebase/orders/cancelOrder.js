@@ -4,18 +4,18 @@ import {
   runTransaction,
   getDocs,
   collection,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+} from "firebase/firestore";
+import { app } from "../config";
 
 export const cancelOrder = async (empresaId, sucursalId, orderId) => {
   const firestore = getFirestore(app);
   const pedidoDocRef = doc(
     firestore,
-    'absoluteClientes',
+    "absoluteClientes",
     empresaId,
-    'sucursales',
+    "sucursales",
     sucursalId,
-    'pedidos',
+    "pedidos",
     orderId
   );
 
@@ -23,14 +23,14 @@ export const cancelOrder = async (empresaId, sucursalId, orderId) => {
     await runTransaction(firestore, async (transaction) => {
       const docSnapshot = await transaction.get(pedidoDocRef);
       if (!docSnapshot.exists()) {
-        throw new Error('El pedido no existe.');
+        throw new Error("El pedido no existe.");
       }
       const pedido = docSnapshot.data();
       const couponCodes = pedido.couponCodes || [];
 
       if (couponCodes.length > 0) {
         const vouchersSnapshot = await getDocs(
-          collection(firestore, 'vouchers')
+          collection(firestore, "vouchers")
         );
         const vouchersMap = new Map();
         for (const voucherDoc of vouchersSnapshot.docs) {
@@ -44,7 +44,7 @@ export const cancelOrder = async (empresaId, sucursalId, orderId) => {
             if (codigoIndex !== -1) {
               codigosActualizados[codigoIndex] = {
                 ...codigosActualizados[codigoIndex],
-                estado: 'disponible',
+                estado: "disponible",
               };
               requiresUpdate = true;
             }
@@ -59,16 +59,16 @@ export const cancelOrder = async (empresaId, sucursalId, orderId) => {
       }
 
       const now = new Date();
-      const cancelTime = `${String(now.getHours()).padStart(2, '0')}:${String(
+      const cancelTime = `${String(now.getHours()).padStart(2, "0")}:${String(
         now.getMinutes()
-      ).padStart(2, '0')}`;
+      ).padStart(2, "0")}`;
       transaction.update(pedidoDocRef, {
         canceled: cancelTime,
       });
     });
     return true;
   } catch (error) {
-    console.error('[cancelOrder] ❌ Error al cancelar el pedido:', error);
+    console.error("[cancelOrder] ❌ Error al cancelar el pedido:", error);
     throw error;
   }
 };

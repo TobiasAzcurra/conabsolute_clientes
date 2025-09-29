@@ -4,19 +4,19 @@ import {
   getDocs,
   doc,
   getDoc,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+} from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
 export const getProductsByClient = async (empresa, sucursal) => {
   const ref = collection(
     db,
-    'absoluteClientes',
+    "absoluteClientes",
     empresa,
-    'sucursales',
+    "sucursales",
     sucursal,
-    'productos'
+    "productos"
   );
   const snapshot = await getDocs(ref);
 
@@ -27,7 +27,7 @@ export const getProductsByClient = async (empresa, sucursal) => {
 
       try {
         if (data.category) {
-          if (typeof data.category === 'string') {
+          if (typeof data.category === "string") {
             categoryId = data.category;
           } else if (data.category.path) {
             const categoryRef = doc(db, data.category.path);
@@ -38,7 +38,7 @@ export const getProductsByClient = async (empresa, sucursal) => {
           }
         }
       } catch (e) {
-        console.warn('⚠️ Error al obtener categoría:', e);
+        console.warn("⚠️ Error al obtener categoría:", e);
       }
 
       return {
@@ -50,7 +50,7 @@ export const getProductsByClient = async (empresa, sucursal) => {
   );
 
   const porCategoria = productos.reduce((acc, prod) => {
-    const key = prod.categoryId || 'sin-categoria';
+    const key = prod.categoryId || "sin-categoria";
     if (!acc[key]) acc[key] = [];
 
     const alreadyExists = acc[key].some((p) => p.id === prod.id);
@@ -61,7 +61,7 @@ export const getProductsByClient = async (empresa, sucursal) => {
     return acc;
   }, {});
 
-  console.log('🔍 Categorías obtenidas:', Object.keys(porCategoria));
+  console.log("🔍 Categorías obtenidas:", Object.keys(porCategoria));
 
   return {
     todos: productos,

@@ -1,34 +1,35 @@
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { app } from "../config";
 
 const db = getFirestore(app);
 
 /**
  * Obtiene un producto específico con datos actualizados incluyendo stock
  * @param {string} empresaId - ID de la empresa
- * @param {string} sucursalId - ID de la sucursal  
+ * @param {string} sucursalId - ID de la sucursal
  * @param {string} productId - ID del producto
  * @param {number} retries - Número de reintentos (por defecto 2)
  * @returns {Object|null} - Producto actualizado o null si no existe
  */
-export const getProductById = async (empresaId, sucursalId, productId, retries = 2) => {
+export const getProductById = async (
+  empresaId,
+  sucursalId,
+  productId,
+  retries = 2
+) => {
   try {
     const productRef = doc(
       db,
-      'absoluteClientes',
+      "absoluteClientes",
       empresaId,
-      'sucursales',
+      "sucursales",
       sucursalId,
-      'productos',
+      "productos",
       productId
     );
-    
+
     const productDoc = await getDoc(productRef);
-    
+
     if (!productDoc.exists()) {
       console.warn(`❌ Producto ${productId} no encontrado`);
       return null;
@@ -40,7 +41,7 @@ export const getProductById = async (empresaId, sucursalId, productId, retries =
     // Obtener categoría si existe
     try {
       if (data.category) {
-        if (typeof data.category === 'string') {
+        if (typeof data.category === "string") {
           categoryId = data.category;
         } else if (data.category.path) {
           const categoryRef = doc(db, data.category.path);
@@ -51,7 +52,7 @@ export const getProductById = async (empresaId, sucursalId, productId, retries =
         }
       }
     } catch (e) {
-      console.warn('⚠️ Error al obtener categoría:', e);
+      console.warn("⚠️ Error al obtener categoría:", e);
     }
 
     const result = {
@@ -63,19 +64,21 @@ export const getProductById = async (empresaId, sucursalId, productId, retries =
 
     console.log(`📦 Producto ${productId} obtenido exitosamente`);
     return result;
-
   } catch (error) {
-    console.error(`❌ Error obteniendo producto (intento ${3 - retries}):`, error);
-    
+    console.error(
+      `❌ Error obteniendo producto (intento ${3 - retries}):`,
+      error
+    );
+
     // Retry automático con delay exponencial
     if (retries > 0) {
       const delay = Math.pow(2, 3 - retries) * 1000; // 1s, 2s, 4s
       console.log(`🔄 Reintentando en ${delay}ms...`);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
+
+      await new Promise((resolve) => setTimeout(resolve, delay));
       return getProductById(empresaId, sucursalId, productId, retries - 1);
     }
-    
+
     return null;
   }
 };

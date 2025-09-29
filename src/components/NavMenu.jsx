@@ -102,7 +102,7 @@ const NavMenu = () => {
 
   return (
     <div className="relative z-[99]">
-      <p className="text-gray-100 px-4 text-center text-2xl mb-3 font-medium font-coolvetica">
+      <p className="text-gray-50 px-4  text-2xl mb-3 text-center font-coolvetica">
         {clientAssets?.heroTitle || "Elegí lo que más te guste"}
       </p>
       <nav

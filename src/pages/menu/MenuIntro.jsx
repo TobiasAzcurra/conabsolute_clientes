@@ -274,7 +274,7 @@ const MenuIntro = () => {
   };
 
   return (
-    <div className="flex items-center justify-center w-full h-screen bg-white relative overflow-hidden">
+    <div className="flex items-center justify-center w-full h-screen bg-gray-50  relative overflow-hidden">
       {(() => {
         console.log("🏠 Renderizando componente principal");
         console.log("📊 Estados finales:", {
@@ -290,7 +290,7 @@ const MenuIntro = () => {
         : (() => {
             console.log("💭 Mostrando loader por defecto (sin introGif)");
             return (
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-white">
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-gray-50 ">
                 <div className="relative flex items-center justify-center w-32 h-32">
                   <span className="absolute w-28 h-28 rounded-full border border-neutral-300 animate-pulseOrbit" />
                   <span className="absolute w-20 h-20 rounded-full border border-neutral-400 animate-pulseOrbit delay-200" />
