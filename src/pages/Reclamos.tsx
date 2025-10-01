@@ -220,7 +220,7 @@ const Reclamos = () => {
             Volver
           </button>
           <h3
-            className={`font-coolvetica text-sm text-center ${
+            className={` font-primary  text-sm text-center ${
               selectedOrder ? "mt-2" : "mt-2"
             }`}
           >
@@ -314,7 +314,7 @@ const Reclamos = () => {
 
   if (submitted) {
     return (
-      <div className="bg-gray-50  px-4 min-h-screen justify-center font-coolvetica flex flex-col items-center">
+      <div className="bg-gray-50  px-4 min-h-screen justify-center  font-primary  flex flex-col items-center">
         <p className="text-2xl text-center font-bold">
           Reclamo enviado con exito!
         </p>
@@ -332,7 +332,7 @@ const Reclamos = () => {
   }
 
   return (
-    <div className="bg-gray-50  py-4 min-h-screen justify-center font-coolvetica flex flex-col">
+    <div className="bg-gray-50  py-4 min-h-screen justify-center  font-primary  flex flex-col">
       <div
         className={`w-full flex flex-col justify-center items-center mb-4 ${
           selectedOrder ? "" : "mt-12"
@@ -411,7 +411,7 @@ const Reclamos = () => {
               <button
                 type="submit"
                 disabled={loading || !selectedOrder}
-                className={`w-full bg-black text-gray-100 font-coolvetica text-2xl h-20 rounded-3xl font-bold 
+                className={`w-full bg-black text-gray-100  font-primary  text-2xl h-20 rounded-3xl font-bold 
                                     ${
                                       loading || !selectedOrder
                                         ? "opacity-50 cursor-not-allowed"

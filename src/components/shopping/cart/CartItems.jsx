@@ -80,7 +80,7 @@ const CartItems = () => {
   };
 
   return (
-    <div className="flex flex-col font-coolvetica mb-4 overflow-x-hidden">
+    <div className="flex flex-col  font-primary  mb-4 overflow-x-hidden">
       <div className="flex flex-col mt-8  w-full">
         {/* header */}
         <div className="flex flex-row items-center px-4  w-fit">
@@ -155,7 +155,7 @@ const CartItems = () => {
             </div>
           ) : (
             <div className="flex justify-center items-center w-full h-20">
-              <p className="font-coolvetica text-gray-600 text-center">
+              <p className=" font-primary  text-gray-600 text-center">
                 No hay productos destacados disponibles
               </p>
             </div>

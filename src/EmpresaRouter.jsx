@@ -13,7 +13,7 @@ import { useMediaQuery } from "react-responsive";
 import Absolute from "./assets/isologoAbsolte.png";
 
 const PcBlock = () => (
-  <div className="bg-black font-coolvetica flex items-center justify-center flex-col h-screen w-screen">
+  <div className="bg-black  font-primary  flex items-center justify-center flex-col h-screen w-screen">
     <img className="h-56" src={Absolute} alt="" />
     <div className="flex flex-col">
       <div className="flex flex-row gap-1">

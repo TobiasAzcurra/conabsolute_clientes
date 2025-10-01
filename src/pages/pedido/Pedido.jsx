@@ -213,7 +213,7 @@ const Pedido = () => {
 
         {/* Estado actual */}
         <p
-          className={`font-coolvetica font-light text-xs text-left mb-4 ${config.color}`}
+          className={` font-primary  font-light text-xs text-left mb-4 ${config.color}`}
         >
           {config.label}
         </p>
@@ -231,7 +231,7 @@ const Pedido = () => {
               <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
               <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
             </svg>
-            <p className="font-coolvetica font-light text-xs text-gray-400 ">
+            <p className=" font-primary  font-light text-xs text-gray-400 ">
               {isDelivery
                 ? currentOrder.fulfillment?.address || "Dirección no disponible"
                 : `Retiro en ${clientData?.name || "el local"}`}
@@ -254,7 +254,7 @@ const Pedido = () => {
               />
               <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
             </svg>
-            <p className="font-coolvetica font-light text-xs text-gray-400 ">
+            <p className=" font-primary  font-light text-xs text-gray-400 ">
               {currencyFormat(total)}
             </p>
           </div>
@@ -274,7 +274,7 @@ const Pedido = () => {
                 clipRule="evenodd"
               />
             </svg>
-            <p className="font-coolvetica font-light text-xs text-gray-400 ">
+            <p className=" font-primary  font-light text-xs text-gray-400 ">
               {currentOrder.payment?.method === "online"
                 ? "Virtual"
                 : currentOrder.payment?.method === "cash"
@@ -287,7 +287,7 @@ const Pedido = () => {
           {/* Notas */}
           {currentOrder.orderNotes && (
             <div className="bg-gray-100 p-3 rounded-lg">
-              <p className="font-coolvetica text-xs text-gray-600">
+              <p className=" font-primary  text-xs text-gray-600">
                 <span className="font-bold">Nota:</span>{" "}
                 {currentOrder.orderNotes}
               </p>
@@ -303,7 +303,7 @@ const Pedido = () => {
               onClick={() =>
                 handlePaymentClick(total, currentOrder.customer?.phone)
               }
-              className="text-blue-700 bg-gray-300 text-sm font-coolvetica h-10 px-4 rounded-full font-medium"
+              className="text-blue-700 bg-gray-300 text-sm  font-primary  h-10 px-4 rounded-full font-medium"
             >
               Pagar virtualmente
             </button>
@@ -312,7 +312,7 @@ const Pedido = () => {
           {/* Contactar soporte */}
           <button
             onClick={handleSupportClick}
-            className=" bg-gray-300 font-coolvetica text-sm h-10 px-4 rounded-full font-medium"
+            className=" bg-gray-300  font-primary  text-sm h-10 px-4 rounded-full font-medium"
           >
             Soporte
           </button>
@@ -324,7 +324,7 @@ const Pedido = () => {
                 setSelectedOrderId(currentOrder.id);
                 setIsCancelModalOpen(true);
               }}
-              className="bg-gray-300 text-red-600 font-coolvetica h-12 rounded-full font-bold"
+              className="bg-gray-300 text-red-600  font-primary  h-12 rounded-full font-bold"
             >
               Cancelar pedido
             </button>
@@ -358,7 +358,7 @@ const Pedido = () => {
         {loading && (
           <div className="flex flex-col items-center justify-center mt-8 px-8">
             <LoadingPoints color="text-gray-900" />
-            <p className="font-light text-gray-400 text-center font-coolvetica text-xs mt-4">
+            <p className="font-light text-gray-400 text-center  font-primary  text-xs mt-4">
               Buscando tus pedidos...
             </p>
           </div>
@@ -366,12 +366,12 @@ const Pedido = () => {
 
         {/* Mensajes */}
         {error && (
-          <div className="mt-4 text-red-500 font-coolvetica text-xs font-light text-center px-4">
+          <div className="mt-4 text-red-500  font-primary  text-xs font-light text-center px-4">
             {error}
           </div>
         )}
         {message && (
-          <div className="mt-4 text-green-500 font-coolvetica text-xs font-light text-center px-4">
+          <div className="mt-4 text-green-500  font-primary  text-xs font-light text-center px-4">
             {message}
           </div>
         )}
@@ -382,7 +382,7 @@ const Pedido = () => {
             {displayOrders.map((currentOrder, index) => (
               <div key={currentOrder.id}>
                 {displayOrders.length > 1 && (
-                  <h2 className="text-2xl px-4 font-bold font-coolvetica mb-4">
+                  <h2 className="text-2xl px-4 font-bold  font-primary  mb-4">
                     Pedido {index + 1}
                   </h2>
                 )}
@@ -398,7 +398,7 @@ const Pedido = () => {
         {/* Sin pedidos */}
         {!loading && displayOrders.length === 0 && (
           <div className="flex flex-col items-center justify-center mt-8 px-8">
-            <p className="font-light text-gray-400 text-center font-coolvetica text-xs">
+            <p className="font-light text-gray-400 text-center  font-primary  text-xs">
               No se encontraron pedidos activos.
             </p>
           </div>

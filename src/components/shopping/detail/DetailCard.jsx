@@ -100,7 +100,7 @@ const DetailCard = () => {
   if (!product) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="text-center font-coolvetica text-gray-900">
+        <div className="text-center  font-primary  text-gray-900">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p>Cargando producto...</p>
           <p className="text-xs text-gray-500 mt-2">
@@ -554,7 +554,7 @@ const DetailCard = () => {
                     visibleImages.push(
                       <div
                         key="more-left"
-                        className=" flex items-center justify-center font-coolvetica mr-2  "
+                        className=" flex items-center justify-center  font-primary  mr-2  "
                       >
                         <span className="text-white text-xs font-light">
                           +{startIndex}
@@ -589,7 +589,7 @@ const DetailCard = () => {
                     visibleImages.push(
                       <div
                         key="more-right"
-                        className=" flex items-center ml-2 justify-center font-coolvetica  "
+                        className=" flex items-center ml-2 justify-center  font-primary   "
                       >
                         <span className="text-white text-xs font-light">
                           +{totalImages - endIndex}
@@ -622,7 +622,7 @@ const DetailCard = () => {
                     />
                   </svg>
                 </button>
-                <h4 className="font-coolvetica font-bold pr-4 capitalize text-xl text-gray-900 leading-tight">
+                <h4 className=" font-primary  font-bold pr-4 capitalize text-xl text-gray-900 leading-tight">
                   {product.name}
                 </h4>
               </div>
@@ -653,7 +653,7 @@ const DetailCard = () => {
             </div>
 
             {product.detailDescription && (
-              <p className="font-coolvetica text-xs text-gray-400 font-light pl-4 pt-4 pr-16 leading-tight">
+              <p className=" font-primary  text-xs text-gray-400 font-light pl-4 pt-4 pr-16 leading-tight">
                 {product.detailDescription.charAt(0).toUpperCase() +
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
@@ -663,7 +663,7 @@ const DetailCard = () => {
               <div className="gap-2 w-full mt-8 flex flex-col justify-center ">
                 {Object.entries(variantStats).map(([key, values]) => (
                   <div key={key}>
-                    <h5 className="font-coolvetica px-4 font-light mb-2 text-xs w-full text-gray-900">
+                    <h5 className=" font-primary  px-4 font-light mb-2 text-xs w-full text-gray-900">
                       {clientConfig?.labels?.[key] || capitalizeWords(key)}
                     </h5>
                     <div className="flex w-full">
@@ -780,7 +780,7 @@ const DetailCard = () => {
                               className={`
             ${hasAttributeImage ? "w-10" : "px-4"} 
             h-10 
-            font-coolvetica 
+             font-primary  
             flex-shrink-0 
             text-xs 
             transition-all 
@@ -863,7 +863,7 @@ const DetailCard = () => {
                 displayAsFullButton={true}
                 disabled={shouldDisable}
               />
-              <p className="text-xs font-coolvetica pt-2 font-light text-gray-400">
+              <p className="text-xs  font-primary  pt-2 font-light text-gray-400">
                 Por {currencyFormat(totalPrice)}
               </p>
             </div>

@@ -29,7 +29,7 @@ export const Toast = ({ toasts, onRemove }) => {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`px-4 py-2 rounded-lg shadow-lg text-white text-sm font-coolvetica transform transition-all duration-300 ${
+          className={`px-4 py-2 rounded-lg shadow-lg text-white text-sm  font-primary  transform transition-all duration-300 ${
             toast.type === "success"
               ? "bg-green-500"
               : toast.type === "error"

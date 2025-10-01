@@ -260,13 +260,13 @@ const Card = ({ data, path }) => {
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-50 capitalize bg-opacity-40 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
+                          className="bg-gray-50 capitalize bg-opacity-40 text-gray-50  font-primary  text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
                         >
                           {attr}
                         </div>
                       ))}
                       {hasMore && (
-                        <div className="bg-gray-50 bg-opacity-70 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900">
+                        <div className="bg-gray-50 bg-opacity-70 text-gray-50  font-primary  text-xs font-light px-2 py-1 rounded-lg shadow-gray-900">
                           +{attributes.length - maxVisible}
                         </div>
                       )}
@@ -295,7 +295,7 @@ const Card = ({ data, path }) => {
         </div>
 
         {/* datos */}
-        <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left">
+        <div className="flex px-4 flex-col justify-between leading-normal  font-primary  text-left">
           <div className="flex mt-4 flex-col w-full">
             <h5 className="text-base font-medium">
               {(name || "Producto sin nombre").charAt(0).toUpperCase() +
@@ -303,7 +303,7 @@ const Card = ({ data, path }) => {
             </h5>
           </div>
           {data?.cardDescription && (
-            <p className="text-xs text-gray-400 font-light font-coolvetica">
+            <p className="text-xs text-gray-400 font-light  font-primary ">
               {data.cardDescription}
             </p>
           )}

@@ -51,7 +51,7 @@ const Section = () => {
           <Card key={p.id} data={p} path={category} />
         ))
       ) : (
-        <p className="font-coolvetica text-center text-xs font-light text-gray-400 px-8 pt-4 col-span-full">
+        <p className=" font-primary  text-center text-xs font-light text-gray-400 px-8 pt-4 col-span-full">
           {activeFilters.length > 0 || activeSortOption
             ? "No hay productos que coincidan con los filtros seleccionados."
             : "No hay productos en esta categoría."}

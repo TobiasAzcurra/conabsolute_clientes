@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useMemo } from "react";
+import { useTypography } from "../hooks/useTypography"; // ← NUEVO
 
 export const ClientContext = createContext();
 
@@ -16,10 +17,14 @@ export const ClientProvider = ({ children }) => {
   const [slugSucursal, setSlugSucursal] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
   const [sucursalId, setSucursalId] = useState(null);
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [activeSortOption, setActiveSortOption] = useState(null);
 
-  // ✅ Nuevo: Estado de filtros y ordenamiento
-  const [activeFilters, setActiveFilters] = useState([]); // ['hombre', 'mujer']
-  const [activeSortOption, setActiveSortOption] = useState(null); // 'price-asc' o null
+  // ← NUEVO: Cargar tipografía cuando tenemos los IDs
+  const { typography, loading: typographyLoading } = useTypography(
+    empresaId,
+    sucursalId
+  );
 
   const value = useMemo(
     () => ({
@@ -49,10 +54,12 @@ export const ClientProvider = ({ children }) => {
       setEmpresaId,
       sucursalId,
       setSucursalId,
-      activeFilters, // ✅
-      setActiveFilters, // ✅
-      activeSortOption, // ✅
-      setActiveSortOption, // ✅
+      activeFilters,
+      setActiveFilters,
+      activeSortOption,
+      setActiveSortOption,
+      typography, // ← NUEVO
+      typographyLoading, // ← NUEVO
     }),
     [
       isLoaded,
@@ -68,8 +75,10 @@ export const ClientProvider = ({ children }) => {
       slugSucursal,
       empresaId,
       sucursalId,
-      activeFilters, // ✅
-      activeSortOption, // ✅
+      activeFilters,
+      activeSortOption,
+      typography, // ← NUEVO
+      typographyLoading, // ← NUEVO
     ]
   );
 

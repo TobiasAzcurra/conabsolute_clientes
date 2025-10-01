@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import PropTypes from 'prop-types';
-import LoadingPoints from './LoadingPoints';
-import { MapDirection } from './form/MapDirection';
+import React, { useState } from "react";
+import ReactDOM from "react-dom";
+import PropTypes from "prop-types";
+import LoadingPoints from "./LoadingPoints";
+import { MapDirection } from "./form/MapDirection";
 import {
   doc,
   runTransaction,
   collection,
   getFirestore,
-} from 'firebase/firestore';
-import { obtenerFechaActual } from '../firebase/utils/dateHelpers';
-import isologo from '../assets/isologo.png';
-import { useClient } from '../contexts/ClientContext';
+} from "firebase/firestore";
+import { obtenerFechaActual } from "../firebase/utils/dateHelpers";
+import isologo from "../assets/isologo.png";
+import { useClient } from "../contexts/ClientContext";
 
 const AppleModal = ({
   isOpen,
@@ -39,33 +39,33 @@ const AppleModal = ({
     temperatura: 0,
     presentacion: 0,
     pagina: 0,
-    comentario: '',
+    comentario: "",
   });
 
-  const [deliveryMethod, setDeliveryMethod] = useState('delivery');
-  const [newTime, setNewTime] = useState('');
-  const [timeError, setTimeError] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState("delivery");
+  const [newTime, setNewTime] = useState("");
+  const [timeError, setTimeError] = useState("");
   const [isUpdatingTime, setIsUpdatingTime] = useState(false);
-  const [newAddress, setNewAddress] = useState('');
-  const [mapUrl, setMapUrl] = useState('');
-  const [addressError, setAddressError] = useState('');
+  const [newAddress, setNewAddress] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
+  const [addressError, setAddressError] = useState("");
   const [isUpdatingAddress, setIsUpdatingAddress] = useState(false);
-  const [aclaraciones, setAclaraciones] = useState('');
+  const [aclaraciones, setAclaraciones] = useState("");
   const { slugEmpresa, slugSucursal } = useClient();
 
   const handleUpdateAddress = async () => {
-    if (deliveryMethod === 'takeaway') {
+    if (deliveryMethod === "takeaway") {
       try {
         const firestore = getFirestore();
         const fechaActual = obtenerFechaActual();
-        const [dia, mes, anio] = fechaActual.split('/');
+        const [dia, mes, anio] = fechaActual.split("/");
         const pedidosCollectionRef = collection(
           firestore,
-          'absoluteClientes',
+          "absoluteClientes",
           slugEmpresa,
-          'sucursales',
+          "sucursales",
           slugSucursal,
-          'pedidos',
+          "pedidos",
           anio,
           mes
         );
@@ -74,7 +74,7 @@ const AppleModal = ({
         await runTransaction(firestore, async (transaction) => {
           const docSnapshot = await transaction.get(pedidoDocRef);
           if (!docSnapshot.exists()) {
-            throw new Error('El pedido no existe para la fecha especificada.');
+            throw new Error("El pedido no existe para la fecha especificada.");
           }
 
           const existingData = docSnapshot.data();
@@ -84,13 +84,13 @@ const AppleModal = ({
           );
 
           if (pedidoIndex === -1) {
-            throw new Error('Pedido no encontrado');
+            throw new Error("Pedido no encontrado");
           }
 
-          pedidosDelDia[pedidoIndex].direccion = '';
-          pedidosDelDia[pedidoIndex].deliveryMethod = 'takeaway';
-          pedidosDelDia[pedidoIndex].ubicacion = '';
-          pedidosDelDia[pedidoIndex].referencias = '';
+          pedidosDelDia[pedidoIndex].direccion = "";
+          pedidosDelDia[pedidoIndex].deliveryMethod = "takeaway";
+          pedidosDelDia[pedidoIndex].ubicacion = "";
+          pedidosDelDia[pedidoIndex].referencias = "";
           pedidosDelDia[pedidoIndex].map = [];
 
           transaction.set(pedidoDocRef, {
@@ -99,12 +99,12 @@ const AppleModal = ({
           });
         });
 
-        onAddressSuccess?.('');
+        onAddressSuccess?.("");
         onClose();
       } catch (error) {
-        console.error('Error al cambiar a retiro:', error);
+        console.error("Error al cambiar a retiro:", error);
         setAddressError(
-          'Hubo un error al cambiar a retiro. Por favor intenta nuevamente.'
+          "Hubo un error al cambiar a retiro. Por favor intenta nuevamente."
         );
       } finally {
         setIsUpdatingAddress(false);
@@ -112,25 +112,25 @@ const AppleModal = ({
       return;
     }
 
-    if (!newAddress && deliveryMethod === 'delivery') {
-      setAddressError('Por favor selecciona una dirección válida');
+    if (!newAddress && deliveryMethod === "delivery") {
+      setAddressError("Por favor selecciona una dirección válida");
       return;
     }
 
     setIsUpdatingAddress(true);
-    setAddressError('');
+    setAddressError("");
 
     try {
       const firestore = getFirestore();
       const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split('/');
+      const [dia, mes, anio] = fechaActual.split("/");
       const pedidosCollectionRef = collection(
         firestore,
-        'absoluteClientes',
+        "absoluteClientes",
         slugEmpresa,
-        'sucursales',
+        "sucursales",
         slugSucursal,
-        'pedidos',
+        "pedidos",
         anio,
         mes
       );
@@ -139,7 +139,7 @@ const AppleModal = ({
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe para la fecha especificada.');
+          throw new Error("El pedido no existe para la fecha especificada.");
         }
 
         const existingData = docSnapshot.data();
@@ -149,13 +149,13 @@ const AppleModal = ({
         );
 
         if (pedidoIndex === -1) {
-          throw new Error('Pedido no encontrado');
+          throw new Error("Pedido no encontrado");
         }
 
         pedidosDelDia[pedidoIndex].direccion = newAddress;
         pedidosDelDia[pedidoIndex].ubicacion = mapUrl;
         pedidosDelDia[pedidoIndex].referencias = aclaraciones;
-        pedidosDelDia[pedidoIndex].deliveryMethod = 'delivery';
+        pedidosDelDia[pedidoIndex].deliveryMethod = "delivery";
 
         const coords = mapUrl.match(/q=(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (coords) {
@@ -174,9 +174,9 @@ const AppleModal = ({
       onAddressSuccess?.(newAddress);
       onClose();
     } catch (error) {
-      console.error('Error al actualizar la dirección:', error);
+      console.error("Error al actualizar la dirección:", error);
       setAddressError(
-        'Hubo un error al actualizar la dirección. Por favor intenta nuevamente.'
+        "Hubo un error al actualizar la dirección. Por favor intenta nuevamente."
       );
     } finally {
       setIsUpdatingAddress(false);
@@ -185,24 +185,24 @@ const AppleModal = ({
 
   const handleUpdateTime = async () => {
     if (!newTime) {
-      setTimeError('Por favor selecciona una hora válida');
+      setTimeError("Por favor selecciona una hora válida");
       return;
     }
 
     setIsUpdatingTime(true);
-    setTimeError('');
+    setTimeError("");
 
     try {
       const firestore = getFirestore();
       const fechaActual = obtenerFechaActual();
-      const [dia, mes, anio] = fechaActual.split('/');
+      const [dia, mes, anio] = fechaActual.split("/");
       const pedidosCollectionRef = collection(
         firestore,
-        'absoluteClientes',
+        "absoluteClientes",
         slugEmpresa,
-        'sucursales',
+        "sucursales",
         slugSucursal,
-        'pedidos',
+        "pedidos",
         anio,
         mes
       );
@@ -211,7 +211,7 @@ const AppleModal = ({
       await runTransaction(firestore, async (transaction) => {
         const docSnapshot = await transaction.get(pedidoDocRef);
         if (!docSnapshot.exists()) {
-          throw new Error('El pedido no existe para la fecha especificada.');
+          throw new Error("El pedido no existe para la fecha especificada.");
         }
 
         const existingData = docSnapshot.data();
@@ -221,15 +221,15 @@ const AppleModal = ({
         );
 
         if (pedidoIndex === -1) {
-          throw new Error('Pedido no encontrado');
+          throw new Error("Pedido no encontrado");
         }
 
         // Ajustamos la hora según el método de entrega
         const pedido = pedidosDelDia[pedidoIndex];
-        const isDelivery = pedido.direccion !== '';
+        const isDelivery = pedido.direccion !== "";
 
         // Convertimos la hora seleccionada a minutos desde medianoche
-        const [hours, minutes] = newTime.split(':').map(Number);
+        const [hours, minutes] = newTime.split(":").map(Number);
         let totalMinutes = hours * 60 + minutes;
 
         // Restamos el tiempo de preparación/envío según corresponda
@@ -244,8 +244,8 @@ const AppleModal = ({
         const adjustedMinutes = totalMinutes % 60;
         const adjustedTime = `${String(adjustedHours).padStart(
           2,
-          '0'
-        )}:${String(adjustedMinutes).padStart(2, '0')}`;
+          "0"
+        )}:${String(adjustedMinutes).padStart(2, "0")}`;
 
         pedidosDelDia[pedidoIndex].hora = adjustedTime;
 
@@ -258,9 +258,9 @@ const AppleModal = ({
       onTimeSuccess?.(newTime);
       onClose();
     } catch (error) {
-      console.error('❌ Error al actualizar la hora:', error);
+      console.error("❌ Error al actualizar la hora:", error);
       setTimeError(
-        'Hubo un problema al actualizar la hora. Por favor intenta nuevamente.'
+        "Hubo un problema al actualizar la hora. Por favor intenta nuevamente."
       );
     } finally {
       setIsUpdatingTime(false);
@@ -270,10 +270,10 @@ const AppleModal = ({
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(textToCopy);
-      alert('¡Copiado al portapapeles!');
+      alert("¡Copiado al portapapeles!");
     } catch (err) {
-      console.error('Error al copiar:', err);
-      alert('No se pudo copiar al portapapeles');
+      console.error("Error al copiar:", err);
+      alert("No se pudo copiar al portapapeles");
     }
   };
 
@@ -281,7 +281,7 @@ const AppleModal = ({
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
-      <div className="bg-gray-50  flex flex-col items-center justify-center rounded-3xl shadow-xl w-full max-w-md font-coolvetica pb-4 pt-2 relative">
+      <div className="bg-gray-50  flex flex-col items-center justify-center rounded-3xl shadow-xl w-full max-w-md  font-primary  pb-4 pt-2 relative">
         {title && (
           <h2 className="text-2xl font-bold px-4 text-black pt-2 border-b border-black border-opacity-20 w-full text-center pb-4">
             {title}
@@ -319,14 +319,14 @@ const AppleModal = ({
                         const currentMinute = now.getMinutes();
 
                         const allTimeSlots = [
-                          '20:30',
-                          '21:00',
-                          '21:30',
-                          '22:00',
-                          '22:30',
-                          '23:00',
-                          '23:30',
-                          '00:00',
+                          "20:30",
+                          "21:00",
+                          "21:30",
+                          "22:00",
+                          "22:30",
+                          "23:00",
+                          "23:30",
+                          "00:00",
                         ];
 
                         const nextSlotMinutes =
@@ -339,7 +339,7 @@ const AppleModal = ({
                         return allTimeSlots
                           .filter((timeSlot) => {
                             let [slotHour, slotMinute] = timeSlot
-                              .split(':')
+                              .split(":")
                               .map(Number);
                             if (slotHour === 0) slotHour = 24;
                             const slotTimeInMinutes =
@@ -368,11 +368,11 @@ const AppleModal = ({
                 <button
                   type="button"
                   className={`h-20 flex-1 font-bold items-center flex justify-center gap-2 rounded-lg ${
-                    deliveryMethod === 'delivery'
-                      ? 'bg-black text-gray-100'
-                      : 'bg-gray-300 text-black'
+                    deliveryMethod === "delivery"
+                      ? "bg-black text-gray-100"
+                      : "bg-gray-300 text-black"
                   }`}
-                  onClick={() => setDeliveryMethod('delivery')}
+                  onClick={() => setDeliveryMethod("delivery")}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -389,19 +389,19 @@ const AppleModal = ({
                 <button
                   type="button"
                   className={`h-20 flex-1 flex-col font-bold items-center flex justify-center rounded-lg ${
-                    deliveryMethod === 'takeaway'
-                      ? 'bg-black text-gray-100'
-                      : 'bg-gray-300 text-black'
+                    deliveryMethod === "takeaway"
+                      ? "bg-black text-gray-100"
+                      : "bg-gray-300 text-black"
                   }`}
-                  onClick={() => setDeliveryMethod('takeaway')}
+                  onClick={() => setDeliveryMethod("takeaway")}
                 >
                   <div className="flex flex-row items-center gap-2">
                     <img
                       src={isologo}
                       className={`h-4 ${
-                        deliveryMethod === 'takeaway'
-                          ? 'invert brightness-0'
-                          : 'brightness-0'
+                        deliveryMethod === "takeaway"
+                          ? "invert brightness-0"
+                          : "brightness-0"
                       }`}
                       alt=""
                     />
@@ -411,7 +411,7 @@ const AppleModal = ({
                 </button>
               </div>
 
-              {deliveryMethod === 'delivery' && (
+              {deliveryMethod === "delivery" && (
                 <div className="w-full items-center rounded-3xl border-2 border-black">
                   <div className="border-b border-black border-opacity-20">
                     <MapDirection
@@ -419,7 +419,7 @@ const AppleModal = ({
                       setValidarUbi={() => {}}
                       setNoEncontre={() => {}}
                       setFieldValue={(field, value) => {
-                        if (field === 'address') {
+                        if (field === "address") {
                           setNewAddress(value);
                         }
                       }}
@@ -463,10 +463,10 @@ const AppleModal = ({
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(textToCopy);
-                  alert('¡Copiado al portapapeles!');
+                  alert("¡Copiado al portapapeles!");
                 } catch (err) {
-                  console.error('Error al copiar:', err);
-                  alert('No se pudo copiar al portapapeles');
+                  console.error("Error al copiar:", err);
+                  alert("No se pudo copiar al portapapeles");
                 }
               }}
               className="w-full h-10 mb-2 text-base bg-gray-300 text-black rounded-3xl font-bold cursor-pointer hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
@@ -491,14 +491,14 @@ const AppleModal = ({
                 disabled={isUpdatingTime}
                 className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
                   isUpdatingTime
-                    ? 'cursor-not-allowed opacity-70'
-                    : 'cursor-pointer'
+                    ? "cursor-not-allowed opacity-70"
+                    : "cursor-pointer"
                 }`}
               >
                 {isUpdatingTime ? (
                   <LoadingPoints color="text-gray-100" />
                 ) : (
-                  'Confirmar'
+                  "Confirmar"
                 )}
               </button>
               <button
@@ -518,7 +518,7 @@ const AppleModal = ({
                 {isUpdatingAddress ? (
                   <LoadingPoints color="text-gray-100" />
                 ) : (
-                  'Confirmar'
+                  "Confirmar"
                 )}
               </button>
               <button
@@ -533,11 +533,11 @@ const AppleModal = ({
               <button
                 onClick={onConfirm}
                 className={`w-1/2 h-20 text-2xl flex items-center justify-center bg-black text-gray-100 rounded-3xl font-bold hover:bg-opacity-90 transition-all ${
-                  isLoading ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
+                  isLoading ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                 }`}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingPoints color="text-gray-100" /> : 'Sí'}
+                {isLoading ? <LoadingPoints color="text-gray-100" /> : "Sí"}
               </button>
               <button
                 onClick={onClose}
@@ -559,7 +559,7 @@ const AppleModal = ({
               disabled={
                 isRatingModal &&
                 Object.entries(ratings)
-                  .filter(([key]) => key !== 'comentario')
+                  .filter(([key]) => key !== "comentario")
                   .some(([_, value]) => value === 0)
               }
             >
@@ -567,17 +567,17 @@ const AppleModal = ({
                 isLoading ? (
                   <LoadingPoints color="text-gray-100" />
                 ) : (
-                  'Enviar'
+                  "Enviar"
                 )
               ) : (
-                'Entendido'
+                "Entendido"
               )}
             </button>
           )}
         </div>
       </div>
     </div>,
-    document.getElementById('modal-root')
+    document.getElementById("modal-root")
   );
 };
 
@@ -604,23 +604,23 @@ AppleModal.propTypes = {
 };
 
 AppleModal.defaultProps = {
-  title: '',
+  title: "",
   twoOptions: false,
   onConfirm: () => {},
   isLoading: false,
   isRatingModal: false,
   isEditAddressModal: false,
-  orderId: '',
-  currentAddress: '',
+  orderId: "",
+  currentAddress: "",
   onAddressSuccess: () => {},
   children: null,
   orderProducts: [],
   additionalProducts: [],
   isEditTimeModal: false,
-  currentTime: '',
+  currentTime: "",
   onTimeSuccess: () => {},
   copy: false,
-  textToCopy: '',
+  textToCopy: "",
 };
 
 export default AppleModal;

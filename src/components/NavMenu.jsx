@@ -128,7 +128,7 @@ const NavMenu = () => {
 
   return (
     <div className="relative z-[99]">
-      <p className="text-gray-50 px-4 text-2xl font-medium mb-3 text-center font-coolvetica">
+      <p className="text-gray-50 px-4 text-2xl font-medium mb-3 text-center  font-primary ">
         {clientAssets?.heroTitle || "Elegí lo que más te guste"}
       </p>
       <nav
@@ -161,7 +161,7 @@ const NavMenu = () => {
             d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
           />
         </svg>
-        <div className="flex flex-row font-coolvetica gap-1 flex-shrink-0">
+        <div className="flex flex-row  font-primary  gap-1 flex-shrink-0">
           {/* ✅ Tags de filtro desde DB */}
           {productTags.map((tag) => (
             <button

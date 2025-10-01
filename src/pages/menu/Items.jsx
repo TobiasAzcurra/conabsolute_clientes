@@ -66,7 +66,7 @@ const Items = ({
           />
         )}
       </div>
-      <h5 className="h-10 flex items-center px-4 text-xs font-coolvetica  w-full font-light text-gray-900">
+      <h5 className="h-10 flex items-center px-4 text-xs  font-primary   w-full font-light text-gray-900">
         <span className="truncate  max-w-[100px]">{capitalizeWords(name)}</span>
       </h5>
     </>

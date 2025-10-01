@@ -110,7 +110,7 @@ const UpdatedPedidoSection = ({
   };
 
   return (
-    <div className="flex flex-col justify-center items-center font-coolvetica w-full">
+    <div className="flex flex-col justify-center items-center  font-primary  w-full">
       {/* Pregunta */}
       <div
         className="w-full mt-11 flex-col px-4 flex cursor-pointer"
@@ -225,7 +225,7 @@ const UpdatedPedidoSection = ({
 						<div className="fixed bottom-0 w-full px-4 p-4 border-t border-opacity-20 border-black  bg-gray-50 ">
 							<div
 								onClick={onConfirmChanges}
-								className={`bg-green-500 w-full text-gray-100 font-coolvetica text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold shadow-lg ${
+								className={`bg-green-500 w-full text-gray-100  font-primary  text-center justify-center h-20 flex items-center text-2xl rounded-3xl font-bold shadow-lg ${
 									isConfirming
 										? "opacity-50 cursor-not-allowed"
 										: "cursor-pointer"
