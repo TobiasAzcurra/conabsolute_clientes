@@ -15,6 +15,7 @@ import {
   getPreloadStrategy,
   getConnectionQuality,
 } from "../../utils/networkDetector";
+import { getProductTagsByClient } from "../../firebase/tags/getTagsByClient";
 
 const DEFAULT_INTRO_DURATION = 0;
 const REDIRECT_BUFFER = 300;
@@ -32,6 +33,7 @@ const MenuIntro = () => {
     setProductsByCategory,
     setCategories,
     setProductsSorted,
+    setProductTags,
     setSlugEmpresa,
     setSlugSucursal,
     setEmpresaId,
@@ -95,18 +97,26 @@ const MenuIntro = () => {
         }, strategy.heroDelay);
 
         // 3. Cargar resto de datos en paralelo
-        const [data, config, categories, productsData, sortedProducts] =
-          await Promise.all([
-            getClientData(empresaId, sucursalId),
-            getClientConfig(empresaId, sucursalId),
-            getCategoriesByClient(empresaId, sucursalId),
-            getProductsByClient(empresaId, sucursalId),
-            getProductsByCategoryPosition(empresaId, sucursalId),
-          ]);
+        const [
+          data,
+          config,
+          categories,
+          productTags,
+          productsData,
+          sortedProducts,
+        ] = await Promise.all([
+          getClientData(empresaId, sucursalId),
+          getClientConfig(empresaId, sucursalId),
+          getCategoriesByClient(empresaId, sucursalId),
+          getProductTagsByClient(empresaId, sucursalId), // ✅ Nuevo
+          getProductsByClient(empresaId, sucursalId),
+          getProductsByCategoryPosition(empresaId, sucursalId),
+        ]);
 
         setClientData(data);
         setClientConfig(config);
         setCategories(categories);
+        setProductTags(productTags);
 
         // Ordenar productos alfabéticamente UNA SOLA VEZ aquí
         // Section.jsx consumirá directamente sin re-ordenar

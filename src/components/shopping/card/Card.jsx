@@ -260,7 +260,7 @@ const Card = ({ data, path }) => {
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-50 bg-opacity-40 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
+                          className="bg-gray-50 capitalize bg-opacity-40 text-gray-50 font-coolvetica text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
                         >
                           {attr}
                         </div>
@@ -297,7 +297,7 @@ const Card = ({ data, path }) => {
         {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal font-coolvetica text-left">
           <div className="flex mt-4 flex-col w-full">
-            <h5 className="text-lg font-medium">
+            <h5 className="text-base font-medium">
               {(name || "Producto sin nombre").charAt(0).toUpperCase() +
                 (name || "Producto sin nombre").slice(1).toLowerCase()}
             </h5>
@@ -311,7 +311,7 @@ const Card = ({ data, path }) => {
           <div className="flex w-full mt-4 flex-col mb-4">
             <div className="flex flex-row justify-between items-center">
               <div className="flex flex-col">
-                <span className="font-bold text-4xl text-black">
+                <span className="font-bold text-2xl text-black">
                   {currencyFormat(pricingInfo.mainPrice)}
                 </span>
                 {pricingInfo.strikeThroughOldPrice && (

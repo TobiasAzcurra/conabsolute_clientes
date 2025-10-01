@@ -16,7 +16,7 @@ const FloatingCart = ({ totalQuantity, cart }) => {
         <p className="text-xs font-light text-gray-500">
           {totalQuantity} {totalQuantity === 1 ? "producto" : "productos"}
         </p>
-        <p className="text-4xl font-bold mt-[-5px]">
+        <p className="text-3xl font-bold mt-[-5px]">
           {currencyFormat(totalPrice)}
         </p>
       </div>

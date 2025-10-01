@@ -113,7 +113,7 @@ const ClientLayout = ({ children }) => {
 
         <div
           className={`${
-            !shouldHideHeader ? "mt-[100px]" : ""
+            !shouldHideHeader ? "mt-[150px]" : ""
           } ${paddingBottom} z-[5]`}
         >
           {children}

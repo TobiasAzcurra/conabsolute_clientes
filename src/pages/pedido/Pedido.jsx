@@ -93,7 +93,7 @@ const Pedido = () => {
   };
 
   const handleSupportClick = () => {
-    const phone = clientConfig?.logistics?.phone || "543584306832";
+    const phone = clientConfig?.logistics?.phone || "";
     const msg = "Hola! Necesito ayuda con mi pedido.";
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
       msg
@@ -335,6 +335,8 @@ const Pedido = () => {
   };
 
   const displayOrders = orderId ? (order ? [order] : []) : orders;
+
+  console.log(clientConfig);
 
   return (
     <div

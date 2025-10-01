@@ -3,19 +3,19 @@ import { app } from "../config";
 
 const db = getFirestore(app);
 
-export const getCategoriesByClient = async (empresa, sucursal) => {
+export const getProductTagsByClient = async (empresa, sucursal) => {
   const ref = collection(
     db,
     "absoluteClientes",
     empresa,
     "sucursales",
     sucursal,
-    "categorias"
+    "productTags"
   );
   const snapshot = await getDocs(ref);
-  const categories = snapshot.docs
+  const tags = snapshot.docs
     .map((doc) => ({ id: doc.id, ...doc.data() }))
-    .filter((cat) => cat.active && cat.name)
+    .filter((tag) => tag.active)
     .sort((a, b) => (a.position || 0) - (b.position || 0));
-  return categories;
+  return tags;
 };

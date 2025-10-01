@@ -6,13 +6,35 @@ import LoadingPoints from "../../LoadingPoints";
 
 const Section = () => {
   const { category } = useParams();
-  const { productsByCategory } = useClient();
+  const { productsByCategory, activeFilters, activeSortOption } = useClient();
 
-  const products = useMemo(() => {
-    // Ya vienen ordenados del Context, no re-ordenar
-    if (!productsByCategory || !productsByCategory[category]) return [];
-    return productsByCategory[category];
-  }, [productsByCategory, category]);
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...(productsByCategory[category] || [])];
+
+    // 1. Aplicar filtros
+    if (activeFilters.length > 0) {
+      result = result.filter((product) => {
+        if (!product.tags || !Array.isArray(product.tags)) return false;
+        return activeFilters.some((filter) => product.tags.includes(filter));
+      });
+    }
+
+    // 2. Aplicar ordenamiento
+    if (activeSortOption === "price-asc") {
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (activeSortOption === "date-desc") {
+      result.sort((a, b) => {
+        // Firestore Timestamps tienen un método toMillis() o seconds
+        const dateA =
+          a.createdAt?.toMillis?.() || a.createdAt?.seconds * 1000 || 0;
+        const dateB =
+          b.createdAt?.toMillis?.() || b.createdAt?.seconds * 1000 || 0;
+        return dateB - dateA; // Más reciente primero (descendente)
+      });
+    }
+
+    return result;
+  }, [productsByCategory, category, activeFilters, activeSortOption]);
 
   if (!productsByCategory) {
     return (
@@ -24,11 +46,15 @@ const Section = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 px-4 mb-10">
-      {products.length > 0 ? (
-        products.map((p) => <Card key={p.id} data={p} path={category} />)
+      {filteredAndSortedProducts.length > 0 ? (
+        filteredAndSortedProducts.map((p) => (
+          <Card key={p.id} data={p} path={category} />
+        ))
       ) : (
-        <p className="font-coolvetica text-center text-xs font-light text-gray-400">
-          No hay productos en esta categoría.
+        <p className="font-coolvetica text-center text-xs font-light text-gray-400 px-8 pt-4 col-span-full">
+          {activeFilters.length > 0 || activeSortOption
+            ? "No hay productos que coincidan con los filtros seleccionados."
+            : "No hay productos en esta categoría."}
         </p>
       )}
     </div>

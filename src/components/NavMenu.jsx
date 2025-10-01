@@ -1,13 +1,23 @@
 import { useEffect, useRef } from "react";
 import Items from "../pages/menu/Items";
 import { useClient } from "../contexts/ClientContext";
+import { useLocation } from "react-router-dom";
+import { SORT_OPTIONS } from "../constants/sortOptions";
 
 const NavMenu = () => {
   const navRef = useRef(null);
   const animationRef = useRef(null);
   const interactionTimeoutRef = useRef(null);
   const isUserInteracting = useRef(false);
-  const { categories, clientAssets } = useClient();
+  const {
+    categories,
+    productTags,
+    clientAssets,
+    activeFilters,
+    setActiveFilters,
+    activeSortOption,
+    setActiveSortOption,
+  } = useClient();
 
   useEffect(() => {
     const nav = navRef.current;
@@ -64,12 +74,10 @@ const NavMenu = () => {
       clearTimeout(interactionTimeoutRef.current);
       interactionTimeoutRef.current = setTimeout(() => {
         isUserInteracting.current = false;
-        // sincroniza scrollAmount actual al reanudar animación
         scrollAmount = nav.scrollLeft;
       }, 2000);
     };
 
-    // Eventos para desktop
     nav.addEventListener("mousedown", startInteraction);
     nav.addEventListener("mousemove", startInteraction);
     nav.addEventListener("mouseup", endInteraction);
@@ -78,7 +86,6 @@ const NavMenu = () => {
       endInteraction();
     });
 
-    // Eventos para mobile
     nav.addEventListener("touchstart", startInteraction);
     nav.addEventListener("touchmove", startInteraction);
     nav.addEventListener("touchend", endInteraction);
@@ -100,9 +107,28 @@ const NavMenu = () => {
     };
   }, []);
 
+  const location = useLocation();
+  const pathParts = location.pathname.split("/");
+  const activeCategory = pathParts[pathParts.length - 1];
+
+  // ✅ Manejar click en filtros (multi-selección)
+  const handleFilterClick = (tagId) => {
+    setActiveFilters(
+      (prev) =>
+        prev.includes(tagId)
+          ? prev.filter((id) => id !== tagId) // Quitar si ya está
+          : [...prev, tagId] // Agregar si no está
+    );
+  };
+
+  // ✅ Manejar click en sort
+  const handleSortClick = (sortId) => {
+    setActiveSortOption((prev) => (prev === sortId ? null : sortId)); // Toggle
+  };
+
   return (
     <div className="relative z-[99]">
-      <p className="text-gray-50 px-4  text-2xl mb-3 text-center font-coolvetica">
+      <p className="text-gray-50 px-4 text-2xl font-medium mb-3 text-center font-coolvetica">
         {clientAssets?.heroTitle || "Elegí lo que más te guste"}
       </p>
       <nav
@@ -116,9 +142,62 @@ const NavMenu = () => {
             img={cat.image || cat.img || "/menu/defaultPortada.jpeg"}
             categoryId={cat.id}
             name={cat.name || cat.id}
+            isActive={activeCategory === cat.id}
           />
         ))}
       </nav>
+      <div className="px-4 flex flex-row items-center gap-4  pb-4 overflow-x-auto nav-scroll-hide">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="1.5"
+          stroke="currentColor"
+          className="h-6 flex-shrink-0"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+          />
+        </svg>
+        <div className="flex flex-row font-coolvetica gap-1 flex-shrink-0">
+          {/* ✅ Tags de filtro desde DB */}
+          {productTags.map((tag) => (
+            <button
+              key={tag.id}
+              onClick={() => handleFilterClick(tag.id)}
+              className={`shadow-lg shadow-gray-200 bg-gray-50 w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
+                activeFilters.includes(tag.id)
+                  ? "border-2 border-gray-900 text-gray-900"
+                  : "text-gray-600 "
+              }`}
+            >
+              {tag.name}
+            </button>
+          ))}
+
+          {/* ✅ Separador visual */}
+          {productTags.length > 0 && (
+            <div className="w-px h-6 bg-gray-300 self-center mx-1" />
+          )}
+
+          {/* ✅ Tags de ordenamiento */}
+          {SORT_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              onClick={() => handleSortClick(option.id)}
+              className={`shadow-lg shadow-gray-200 bg-gray-50 w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
+                activeSortOption === option.id
+                  ? "border-2 border-gray-900 text-gray-900"
+                  : "text-gray-600 "
+              }`}
+            >
+              {option.name}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

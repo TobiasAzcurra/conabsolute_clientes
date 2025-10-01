@@ -195,16 +195,16 @@ const FormCustom = ({ cart, total }) => {
     const isReserva = values.hora.trim() !== "";
 
     // 1. Validar horarios si NO es reserva
-    // if (!isReserva) {
-    //   const businessHours = clientConfig?.logistics?.businessHours;
-    //   const status = isBusinessOpen(businessHours);
+    if (!isReserva) {
+      const businessHours = clientConfig?.logistics?.businessHours;
+      const status = isBusinessOpen(businessHours);
 
-    //   if (!status.isOpen) {
-    //     setClosedMessage(status.message);
-    //     setShowClosedModal(true);
-    //     return;
-    //   }
-    // }
+      if (!status.isOpen) {
+        setClosedMessage(status.message);
+        setShowClosedModal(true);
+        return;
+      }
+    }
 
     // 2. Verificar código de descuento
     let appliedDiscount = null;
