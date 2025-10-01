@@ -260,13 +260,13 @@ const Card = ({ data, path }) => {
                       {visibleAttributes.map((attr, index) => (
                         <div
                           key={index}
-                          className="bg-gray-50 capitalize bg-opacity-40 text-gray-50  font-primary  text-xs font-light px-2 py-1 rounded-lg shadow-gray-900"
+                          className="bg-gray-300 capitalize bg-opacity-50 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full"
                         >
                           {attr}
                         </div>
                       ))}
                       {hasMore && (
-                        <div className="bg-gray-50 bg-opacity-70 text-gray-50  font-primary  text-xs font-light px-2 py-1 rounded-lg shadow-gray-900">
+                        <div className="bg-gray-300 bg-opacity-70 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full">
                           +{attributes.length - maxVisible}
                         </div>
                       )}

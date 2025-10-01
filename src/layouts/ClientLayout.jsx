@@ -1,8 +1,8 @@
-// layouts/ClientLayout.js - MIGRADO
+// layouts/ClientLayout.js - MIGRADO + WhatsApp
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useClient } from "../contexts/ClientContext";
-import { useCart } from "../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
+import { useCart } from "../contexts/CartContext";
 import Carrusel from "../components/Carrusel";
 import NavMenu from "../components/NavMenu";
 import FloatingCart from "../components/shopping/FloatingCart";
@@ -10,11 +10,9 @@ import SearchBar from "../components/SearchBar";
 import { useLocation } from "react-router-dom";
 
 const ClientLayout = ({ children }) => {
-  const { clientData, clientAssets } = useClient();
+  const { clientData, clientAssets, clientConfig } = useClient(); // ← Agregado clientConfig
 
-  // ← CAMBIO: Reemplazar Redux con Context
-  // OLD: const cart = useSelector((state) => state.cartState.cart);
-  const { cart } = useCart(); // ← NUEVO
+  const { cart } = useCart();
 
   const location = useLocation();
   const pathname = location.pathname;
@@ -31,7 +29,6 @@ const ClientLayout = ({ children }) => {
 
   const shouldHideSearch = isCart && isSuccessPage && isPedidoPage;
 
-  // ← FUNCIONA IGUAL: cart viene del Context ahora
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -48,6 +45,16 @@ const ClientLayout = ({ children }) => {
   const onSuggestionClick = () => {
     setPhoneNumber(previousPhone);
     setShowSuggestion(false);
+  };
+
+  // ← NUEVO: Función para abrir WhatsApp
+  const handleContactClick = () => {
+    const phone = clientConfig?.logistics?.phone || "";
+    const msg = "Hola! Tengo una consulta.";
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
+      msg
+    )}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   const paddingBottom =
@@ -88,10 +95,20 @@ const ClientLayout = ({ children }) => {
               className={`fixed inset-x-0 bottom-0 z-10 
             ${totalQuantity > 0 ? "h-[125px]" : "h-[75px]"} 
             
-            bg-gray-200 bg-opacity-60 
+            bg-gray-300 bg-opacity-50 
             pointer-events-none 
             backdrop-blur-md`}
             />
+
+            {/* ← CAMBIO: Convertido a botón con onClick */}
+            <button
+              onClick={handleContactClick}
+              className={`bg-gray-300 bg-opacity-50 fixed z-50 ${
+                totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
+              } backdrop-blur-md right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
+            >
+              Contactanos
+            </button>
 
             <SearchBar
               phoneNumber={phoneNumber}
