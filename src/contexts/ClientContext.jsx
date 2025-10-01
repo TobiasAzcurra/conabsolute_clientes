@@ -1,5 +1,7 @@
+// contexts/ClientContext.jsx
 import React, { createContext, useState, useContext, useMemo } from "react";
-import { useTypography } from "../hooks/useTypography"; // ← NUEVO
+import { useTypography } from "../hooks/useTypography";
+import { useColors } from "../hooks/useColors";
 
 export const ClientContext = createContext();
 
@@ -20,11 +22,13 @@ export const ClientProvider = ({ children }) => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [activeSortOption, setActiveSortOption] = useState(null);
 
-  // ← NUEVO: Cargar tipografía cuando tenemos los IDs
+  // Cargar tipografía y colores cuando tenemos los IDs
   const { typography, loading: typographyLoading } = useTypography(
     empresaId,
     sucursalId
   );
+
+  const { colors, loading: colorsLoading } = useColors(empresaId, sucursalId);
 
   const value = useMemo(
     () => ({
@@ -58,8 +62,10 @@ export const ClientProvider = ({ children }) => {
       setActiveFilters,
       activeSortOption,
       setActiveSortOption,
-      typography, // ← NUEVO
-      typographyLoading, // ← NUEVO
+      typography,
+      typographyLoading,
+      colors,
+      colorsLoading,
     }),
     [
       isLoaded,
@@ -77,8 +83,10 @@ export const ClientProvider = ({ children }) => {
       sucursalId,
       activeFilters,
       activeSortOption,
-      typography, // ← NUEVO
-      typographyLoading, // ← NUEVO
+      typography,
+      typographyLoading,
+      colors,
+      colorsLoading,
     ]
   );
 

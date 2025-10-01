@@ -23,9 +23,9 @@ const FloatingCart = ({ totalQuantity, cart }) => {
 
       <Link
         to={`/${slugEmpresa}/${slugSucursal}/carrito`}
-        className="bg-blue-700 mr-4 items-center flex justify-center px-4 py-2 rounded-full "
+        className="bg-primary mr-4 items-center flex justify-center px-4 py-2 rounded-full "
       >
-        <p className="bg-blue-700 text-sm text-gray-50 font-medium text-center">
+        <p className=" text-sm text-gray-50 font-medium text-center">
           Ver pedido
         </p>
       </Link>
