@@ -214,12 +214,12 @@ const QuickAddToCart = ({
             >
               <div className="flex w-fit h-10">
                 <div
-                  className="text-blue-700  font-primary  font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
+                  className="text-primary  -700  font-primary  font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
                   onClick={() => handleQuantityChange(-1)}
                 >
                   -
                 </div>
-                <div className=" font-primary  font-medium text-blue-700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
+                <div className=" font-primary  font-medium text-primary  -700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -240,7 +240,7 @@ const QuickAddToCart = ({
                   className={` font-primary  font-medium flex justify-center text-center items-center w-[35px] h-10 ${
                     quantity >= maxStock
                       ? "text-gray-400 cursor-not-allowed"
-                      : "text-blue-700 cursor-pointer"
+                      : "text-primary  -700 cursor-pointer"
                   }`}
                   onClick={() => quantity < maxStock && handleQuantityChange(1)}
                 >
@@ -268,7 +268,7 @@ const QuickAddToCart = ({
               <div className="absolute z-[60]">
                 <button
                   disabled={disabled}
-                  className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-blue-700 rounded-full h-10 px-4 font-medium ${
+                  className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-primary  -700 rounded-full h-10 px-4 font-medium ${
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={!disabled ? startAddingProcess : undefined}
@@ -279,7 +279,7 @@ const QuickAddToCart = ({
                     viewBox="0 0 24 24"
                     strokeWidth="1.5"
                     stroke="currentColor"
-                    className="h-6 text-blue-700"
+                    className="h-6 text-primary  -700"
                   >
                     <path
                       strokeLinecap="round"
@@ -292,7 +292,7 @@ const QuickAddToCart = ({
               </div>
             ) : (
               <div
-                className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-blue-700 rounded-full h-10 px-4 font-medium`}
+                className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-primary  -700 rounded-full h-10 px-4 font-medium`}
                 onClick={startAddingProcess}
               >
                 <svg
@@ -301,7 +301,7 @@ const QuickAddToCart = ({
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
-                  className="h-6 text-blue-700"
+                  className="h-6 text-primary  -700"
                 >
                   <path
                     strokeLinecap="round"
