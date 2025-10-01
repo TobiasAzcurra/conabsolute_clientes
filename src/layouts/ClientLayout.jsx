@@ -60,7 +60,7 @@ const ClientLayout = ({ children }) => {
   return (
     <>
       <Helmet>
-        <title>{clientData?.name || "CONABSOLUTE"}</title>
+        <title>{clientData?.name || "Absolute"}</title>
         {clientAssets?.logo && (
           <link
             rel="icon"
@@ -70,7 +70,7 @@ const ClientLayout = ({ children }) => {
           />
         )}
       </Helmet>
-      <div className="flex flex-col relative ">
+      <div className="flex flex-col relative bg-gray-100 ">
         {!shouldHideHeader && (
           <>
             <div className="relative z-[10]">
@@ -104,7 +104,6 @@ const ClientLayout = ({ children }) => {
 
             {shouldShowFloatingCart && totalQuantity > 0 && (
               <>
-                {/* ← FUNCIONA IGUAL: FloatingCart recibe cart del Context */}
                 <FloatingCart totalQuantity={totalQuantity} cart={cart} />
               </>
             )}

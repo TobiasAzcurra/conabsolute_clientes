@@ -80,7 +80,7 @@ const CartItems = () => {
   };
 
   return (
-    <div className="flex flex-col  font-primary  mb-4 overflow-x-hidden">
+    <div className="flex flex-col bg-gray-100 font-primary  pb-4 overflow-x-hidden">
       <div className="flex flex-col mt-8  w-full">
         {/* header */}
         <div className="flex flex-row items-center px-4  w-fit">

@@ -603,7 +603,7 @@ const DetailCard = () => {
             </div>
           </div>
 
-          <div className="flex flex-col bg-gray-50 w-full overflow-hidden z-50 rounded-t-3xl">
+          <div className="flex flex-col bg-gray-100 w-full overflow-hidden z-50 rounded-t-3xl">
             <div className="flex flex-row px-4 pt-4 items-center justify-between">
               <div className="flex flex-row gap-2 items-center">
                 <button onClick={handleGoBack}>
