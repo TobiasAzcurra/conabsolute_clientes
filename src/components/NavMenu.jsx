@@ -153,7 +153,7 @@ const NavMenu = () => {
           viewBox="0 0 24 24"
           strokeWidth="1.5"
           stroke="currentColor"
-          className="h-6 flex-shrink-0"
+          className="h-6 flex-shrink-0 text-gray-400"
         >
           <path
             strokeLinecap="round"
