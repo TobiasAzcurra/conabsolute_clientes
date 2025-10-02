@@ -37,11 +37,18 @@ export class StockManager {
     const timestamp = Date.now();
     const infiniteValue = Number.MAX_SAFE_INTEGER;
 
+    // ✅ OBTENER unitCost desde la variante
+    const variant =
+      selectedVariant || producto.variants?.find((v) => v.default);
+    const unitCost = variant?.stockSummary?.currentPurchase?.unitCost || 0;
+
+    console.log(`💰 Costo unitario para stock infinito: $${unitCost}`);
+
     const purchaseTrace = [
       {
         compraId: `infinite-stock-${timestamp}`,
         units: cantidad,
-        unitCost: 0,
+        unitCost: unitCost, // ✅ Usar el costo real
         remainingBefore: infiniteValue,
         remainingAfter: infiniteValue,
       },
@@ -49,7 +56,7 @@ export class StockManager {
 
     return {
       purchaseTrace,
-      unitCostAvg: 0,
+      unitCostAvg: unitCost, // ✅ Devolver el costo real
       finalRemainingStock: infiniteValue,
       totalStockAfter: infiniteValue,
       totalStockBefore: infiniteValue,
