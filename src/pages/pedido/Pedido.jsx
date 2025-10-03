@@ -283,16 +283,6 @@ const Pedido = () => {
               {" - "}
             </p>
           </div>
-
-          {/* Notas */}
-          {currentOrder.orderNotes && (
-            <div className="bg-gray-100 p-3 rounded-lg">
-              <p className=" font-primary  text-xs text-gray-600">
-                <span className="font-bold">Nota:</span>{" "}
-                {currentOrder.orderNotes}
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Botones de acción */}
