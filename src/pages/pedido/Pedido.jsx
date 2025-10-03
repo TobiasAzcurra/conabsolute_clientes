@@ -45,7 +45,7 @@ const Pedido = () => {
       barSteps: 3,
     },
     Delivered: {
-      label: "Entregado",
+      label: "En camino...",
       color: "text-gray-600",
       barSteps: 4,
     },
