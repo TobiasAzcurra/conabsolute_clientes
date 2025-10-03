@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useClient } from '../../contexts/ClientContext';
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useClient } from "../../contexts/ClientContext";
 
 const SuccessPage = () => {
   const { slugEmpresa, slugSucursal } = useClient();
@@ -21,7 +21,7 @@ const SuccessPage = () => {
         {`
           @keyframes drawCircle {
             from {
-              stroke-dashoffset: 157; /* Circunferencia de un círculo con r=25: 2 * π * 25 ≈ 157 */
+              stroke-dashoffset: 157;
             }
             to {
               stroke-dashoffset: 0;
@@ -30,7 +30,7 @@ const SuccessPage = () => {
 
           @keyframes drawCheck {
             from {
-              stroke-dashoffset: 50; /* Longitud aproximada del check */
+              stroke-dashoffset: 50;
             }
             to {
               stroke-dashoffset: 0;
@@ -52,18 +52,6 @@ const SuccessPage = () => {
             }
           }
 
-          @keyframes backgroundMovement {
-            0% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-
           .circle-animation {
             stroke-dasharray: 157;
             stroke-dashoffset: 157;
@@ -74,7 +62,7 @@ const SuccessPage = () => {
             stroke-dasharray: 50;
             stroke-dashoffset: 50;
             animation: drawCheck 1s ease-out;
-            animation-delay: 1s; /* Inicia después de que el círculo empiece */
+            animation-delay: 1s;
           }
 
           .success-icon {
@@ -91,12 +79,6 @@ const SuccessPage = () => {
             animation-delay: 1s;
           }
 
-          .blue-gradient-background {
-            background: linear-gradient(135deg, #1E4F95 0%, #396FB7 25%, #2E5FA6 50%, #4479C4 75%, #5089D1 100%);
-            background-size: 300% 300%;
-            animation: backgroundMovement 8s ease-in-out infinite;
-          }
-
           @keyframes fadeInUpCustom {
             0% {
               opacity: 0;
@@ -109,7 +91,7 @@ const SuccessPage = () => {
           }
         `}
       </style>
-      <div className="blue-gradient-background flex items-center justify-center h-screen">
+      <div className="bg-primary flex items-center justify-center h-screen">
         <div className="text-center">
           <svg
             className="success-icon mb-[-30px] w-[200px] h-[200px] mx-auto text-gray-100"
