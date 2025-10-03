@@ -20,6 +20,7 @@ import { extractCoordinates } from "../../helpers/currencyFormat";
 import { isBusinessOpen } from "../../utils/businessHoursValidator";
 import { useDiscountCode } from "../../hooks/useDiscountCode";
 import SimpleModal from "../ui/SimpleModal";
+import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillmentMethods";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -269,6 +270,9 @@ const FormCustom = ({ cart, total }) => {
     // 4. Procesar pedido normalmente
     await processPedido(values, isReserva, appliedDiscount);
   };
+  const availableMethods = useAvailableFulfillmentMethods(cartItems);
+
+  console.log(availableMethods);
 
   return (
     <>
@@ -360,7 +364,9 @@ const FormCustom = ({ cart, total }) => {
           initialValues={{
             subTotal: total,
             phone: "",
-            deliveryMethod: "delivery",
+            deliveryMethod: availableMethods.delivery.available
+              ? "delivery"
+              : "takeaway", // ⭐ CAMBIAR
             references: "",
             paymentMethod: "cash",
             hora: "",
@@ -396,31 +402,74 @@ const FormCustom = ({ cart, total }) => {
                   <div className="flex flex-row gap-1 mb-4 p-0.5 bg-gray-300 w-fit rounded-full">
                     <button
                       type="button"
+                      disabled={!availableMethods.delivery.available}
                       className={`h-10 px-4 text-xs flex items-center justify-center gap-2 rounded-full ${
                         values.deliveryMethod === "delivery"
                           ? "bg-gray-100 text-black"
+                          : !availableMethods.delivery.available
+                          ? "bg-red-100 text-red-400 cursor-not-allowed"
                           : "bg-gray-300 text-gray-400"
                       }`}
                       onClick={() =>
+                        availableMethods.delivery.available &&
                         setFieldValue("deliveryMethod", "delivery")
                       }
                     >
                       <p className="font-light">Delivery</p>
                     </button>
+
                     <button
                       type="button"
+                      disabled={!availableMethods.takeaway.available}
                       className={`h-10 px-4 text-xs flex flex-col items-center justify-center rounded-full ${
                         values.deliveryMethod === "takeaway"
                           ? "bg-gray-100 text-black"
+                          : !availableMethods.takeaway.available
+                          ? "bg-red-100 text-red-400 cursor-not-allowed"
                           : "bg-gray-300 text-gray-400"
                       }`}
                       onClick={() =>
+                        availableMethods.takeaway.available &&
                         setFieldValue("deliveryMethod", "takeaway")
                       }
                     >
                       <p className="font-light">Retiro</p>
                     </button>
                   </div>
+
+                  {/* ⭐ AGREGAR MENSAJE INFORMATIVO */}
+                  {(!availableMethods.delivery.available ||
+                    !availableMethods.takeaway.available) && (
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                      <p className="text-xs text-yellow-800 font-light">
+                        {!availableMethods.delivery.available && (
+                          <>
+                            <strong>Delivery no disponible:</strong>{" "}
+                            {availableMethods.delivery.blockedBy.join(", ")}{" "}
+                            {!availableMethods.takeaway.available
+                              ? ""
+                              : "solo está disponible para retiro en local."}
+                          </>
+                        )}
+                        {!availableMethods.takeaway.available &&
+                          availableMethods.delivery.available && (
+                            <>
+                              <strong>Retiro no disponible:</strong>{" "}
+                              {availableMethods.takeaway.blockedBy.join(", ")}{" "}
+                              solo está disponible para delivery.
+                            </>
+                          )}
+                        {!availableMethods.delivery.available &&
+                          !availableMethods.takeaway.available && (
+                            <>
+                              <strong>⚠️ Productos incompatibles:</strong> Tenés
+                              productos que no se pueden pedir juntos. Por favor
+                              eliminá algunos del carrito.
+                            </>
+                          )}
+                      </p>
+                    </div>
+                  )}
 
                   <AddressInputs
                     values={values}

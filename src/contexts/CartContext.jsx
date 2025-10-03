@@ -238,9 +238,10 @@ export const createCartItem = (
     price: finalPrice,
     variants: selectedVariant ? [selectedVariant] : [],
     img: getProductImage(),
-    infiniteStock: product.infiniteStock || false, // ← CAMBIO AQUÍ
+    infiniteStock: product.infiniteStock || false,
     stockReference: variant?.stockReference || "",
     availableStock: variant?.stockSummary?.totalStock || 0,
     stockVersion: variant?.stockSummary?.version || 0,
+    restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] }, // ⭐ AGREGAR ESTA LÍNEA
   };
 };

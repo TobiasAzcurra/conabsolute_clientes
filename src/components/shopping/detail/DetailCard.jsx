@@ -277,6 +277,7 @@ const DetailCard = () => {
       availableStock: selectedVariant?.stockSummary?.totalStock || 0,
       stockReference: selectedVariant?.stockReference || "",
       variants: selectedVariant ? [selectedVariant] : [],
+      restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] }, // ⭐ AGREGAR
     };
   }, [product, selectedVariant, totalPrice, basePrice, variantPrice]);
 
@@ -494,6 +495,8 @@ const DetailCard = () => {
     if (selectedVariant?.videos?.length) return selectedVariant.videos;
     return reels;
   }, [product?.vid, selectedVariant?.videos, reels]);
+
+  console.log(product);
 
   return (
     <div className="overflow-x-hidden ">

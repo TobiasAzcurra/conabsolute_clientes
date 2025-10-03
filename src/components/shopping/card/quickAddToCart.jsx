@@ -94,6 +94,9 @@ const QuickAddToCart = ({
             variants: product.variants || [],
             infiniteStock: product.infiniteStock || false,
             img: product.img,
+            restrictions: product.restrictions || {
+              fulfillmentMethodsExcluded: [],
+            }, // ⭐ AGREGAR
           },
           product.selectedVariant || (product.variants && product.variants[0]),
           qty
