@@ -6,7 +6,8 @@ import LoadingPoints from "../../LoadingPoints";
 
 const Section = () => {
   const { category } = useParams();
-  const { productsByCategory, activeFilters, activeSortOption } = useClient();
+  const { productsByCategory, productTags, activeFilters, activeSortOption } =
+    useClient();
 
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...(productsByCategory[category] || [])];
@@ -19,22 +20,58 @@ const Section = () => {
       });
     }
 
+    // Función helper para obtener la posición mínima de un producto
+    const getMinTagPosition = (product) => {
+      if (!product.tags || product.tags.length === 0) {
+        return Infinity;
+      }
+
+      const positions = product.tags
+        .map((tagId) => {
+          const tag = productTags.find((t) => t.id === tagId);
+          return tag?.position ?? Infinity;
+        })
+        .filter((pos) => pos !== Infinity);
+
+      return positions.length > 0 ? Math.min(...positions) : Infinity;
+    };
+
     // 2. Aplicar ordenamiento
     if (activeSortOption === "price-asc") {
       result.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (activeSortOption === "date-desc") {
       result.sort((a, b) => {
-        // Firestore Timestamps tienen un método toMillis() o seconds
         const dateA =
           a.createdAt?.toMillis?.() || a.createdAt?.seconds * 1000 || 0;
         const dateB =
           b.createdAt?.toMillis?.() || b.createdAt?.seconds * 1000 || 0;
-        return dateB - dateA; // Más reciente primero (descendente)
+        return dateB - dateA;
+      });
+    } else if (activeSortOption === "tag-position") {
+      result.sort((a, b) => {
+        const posA = getMinTagPosition(a);
+        const posB = getMinTagPosition(b);
+        return posA - posB;
+      });
+    }
+
+    // 3. Ordenamiento por defecto: por position de tags
+    if (!activeSortOption) {
+      result.sort((a, b) => {
+        const posA = getMinTagPosition(a);
+        const posB = getMinTagPosition(b);
+        return posA - posB;
       });
     }
 
     return result;
-  }, [productsByCategory, category, activeFilters, activeSortOption]);
+  }, [
+    productsByCategory,
+    category,
+    productTags,
+    activeFilters,
+    activeSortOption,
+  ]);
 
   if (!productsByCategory) {
     return (
@@ -51,7 +88,7 @@ const Section = () => {
           <Card key={p.id} data={p} path={category} />
         ))
       ) : (
-        <p className=" font-primary  text-center text-xs font-light text-gray-400 px-8 pt-4 col-span-full">
+        <p className="font-primary text-center text-xs font-light text-gray-400 px-8 pt-4 col-span-full">
           {activeFilters.length > 0 || activeSortOption
             ? "No hay productos que coincidan con los filtros seleccionados."
             : "No hay productos en esta categoría."}
