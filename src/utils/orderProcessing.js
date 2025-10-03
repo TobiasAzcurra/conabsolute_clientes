@@ -271,7 +271,7 @@ export const handlePOSSubmit = async (
     const orderData = {
       status: "Confirmed",
       statusNote: "",
-      orderNotes: formData.references || formData.orderNotes || "",
+      orderNotes: formData.aclaraciones || "",
 
       from: {
         feature: "webapp",
@@ -299,7 +299,7 @@ export const handlePOSSubmit = async (
         address: formData.address || clientData?.address || "",
         coordinates: formData.coordinates || [0, 0],
         estimatedTime: formData.hora || null,
-        deliveryNotes: formData.deliveryNotes || "",
+        deliveryNotes: formData.references || "",
       },
 
       items: itemsForOrder,
