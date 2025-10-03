@@ -46,6 +46,9 @@ const FormCustom = ({ cart, total }) => {
   const [showDiscountWarning, setShowDiscountWarning] = useState(false);
   const [showStockUpdateModal, setShowStockUpdateModal] = useState(false);
   const [pendingSubmitValues, setPendingSubmitValues] = useState(null);
+  const [showDelayModal, setShowDelayModal] = useState(false);
+  const [delayMinutes, setDelayMinutes] = useState(0);
+  const [pendingDelaySubmit, setPendingDelaySubmit] = useState(null);
 
   const [currentDeliveryMethod, setCurrentDeliveryMethod] =
     useState("delivery");
@@ -130,7 +133,12 @@ const FormCustom = ({ cart, total }) => {
       setIsProcessingStock(true);
 
       let hora = values.hora;
-      if (isReserva) hora = adjustHora(values.hora);
+
+      // Solo ajustar hora si es una reserva explícita del usuario
+      // Si viene del delay, ya tiene el formato correcto
+      if (isReserva && !values.hora.includes(":")) {
+        hora = adjustHora(values.hora);
+      }
 
       const coordinates = mapUrl ? extractCoordinates(mapUrl) : [0, 0];
 
@@ -171,7 +179,6 @@ const FormCustom = ({ cart, total }) => {
       console.error("❌ Error al procesar el pedido:", err);
 
       if (err.message.includes("RACE_CONDITION")) {
-        // Guardar valores para reintentar después de actualizar
         setPendingSubmitValues({ values, isReserva, appliedDiscount });
         setShowStockUpdateModal(true);
       } else if (err.message.includes("INSUFFICIENT_STOCK")) {
@@ -189,6 +196,22 @@ const FormCustom = ({ cart, total }) => {
 
   const processPedidoWithoutDiscount = async (values, isReserva) => {
     await processPedido(values, isReserva, null);
+  };
+
+  const processPedidoWithDelay = async (values, isReserva, appliedDiscount) => {
+    const delayConfig = clientConfig?.operaciones?.delay;
+    const delayMinutes = delayConfig?.minutes || 0;
+
+    // Actualizar valores con el delay
+    const updatedValues = {
+      ...values,
+      delayMinutes: delayMinutes, // ← PASAR AL PROCESSING
+    };
+
+    console.log(`⏰ Aplicando delay de ${delayMinutes} minutos`);
+
+    // Procesar normalmente (sin hora específica)
+    await processPedido(updatedValues, false, appliedDiscount);
   };
 
   const handleFormSubmit = async (values) => {
@@ -227,13 +250,50 @@ const FormCustom = ({ cart, total }) => {
       }
     }
 
-    // 3. Procesar pedido
-    console.log("Submitting form with values:", values);
+    // 3. ✅ NUEVO: Verificar si hay delay activo
+    const delayConfig = clientConfig?.operaciones?.delay;
+
+    if (delayConfig?.isActive && !isReserva) {
+      // Verificar si el delay no ha expirado
+      const now = new Date();
+      const expiresAt = new Date(delayConfig.expiresAt);
+
+      if (now < expiresAt) {
+        setDelayMinutes(delayConfig.minutes || 15);
+        setPendingDelaySubmit({ values, isReserva, appliedDiscount });
+        setShowDelayModal(true);
+        return;
+      }
+    }
+
+    // 4. Procesar pedido normalmente
     await processPedido(values, isReserva, appliedDiscount);
   };
 
   return (
     <>
+      <SimpleModal
+        isOpen={showDelayModal}
+        onClose={() => {
+          setShowDelayModal(false);
+          setPendingDelaySubmit(null);
+        }}
+        title="Hay demora en los pedidos"
+        message={`Actualmente hay una demora de ${delayMinutes} minutos. ¿Aceptás esperar este tiempo adicional?`}
+        twoButtons={true}
+        cancelText="No"
+        confirmText="Sí, acepto"
+        onConfirm={async () => {
+          setShowDelayModal(false);
+          if (pendingDelaySubmit) {
+            await processPedidoWithDelay(
+              pendingDelaySubmit.values,
+              pendingDelaySubmit.isReserva,
+              pendingDelaySubmit.appliedDiscount
+            );
+          }
+        }}
+      />
       <SimpleModal
         isOpen={showClosedModal}
         onClose={() => setShowClosedModal(false)}

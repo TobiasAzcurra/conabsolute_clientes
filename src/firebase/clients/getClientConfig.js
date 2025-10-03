@@ -4,7 +4,7 @@ import { app } from "../config";
 const db = getFirestore(app);
 
 export const getClientConfig = async (empresa, sucursal) => {
-  const configPaths = ["labels", "logistics"];
+  const configPaths = ["labels", "logistics", "operaciones"]; // ← AGREGADO
 
   const promises = configPaths.map(async (subdoc) => {
     const ref = doc(

@@ -186,6 +186,17 @@ export const handlePOSSubmit = async (
     const now = new Date().toISOString();
     const orderId = generateUUID();
 
+    // ✅ NUEVO: Calcular confirmedAt con delay si aplica
+    let confirmedAt = now;
+    if (formData.delayMinutes && formData.delayMinutes > 0) {
+      const delayedDate = new Date();
+      delayedDate.setMinutes(delayedDate.getMinutes() + formData.delayMinutes);
+      confirmedAt = delayedDate.toISOString();
+      console.log(
+        `⏰ Pedido confirmado con delay: ${formData.delayMinutes}min → ${confirmedAt}`
+      );
+    }
+
     console.log("📦 Consumiendo stock...");
     const traces = await consumeStockForOrderAndReturnTraces(
       cartItems,
@@ -282,7 +293,7 @@ export const handlePOSSubmit = async (
         createdAt: now,
         updatedAt: now,
         pendingAt: null,
-        confirmedAt: now,
+        confirmedAt: confirmedAt, // ← USAR EL TIMESTAMP AJUSTADO CON DELAY
         readyAt: null,
         deliveredAt: null,
         clientAt: null,
