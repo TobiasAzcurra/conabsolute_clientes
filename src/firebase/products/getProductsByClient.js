@@ -23,6 +23,12 @@ export const getProductsByClient = async (empresa, sucursal) => {
   const productos = await Promise.all(
     snapshot.docs.map(async (docSnap) => {
       const data = docSnap.data();
+
+      // ✅ Filtrar productos inactivos
+      if (data.active === false) {
+        return null;
+      }
+
       let categoryId = null;
 
       try {
@@ -49,7 +55,10 @@ export const getProductsByClient = async (empresa, sucursal) => {
     })
   );
 
-  const porCategoria = productos.reduce((acc, prod) => {
+  // ✅ Filtrar los null (productos inactivos)
+  const productosActivos = productos.filter((prod) => prod !== null);
+
+  const porCategoria = productosActivos.reduce((acc, prod) => {
     const key = prod.categoryId || "sin-categoria";
     if (!acc[key]) acc[key] = [];
 
@@ -62,9 +71,12 @@ export const getProductsByClient = async (empresa, sucursal) => {
   }, {});
 
   console.log("🔍 Categorías obtenidas:", Object.keys(porCategoria));
+  console.log(
+    `✅ Productos activos: ${productosActivos.length}/${productos.length}`
+  );
 
   return {
-    todos: productos,
+    todos: productosActivos,
     porCategoria,
   };
 };
