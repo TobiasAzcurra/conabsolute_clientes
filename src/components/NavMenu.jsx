@@ -128,7 +128,7 @@ const NavMenu = () => {
 
   return (
     <div className="relative z-[99]">
-      <p className="text-gray-50 px-4 text-2xl font-medium mb-3 text-center  font-primary ">
+      <p className="text-gray-50 px-4 text-xl font-medium mb-3  font-primary ">
         {clientAssets?.heroTitle || "Elegí lo que más te guste"}
       </p>
       <nav
