@@ -1,13 +1,15 @@
-// components/shopping/detail/DetailCard.js - Con validación de variante requerida
+// components/shopping/detail/DetailCard.js - Versión completa con Modifier Groups
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useCart } from "../../../contexts/CartContext";
 import { useClient } from "../../../contexts/ClientContext.jsx";
 import currencyFormat from "../../../helpers/currencyFormat.js";
+import { calculateProductPrice } from "../../../helpers/priceCalculator.js";
 import { getProductById } from "../../../firebase/products/getProductById.js";
 import { useToast, Toast } from "../../../hooks/useToast.jsx";
 import VideoSlider from "./VideoSlider.jsx";
 import QuickAddToCart from "../card/quickAddToCart.jsx";
+import ModifierGroupSelector from "./ModifierGroupSelector.jsx";
 import { createPortal } from "react-dom";
 
 const capitalizeWords = (str) => {
@@ -41,6 +43,13 @@ const DetailCard = () => {
   const touchEndXRef = useRef(0);
   const lastTouchTimeRef = useRef(0);
 
+  // Estados para modifier groups
+  const [modifierSelections, setModifierSelections] = useState({
+    selections: {},
+    additionalPrice: 0,
+    isValid: true,
+  });
+
   const STOCK_CACHE_DURATION = 30 * 1000;
 
   const reels = clientAssets?.reels || [];
@@ -59,7 +68,6 @@ const DetailCard = () => {
     const updateProductStock = async () => {
       const now = Date.now();
       if (lastStockUpdate && now - lastStockUpdate < STOCK_CACHE_DURATION) {
-        console.log("📦 Stock en cache, saltando actualización");
         return;
       }
 
@@ -82,9 +90,6 @@ const DetailCard = () => {
 
           setUpdatedProduct(filteredProduct);
           setLastStockUpdate(now);
-          console.log(
-            "✅ Stock del producto actualizado y variantes filtradas"
-          );
         }
       } catch (error) {
         console.error("❌ Error actualizando stock:", error);
@@ -100,7 +105,7 @@ const DetailCard = () => {
   if (!product) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="text-center  font-primary  text-gray-900">
+        <div className="text-center font-primary text-gray-900">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p>Cargando producto...</p>
           <p className="text-xs text-gray-500 mt-2">
@@ -198,7 +203,6 @@ const DetailCard = () => {
       (value) => value !== null && value !== undefined && value !== ""
     );
 
-    // Si no hay customización real (variantStats vacío), autoseleccionar la primera/default
     if (!hasUserSelections && Object.keys(variantStats).length === 0) {
       const defaultVariant =
         product.variants?.find((v) => v.default) || product.variants?.[0];
@@ -206,13 +210,11 @@ const DetailCard = () => {
       return;
     }
 
-    // Si no hay selecciones pero SÍ hay customización, no seleccionar nada
     if (!hasUserSelections) {
       setSelectedVariant(null);
       return;
     }
 
-    // Si hay selecciones, buscar match
     const matched = product.variants.find((variant) => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return false;
@@ -229,7 +231,22 @@ const DetailCard = () => {
     setSelectedVariant(matched || null);
   }, [selectedVariants, product.variants, variantStats]);
 
-  console.log("product:", product, "variantStats", variantStats);
+  // Resetear modifier selections cuando cambia la variante
+  useEffect(() => {
+    if (selectedVariant?.hasModifiers) {
+      setModifierSelections({
+        selections: {},
+        additionalPrice: 0,
+        isValid: false,
+      });
+    } else {
+      setModifierSelections({
+        selections: {},
+        additionalPrice: 0,
+        isValid: true,
+      });
+    }
+  }, [selectedVariant?.id]);
 
   const productImages = useMemo(() => {
     const imgs = selectedVariant?.images?.length
@@ -255,9 +272,13 @@ const DetailCard = () => {
     setSelectedImageIndex(0);
   }, [productImages]);
 
-  const basePrice = product.price || 0;
-  const variantPrice = selectedVariant?.price || 0;
-  const totalPrice = basePrice + variantPrice;
+  // Usar el helper centralizado para calcular precios
+  const priceBreakdown = useMemo(() => {
+    return calculateProductPrice(product, selectedVariant, modifierSelections);
+  }, [product, selectedVariant, modifierSelections]);
+
+  const { basePrice, variantPrice, modifiersPrice, totalPrice } =
+    priceBreakdown;
 
   const productToSend = useMemo(() => {
     return {
@@ -277,9 +298,21 @@ const DetailCard = () => {
       availableStock: selectedVariant?.stockSummary?.totalStock || 0,
       stockReference: selectedVariant?.stockReference || "",
       variants: selectedVariant ? [selectedVariant] : [],
-      restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] }, // ⭐ AGREGAR
+      restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] },
+      modifierSelections: selectedVariant?.hasModifiers
+        ? modifierSelections.selections
+        : {},
+      modifiersPrice: modifiersPrice,
     };
-  }, [product, selectedVariant, totalPrice, basePrice, variantPrice]);
+  }, [
+    product,
+    selectedVariant,
+    basePrice,
+    variantPrice,
+    modifiersPrice,
+    totalPrice,
+    modifierSelections,
+  ]);
 
   const outOfStock = product.infiniteStock
     ? false
@@ -288,15 +321,17 @@ const DetailCard = () => {
       selectedVariant.stockSummary.totalStock === 0;
 
   const shouldDisable = useMemo(() => {
-    // 1. Si hay variantes, DEBE seleccionar una
     const hasVariants = product?.variants?.length > 0;
     if (hasVariants && !selectedVariant) return true;
 
-    // 2. Solo validar stock si NO es infinito
+    if (selectedVariant?.hasModifiers && !modifierSelections.isValid) {
+      return true;
+    }
+
     if (!product.infiniteStock && outOfStock) return true;
 
     return false;
-  }, [product, selectedVariant, outOfStock]);
+  }, [product, selectedVariant, outOfStock, modifierSelections.isValid]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -397,7 +432,6 @@ const DetailCard = () => {
       if (freshProduct) {
         setUpdatedProduct(freshProduct);
         setLastStockUpdate(Date.now());
-        console.log("✅ Stock actualizado manualmente");
         addToast("Stock actualizado", "success");
       }
     } catch (error) {
@@ -496,13 +530,20 @@ const DetailCard = () => {
     return reels;
   }, [product?.vid, selectedVariant?.videos, reels]);
 
-  console.log(product);
+  const quickAddKey = useMemo(() => {
+    const modifiersKey =
+      Object.keys(modifierSelections.selections).length > 0
+        ? JSON.stringify(modifierSelections.selections)
+        : "no-modifiers";
+
+    return `${product.id}-${selectedVariant?.id || "default"}-${modifiersKey}`;
+  }, [product.id, selectedVariant?.id, modifierSelections.selections]);
 
   return (
-    <div className="overflow-x-hidden ">
+    <div className="overflow-x-hidden">
       <Toast toasts={toasts} onRemove={removeToast} />
-      <div className="flex flex-col ">
-        <div className="flex flex-col  justify-items-center items-center">
+      <div className="flex flex-col">
+        <div className="flex flex-col justify-items-center items-center">
           <div className="w-full h-[200px] flex items-center justify-center relative">
             <img
               className="w-full h-[250px] object-cover object-center cursor-zoom-in"
@@ -516,7 +557,6 @@ const DetailCard = () => {
                   const totalImages = productImages.length;
                   const maxVisible = 5;
 
-                  // Si hay 5 o menos, mostrar todas
                   if (totalImages <= maxVisible) {
                     return productImages.map((image, index) => (
                       <button
@@ -537,7 +577,6 @@ const DetailCard = () => {
                     ));
                   }
 
-                  // Si hay más de 5, mostrar las cercanas a la actual
                   const halfVisible = Math.floor(maxVisible / 2);
                   let startIndex = Math.max(
                     0,
@@ -545,19 +584,17 @@ const DetailCard = () => {
                   );
                   let endIndex = Math.min(totalImages, startIndex + maxVisible);
 
-                  // Ajustar si estamos cerca del final
                   if (endIndex === totalImages) {
                     startIndex = Math.max(0, totalImages - maxVisible);
                   }
 
                   const visibleImages = [];
 
-                  // Indicador de "hay más a la izquierda"
                   if (startIndex > 0) {
                     visibleImages.push(
                       <div
                         key="more-left"
-                        className=" flex items-center justify-center  font-primary  mr-2  "
+                        className="flex items-center justify-center font-primary mr-2"
                       >
                         <span className="text-white text-xs font-light">
                           +{startIndex}
@@ -566,7 +603,6 @@ const DetailCard = () => {
                     );
                   }
 
-                  // Miniaturas visibles
                   for (let i = startIndex; i < endIndex; i++) {
                     visibleImages.push(
                       <button
@@ -587,12 +623,11 @@ const DetailCard = () => {
                     );
                   }
 
-                  // Indicador de "hay más a la derecha"
                   if (endIndex < totalImages) {
                     visibleImages.push(
                       <div
                         key="more-right"
-                        className=" flex items-center ml-2 justify-center  font-primary   "
+                        className="flex items-center ml-2 justify-center font-primary"
                       >
                         <span className="text-white text-xs font-light">
                           +{totalImages - endIndex}
@@ -625,7 +660,7 @@ const DetailCard = () => {
                     />
                   </svg>
                 </button>
-                <h4 className=" font-primary  font-bold pr-4 capitalize text-xl text-gray-900 leading-tight">
+                <h4 className="font-primary font-bold pr-4 capitalize text-xl text-gray-900 leading-tight">
                   {product.name}
                 </h4>
               </div>
@@ -656,17 +691,17 @@ const DetailCard = () => {
             </div>
 
             {product.detailDescription && (
-              <p className=" font-primary  text-xs text-gray-400 font-light pl-4 pt-4 pr-16 leading-tight">
+              <p className="font-primary text-xs text-gray-400 font-light pl-4 pt-4 pr-16 leading-tight">
                 {product.detailDescription.charAt(0).toUpperCase() +
                   product.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
 
             {customization && (
-              <div className="gap-2 w-full mt-8 flex flex-col justify-center ">
+              <div className="gap-2 w-full mt-8 flex flex-col justify-center">
                 {Object.entries(variantStats).map(([key, values]) => (
                   <div key={key}>
-                    <h5 className=" font-primary  px-4 font-light mb-2 text-xs w-full text-gray-900">
+                    <h5 className="font-primary px-4 font-light mb-2 text-xs w-full text-gray-900">
                       {clientConfig?.labels?.[key] || capitalizeWords(key)}
                     </h5>
                     <div className="flex w-full">
@@ -781,32 +816,31 @@ const DetailCard = () => {
                               }
                               disabled={!isClickable}
                               className={`
-            ${hasAttributeImage ? "w-10" : "px-4"} 
-            h-10 
-             font-primary  
-            flex-shrink-0 
-            text-xs 
-            transition-all 
-            duration-200 
-            border 
-            ${borderStyle} 
-            font-light 
-            ${borderRadiusClass} 
-            ${index > 0 ? "-ml-px" : ""} 
-            flex 
-            items-center 
-            justify-center 
-            ${backgroundStyle} 
-            ${textStyle} 
-            ${cursorStyle}
-          `}
+                                ${hasAttributeImage ? "w-10" : "px-4"} 
+                                h-10 
+                                font-primary  
+                                flex-shrink-0 
+                                text-xs 
+                                transition-all 
+                                duration-200 
+                                border 
+                                ${borderStyle} 
+                                font-light 
+                                ${borderRadiusClass} 
+                                ${index > 0 ? "-ml-px" : ""} 
+                                flex 
+                                items-center 
+                                justify-center 
+                                ${backgroundStyle} 
+                                ${textStyle} 
+                                ${cursorStyle}
+                              `}
                               style={{
                                 scrollbarWidth: "none",
                                 msOverflowStyle: "none",
                                 ...(hasAttributeImage
                                   ? {
                                       padding: 0,
-                                      // ❌ ELIMINAR: width: "100%",
                                       height: 40,
                                     }
                                   : {}),
@@ -859,14 +893,25 @@ const DetailCard = () => {
               </div>
             )}
 
+            {selectedVariant?.hasModifiers &&
+              selectedVariant?.modifierGroups?.length > 0 && (
+                <div className="px-4 mt-8">
+                  <ModifierGroupSelector
+                    modifierGroups={selectedVariant.modifierGroups}
+                    onSelectionChange={setModifierSelections}
+                  />
+                </div>
+              )}
+
             <div className="flex flex-col w-full mt-6 px-4">
               <QuickAddToCart
+                key={quickAddKey}
                 product={productToSend}
                 calculatedPrice={totalPrice}
                 displayAsFullButton={true}
                 disabled={shouldDisable}
               />
-              <p className="text-xs  font-primary  pt-2 font-light text-gray-400">
+              <p className="text-xs font-primary pt-2 font-light text-gray-400">
                 Por {currencyFormat(totalPrice)}
               </p>
             </div>
@@ -948,7 +993,7 @@ const DetailCard = () => {
               )}
             </div>
           </div>,
-          document.body // ← AGREGAR ESTO
+          document.body
         )}
     </div>
   );

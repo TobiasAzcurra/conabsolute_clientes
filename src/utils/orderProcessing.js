@@ -1,4 +1,4 @@
-// utils/orderProcessing.js - Con optimistic locking completo
+// utils/orderProcessing.js - Con modifiers simplificados
 import { db } from "../firebase/config";
 import {
   collection,
@@ -89,12 +89,11 @@ export const consumeStockForOrderAndReturnTraces = async (
         );
       }
 
-      // CRÍTICO: Pasar la versión capturada en el carrito al StockManager
       const variantWithCapturedVersion = {
         ...variant,
         stockSummary: {
           ...(variant?.stockSummary || {}),
-          version: item.stockVersion || 0, // Versión del momento en que se agregó al carrito
+          version: item.stockVersion || 0,
         },
       };
 
@@ -139,8 +138,37 @@ export const consumeStockForOrderAndReturnTraces = async (
   return results;
 };
 
+const extractModifierOptions = (item) => {
+  if (!item.modifierSelections || !item.variants?.[0]?.modifierGroups) {
+    return [];
+  }
+
+  const variant = item.variants[0];
+  const allOptions = [];
+
+  variant.modifierGroups.forEach((group) => {
+    const selectedOptionIds = item.modifierSelections[group.id] || [];
+
+    selectedOptionIds.forEach((optionId) => {
+      const option = group.options.find((opt) => opt.id === optionId);
+      if (option) {
+        allOptions.push({
+          id: option.id,
+          name: option.name,
+          price: option.price,
+        });
+      }
+    });
+  });
+
+  return allOptions;
+};
+
 export const computeItemFinancials = (item, unitCostAvg) => {
-  const unitPrice = (item.basePrice || 0) + (item.variantPrice || 0);
+  const unitPrice =
+    (item.basePrice || 0) +
+    (item.variantPrice || 0) +
+    (item.modifiersPrice || 0);
   const quantity = item.quantity || 0;
 
   const unitCost = round2(unitCostAvg || 0);
@@ -186,7 +214,6 @@ export const handlePOSSubmit = async (
     const now = new Date().toISOString();
     const orderId = generateUUID();
 
-    // ✅ NUEVO: Calcular confirmedAt con delay si aplica
     let confirmedAt = now;
     if (formData.delayMinutes && formData.delayMinutes > 0) {
       const delayedDate = new Date();
@@ -213,10 +240,12 @@ export const handlePOSSubmit = async (
         quantity: item.quantity || 0,
         variantId: item.variantId || "default",
         variantName: item.variantName || "default",
+        modifiers: extractModifierOptions(item),
 
         financeSummary: {
           unitBasePrice: item.basePrice || 0,
           unitVariantPrice: item.variantPrice || 0,
+          unitModifiersPrice: item.modifiersPrice || 0,
           totalPrice: financials.totalPrice,
           unitCost: financials.unitCost,
           totalCost: financials.totalCost,
@@ -293,7 +322,7 @@ export const handlePOSSubmit = async (
         createdAt: now,
         updatedAt: now,
         pendingAt: null,
-        confirmedAt: confirmedAt, // ← USAR EL TIMESTAMP AJUSTADO CON DELAY
+        confirmedAt: confirmedAt,
         readyAt: null,
         deliveredAt: null,
         clientAt: null,
@@ -383,11 +412,14 @@ export const adaptCartToPOSFormat = (contextCartItems) => {
     variantName: item.variantName || "default",
     basePrice: item.basePrice || item.price || 0,
     variantPrice: item.variantPrice || 0,
+    modifiersPrice: item.modifiersPrice || 0,
     finalPrice: item.finalPrice || item.price || 0,
     category: item.category,
     isInfiniteStock: item.isInfiniteStock || false,
     stockReference: item.stockReference || "",
     availableStock: item.availableStock || 0,
-    stockVersion: item.stockVersion || 0, // PASAR VERSIÓN AL PROCESSING
+    stockVersion: item.stockVersion || 0,
+    modifierSelections: item.modifierSelections || {},
+    variants: item.variants || [],
   }));
 };

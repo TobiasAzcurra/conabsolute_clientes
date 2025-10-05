@@ -6,7 +6,8 @@ export const useDiscountCode = (
   sucursalId,
   cartItems,
   deliveryMethod,
-  paymentMethod
+  paymentMethod,
+  subtotal // ← NUEVO: recibir como parámetro
 ) => {
   const [code, setCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -33,20 +34,13 @@ export const useDiscountCode = (
     const timer = setTimeout(async () => {
       setIsValidating(true);
 
-      // Calcular subtotal
-      const subtotal = cartItems.reduce((sum, item) => {
-        const price =
-          (item.basePrice || item.price || 0) + (item.variantPrice || 0);
-        return sum + price * item.quantity;
-      }, 0);
-
       const enterpriseData = { empresaId, sucursalId };
 
-      // Validación COMPLETA en tiempo real
+      // Ya no calcular subtotal aquí, usar el que viene por parámetro
       const result = await validateAndCalculateDiscount(
         code,
         cartItems,
-        subtotal,
+        subtotal, // ← usar el memoizado del context
         deliveryMethod,
         paymentMethod,
         enterpriseData
@@ -66,7 +60,15 @@ export const useDiscountCode = (
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [code, empresaId, sucursalId, cartItems, deliveryMethod, paymentMethod]);
+  }, [
+    code,
+    empresaId,
+    sucursalId,
+    cartItems,
+    deliveryMethod,
+    paymentMethod,
+    subtotal,
+  ]);
 
   return {
     code,

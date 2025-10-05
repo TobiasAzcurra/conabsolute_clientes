@@ -1,7 +1,35 @@
 // contexts/CartContext.js
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
+import {
+  calculateProductPrice,
+  calculateItemPrice,
+} from "../helpers/priceCalculator.js";
 
 const CartContext = createContext();
+
+const generateCartItemId = (productId, variantId, modifierSelections = {}) => {
+  const modifiersKey =
+    Object.keys(modifierSelections).length > 0
+      ? JSON.stringify(
+          Object.entries(modifierSelections)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .reduce((acc, [key, value]) => {
+              acc[key] = Array.isArray(value) ? [...value].sort() : value;
+              return acc;
+            }, {})
+        )
+      : "";
+
+  return `${productId}-${variantId || "default"}${
+    modifiersKey ? `-${btoa(modifiersKey)}` : ""
+  }`;
+};
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
@@ -22,24 +50,47 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
-  const generateCartItemId = (productId, variantId) => {
-    return `${productId}-${variantId || "default"}`;
-  };
+  // Memoizar subtotal (sin delivery ni fees)
+  const subtotal = useMemo(() => {
+    return Object.values(cartItems).reduce((sum, item) => {
+      return sum + calculateItemPrice(item) * item.quantity;
+    }, 0);
+  }, [cartItems]);
 
-  const total = Object.values(cartItems).reduce(
-    (sum, item) => sum + item.finalPrice * item.quantity,
-    0
-  );
+  // Memoizar total (para mantener compatibilidad)
+  const total = useMemo(() => {
+    return Object.values(cartItems).reduce(
+      (sum, item) => sum + item.finalPrice * item.quantity,
+      0
+    );
+  }, [cartItems]);
 
   const cartArray = Object.values(cartItems);
 
   const addToCart = (item) => {
-    const cartItemId = generateCartItemId(item.productId, item.variantId);
+    console.log("➕ addToCart llamado con:", {
+      productId: item.productId,
+      variantId: item.variantId,
+      modifierSelections: item.modifierSelections,
+      quantity: item.quantity,
+    });
+
+    const cartItemId = generateCartItemId(
+      item.productId,
+      item.variantId,
+      item.modifierSelections
+    );
 
     setCartItems((prevCart) => {
       const existingItem = prevCart[cartItemId];
 
       if (existingItem) {
+        console.log("✅ Item existente encontrado, sumando cantidad:", {
+          cartItemId,
+          cantidadPrevia: existingItem.quantity,
+          cantidadASumar: item.quantity,
+          cantidadFinal: existingItem.quantity + item.quantity,
+        });
         return {
           ...prevCart,
           [cartItemId]: {
@@ -48,6 +99,12 @@ export const CartProvider = ({ children }) => {
           },
         };
       } else {
+        console.log("🆕 Item nuevo, agregando al carrito:", {
+          cartItemId,
+          productName: item.productName,
+          variantName: item.variantName,
+          quantity: item.quantity,
+        });
         return {
           ...prevCart,
           [cartItemId]: {
@@ -79,7 +136,6 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // NUEVO: Actualizar propiedades específicas de un item
   const updateCartItem = (itemId, updates) => {
     setCartItems((prevCart) => {
       const item = prevCart[itemId];
@@ -121,7 +177,7 @@ export const CartProvider = ({ children }) => {
       category: item.category,
       name: item.name,
       variants: item.variants || [],
-      infiniteStock: item.infiniteStock || false, // ← CAMBIO AQUÍ
+      infiniteStock: item.infiniteStock || false,
       stockReference: item.stockReference || "",
       availableStock: item.availableStock || 0,
       stockVersion: item.stockVersion || 0,
@@ -171,10 +227,11 @@ export const CartProvider = ({ children }) => {
       value={{
         cartItems,
         cartArray,
+        subtotal, // ← NUEVO
         total,
         addToCart,
         updateQuantity,
-        updateCartItem, // NUEVO
+        updateCartItem,
         removeFromCart,
         clearCart,
         cart: cartArray,
@@ -207,14 +264,24 @@ export const createCartItem = (
   selectedVariant = null,
   quantity = 1
 ) => {
+  console.log("🏗️ createCartItem llamado:", {
+    productId: product.id,
+    productName: product.name,
+    variantId: selectedVariant?.id,
+    quantity,
+    modifierSelections: product.modifierSelections,
+  });
+
   const variant =
     selectedVariant ||
     product.variants?.find((v) => v.default) ||
     product.variants?.[0];
 
-  const basePrice = product.price || 0;
-  const variantPrice = variant?.price || 0;
-  const finalPrice = basePrice + variantPrice;
+  const priceBreakdown = calculateProductPrice(product, variant, {
+    additionalPrice: product.modifiersPrice || 0,
+  });
+
+  console.log("💰 createCartItem - Usando priceCalculator:", priceBreakdown);
 
   const getProductImage = () => {
     if (!product.img) return "";
@@ -224,24 +291,41 @@ export const createCartItem = (
     return product.img;
   };
 
-  return {
+  const cartItem = {
     productId: product.id,
     productName: product.name,
     variantId: variant?.id || "default",
     variantName: variant?.name || "default",
     quantity: quantity,
-    basePrice: basePrice,
-    variantPrice: variantPrice,
-    finalPrice: finalPrice,
+    basePrice: priceBreakdown.basePrice,
+    variantPrice: priceBreakdown.variantPrice,
+    finalPrice: priceBreakdown.totalPrice,
     category: product.category,
     name: product.name,
-    price: finalPrice,
+    price: priceBreakdown.totalPrice,
     variants: selectedVariant ? [selectedVariant] : [],
     img: getProductImage(),
     infiniteStock: product.infiniteStock || false,
     stockReference: variant?.stockReference || "",
     availableStock: variant?.stockSummary?.totalStock || 0,
     stockVersion: variant?.stockSummary?.version || 0,
-    restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] }, // ⭐ AGREGAR ESTA LÍNEA
+    restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] },
+    modifierSelections: product.modifierSelections || {},
+    modifiersPrice: priceBreakdown.modifiersPrice,
   };
+
+  cartItem.id = generateCartItemId(
+    cartItem.productId,
+    cartItem.variantId,
+    cartItem.modifierSelections
+  );
+
+  console.log("✨ Cart Item creado:", {
+    id: cartItem.id,
+    productName: cartItem.productName,
+    variantName: cartItem.variantName,
+    priceBreakdown: priceBreakdown,
+  });
+
+  return cartItem;
 };

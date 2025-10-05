@@ -24,7 +24,8 @@ import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillm
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
-  const { addLastCart, clearCart, cartItems, updateCartItem } = useCart();
+  const { addLastCart, clearCart, cartItems, updateCartItem, subtotal } =
+    useCart(); // ← AGREGAR subtotal
 
   const {
     slugEmpresa,
@@ -62,7 +63,8 @@ const FormCustom = ({ cart, total }) => {
     sucursalId,
     cart,
     currentDeliveryMethod,
-    currentPaymentMethod
+    currentPaymentMethod,
+    subtotal // ← PASAR subtotal memoizado
   );
 
   const enterpriseData = {
@@ -70,7 +72,6 @@ const FormCustom = ({ cart, total }) => {
     selectedSucursal: { id: sucursalId },
   };
 
-  // Función para actualizar versiones de stock del carrito
   const updateCartStockVersions = async () => {
     try {
       setIsProcessingStock(true);
@@ -96,7 +97,6 @@ const FormCustom = ({ cart, total }) => {
           );
 
           if (variant) {
-            // Actualizar usando updateCartItem
             updateCartItem(itemId, {
               stockVersion: variant.stockSummary?.version || 0,
               availableStock: variant.stockSummary?.totalStock || 0,
@@ -113,7 +113,6 @@ const FormCustom = ({ cart, total }) => {
 
       setShowStockUpdateModal(false);
 
-      // Reintentar el submit
       if (pendingSubmitValues) {
         await processPedido(
           pendingSubmitValues.values,
@@ -135,8 +134,6 @@ const FormCustom = ({ cart, total }) => {
 
       let hora = values.hora;
 
-      // Solo ajustar hora si es una reserva explícita del usuario
-      // Si viene del delay, ya tiene el formato correcto
       if (isReserva && !values.hora.includes(":")) {
         hora = adjustHora(values.hora);
       }
@@ -203,22 +200,19 @@ const FormCustom = ({ cart, total }) => {
     const delayConfig = clientConfig?.operaciones?.delay;
     const delayMinutes = delayConfig?.minutes || 0;
 
-    // Actualizar valores con el delay
     const updatedValues = {
       ...values,
-      delayMinutes: delayMinutes, // ← PASAR AL PROCESSING
+      delayMinutes: delayMinutes,
     };
 
     console.log(`⏰ Aplicando delay de ${delayMinutes} minutos`);
 
-    // Procesar normalmente (sin hora específica)
     await processPedido(updatedValues, false, appliedDiscount);
   };
 
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
 
-    // 1. Validar horarios si NO es reserva
     if (!isReserva) {
       const businessHours = clientConfig?.logistics?.businessHours;
       const status = isBusinessOpen(businessHours);
@@ -230,7 +224,6 @@ const FormCustom = ({ cart, total }) => {
       }
     }
 
-    // 2. Verificar código de descuento
     let appliedDiscount = null;
 
     if (discountHook.code && discountHook.code.trim()) {
@@ -251,11 +244,9 @@ const FormCustom = ({ cart, total }) => {
       }
     }
 
-    // 3. ✅ NUEVO: Verificar si hay delay activo
     const delayConfig = clientConfig?.operaciones?.delay;
 
     if (delayConfig?.isActive && !isReserva) {
-      // Verificar si el delay no ha expirado
       const now = new Date();
       const expiresAt = new Date(delayConfig.expiresAt);
 
@@ -267,9 +258,9 @@ const FormCustom = ({ cart, total }) => {
       }
     }
 
-    // 4. Procesar pedido normalmente
     await processPedido(values, isReserva, appliedDiscount);
   };
+
   const availableMethods = useAvailableFulfillmentMethods(cartItems);
 
   console.log(availableMethods);
@@ -366,7 +357,7 @@ const FormCustom = ({ cart, total }) => {
             phone: "",
             deliveryMethod: availableMethods.delivery.available
               ? "delivery"
-              : "takeaway", // ⭐ CAMBIAR
+              : "takeaway",
             references: "",
             paymentMethod: "cash",
             hora: "",
@@ -383,10 +374,8 @@ const FormCustom = ({ cart, total }) => {
               setCurrentPaymentMethod(values.paymentMethod);
             }, [values.deliveryMethod, values.paymentMethod]);
 
-            const productsTotal = cart.reduce(
-              (acc, item) => acc + item.price * item.quantity,
-              0
-            );
+            // Usar subtotal memoizado del context
+            const productsTotal = subtotal;
 
             const descuento = discountHook.validation.isValid
               ? discountHook.validation.discount
@@ -437,7 +426,6 @@ const FormCustom = ({ cart, total }) => {
                     </button>
                   </div>
 
-                  {/* ⭐ AGREGAR MENSAJE INFORMATIVO */}
                   {(!availableMethods.delivery.available ||
                     !availableMethods.takeaway.available) && (
                     <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
@@ -495,7 +483,7 @@ const FormCustom = ({ cart, total }) => {
                   <button
                     type="submit"
                     disabled={isSubmitting || isProcessingStock}
-                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-primary text-gray-100 rounded-3xl h-20 font-bold  transition-colors duration-300 ${
+                    className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-primary text-gray-100 rounded-3xl h-20 font-bold transition-colors duration-300 ${
                       isSubmitting || isProcessingStock
                         ? "opacity-50 cursor-not-allowed"
                         : ""

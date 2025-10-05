@@ -1,11 +1,20 @@
+// CartCard.jsx - Con display de modifier selections
 import React, { useState, useEffect } from "react";
 import { handleConfirmChanges } from "../../../firebase/orders/confirmChanges";
 import currencyFormat from "../../../helpers/currencyFormat";
+import {
+  calculateItemPrice,
+  calculateItemTotal,
+} from "../../../helpers/priceCalculator";
 import QuickAddToCart from "../card/quickAddToCart";
 import { getImageSrc } from "../../../helpers/getImageSrc";
 
+const capitalizeWords = (str) => {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
-  const { name, price, quantity, category, img, toppings, extra } = item;
+  const { name, quantity, category, img, extra } = item;
   const isConfirmed = item.isConfirmed || false;
   const [isUpdating, setIsUpdating] = useState(false);
   const [countdown, setCountdown] = useState(null);
@@ -48,30 +57,51 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
       item.extra === undefined ||
       (extra === true && isConfirmed));
 
-  const calculateTotalPrice = () => {
-    const toppingsTotal =
-      toppings && Array.isArray(toppings)
-        ? toppings.reduce((acc, topping) => {
-            if (typeof topping === "object" && topping?.price) {
-              return acc + topping.price;
-            }
-            return acc;
-          }, 0)
-        : 0;
-    return (price || 0) + toppingsTotal;
-  };
-
-  const totalPrice = calculateTotalPrice();
+  // Usar helpers centralizados para calcular precios
+  const unitPrice = calculateItemPrice(item);
+  const totalPrice = calculateItemTotal(item, quantity);
 
   const imageSrc = getImageSrc(item || img);
 
-  console.log(item, "el item");
+  // Función para obtener las opciones seleccionadas con sus nombres y precios
+  const getSelectedModifiers = () => {
+    if (!item.modifierSelections || !item.variants?.[0]?.modifierGroups) {
+      return [];
+    }
+
+    const variant = item.variants[0];
+    const selectedGroups = [];
+
+    variant.modifierGroups.forEach((group) => {
+      const selectedOptionIds = item.modifierSelections[group.id] || [];
+
+      if (selectedOptionIds.length > 0) {
+        const selectedOptions = selectedOptionIds
+          .map((optionId) => {
+            const option = group.options.find((opt) => opt.id === optionId);
+            return option || null;
+          })
+          .filter(Boolean);
+
+        if (selectedOptions.length > 0) {
+          selectedGroups.push({
+            groupLabel: group.label,
+            options: selectedOptions,
+          });
+        }
+      }
+    });
+
+    return selectedGroups;
+  };
+
+  const selectedModifiers = getSelectedModifiers();
 
   return (
     <div className="relative">
       <div
-        className={`flex flex-row  bg-gray-50 w-full h-[250px] shadow-lg shadow-gray-200 rounded-3xl md:w-[450px] ${
-          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50 " : ""
+        className={`flex flex-row bg-gray-50 w-full h-[250px] shadow-lg shadow-gray-200 rounded-3xl md:w-[450px] ${
+          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50" : ""
         }`}
       >
         <div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden relative">
@@ -114,12 +144,11 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
           />
         </div>
 
-        <div className="flex flex-col w-2/3 justify-center px-4  gap-4">
-          {/* header
-           */}
+        <div className="flex flex-col w-2/3 justify-center px-4 gap-4">
+          {/* header */}
           <div>
             <h3
-              className={`text-2xl font-bold  ${
+              className={`text-2xl font-bold ${
                 showConfirmation ? "truncate leading-none" : "leading-6"
               }`}
             >
@@ -133,6 +162,33 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
               {item.variantName.charAt(0).toUpperCase() +
                 item.variantName.slice(1).toLowerCase()}
             </p>
+
+            {/* Mostrar modifier selections */}
+            {selectedModifiers.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {selectedModifiers.map((group, groupIdx) => (
+                  <div key={groupIdx} className="text-xs">
+                    <span className="font-light text-gray-500">
+                      {group.groupLabel}:{" "}
+                    </span>
+                    <span className="font-light text-gray-600">
+                      {group.options.map((option, optIdx) => (
+                        <span key={option.id}>
+                          {capitalizeWords(option.name)}
+                          {option.price > 0 && (
+                            <span className="text-gray-400">
+                              {" "}
+                              (+${option.price})
+                            </span>
+                          )}
+                          {optIdx < group.options.length - 1 && ", "}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* quantity */}
@@ -140,8 +196,8 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
             <QuickAddToCart
               product={{
                 ...item,
-                id: item.productId, // ← AGREGAR: mapear productId a id
-                variantId: item.variantId, // ← Ya existe, pero asegurarlo
+                id: item.productId,
+                variantId: item.variantId,
                 name: item.name || item.data?.name || "Producto sin nombre",
                 price: item.price || item.data?.price || 0,
                 img: imageSrc,
@@ -164,7 +220,7 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
               animateFrom="left"
             />
             <p className="text-xs font-light text-gray-400 mt-2">
-              {currencyFormat(totalPrice * quantity)}
+              {currencyFormat(totalPrice)}
             </p>
           </div>
         </div>

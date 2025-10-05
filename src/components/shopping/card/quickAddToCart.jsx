@@ -1,5 +1,5 @@
-// components/shopping/card/quickAddToCart.jsx - Con límite de stock y validación de variantes
-import React, { useState, useRef, useEffect } from "react";
+// components/shopping/card/quickAddToCart.jsx
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart, createCartItem } from "../../../contexts/CartContext";
 import { ReadMateriales, ReadData } from "../../../firebase/orders/uploadOrder";
@@ -21,17 +21,48 @@ const QuickAddToCart = ({
 }) => {
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
 
+  console.log("🔄 QuickAddToCart montado/actualizado con:", {
+    productId: product.id,
+    variantId: product.variantId,
+    modifierSelections: product.modifierSelections,
+    hasModifiers: Object.keys(product.modifierSelections || {}).length > 0,
+  });
+
+  // Generar el ID esperado basado en el producto actual
+  const expectedCartItemId = useMemo(() => {
+    if (!product.id) return null;
+
+    const modifiersKey =
+      Object.keys(product.modifierSelections || {}).length > 0
+        ? JSON.stringify(
+            Object.entries(product.modifierSelections)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .reduce((acc, [key, value]) => {
+                acc[key] = Array.isArray(value) ? [...value].sort() : value;
+                return acc;
+              }, {})
+          )
+        : "";
+
+    return `${product.id}-${product.variantId || "default"}${
+      modifiersKey ? `-${btoa(modifiersKey)}` : ""
+    }`;
+  }, [product.id, product.variantId, product.modifierSelections]);
+
   const cartItem = !isOrderItem
-    ? cart.find((item) => {
-        if (product.id && product.variantId) {
-          return (
-            item.productId === product.id &&
-            item.variantId === product.variantId
-          );
-        }
-        return item.name === product.name && item.category === product.category;
-      })
+    ? cart.find((item) => item.id === expectedCartItemId)
     : null;
+
+  console.log("🔍 Buscando en carrito:", {
+    expectedId: expectedCartItemId,
+    found: !!cartItem,
+    cartItem: cartItem
+      ? {
+          id: cartItem.id,
+          quantity: cartItem.quantity,
+        }
+      : null,
+  });
 
   const initialQuantity = isOrderItem
     ? initialOrderQuantity || product.quantity
@@ -96,7 +127,9 @@ const QuickAddToCart = ({
             img: product.img,
             restrictions: product.restrictions || {
               fulfillmentMethodsExcluded: [],
-            }, // ⭐ AGREGAR
+            },
+            modifierSelections: product.modifierSelections || {},
+            modifiersPrice: product.modifiersPrice || 0,
           },
           product.selectedVariant || (product.variants && product.variants[0]),
           qty
@@ -118,6 +151,7 @@ const QuickAddToCart = ({
           finalPrice: newCartItem.finalPrice,
           infiniteStock: newCartItem.infiniteStock,
           availableStock: newCartItem.availableStock,
+          modifierSelections: newCartItem.modifierSelections,
         });
 
         addToCart(newCartItem);
@@ -217,12 +251,12 @@ const QuickAddToCart = ({
             >
               <div className="flex w-fit h-10">
                 <div
-                  className="text-primary  -700  font-primary  font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
+                  className="text-primary-700 font-primary font-medium flex justify-center text-center items-center w-[35px] h-10 cursor-pointer"
                   onClick={() => handleQuantityChange(-1)}
                 >
                   -
                 </div>
-                <div className=" font-primary  font-medium text-primary  -700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
+                <div className="font-primary font-medium text-primary-700 gap-2 flex justify-center text-sm text-center items-center w-[35px] h-10">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -240,10 +274,10 @@ const QuickAddToCart = ({
                   {quantity}
                 </div>
                 <div
-                  className={` font-primary  font-medium flex justify-center text-center items-center w-[35px] h-10 ${
+                  className={`font-primary font-medium flex justify-center text-center items-center w-[35px] h-10 ${
                     quantity >= maxStock
                       ? "text-gray-400 cursor-not-allowed"
-                      : "text-primary  -700 cursor-pointer"
+                      : "text-primary-700 cursor-pointer"
                   }`}
                   onClick={() => quantity < maxStock && handleQuantityChange(1)}
                 >
@@ -259,7 +293,7 @@ const QuickAddToCart = ({
               <div className="absolute z-[60]">
                 <button
                   disabled={disabled}
-                  className={`bg-primary text-sm flex flex-row items-center gap-2  font-primary  text-gray-50 rounded-full h-10 px-4 font-medium ${
+                  className={`bg-primary text-sm flex flex-row items-center gap-2 font-primary text-gray-50 rounded-full h-10 px-4 font-medium ${
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={!disabled ? startAddingProcess : undefined}
@@ -271,7 +305,7 @@ const QuickAddToCart = ({
               <div className="absolute z-[60]">
                 <button
                   disabled={disabled}
-                  className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-primary  -700 rounded-full h-10 px-4 font-medium ${
+                  className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-primary text-primary-700 rounded-full h-10 px-4 font-medium ${
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={!disabled ? startAddingProcess : undefined}
@@ -282,7 +316,7 @@ const QuickAddToCart = ({
                     viewBox="0 0 24 24"
                     strokeWidth="1.5"
                     stroke="currentColor"
-                    className="h-6 text-primary  -700"
+                    className="h-6 text-primary-700"
                   >
                     <path
                       strokeLinecap="round"
@@ -295,7 +329,7 @@ const QuickAddToCart = ({
               </div>
             ) : (
               <div
-                className={`bg-gray-300 text-sm flex flex-row items-center gap-2  font-primary  text-primary  -700 rounded-full h-10 px-4 font-medium`}
+                className={`bg-gray-300 text-sm flex flex-row items-center gap-2 font-primary text-primary-700 rounded-full h-10 px-4 font-medium`}
                 onClick={startAddingProcess}
               >
                 <svg
@@ -304,7 +338,7 @@ const QuickAddToCart = ({
                   viewBox="0 0 24 24"
                   strokeWidth="1.5"
                   stroke="currentColor"
-                  className="h-6 text-primary  -700"
+                  className="h-6 text-primary-700"
                 >
                   <path
                     strokeLinecap="round"

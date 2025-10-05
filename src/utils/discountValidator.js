@@ -1,5 +1,6 @@
 import { db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { calculateItemPrice } from "../helpers/priceCalculator";
 
 // Helper de redondeo
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -131,11 +132,7 @@ export const validateAndCalculateDiscount = async (
     console.log(`  [${i}] ${item.productName || item.name}`);
     console.log(`      productId: "${item.productId}"`);
     console.log(`      variantId: "${item.variantId}"`);
-    console.log(
-      `      precio: $${
-        (item.basePrice || item.price || 0) + (item.variantPrice || 0)
-      }`
-    );
+    console.log(`      precio: $${calculateItemPrice(item)}`);
     console.log(`      cantidad: ${item.quantity}`);
   });
 
@@ -274,8 +271,7 @@ export const validateAndCalculateDiscount = async (
   });
 
   const eligibleSubtotal = eligibleItems.reduce((sum, item) => {
-    const itemPrice =
-      (item.basePrice || item.price || 0) + (item.variantPrice || 0);
+    const itemPrice = calculateItemPrice(item); // ← USAR HELPER
     const itemTotal = itemPrice * item.quantity;
     console.log(
       `  ${item.productName}: $${itemPrice} x ${item.quantity} = $${itemTotal}`
