@@ -24,7 +24,6 @@ const CartItems = () => {
   // ✅ CAMBIO: Usar hook para productos destacados (ordenados por categoría)
   const featuredProducts = useProducts({
     sortBy: "category",
-    limit: 10,
   });
 
   const findCategoryWithProducts = () => {
