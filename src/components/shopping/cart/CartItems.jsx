@@ -1,32 +1,31 @@
-// components/shopping/cart/CartItems.js - MIGRADO
+// CartItems.jsx - REFACTORIZADO
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useClient } from "../../../contexts/ClientContext";
-import { useCart } from "../../../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
+import { useCart } from "../../../contexts/CartContext";
+import { useProducts } from "../../../hooks/useProducts"; // ✅ NUEVO
 import Items from "../../../pages/menu/Items";
 import CartCard from "./CartCard";
 import FormCustom from "../../form/FormCustom";
 import { getImageSrc } from "../../../helpers/getImageSrc";
-import VideoSlider from "../detail/VideoSlider";
 
 const CartItems = () => {
-  // ← CAMBIO: Reemplazar Redux con Context
-  // OLD: const { cart, total } = useSelector((state) => state.cartState);
-  // OLD: const dispatch = useDispatch();
-  const { cart, total, removeOneItem, addOneItem, removeItem } = useCart(); // ← NUEVO
-
+  const { cart, total, removeOneItem, addOneItem, removeItem } = useCart();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const {
-    products,
-    productsSorted,
     slugEmpresa,
     slugSucursal,
     clientAssets,
     categories,
     productsByCategory,
   } = useClient();
-  const reels = clientAssets?.reels || [];
+
+  // ✅ CAMBIO: Usar hook para productos destacados (ordenados por categoría)
+  const featuredProducts = useProducts({
+    sortBy: "category",
+    limit: 10,
+  });
 
   const findCategoryWithProducts = () => {
     if (!categories || !productsByCategory) return "default";
@@ -60,19 +59,18 @@ const CartItems = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // ← CAMBIO: Simplificar funciones (Context las maneja internamente)
   const decrementQuantity = (index, quantity) => {
     if (quantity > 1) {
-      removeOneItem(index); // ← Misma función que antes
+      removeOneItem(index);
     }
   };
 
   const incrementQuantity = (index) => {
-    addOneItem(index); // ← Misma función que antes
+    addOneItem(index);
   };
 
   const deleteItem = (index) => {
-    removeItem(index); // ← Misma función que antes
+    removeItem(index);
   };
 
   const handleGoBack = () => {
@@ -80,10 +78,10 @@ const CartItems = () => {
   };
 
   return (
-    <div className="flex flex-col bg-gray-100 font-primary  pb-4 overflow-x-hidden">
-      <div className="flex flex-col mt-8  w-full">
+    <div className="flex flex-col bg-gray-100 font-primary pb-4 overflow-x-hidden">
+      <div className="flex flex-col mt-8 w-full">
         {/* header */}
-        <div className="flex flex-row items-center px-4  w-fit">
+        <div className="flex flex-row items-center px-4 w-fit">
           <svg
             onClick={handleGoBack}
             xmlns="http://www.w3.org/2000/svg"
@@ -99,7 +97,7 @@ const CartItems = () => {
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
-          <p className="text-xs text-blue-700 font-light ">Volver</p>
+          <p className="text-xs text-blue-700 font-light">Volver</p>
         </div>
         <div
           className="flex flex-col md:flex-row gap-1 w-full mt-4 px-4 overflow-x-auto custom-scrollbar"
@@ -123,10 +121,10 @@ const CartItems = () => {
         </div>
       </div>
 
-      {/* Productos destacados */}
-      <div className="flex  flex-col  mb-8  w-full">
-        <div className="w-full ">
-          {productsSorted.length > 0 ? (
+      {/* ✅ CAMBIO: Productos destacados usando el hook */}
+      <div className="flex flex-col mb-8 w-full">
+        <div className="w-full">
+          {featuredProducts.length > 0 ? (
             <div
               className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
               style={{
@@ -138,7 +136,7 @@ const CartItems = () => {
               }}
             >
               <div className="flex gap-1" style={{ width: "max-content" }}>
-                {productsSorted.map((product, index) => {
+                {featuredProducts.map((product, index) => {
                   const productImg = getImageSrc(product);
                   return (
                     <Items
@@ -155,18 +153,17 @@ const CartItems = () => {
             </div>
           ) : (
             <div className="flex justify-center items-center w-full h-20">
-              <p className=" font-primary  text-gray-600 text-center">
+              <p className="font-primary text-gray-600 text-center">
                 No hay productos destacados disponibles
               </p>
             </div>
           )}
-          <p className=" font-light border-b border-gray-300 pb-2 ml-4 text-xs text-gray-400 pr-4 ">
+          <p className="font-light border-b border-gray-300 pb-2 ml-4 text-xs text-gray-400 pr-4">
             {clientAssets?.upsellsTitle || "Elegí lo que más te guste"}
           </p>
         </div>
       </div>
 
-      {/* ← CAMBIO: cart y total ahora vienen del Context */}
       <FormCustom cart={cart} total={total} />
 
       <style>
@@ -175,17 +172,17 @@ const CartItems = () => {
             height: 8px;
           }
           .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f3f4f6; /* bg-gray-50  */
+            background: #f3f4f6;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #f3f4f6; /* bg-gray-50  */
+            background: #f3f4f6;
             border-radius: 10px;
             border: 2px solid transparent;
             background-clip: padding-box;
           }
           .custom-scrollbar {
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: #f3f4f6 #f3f4f6; /* Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: #f3f4f6 #f3f4f6;
           }
         `}
       </style>

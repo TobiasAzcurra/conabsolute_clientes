@@ -1,11 +1,11 @@
-// components/shopping/detail/DetailCard.js - Versión completa con Modifier Groups
+// components/shopping/detail/DetailCard.js - REFACTORIZADO
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useCart } from "../../../contexts/CartContext";
 import { useClient } from "../../../contexts/ClientContext.jsx";
 import currencyFormat from "../../../helpers/currencyFormat.js";
 import { calculateProductPrice } from "../../../helpers/priceCalculator.js";
-import { getProductById } from "../../../firebase/products/getProductById.js";
+import { useProductStock } from "../../../hooks/useProductStock.js"; // ✅ NUEVO
 import { useToast, Toast } from "../../../hooks/useToast.jsx";
 import VideoSlider from "./VideoSlider.jsx";
 import QuickAddToCart from "../card/quickAddToCart.jsx";
@@ -18,13 +18,7 @@ const capitalizeWords = (str) => {
 
 const DetailCard = () => {
   const { category, id } = useParams();
-  const {
-    productsByCategory,
-    clientAssets,
-    clientConfig,
-    empresaId,
-    sucursalId,
-  } = useClient();
+  const { productsByCategory, clientAssets, clientConfig } = useClient();
   const navigate = useNavigate();
   const location = useLocation();
   const { cart } = useCart();
@@ -33,9 +27,6 @@ const DetailCard = () => {
   const [selectedVariants, setSelectedVariants] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [updatedProduct, setUpdatedProduct] = useState(null);
-  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
-  const [lastStockUpdate, setLastStockUpdate] = useState(null);
   const prevImagesRef = useRef([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
@@ -50,59 +41,45 @@ const DetailCard = () => {
     isValid: true,
   });
 
-  const STOCK_CACHE_DURATION = 30 * 1000;
-
   const reels = clientAssets?.reels || [];
   const logo = clientAssets?.logoFooter || clientAssets?.logo || "";
   const list = productsByCategory?.[category] || [];
 
-  const product = useMemo(() => {
-    if (updatedProduct) return updatedProduct;
+  // ✅ CAMBIO: Obtener producto inicial del context
+  const initialProduct = useMemo(() => {
     if (location?.state?.product) return location.state.product;
     return list.find((p) => p.id === id);
-  }, [updatedProduct, location?.state, list, id]);
+  }, [location?.state, list, id]);
 
-  useEffect(() => {
-    if (!empresaId || !sucursalId || !id) return;
+  // ✅ CAMBIO: Usar el hook refactorizado
+  const {
+    product,
+    isUpdating: isUpdatingStock,
+    refreshStock,
+  } = useProductStock(id, initialProduct);
 
-    const updateProductStock = async () => {
-      const now = Date.now();
-      if (lastStockUpdate && now - lastStockUpdate < STOCK_CACHE_DURATION) {
-        return;
-      }
+  // ✅ CAMBIO: Filtrar variantes inválidas localmente
+  const filteredProduct = useMemo(() => {
+    if (!product) return null;
 
-      setIsUpdatingStock(true);
-      try {
-        const freshProduct = await getProductById(empresaId, sucursalId, id);
-        if (freshProduct) {
-          const filteredProduct = {
-            ...freshProduct,
-            variants:
-              freshProduct.variants?.filter((variant) => {
-                if (!variant.price && variant.price !== 0) return true;
-                if (typeof variant.price !== "number") return false;
+    return {
+      ...product,
+      variants:
+        product.variants?.filter((variant) => {
+          if (!variant.price && variant.price !== 0) return true;
+          if (typeof variant.price !== "number") return false;
 
-                const basePrice = freshProduct.price || 0;
-                const finalPrice = basePrice + variant.price;
-                return finalPrice >= 0;
-              }) || [],
-          };
-
-          setUpdatedProduct(filteredProduct);
-          setLastStockUpdate(now);
-        }
-      } catch (error) {
-        console.error("❌ Error actualizando stock:", error);
-        addToast("Error al actualizar stock", "error");
-      } finally {
-        setIsUpdatingStock(false);
-      }
+          const basePrice = product.price || 0;
+          const finalPrice = basePrice + variant.price;
+          return finalPrice >= 0;
+        }) || [],
     };
+  }, [product]);
 
-    updateProductStock();
-  }, [empresaId, sucursalId, id, lastStockUpdate, STOCK_CACHE_DURATION]);
+  // ✅ CAMBIO: Usar producto filtrado en vez de updatedProduct
+  const displayProduct = filteredProduct;
 
-  if (!product) {
+  if (!displayProduct) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-center font-primary text-gray-900">
@@ -118,7 +95,7 @@ const DetailCard = () => {
 
   const variantStats = useMemo(() => {
     const stats = {};
-    for (const variant of product?.variants || []) {
+    for (const variant of displayProduct?.variants || []) {
       if (!variant.attributes) continue;
       Object.entries(variant.attributes).forEach(([key, value]) => {
         const k = key.toLowerCase();
@@ -132,7 +109,7 @@ const DetailCard = () => {
       result[key] = Array.from(stats[key]);
     }
     return result;
-  }, [product?.variants]);
+  }, [displayProduct?.variants]);
 
   const customization = useMemo(() => {
     return Object.keys(variantStats).length > 0;
@@ -146,7 +123,7 @@ const DetailCard = () => {
     );
 
     const filteredVariants = hasSelections
-      ? product.variants?.filter((variant) => {
+      ? displayProduct.variants?.filter((variant) => {
           const match = Object.entries(selectedVariants).every(
             ([key, value]) => {
               if (!value) return true;
@@ -165,7 +142,7 @@ const DetailCard = () => {
           );
           return match;
         }) || []
-      : product.variants || [];
+      : displayProduct.variants || [];
 
     for (const variant of filteredVariants) {
       if (!variant.attributes) continue;
@@ -183,7 +160,7 @@ const DetailCard = () => {
     }
 
     return result;
-  }, [product.variants, selectedVariants]);
+  }, [displayProduct.variants, selectedVariants]);
 
   useEffect(() => {
     const newSelection = { ...selectedVariants };
@@ -205,7 +182,8 @@ const DetailCard = () => {
 
     if (!hasUserSelections && Object.keys(variantStats).length === 0) {
       const defaultVariant =
-        product.variants?.find((v) => v.default) || product.variants?.[0];
+        displayProduct.variants?.find((v) => v.default) ||
+        displayProduct.variants?.[0];
       setSelectedVariant(defaultVariant || null);
       return;
     }
@@ -215,7 +193,7 @@ const DetailCard = () => {
       return;
     }
 
-    const matched = product.variants.find((variant) => {
+    const matched = displayProduct.variants.find((variant) => {
       return Object.entries(selectedVariants).every(([key, value]) => {
         if (!value) return false;
 
@@ -229,7 +207,7 @@ const DetailCard = () => {
       });
     });
     setSelectedVariant(matched || null);
-  }, [selectedVariants, product.variants, variantStats]);
+  }, [selectedVariants, displayProduct.variants, variantStats]);
 
   // Resetear modifier selections cuando cambia la variante
   useEffect(() => {
@@ -251,14 +229,17 @@ const DetailCard = () => {
   const productImages = useMemo(() => {
     const imgs = selectedVariant?.images?.length
       ? selectedVariant.images
-      : product?.img || product?.image || product?.images || [];
+      : displayProduct?.img ||
+        displayProduct?.image ||
+        displayProduct?.images ||
+        [];
     const normalized = Array.isArray(imgs) ? imgs : [imgs];
     const isSame =
       prevImagesRef.current.length === normalized.length &&
       prevImagesRef.current.every((img, i) => img === normalized[i]);
     if (!isSame) prevImagesRef.current = normalized;
     return prevImagesRef.current;
-  }, [selectedVariant, product]);
+  }, [selectedVariant, displayProduct]);
 
   useEffect(() => {
     if (!productImages || productImages.length <= 1 || isModalOpen) return;
@@ -274,17 +255,21 @@ const DetailCard = () => {
 
   // Usar el helper centralizado para calcular precios
   const priceBreakdown = useMemo(() => {
-    return calculateProductPrice(product, selectedVariant, modifierSelections);
-  }, [product, selectedVariant, modifierSelections]);
+    return calculateProductPrice(
+      displayProduct,
+      selectedVariant,
+      modifierSelections
+    );
+  }, [displayProduct, selectedVariant, modifierSelections]);
 
   const { basePrice, variantPrice, modifiersPrice, totalPrice } =
     priceBreakdown;
 
   const productToSend = useMemo(() => {
     return {
-      id: product.id,
-      name: product.name,
-      category: product.category,
+      id: displayProduct.id,
+      name: displayProduct.name,
+      category: displayProduct.category,
       price: basePrice,
       selectedVariant: selectedVariant,
       variantId: selectedVariant?.id || "default",
@@ -293,19 +278,23 @@ const DetailCard = () => {
       basePrice: basePrice,
       finalPrice: totalPrice,
       img:
-        selectedVariant?.productImage?.[0] || product.img?.[0] || product.img,
-      infiniteStock: product.infiniteStock || false,
+        selectedVariant?.productImage?.[0] ||
+        displayProduct.img?.[0] ||
+        displayProduct.img,
+      infiniteStock: displayProduct.infiniteStock || false,
       availableStock: selectedVariant?.stockSummary?.totalStock || 0,
       stockReference: selectedVariant?.stockReference || "",
       variants: selectedVariant ? [selectedVariant] : [],
-      restrictions: product.restrictions || { fulfillmentMethodsExcluded: [] },
+      restrictions: displayProduct.restrictions || {
+        fulfillmentMethodsExcluded: [],
+      },
       modifierSelections: selectedVariant?.hasModifiers
         ? modifierSelections.selections
         : {},
       modifiersPrice: modifiersPrice,
     };
   }, [
-    product,
+    displayProduct,
     selectedVariant,
     basePrice,
     variantPrice,
@@ -314,24 +303,24 @@ const DetailCard = () => {
     modifierSelections,
   ]);
 
-  const outOfStock = product.infiniteStock
+  const outOfStock = displayProduct.infiniteStock
     ? false
     : selectedVariant &&
       selectedVariant.stockSummary &&
       selectedVariant.stockSummary.totalStock === 0;
 
   const shouldDisable = useMemo(() => {
-    const hasVariants = product?.variants?.length > 0;
+    const hasVariants = displayProduct?.variants?.length > 0;
     if (hasVariants && !selectedVariant) return true;
 
     if (selectedVariant?.hasModifiers && !modifierSelections.isValid) {
       return true;
     }
 
-    if (!product.infiniteStock && outOfStock) return true;
+    if (!displayProduct.infiniteStock && outOfStock) return true;
 
     return false;
-  }, [product, selectedVariant, outOfStock, modifierSelections.isValid]);
+  }, [displayProduct, selectedVariant, outOfStock, modifierSelections.isValid]);
 
   const handleVariantSelect = (key, value) => {
     setSelectedVariants((prev) => {
@@ -344,7 +333,7 @@ const DetailCard = () => {
 
       newSelections[key] = value;
 
-      const isCurrentSelectionValid = (product.variants || []).some(
+      const isCurrentSelectionValid = (displayProduct.variants || []).some(
         (variant) => {
           if (!variant.attributes) return false;
 
@@ -369,7 +358,7 @@ const DetailCard = () => {
       if (!isCurrentSelectionValid) {
         const cleanedSelections = { [key]: value };
 
-        const variantsWithNewValue = (product.variants || []).filter(
+        const variantsWithNewValue = (displayProduct.variants || []).filter(
           (variant) => {
             if (!variant.attributes) return false;
 
@@ -423,22 +412,16 @@ const DetailCard = () => {
     navigate(-1);
   };
 
+  // ✅ CAMBIO: Simplificado - ahora solo llama al hook
   const handleRefreshStock = async () => {
-    if (!empresaId || !sucursalId || !id || isUpdatingStock) return;
+    if (isUpdatingStock) return;
 
-    setIsUpdatingStock(true);
     try {
-      const freshProduct = await getProductById(empresaId, sucursalId, id);
-      if (freshProduct) {
-        setUpdatedProduct(freshProduct);
-        setLastStockUpdate(Date.now());
-        addToast("Stock actualizado", "success");
-      }
+      await refreshStock();
+      addToast("Stock actualizado", "success");
     } catch (error) {
       console.error("❌ Error actualizando stock:", error);
       addToast("Error al actualizar stock", "error");
-    } finally {
-      setIsUpdatingStock(false);
     }
   };
 
@@ -525,10 +508,10 @@ const DetailCard = () => {
   }, []);
 
   const productVideos = useMemo(() => {
-    if (product?.vid?.length) return product.vid;
+    if (displayProduct?.vid?.length) return displayProduct.vid;
     if (selectedVariant?.videos?.length) return selectedVariant.videos;
     return reels;
-  }, [product?.vid, selectedVariant?.videos, reels]);
+  }, [displayProduct?.vid, selectedVariant?.videos, reels]);
 
   const quickAddKey = useMemo(() => {
     const modifiersKey =
@@ -536,8 +519,10 @@ const DetailCard = () => {
         ? JSON.stringify(modifierSelections.selections)
         : "no-modifiers";
 
-    return `${product.id}-${selectedVariant?.id || "default"}-${modifiersKey}`;
-  }, [product.id, selectedVariant?.id, modifierSelections.selections]);
+    return `${displayProduct.id}-${
+      selectedVariant?.id || "default"
+    }-${modifiersKey}`;
+  }, [displayProduct.id, selectedVariant?.id, modifierSelections.selections]);
 
   return (
     <div className="overflow-x-hidden">
@@ -548,7 +533,7 @@ const DetailCard = () => {
             <img
               className="w-full h-[250px] object-cover object-center cursor-zoom-in"
               src={productImages[selectedImageIndex]}
-              alt={product.name}
+              alt={displayProduct.name}
               onClick={handleImageClick}
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
@@ -570,7 +555,7 @@ const DetailCard = () => {
                       >
                         <img
                           src={image}
-                          alt={`${product.name} - imagen ${index + 1}`}
+                          alt={`${displayProduct.name} - imagen ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -616,7 +601,7 @@ const DetailCard = () => {
                       >
                         <img
                           src={productImages[i]}
-                          alt={`${product.name} - imagen ${i + 1}`}
+                          alt={`${displayProduct.name} - imagen ${i + 1}`}
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -661,7 +646,7 @@ const DetailCard = () => {
                   </svg>
                 </button>
                 <h4 className="font-primary font-bold pr-4 capitalize text-xl text-gray-900 leading-tight">
-                  {product.name}
+                  {displayProduct.name}
                 </h4>
               </div>
 
@@ -690,10 +675,10 @@ const DetailCard = () => {
               </button>
             </div>
 
-            {product.detailDescription && (
+            {displayProduct.detailDescription && (
               <p className="font-primary text-xs text-gray-400 font-light pl-4 pt-4 pr-16 leading-tight">
-                {product.detailDescription.charAt(0).toUpperCase() +
-                  product.detailDescription.slice(1).toLowerCase()}
+                {displayProduct.detailDescription.charAt(0).toUpperCase() +
+                  displayProduct.detailDescription.slice(1).toLowerCase()}
               </p>
             )}
 
@@ -709,74 +694,72 @@ const DetailCard = () => {
                         {values.map((value, index) => {
                           const isSelected = selectedVariants[key] === value;
 
-                          const isCompatible = (product.variants || []).some(
-                            (variant) => {
-                              if (!variant.attributes) return false;
+                          const isCompatible = (
+                            displayProduct.variants || []
+                          ).some((variant) => {
+                            if (!variant.attributes) return false;
 
-                              const attributeKey = Object.keys(
-                                variant.attributes
-                              ).find(
-                                (attrKey) =>
-                                  attrKey.toLowerCase() === key.toLowerCase()
-                              );
-                              const attrValue = attributeKey
-                                ? variant.attributes[attributeKey]
-                                : undefined;
+                            const attributeKey = Object.keys(
+                              variant.attributes
+                            ).find(
+                              (attrKey) =>
+                                attrKey.toLowerCase() === key.toLowerCase()
+                            );
+                            const attrValue = attributeKey
+                              ? variant.attributes[attributeKey]
+                              : undefined;
 
-                              if (
-                                !attrValue ||
-                                attrValue.toLowerCase() !== value.toLowerCase()
-                              ) {
-                                return false;
+                            if (
+                              !attrValue ||
+                              attrValue.toLowerCase() !== value.toLowerCase()
+                            ) {
+                              return false;
+                            }
+
+                            return Object.entries(selectedVariants).every(
+                              ([otherKey, otherValue]) => {
+                                if (!otherValue || otherKey === key)
+                                  return true;
+
+                                const otherAttributeKey = Object.keys(
+                                  variant.attributes || {}
+                                ).find(
+                                  (attrKey) =>
+                                    attrKey.toLowerCase() ===
+                                    otherKey.toLowerCase()
+                                );
+                                const otherAttrValue = otherAttributeKey
+                                  ? variant.attributes[otherAttributeKey]
+                                  : undefined;
+                                return (
+                                  otherAttrValue &&
+                                  otherAttrValue.toLowerCase() ===
+                                    otherValue.toLowerCase()
+                                );
                               }
+                            );
+                          });
 
-                              return Object.entries(selectedVariants).every(
-                                ([otherKey, otherValue]) => {
-                                  if (!otherValue || otherKey === key)
-                                    return true;
+                          const variantForValue = (
+                            displayProduct.variants || []
+                          ).find((v) => {
+                            if (!v.attributes) return false;
 
-                                  const otherAttributeKey = Object.keys(
-                                    variant.attributes || {}
-                                  ).find(
-                                    (attrKey) =>
-                                      attrKey.toLowerCase() ===
-                                      otherKey.toLowerCase()
-                                  );
-                                  const otherAttrValue = otherAttributeKey
-                                    ? variant.attributes[otherAttributeKey]
-                                    : undefined;
-                                  return (
-                                    otherAttrValue &&
-                                    otherAttrValue.toLowerCase() ===
-                                      otherValue.toLowerCase()
-                                  );
-                                }
-                              );
-                            }
-                          );
-
-                          const variantForValue = (product.variants || []).find(
-                            (v) => {
-                              if (!v.attributes) return false;
-
-                              const attributeKey = Object.keys(
-                                v.attributes
-                              ).find(
-                                (attrKey) =>
-                                  attrKey.toLowerCase() === key.toLowerCase()
-                              );
-                              const attrValue = attributeKey
-                                ? v.attributes[attributeKey]
-                                : undefined;
-                              return (
-                                attrValue &&
-                                attrValue.toLowerCase() === value.toLowerCase()
-                              );
-                            }
-                          );
+                            const attributeKey = Object.keys(v.attributes).find(
+                              (attrKey) =>
+                                attrKey.toLowerCase() === key.toLowerCase()
+                            );
+                            const attrValue = attributeKey
+                              ? v.attributes[attributeKey]
+                              : undefined;
+                            return (
+                              attrValue &&
+                              attrValue.toLowerCase() === value.toLowerCase()
+                            );
+                          });
 
                           const hasStock =
-                            product.infiniteStock ||
+                            displayProduct.infiniteStock ||
                             variantForValue?.stockSummary?.totalStock > 0;
                           const isClickable = hasStock;
                           const borderRadiusClass = "rounded-full";
@@ -863,7 +846,7 @@ const DetailCard = () => {
                               ) : (
                                 <div className="flex items-center gap-1">
                                   <span>{capitalizeWords(value)}</span>
-                                  {!product.infiniteStock &&
+                                  {!displayProduct.infiniteStock &&
                                     variantForValue?.stockSummary
                                       ?.totalStock !== undefined && (
                                       <span
@@ -916,10 +899,10 @@ const DetailCard = () => {
               </p>
             </div>
 
-            {product.deliveryDelay && (
+            {displayProduct.deliveryDelay && (
               <p className="text-gray-500 text-xs font-light mt-3 px-4">
                 {(() => {
-                  const delayHours = product.deliveryDelay;
+                  const delayHours = displayProduct.deliveryDelay;
                   const delayText =
                     delayHours < 24
                       ? `${delayHours} hora${delayHours !== 1 ? "s" : ""}`
@@ -966,7 +949,7 @@ const DetailCard = () => {
                   >
                     <img
                       src={image}
-                      alt={`${product.name} - imagen ${index + 1}`}
+                      alt={`${displayProduct.name} - imagen ${index + 1}`}
                       className="max-w-full max-h-full rounded-3xl object-contain cursor-pointer"
                       onClick={handleImageTap}
                       onTouchStart={handleTouchStart}

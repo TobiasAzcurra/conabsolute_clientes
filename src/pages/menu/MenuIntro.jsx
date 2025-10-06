@@ -1,12 +1,11 @@
-// MenuIntro.jsx
+// MenuIntro.jsx - REFACTORIZADO
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useClient } from "../../contexts/ClientContext";
 import { getClientData } from "../../firebase/clients/getClientData";
 import { getClientAssets } from "../../firebase/clients/getClientAssets";
 import { getCategoriesByClient } from "../../firebase/categories/getCategories";
-import { getProductsByClient } from "../../firebase/products/getProductsByClient";
-import { getProductsByCategoryPosition } from "../../firebase/products/getProductsByCategory";
+import { getProducts } from "../../firebase/products/getProducts"; // ✅ NUEVO
 import { getClientIds } from "../../firebase/clients/getClientIds";
 import { getClientConfig } from "../../firebase/clients/getClientConfig";
 import { preloader } from "../../utils/imagePreloader";
@@ -29,15 +28,14 @@ const MenuIntro = () => {
     setClientData,
     setClientAssets,
     setClientConfig,
-    setProducts,
-    setProductsByCategory,
+    setRawProducts, // ✅ CAMBIO
     setCategories,
-    setProductsSorted,
     setProductTags,
     setSlugEmpresa,
     setSlugSucursal,
     setEmpresaId,
     setSucursalId,
+    productsByCategory, // ✅ NUEVO: Lo usamos para navegación
   } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
@@ -66,7 +64,7 @@ const MenuIntro = () => {
         const connectionQuality = getConnectionQuality();
         const strategy = getPreloadStrategy();
 
-        console.log(`Conexion detectada: ${connectionQuality}`);
+        console.log(`Conexión detectada: ${connectionQuality}`);
         console.log(`Estrategia de precarga:`, strategy);
 
         // Ajustar concurrencia del preloader dinámicamente
@@ -96,99 +94,32 @@ const MenuIntro = () => {
           preloader.preload(heroUrls, "high");
         }, strategy.heroDelay);
 
-        // 3. Cargar resto de datos en paralelo
-        const [
-          data,
-          config,
-          categories,
-          productTags,
-          productsData,
-          sortedProducts,
-        ] = await Promise.all([
-          getClientData(empresaId, sucursalId),
-          getClientConfig(empresaId, sucursalId),
-          getCategoriesByClient(empresaId, sucursalId),
-          getProductTagsByClient(empresaId, sucursalId), // ✅ Nuevo
-          getProductsByClient(empresaId, sucursalId),
-          getProductsByCategoryPosition(empresaId, sucursalId),
-        ]);
+        // 3. ✅ CAMBIO: Cargar datos en paralelo con UNA SOLA query de productos
+        const [data, config, categories, productTags, rawProductsData] =
+          await Promise.all([
+            getClientData(empresaId, sucursalId),
+            getClientConfig(empresaId, sucursalId),
+            getCategoriesByClient(empresaId, sucursalId),
+            getProductTagsByClient(empresaId, sucursalId),
+            getProducts(empresaId, sucursalId, { includeInactive: false }), // ✅ NUEVO
+          ]);
 
         setClientData(data);
         setClientConfig(config);
         setCategories(categories);
         setProductTags(productTags);
 
-        // Ordenar productos alfabéticamente UNA SOLA VEZ aquí
-        // Section.jsx consumirá directamente sin re-ordenar
-        const sortedByCategory = {};
-        Object.keys(productsData.porCategoria).forEach((catId) => {
-          sortedByCategory[catId] = [...productsData.porCategoria[catId]].sort(
-            (a, b) => {
-              const nameA = (a.name || "").toLowerCase();
-              const nameB = (b.name || "").toLowerCase();
-              return nameA.localeCompare(nameB, "es", { sensitivity: "base" });
-            }
-          );
-        });
-
-        setProductsByCategory(sortedByCategory);
-        setProductsSorted(sortedProducts);
-
-        // 4. Precarga FASE 2: Categorías (delay adaptativo)
-        setTimeout(() => {
-          const categoryUrls = extractImageUrls.fromCategories(categories);
-          preloader.preload(categoryUrls, "high");
-        }, strategy.categoriesDelay);
-
-        // 5. Funciones para determinar categorías
-        const getFirstCategoryByPosition = () => {
-          if (!categories || categories.length === 0) return null;
-
-          const sortedByPosition = [...categories]
-            .filter((cat) => cat.position !== undefined)
-            .sort((a, b) => a.position - b.position);
-
-          return sortedByPosition[0]?.id || categories[0]?.id || null;
-        };
-
-        const findCategoryWithProducts = () => {
-          if (!categories || !sortedByCategory) return "default";
-
-          const sortedCategories = [...categories]
-            .filter((cat) => cat.position !== undefined)
-            .sort((a, b) => a.position - b.position);
-
-          const categoriesToCheck =
-            sortedCategories.length > 0 ? sortedCategories : categories;
-
-          for (const category of categoriesToCheck) {
-            const categoryProducts = sortedByCategory[category.id];
-            if (categoryProducts && categoryProducts.length > 0) {
-              return category.id;
-            }
-          }
-
-          return categoriesToCheck[0]?.id || "default";
-        };
-
-        // Categoría para PRECARGA: la de position más bajo
-        const firstCategoryByPosition = getFirstCategoryByPosition();
-
-        // Categoría para NAVEGACIÓN: la primera con productos
-        const firstCategoryWithProducts = findCategoryWithProducts();
-
-        console.log(`Precargando productos de: ${firstCategoryByPosition}`);
-        console.log(`Navegara a: ${firstCategoryWithProducts}`);
-
-        // 6. Procesar productos relacionados
+        // 4. ✅ CAMBIO: Procesar productos relacionados
         const relatedStores = config?.logistics?.relatedStores;
         let relatedProducts = [];
 
         if (relatedStores && Object.keys(relatedStores).length > 0) {
           for (const storeId of Object.keys(relatedStores)) {
             const delay = relatedStores[storeId].deliveryDelay;
-            const extraProducts = await getProductsByClient(empresaId, storeId);
-            const enriched = extraProducts.todos.map((p) => ({
+            const extraProducts = await getProducts(empresaId, storeId, {
+              includeInactive: false,
+            });
+            const enriched = extraProducts.map((p) => ({
               ...p,
               sourceStoreId: storeId,
               deliveryDelay: delay,
@@ -197,9 +128,9 @@ const MenuIntro = () => {
           }
         }
 
-        const allProducts = [...productsData.todos, ...relatedProducts];
+        const allProducts = [...rawProductsData, ...relatedProducts];
 
-        // 7. Validar productos
+        // 5. ✅ CAMBIO: Validar productos (precios válidos)
         const validProducts = allProducts
           .filter((product) => {
             const isValidPrice =
@@ -222,15 +153,67 @@ const MenuIntro = () => {
             return product;
           });
 
-        setProducts(validProducts);
+        // ✅ CAMBIO: Guardar productos crudos en el context
+        setRawProducts(validProducts);
 
-        // 8. Precarga FASE 3: Productos prioritarios (adaptativo según conexión)
+        // 6. Precarga FASE 2: Categorías (delay adaptativo)
         setTimeout(() => {
-          if (
-            firstCategoryByPosition &&
-            sortedByCategory[firstCategoryByPosition]
-          ) {
-            const priorityProducts = sortedByCategory[firstCategoryByPosition];
+          const categoryUrls = extractImageUrls.fromCategories(categories);
+          preloader.preload(categoryUrls, "high");
+        }, strategy.categoriesDelay);
+
+        // 7. ✅ CAMBIO: Funciones para determinar categorías (ahora usan productsByCategory del context)
+        const getFirstCategoryByPosition = () => {
+          if (!categories || categories.length === 0) return null;
+
+          const sortedByPosition = [...categories]
+            .filter((cat) => cat.position !== undefined)
+            .sort((a, b) => a.position - b.position);
+
+          return sortedByPosition[0]?.id || categories[0]?.id || null;
+        };
+
+        // Esperar un tick para que productsByCategory se compute
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        const findCategoryWithProducts = () => {
+          if (!categories) return "default";
+
+          const sortedCategories = [...categories]
+            .filter((cat) => cat.position !== undefined)
+            .sort((a, b) => a.position - b.position);
+
+          const categoriesToCheck =
+            sortedCategories.length > 0 ? sortedCategories : categories;
+
+          for (const category of categoriesToCheck) {
+            // ✅ Ahora usamos el productsByCategory computado del context
+            const categoryProducts = validProducts.filter(
+              (p) => p.categoryId === category.id
+            );
+            if (categoryProducts && categoryProducts.length > 0) {
+              return category.id;
+            }
+          }
+
+          return categoriesToCheck[0]?.id || "default";
+        };
+
+        // Categoría para PRECARGA: la de position más bajo
+        const firstCategoryByPosition = getFirstCategoryByPosition();
+
+        // Categoría para NAVEGACIÓN: la primera con productos
+        const firstCategoryWithProducts = findCategoryWithProducts();
+
+        console.log(`Precargando productos de: ${firstCategoryByPosition}`);
+        console.log(`Navegará a: ${firstCategoryWithProducts}`);
+
+        // 8. Precarga FASE 3: Productos prioritarios
+        setTimeout(() => {
+          if (firstCategoryByPosition) {
+            const priorityProducts = validProducts.filter(
+              (p) => p.categoryId === firstCategoryByPosition
+            );
 
             console.log(
               `Primeros ${strategy.maxProducts} productos a precargar:`,
@@ -252,18 +235,20 @@ const MenuIntro = () => {
             }
           } else {
             console.warn(
-              `No se encontraron productos en la categoria priority: ${firstCategoryByPosition}`
+              `No se encontraron productos en la categoría priority: ${firstCategoryByPosition}`
             );
           }
         }, strategy.productsDelay);
 
-        // 9. Precarga FASE 4: Resto de categorías (solo si conexión rápida y hay tiempo)
+        // 9. Precarga FASE 4: Resto de categorías
         const introDuration = assets?.loadingDuration || DEFAULT_INTRO_DURATION;
         if (!strategy.skipLowPriority && introDuration > 3000) {
           setTimeout(() => {
             categories.forEach((cat) => {
               if (cat.id !== firstCategoryByPosition) {
-                const otherCategoryProducts = sortedByCategory[cat.id] || [];
+                const otherCategoryProducts = validProducts.filter(
+                  (p) => p.categoryId === cat.id
+                );
                 const otherUrls = extractImageUrls.fromProducts(
                   otherCategoryProducts.slice(0, 10)
                 );

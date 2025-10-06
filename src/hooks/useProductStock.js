@@ -1,16 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getProductById } from '../firebase/products/getProductById';
+// hooks/useProductStock.js
+import { useState, useEffect, useCallback } from "react";
+import { getProducts } from "../firebase/products/getProducts"; // ✅ CAMBIO
+import { useClient } from "../contexts/ClientContext";
 
 /**
- * Hook personalizado para manejar actualizaciones de stock de productos
- * @param {string} empresaId - ID de la empresa
- * @param {string} sucursalId - ID de la sucursal
+ * Hook para actualizar stock de un producto específico
  * @param {string} productId - ID del producto
- * @param {Object} initialProduct - Producto inicial (de caché)
- * @returns {Object} - Estado y funciones para manejar el producto
+ * @param {Object} initialProduct - Producto inicial (opcional)
  */
-export const useProductStock = (empresaId, sucursalId, productId, initialProduct) => {
-  const [product, setProduct] = useState(initialProduct);
+export const useProductStock = (productId, initialProduct = null) => {
+  const { empresaId, sucursalId, rawProducts } = useClient();
+
+  // ✅ Primero intentar obtener del context (caché)
+  const cachedProduct = rawProducts.find((p) => p.id === productId);
+
+  const [product, setProduct] = useState(initialProduct || cachedProduct);
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
 
@@ -19,25 +23,44 @@ export const useProductStock = (empresaId, sucursalId, productId, initialProduct
 
     setIsUpdating(true);
     try {
-      const freshProduct = await getProductById(empresaId, sucursalId, productId);
+      // ✅ CAMBIO: Usar la función consolidada
+      const freshProduct = await getProducts(empresaId, sucursalId, {
+        productId,
+        includeInactive: false,
+      });
+
       if (freshProduct) {
-        setProduct(freshProduct);
+        // Filtrar variantes con precios inválidos
+        const filteredProduct = {
+          ...freshProduct,
+          variants:
+            freshProduct.variants?.filter((variant) => {
+              if (!variant.price && variant.price !== 0) return true;
+              if (typeof variant.price !== "number") return false;
+              const basePrice = freshProduct.price || 0;
+              const finalPrice = basePrice + variant.price;
+              return finalPrice >= 0;
+            }) || [],
+        };
+
+        setProduct(filteredProduct);
         setLastUpdate(Date.now());
-        console.log('✅ Stock actualizado para producto:', productId);
+        console.log("✅ Stock actualizado:", productId);
       }
     } catch (error) {
-      console.error('❌ Error actualizando stock:', error);
+      console.error("❌ Error actualizando stock:", error);
     } finally {
       setIsUpdating(false);
     }
   }, [empresaId, sucursalId, productId]);
 
-  // Actualizar automáticamente al montar el componente
+  // Actualizar cuando cambia el caché del context
   useEffect(() => {
-    updateStock();
-  }, [updateStock]);
+    if (cachedProduct) {
+      setProduct(cachedProduct);
+    }
+  }, [cachedProduct]);
 
-  // Función para refrescar manualmente
   const refreshStock = useCallback(() => {
     updateStock();
   }, [updateStock]);

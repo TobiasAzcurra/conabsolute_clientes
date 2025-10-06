@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, useMemo } from "react";
 import { useTypography } from "../hooks/useTypography";
 import { useColors } from "../hooks/useColors";
+import { groupByCategory } from "../utils/productSorters";
 
 export const ClientContext = createContext();
 
@@ -10,17 +11,24 @@ export const ClientProvider = ({ children }) => {
   const [clientData, setClientData] = useState(null);
   const [clientAssets, setClientAssets] = useState(null);
   const [clientConfig, setClientConfig] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [productsByCategory, setProductsByCategory] = useState({});
+
+  // ✅ CAMBIO: Solo guardamos productos "crudos" sin procesar
+  const [rawProducts, setRawProducts] = useState([]);
+
   const [categories, setCategories] = useState([]);
   const [productTags, setProductTags] = useState([]);
-  const [productsSorted, setProductsSorted] = useState([]);
   const [slugEmpresa, setSlugEmpresa] = useState(null);
   const [slugSucursal, setSlugSucursal] = useState(null);
   const [empresaId, setEmpresaId] = useState(null);
   const [sucursalId, setSucursalId] = useState(null);
   const [activeFilters, setActiveFilters] = useState([]);
   const [activeSortOption, setActiveSortOption] = useState(null);
+
+  // ✅ NUEVO: Memoizaciones derivadas (computed values)
+  const productsByCategory = useMemo(
+    () => groupByCategory(rawProducts),
+    [rawProducts]
+  );
 
   // Cargar tipografía y colores cuando tenemos los IDs
   const { typography, loading: typographyLoading } = useTypography(
@@ -40,16 +48,16 @@ export const ClientProvider = ({ children }) => {
       setClientAssets,
       clientConfig,
       setClientConfig,
-      products,
-      setProducts,
-      productsByCategory,
-      setProductsByCategory,
+
+      // ✅ CAMBIO: Exponemos rawProducts y productos derivados
+      rawProducts,
+      setRawProducts,
+      productsByCategory, // Computed
+
       categories,
       setCategories,
       productTags,
       setProductTags,
-      productsSorted,
-      setProductsSorted,
       slugEmpresa,
       setSlugEmpresa,
       slugSucursal,
@@ -72,11 +80,10 @@ export const ClientProvider = ({ children }) => {
       clientData,
       clientAssets,
       clientConfig,
-      products,
+      rawProducts,
       productsByCategory,
       categories,
       productTags,
-      productsSorted,
       slugEmpresa,
       slugSucursal,
       empresaId,
