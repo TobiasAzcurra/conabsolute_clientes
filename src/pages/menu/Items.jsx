@@ -40,7 +40,7 @@ const Items = ({
 
   const content = (
     <>
-      <div className="h-[70px] w-full rounded-t-[14px] overflow-hidden items-center   bg-gray-200 to-gray-300 relative flex justify-center">
+      <div className="h-[70px] w-full rounded-t-[14px] overflow-hidden items-center   bg-gray-50 to-gray-300 relative flex justify-center">
         {imageSrc === "/menu//placeholder-product.jpg" ? (
           // SVG fallback si no hay imagen
 
