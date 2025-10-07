@@ -1,13 +1,13 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { useClient } from "./contexts/ClientContext";
-import MenuIntro from "./pages/menu/MenuIntro";
+import MenuIntro from "./pages/MenuIntro";
 import ClientLayout from "./layouts/ClientLayout";
 import Section from "./components/shopping/section/Section.jsx";
 import DetailCard from "./components/shopping/detail/DetailCard.jsx";
 import CartItems from "./components/shopping/cart/CartItems.jsx";
 import NotFound from "./components/NotFound.jsx";
-import SuccessPage from "./pages/menu/SuccessPage.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
 import Pedido from "./pages/pedido/Pedido.jsx";
 import { useMediaQuery } from "react-responsive";
 import Absolute from "./assets/isologoAbsolte.png";

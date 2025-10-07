@@ -59,7 +59,7 @@ export const isBusinessOpen = (businessHours) => {
 
       // Si está abierto, verificar timeSlots especiales
       const isInSpecialSlot = specialDay.timeSlots?.some((slot) => {
-        return currentTime >= slot.openTime && currentTime <= slot.closeTime;
+        return currentTime >= slot.openTime && currentTime < slot.closeTime;
       });
 
       if (!isInSpecialSlot) {
@@ -92,7 +92,7 @@ export const isBusinessOpen = (businessHours) => {
 
   // Verificar timeSlots regulares
   const isInTimeSlot = daySchedule.timeSlots?.some((slot) => {
-    return currentTime >= slot.openTime && currentTime <= slot.closeTime;
+    return currentTime >= slot.openTime && currentTime < slot.closeTime;
   });
 
   if (!isInTimeSlot) {

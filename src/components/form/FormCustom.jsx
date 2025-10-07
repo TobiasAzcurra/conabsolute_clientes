@@ -251,7 +251,26 @@ const FormCustom = ({ cart, total }) => {
 
     if (delayConfig?.isActive && !isReserva) {
       const now = new Date();
-      const expiresAt = new Date(delayConfig.expiresAt);
+      const tsToDate = (ts) => {
+        if (!ts) return null;
+        // Firestore Timestamp -> Date
+        if (typeof ts.toDate === "function") return ts.toDate();
+        // ISO/string o epoch -> Date
+        return new Date(ts);
+      };
+
+      const expiresAt = tsToDate(delayConfig?.expiresAt);
+      if (
+        delayConfig?.isActive &&
+        !isReserva &&
+        expiresAt &&
+        new Date() < expiresAt
+      ) {
+        setDelayMinutes(delayConfig.minutes || 15);
+        setPendingDelaySubmit({ values, isReserva, appliedDiscount });
+        setShowDelayModal(true);
+        return;
+      }
 
       if (now < expiresAt) {
         setDelayMinutes(delayConfig.minutes || 15);

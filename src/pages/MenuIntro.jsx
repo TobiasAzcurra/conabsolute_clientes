@@ -1,20 +1,20 @@
 // MenuIntro.jsx - REFACTORIZADO
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useClient } from "../../contexts/ClientContext";
-import { getClientData } from "../../firebase/clients/getClientData";
-import { getClientAssets } from "../../firebase/clients/getClientAssets";
-import { getCategoriesByClient } from "../../firebase/categories/getCategories";
-import { getProducts } from "../../firebase/products/getProducts"; // ✅ NUEVO
-import { getClientIds } from "../../firebase/clients/getClientIds";
-import { getClientConfig } from "../../firebase/clients/getClientConfig";
-import { preloader } from "../../utils/imagePreloader";
-import { extractImageUrls } from "../../utils/extractImages";
+import { useClient } from "../contexts/ClientContext";
+import { getClientData } from "../firebase/clients/getClientData";
+import { getClientAssets } from "../firebase/clients/getClientAssets";
+import { getCategoriesByClient } from "../firebase/categories/getCategories";
+import { getProducts } from "../firebase/products/getProducts"; // ✅ NUEVO
+import { getClientIds } from "../firebase/clients/getClientIds";
+import { getClientConfig } from "../firebase/clients/getClientConfig";
+import { preloader } from "../utils/imagePreloader";
+import { extractImageUrls } from "../utils/extractImages";
 import {
   getPreloadStrategy,
   getConnectionQuality,
-} from "../../utils/networkDetector";
-import { getProductTagsByClient } from "../../firebase/tags/getTagsByClient";
+} from "../utils/networkDetector";
+import { getProductTagsByClient } from "../firebase/tags/getTagsByClient";
 
 const DEFAULT_INTRO_DURATION = 0;
 const REDIRECT_BUFFER = 300;

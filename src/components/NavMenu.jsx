@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import Items from "../pages/menu/Items";
+import Items from "../components/ui/Items";
 import { useClient } from "../contexts/ClientContext";
 import { useLocation } from "react-router-dom";
 import { SORT_OPTIONS } from "../constants/sortOptions";

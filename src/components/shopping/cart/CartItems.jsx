@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useClient } from "../../../contexts/ClientContext";
 import { useCart } from "../../../contexts/CartContext";
 import { useProducts } from "../../../hooks/useProducts"; // ✅ NUEVO
-import Items from "../../../pages/menu/Items";
+import Items from "../../../components/ui/Items";
 import CartCard from "./CartCard";
 import FormCustom from "../../form/FormCustom";
 import { getImageSrc } from "../../../helpers/getImageSrc";
