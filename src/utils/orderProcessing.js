@@ -1,4 +1,4 @@
-// utils/orderProcessing.js - Con modifiers simplificados
+// utils/orderProcessing.js - Usando timestampHelpers centralizados
 import { db } from "../firebase/config";
 import {
   collection,
@@ -9,6 +9,10 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { StockManager } from "./stockManager";
+import {
+  createServerTimestamp,
+  createDelayedTimestamp,
+} from "./timestampHelpers";
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
@@ -34,13 +38,13 @@ const getProductData = async (enterpriseData, productId) => {
 
     const productDoc = await getDoc(productRef);
     if (!productDoc.exists()) {
-      console.error(`❌ Producto ${productId} no existe en Firebase`);
+      console.error(`Producto ${productId} no existe en Firebase`);
       return null;
     }
 
     const productData = { id: productId, ...productDoc.data() };
     console.log(
-      `✅ Producto obtenido: ${productData.name}, infiniteStock: ${productData.infiniteStock}`
+      `Producto obtenido: ${productData.name}, infiniteStock: ${productData.infiniteStock}`
     );
 
     return productData;
@@ -57,12 +61,12 @@ export const consumeStockForOrderAndReturnTraces = async (
   const stockManager = new StockManager(enterpriseData);
   const results = [];
 
-  console.log(`📦 Procesando ${cartItems.length} items del carrito...`);
+  console.log(`Procesando ${cartItems.length} items del carrito...`);
 
   for (const item of cartItems) {
     try {
       console.log(
-        `🔍 Procesando item: ${item.productName} (ID: ${item.productId})`
+        `Procesando item: ${item.productName} (ID: ${item.productId})`
       );
 
       const productData = await getProductData(enterpriseData, item.productId);
@@ -75,7 +79,7 @@ export const consumeStockForOrderAndReturnTraces = async (
         variant = productData.variants?.find((v) => v.id === item.variantId);
         if (!variant) {
           console.warn(
-            `⚠️ Variante ${item.variantId} no encontrada, usando default`
+            `Variante ${item.variantId} no encontrada, usando default`
           );
           variant = productData.variants?.find((v) => v.default === true);
         }
@@ -85,7 +89,7 @@ export const consumeStockForOrderAndReturnTraces = async (
 
       if (productData.infiniteStock === true) {
         console.log(
-          `♾️ Producto con stock infinito detectado: ${productData.name}`
+          `Producto con stock infinito detectado: ${productData.name}`
         );
       }
 
@@ -97,7 +101,7 @@ export const consumeStockForOrderAndReturnTraces = async (
         },
       };
 
-      console.log(`🔒 Versión capturada en carrito: ${item.stockVersion}`);
+      console.log(`Versión capturada en carrito: ${item.stockVersion}`);
 
       const saleResult = await stockManager.simulateVenta(
         productData,
@@ -113,9 +117,9 @@ export const consumeStockForOrderAndReturnTraces = async (
         totalStockAfter: saleResult.totalStockAfter || 0,
       });
 
-      console.log(`✅ Item procesado exitosamente: ${item.productName}`);
+      console.log(`Item procesado exitosamente: ${item.productName}`);
     } catch (error) {
-      console.error(`❌ Error procesando item ${item.id}:`, error);
+      console.error(`Error procesando item ${item.id}:`, error);
 
       if (error.message.includes("STOCK_VERSION_MISMATCH")) {
         throw new Error(
@@ -196,7 +200,7 @@ const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
       "usage.usageTracking": arrayUnion(orderId),
     });
 
-    console.log(`✅ Uso de descuento registrado para orden ${orderId}`);
+    console.log(`Uso de descuento registrado para orden ${orderId}`);
   } catch (error) {
     console.error("Error registrando uso de descuento:", error);
   }
@@ -209,22 +213,18 @@ export const handlePOSSubmit = async (
   clientData
 ) => {
   try {
-    console.log("🚀 Procesando pedido con schema POS");
+    console.log("Procesando pedido con schema POS");
 
-    const now = new Date().toISOString();
     const orderId = generateUUID();
 
-    let confirmedAt = now;
+    let confirmedAt = createServerTimestamp();
+
     if (formData.delayMinutes && formData.delayMinutes > 0) {
-      const delayedDate = new Date();
-      delayedDate.setMinutes(delayedDate.getMinutes() + formData.delayMinutes);
-      confirmedAt = delayedDate.toISOString();
-      console.log(
-        `⏰ Pedido confirmado con delay: ${formData.delayMinutes}min → ${confirmedAt}`
-      );
+      confirmedAt = createDelayedTimestamp(formData.delayMinutes);
+      console.log(`Pedido confirmado con delay: ${formData.delayMinutes}min`);
     }
 
-    console.log("📦 Consumiendo stock...");
+    console.log("Consumiendo stock...");
     const traces = await consumeStockForOrderAndReturnTraces(
       cartItems,
       enterpriseData
@@ -279,10 +279,10 @@ export const handlePOSSubmit = async (
         type: "coupon",
         reason: formData.appliedDiscount.discountData.code,
         value: descuento,
-        timestamp: now,
+        timestamp: createServerTimestamp(),
       });
 
-      console.log("🎫 Descuento aplicado:", {
+      console.log("Descuento aplicado:", {
         code: formData.appliedDiscount.discountData.code,
         value: descuento,
       });
@@ -308,6 +308,11 @@ export const handlePOSSubmit = async (
     const finalProfitMarginPercentage =
       totalAfterDiscounts > 0 ? round2(grossMargin / totalAfterDiscounts) : 0;
 
+    let estimatedTime = null;
+    if (formData.estimatedTime) {
+      estimatedTime = formData.estimatedTime;
+    }
+
     const orderData = {
       status: "Confirmed",
       statusNote: "",
@@ -319,8 +324,8 @@ export const handlePOSSubmit = async (
       },
 
       timestamps: {
-        createdAt: now,
-        updatedAt: now,
+        createdAt: createServerTimestamp(),
+        updatedAt: createServerTimestamp(),
         pendingAt: null,
         confirmedAt: confirmedAt,
         readyAt: null,
@@ -338,7 +343,7 @@ export const handlePOSSubmit = async (
         assignedTo: "",
         address: formData.address || clientData?.address || "",
         coordinates: formData.coordinates || [0, 0],
-        estimatedTime: formData.hora || null,
+        estimatedTime: estimatedTime,
         deliveryNotes: formData.references || "",
       },
 
@@ -375,16 +380,16 @@ export const handlePOSSubmit = async (
 
     await setDoc(pedidoRef, orderData);
 
-    console.log("✅ Pedido guardado con schema POS:");
-    console.log("📊 Items con trazabilidad:", itemsForOrder.length);
-    console.log("💰 Margen total:", grossMargin);
+    console.log("Pedido guardado con schema POS:");
+    console.log("Items con trazabilidad:", itemsForOrder.length);
+    console.log("Margen total:", grossMargin);
     console.log(
-      "📈 % Margen:",
+      "% Margen:",
       (finalProfitMarginPercentage * 100).toFixed(1) + "%"
     );
 
     if (descuento > 0) {
-      console.log("🎫 Descuento aplicado:", descuento);
+      console.log("Descuento aplicado:", descuento);
     }
 
     if (formData.appliedDiscount?.discountId) {
@@ -397,7 +402,7 @@ export const handlePOSSubmit = async (
 
     return orderId;
   } catch (error) {
-    console.error("❌ Error en handlePOSSubmit:", error);
+    console.error("Error en handlePOSSubmit:", error);
     throw error;
   }
 };

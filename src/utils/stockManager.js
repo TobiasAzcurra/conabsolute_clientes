@@ -1,4 +1,4 @@
-// utils/stockManager.js - Con optimistic locking implementado
+// utils/stockManager.js - Con timestampHelpers centralizados
 import { db } from "../firebase/config";
 import {
   collection,
@@ -10,6 +10,7 @@ import {
   where,
   runTransaction,
 } from "firebase/firestore";
+import { createServerTimestamp } from "./timestampHelpers";
 
 export class StockManager {
   constructor(enterpriseData) {
@@ -32,23 +33,22 @@ export class StockManager {
   }
 
   handleInfiniteStockSale(producto, selectedVariant = null, cantidad = 1) {
-    console.log(`♾️ Procesando venta de stock infinito: ${cantidad} unidades`);
+    console.log(`Procesando venta de stock infinito: ${cantidad} unidades`);
 
     const timestamp = Date.now();
     const infiniteValue = Number.MAX_SAFE_INTEGER;
 
-    // ✅ OBTENER unitCost desde la variante
     const variant =
       selectedVariant || producto.variants?.find((v) => v.default);
     const unitCost = variant?.stockSummary?.currentPurchase?.unitCost || 0;
 
-    console.log(`💰 Costo unitario para stock infinito: $${unitCost}`);
+    console.log(`Costo unitario para stock infinito: $${unitCost}`);
 
     const purchaseTrace = [
       {
         compraId: `infinite-stock-${timestamp}`,
         units: cantidad,
-        unitCost: unitCost, // ✅ Usar el costo real
+        unitCost: unitCost,
         remainingBefore: infiniteValue,
         remainingAfter: infiniteValue,
       },
@@ -56,7 +56,7 @@ export class StockManager {
 
     return {
       purchaseTrace,
-      unitCostAvg: unitCost, // ✅ Devolver el costo real
+      unitCostAvg: unitCost,
       finalRemainingStock: infiniteValue,
       totalStockAfter: infiniteValue,
       totalStockBefore: infiniteValue,
@@ -151,7 +151,7 @@ export class StockManager {
 
       await updateDoc(stockRef, {
         compras: compras,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: createServerTimestamp(),
       });
     }
   }
@@ -188,12 +188,11 @@ export class StockManager {
 
       await updateDoc(stockRef, {
         compras: compras,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: createServerTimestamp(),
       });
     }
   }
 
-  // OPTIMISTIC LOCKING: Usar transaction para garantizar atomicidad
   async processMultiPurchaseSaleWithTransaction(
     producto,
     selectedVariant,
@@ -241,7 +240,6 @@ export class StockManager {
         throw new Error("MISSING_STOCK_SUMMARY: Variante sin stockSummary");
       }
 
-      // OPTIMISTIC LOCK: Verificar versión
       const currentVersion = currentStockSummary.version || 0;
       const expectedVersion = selectedVariant?.stockSummary?.version || 0;
 
@@ -251,7 +249,6 @@ export class StockManager {
         );
       }
 
-      // Verificar stock disponible
       if (currentStockSummary.totalStock < cantidadTotal) {
         throw new Error(
           `INSUFFICIENT_STOCK: Stock insuficiente. Disponible: ${currentStockSummary.totalStock}, solicitado: ${cantidadTotal}`
@@ -262,7 +259,6 @@ export class StockManager {
       const purchaseTrace = [];
       let cantidadRestante = cantidadTotal;
 
-      // Consumir de la compra actual
       const cantidadDeCompraActual = Math.min(
         cantidadRestante,
         currentStockSummary.currentPurchase.remainingStock
@@ -297,8 +293,6 @@ export class StockManager {
       let updatedStockSummary;
 
       if (newRemainingStock === 0) {
-        // Compra actual agotada - necesitamos encontrar la siguiente
-        // Esto lo haremos después de la transacción
         updatedStockSummary = {
           version: newVersion,
           currentPurchase: {
@@ -308,8 +302,8 @@ export class StockManager {
             ventasId: newVentasId,
           },
           totalStock: newTotalStock,
-          lastUpdated: new Date().toISOString(),
-          needsReplenishment: true, // Flag para actualizar después
+          lastUpdated: createServerTimestamp(),
+          needsReplenishment: true,
         };
       } else {
         updatedStockSummary = {
@@ -321,7 +315,7 @@ export class StockManager {
             ventasId: newVentasId,
           },
           totalStock: newTotalStock,
-          lastUpdated: new Date().toISOString(),
+          lastUpdated: createServerTimestamp(),
         };
       }
 
@@ -333,7 +327,7 @@ export class StockManager {
       transaction.update(productRef, { variants: variants });
 
       console.log(
-        `✅ Stock actualizado con transaction. Nueva versión: ${newVersion}`
+        `Stock actualizado con transaction. Nueva versión: ${newVersion}`
       );
 
       const unitsTotal = purchaseTrace.reduce((a, e) => a + e.units, 0);
@@ -360,9 +354,7 @@ export class StockManager {
 
   async simulateVenta(producto, selectedVariant = null, cantidad = 1) {
     try {
-      console.log(
-        `🛒 Simulando venta de ${cantidad} unidades - ${producto.name}`
-      );
+      console.log(`Simulando venta de ${cantidad} unidades - ${producto.name}`);
 
       if (producto.infiniteStock === true) {
         return this.handleInfiniteStockSale(
@@ -387,7 +379,6 @@ export class StockManager {
         );
       }
 
-      // Ejecutar venta con optimistic locking
       const result = await this.processMultiPurchaseSaleWithTransaction(
         producto,
         selectedVariant,
@@ -396,7 +387,6 @@ export class StockManager {
         stockReference
       );
 
-      // Actualizar stock real después de la transacción exitosa
       if (result.needsReplenishment) {
         await this.updateStockRealAgotarCompra(
           stockReference,
@@ -404,7 +394,6 @@ export class StockManager {
           result.ventasIdToUpdate
         );
 
-        // Buscar siguiente compra y actualizar producto
         const nextPurchase = await this.findNextAvailablePurchase(
           stockReference
         );
@@ -444,14 +433,13 @@ export class StockManager {
                 ventasId: [],
               },
               totalStock: recalculatedTotalStock,
-              lastUpdated: new Date().toISOString(),
+              lastUpdated: createServerTimestamp(),
             };
 
             await updateDoc(productRef, { variants: variants });
           }
         }
       } else {
-        // Solo actualizar stock real (reducir)
         await this.updateStockRealReducir(
           stockReference,
           result.compraIdToUpdate,
@@ -462,7 +450,7 @@ export class StockManager {
 
       return result;
     } catch (error) {
-      console.error("❌ Error al simular venta:", error);
+      console.error("Error al simular venta:", error);
       throw error;
     }
   }

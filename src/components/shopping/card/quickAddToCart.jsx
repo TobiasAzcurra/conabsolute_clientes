@@ -1,10 +1,7 @@
-// components/shopping/card/quickAddToCart.jsx
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart, createCartItem } from "../../../contexts/CartContext";
-import { ReadMateriales, ReadData } from "../../../firebase/orders/uploadOrder";
 import { addProductToOrder } from "../../../firebase/orders/addProductToOrder";
-import { calcularCostoHamburguesa } from "../../../helpers/currencyFormat";
 
 const QuickAddToCart = ({
   product,
@@ -192,23 +189,9 @@ const QuickAddToCart = ({
               quantityRef.current
             );
           } else if (quantityRef.current > 0) {
-            const materialesData = await ReadMateriales();
-            const productsData = await ReadData();
-            const productData = productsData.find(
-              (p) => p.data.name === product.name
-            )?.data;
-            const costoBurger = productData
-              ? calcularCostoHamburguesa(
-                  materialesData,
-                  productData.ingredients
-                )
-              : 0;
             await addProductToOrder(
               currentOrder.id,
-              {
-                ...product,
-                costoBurger: costoBurger * quantityRef.current,
-              },
+              product,
               quantityRef.current
             );
           }

@@ -2,9 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints";
-import SimpleModal from "../../components/ui/SimpleModal";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase/config";
 import { listenOrderById } from "../../firebase/orders/listenOrderById";
 import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
 import { useClient } from "../../contexts/ClientContext";
@@ -22,9 +19,7 @@ const Pedido = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [isCancelling, setIsCancelling] = useState(false);
   const containerRef = useRef(null);
 
   // Mapeo de estados a UI
@@ -54,42 +49,6 @@ const Pedido = () => {
       color: "text-red-600",
       barSteps: 0,
     },
-  };
-
-  const handleCancelOrder = async () => {
-    if (!selectedOrderId) return;
-
-    setIsCancelling(true);
-    setMessage(null);
-    setError(null);
-
-    try {
-      const orderRef = doc(
-        db,
-        "absoluteClientes",
-        empresaId,
-        "sucursales",
-        sucursalId,
-        "pedidos",
-        selectedOrderId
-      );
-
-      await updateDoc(orderRef, {
-        status: "Cancelled",
-        statusNote: "Cancelado por el cliente",
-        "timestamps.canceledAt": new Date().toISOString(),
-        "timestamps.updatedAt": new Date().toISOString(),
-      });
-
-      setMessage("Pedido cancelado exitosamente");
-      setIsCancelModalOpen(false);
-    } catch (err) {
-      console.error("Error cancelando pedido:", err);
-      setError("Error al cancelar el pedido. Intenta nuevamente.");
-    } finally {
-      setIsCancelling(false);
-      setSelectedOrderId(null);
-    }
   };
 
   const handleSupportClick = () => {
@@ -306,19 +265,6 @@ const Pedido = () => {
           >
             Soporte
           </button>
-
-          {/* Cancelar pedido */}
-          {canCancel && (
-            <button
-              onClick={() => {
-                setSelectedOrderId(currentOrder.id);
-                setIsCancelModalOpen(true);
-              }}
-              className="bg-gray-300 text-red-600  font-primary  h-12 rounded-full font-bold"
-            >
-              Cancelar pedido
-            </button>
-          )}
         </div>
       </div>
     );
@@ -394,21 +340,6 @@ const Pedido = () => {
           </div>
         )}
       </div>
-
-      {/* Modal de cancelación */}
-      <SimpleModal
-        isOpen={isCancelModalOpen}
-        onClose={() => {
-          setIsCancelModalOpen(false);
-          setSelectedOrderId(null);
-        }}
-        title="Cancelar pedido"
-        message="¿Estás seguro de que querés cancelar este pedido?"
-        twoButtons={true}
-        cancelText="No, volver"
-        confirmText="Sí, cancelar"
-        onConfirm={handleCancelOrder}
-      />
     </div>
   );
 };

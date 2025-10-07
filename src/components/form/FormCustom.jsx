@@ -1,4 +1,4 @@
-// components/form/FormCustom.jsx - Con actualización de stock sin recargar
+// components/form/FormCustom.jsx - Con timestampHelpers consolidado
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -15,17 +15,17 @@ import { useClient } from "../../contexts/ClientContext";
 import { useFormStates } from "../../hooks/useFormStates";
 import AddressInputs from "./AddressInputs";
 import OrderSummary from "./OrderSummary";
-import { adjustHora } from "../../helpers/time";
 import { extractCoordinates } from "../../helpers/currencyFormat";
 import { isBusinessOpen } from "../../utils/businessHoursValidator";
 import { useDiscountCode } from "../../hooks/useDiscountCode";
 import SimpleModal from "../ui/SimpleModal";
 import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillmentMethods";
+import { parseTimeToTimestamp } from "../../utils/timestampHelpers";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
   const { addLastCart, clearCart, cartItems, updateCartItem, subtotal } =
-    useCart(); // ← AGREGAR subtotal
+    useCart();
 
   const {
     slugEmpresa,
@@ -38,6 +38,8 @@ const FormCustom = ({ cart, total }) => {
 
   const envio = clientConfig?.logistics?.deliveryFee || 2000;
   const expressDeliveryFee = clientConfig?.logistics?.expressFee || 2000;
+  const timezone =
+    clientConfig?.regional?.timezone || "America/Argentina/Buenos_Aires";
 
   const [mapUrl, setUrl] = useState("");
   const [validarUbi, setValidarUbi] = useState(false);
@@ -64,7 +66,7 @@ const FormCustom = ({ cart, total }) => {
     cart,
     currentDeliveryMethod,
     currentPaymentMethod,
-    subtotal // ← PASAR subtotal memoizado
+    subtotal
   );
 
   const enterpriseData = {
@@ -103,13 +105,13 @@ const FormCustom = ({ cart, total }) => {
             });
 
             console.log(
-              `✅ Actualizado ${item.productName}: version ${item.stockVersion} → ${variant.stockSummary?.version}`
+              `Actualizado ${item.productName}: version ${item.stockVersion} → ${variant.stockSummary?.version}`
             );
           }
         }
       }
 
-      console.log("✅ Versiones de stock actualizadas exitosamente");
+      console.log("Versiones de stock actualizadas exitosamente");
 
       setShowStockUpdateModal(false);
 
@@ -132,32 +134,33 @@ const FormCustom = ({ cart, total }) => {
     try {
       setIsProcessingStock(true);
 
-      let hora = values.hora;
+      let estimatedTime = null;
 
-      if (isReserva && !values.hora.includes(":")) {
-        hora = adjustHora(values.hora);
+      if (isReserva && values.hora && values.hora.trim() !== "") {
+        estimatedTime = parseTimeToTimestamp(values.hora, timezone);
+        console.log("Hora de reserva convertida a Timestamp UTC");
       }
 
       const coordinates = mapUrl ? extractCoordinates(mapUrl) : [0, 0];
 
       if (values.deliveryMethod === "delivery" && mapUrl) {
-        console.log("📍 Coordenadas extraídas:", coordinates);
+        console.log("Coordenadas extraídas:", coordinates);
       }
 
       const updatedValues = {
         ...values,
-        hora,
+        estimatedTime,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
         shipping: values.deliveryMethod === "delivery" ? envio : 0,
         coordinates,
         appliedDiscount,
       };
 
-      console.log("🚀 Iniciando procesamiento con schema POS");
+      console.log("Iniciando procesamiento con schema POS");
 
       const posCartItems = adaptCartToPOSFormat(cartItems);
 
-      console.log("📦 Items para procesar:", posCartItems.length);
+      console.log("Items para procesar:", posCartItems.length);
 
       const orderId = await handlePOSSubmit(
         updatedValues,
@@ -167,21 +170,21 @@ const FormCustom = ({ cart, total }) => {
       );
 
       if (orderId) {
-        console.log("✅ Pedido procesado exitosamente con ID:", orderId);
+        console.log("Pedido procesado exitosamente con ID:", orderId);
 
         navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
         addLastCart();
         clearCart();
       }
     } catch (err) {
-      console.error("❌ Error al procesar el pedido:", err);
+      console.error("Error al procesar el pedido:", err);
 
       if (err.message.includes("RACE_CONDITION")) {
         setPendingSubmitValues({ values, isReserva, appliedDiscount });
         setShowStockUpdateModal(true);
       } else if (err.message.includes("INSUFFICIENT_STOCK")) {
         alert(
-          "❌ No hay suficiente stock disponible.\n\n" +
+          "No hay suficiente stock disponible.\n\n" +
             "Por favor verificá las cantidades disponibles."
         );
       } else {
@@ -205,7 +208,7 @@ const FormCustom = ({ cart, total }) => {
       delayMinutes: delayMinutes,
     };
 
-    console.log(`⏰ Aplicando delay de ${delayMinutes} minutos`);
+    console.log(`Aplicando delay de ${delayMinutes} minutos`);
 
     await processPedido(updatedValues, false, appliedDiscount);
   };
@@ -262,8 +265,6 @@ const FormCustom = ({ cart, total }) => {
   };
 
   const availableMethods = useAvailableFulfillmentMethods(cartItems);
-
-  console.log(availableMethods);
 
   return (
     <>
@@ -374,7 +375,6 @@ const FormCustom = ({ cart, total }) => {
               setCurrentPaymentMethod(values.paymentMethod);
             }, [values.deliveryMethod, values.paymentMethod]);
 
-            // Usar subtotal memoizado del context
             const productsTotal = subtotal;
 
             const descuento = discountHook.validation.isValid
@@ -450,7 +450,7 @@ const FormCustom = ({ cart, total }) => {
                         {!availableMethods.delivery.available &&
                           !availableMethods.takeaway.available && (
                             <>
-                              <strong>⚠️ Productos incompatibles:</strong> Tenés
+                              <strong>Productos incompatibles:</strong> Tenés
                               productos que no se pueden pedir juntos. Por favor
                               eliminá algunos del carrito.
                             </>

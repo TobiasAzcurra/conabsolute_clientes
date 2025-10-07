@@ -22,6 +22,8 @@
     "@vis.gl/react-google-maps": "^1.1.0",
     "animate.css": "^4.1.1",
     "classnames": "^2.5.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "firebase": "^10.12.2",
     "formik": "^2.2.9",
     "framer-motion": "^11.11.7",
