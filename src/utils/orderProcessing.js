@@ -279,7 +279,6 @@ export const handlePOSSubmit = async (
         type: "coupon",
         reason: formData.appliedDiscount.discountData.code,
         value: descuento,
-        timestamp: createServerTimestamp(),
       });
 
       console.log("Descuento aplicado:", {
