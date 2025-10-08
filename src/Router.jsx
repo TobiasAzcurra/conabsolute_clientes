@@ -4,11 +4,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 function NavigateConabsolute() {
   useEffect(() => {
-    window.location.href = "https://onlyanhelo.com/anhelo/riocuarto-bsas618";
+    window.location.href = "https://conabsolute.com/";
   }, []);
 
   return <div></div>;
 }
+
 const AppRouter = () => {
   return (
     <Routes>
