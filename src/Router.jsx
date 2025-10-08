@@ -4,19 +4,15 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 function NavigateConabsolute() {
   useEffect(() => {
-    window.location.href = "https://conabsolute.com/";
+    window.location.href = "https://onlyanhelo.com/anhelo/riocuarto-bsas618";
   }, []);
 
-  return <div>Redirigiendo...</div>;
+  return <div></div>;
 }
-
 const AppRouter = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<NavigateConabsolute />}
-      />
+      <Route path="/" element={<NavigateConabsolute />} />
 
       {/* <Route
         path="/:slugEmpresa/:slugSucursal/admin/agregar-producto"
