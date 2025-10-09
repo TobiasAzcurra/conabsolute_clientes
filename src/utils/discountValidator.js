@@ -1,6 +1,8 @@
 import { db } from "../firebase/config";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { calculateItemPrice } from "../helpers/priceCalculator";
+import { toZonedTime } from "date-fns-tz";
+import { format } from "date-fns";
 
 // Helper de redondeo
 const round2 = (n) => Math.round(n * 100) / 100;
@@ -49,21 +51,58 @@ export const validateDiscountCodeBasic = async (code, enterpriseData) => {
       return { isValid: false, reason: "inactive" };
     }
 
-    const today = new Date().toISOString().split("T")[0];
-    if (
-      discountData.validity?.startDate &&
-      today < discountData.validity.startDate
-    ) {
-      console.log("❌ Código aún no válido");
-      return { isValid: false, reason: "not_started" };
-    }
+    // Validar fechas con mejor manejo de errores
+    try {
+      // Timezone con fallback
+      const timezone =
+        enterpriseData.timezone || "America/Argentina/Buenos_Aires";
+      console.log(`🌍 Usando timezone: ${timezone}`);
 
-    if (
-      discountData.validity?.endDate &&
-      today > discountData.validity.endDate
-    ) {
-      console.log("❌ Código expirado");
-      return { isValid: false, reason: "expired" };
+      const now = new Date();
+      const nowInTimezone = toZonedTime(now, timezone);
+      const todayStr = format(nowInTimezone, "yyyy-MM-dd");
+
+      console.log(`📅 Fecha actual (${timezone}):`, todayStr);
+
+      // Validar startDate
+      if (
+        discountData.restrictions?.validity?.startDate &&
+        discountData.restrictions.validity.startDate.trim() !== ""
+      ) {
+        const startDate = discountData.restrictions.validity.startDate;
+        console.log(`  Fecha inicio: ${startDate}`);
+
+        if (todayStr < startDate) {
+          console.log("❌ Código aún no válido");
+          return {
+            isValid: false,
+            reason: "not_started",
+            details: `Válido desde: ${startDate}`,
+          };
+        }
+      }
+
+      // Validar endDate
+      if (
+        discountData.restrictions?.validity?.endDate &&
+        discountData.restrictions.validity.endDate.trim() !== ""
+      ) {
+        const endDate = discountData.restrictions.validity.endDate;
+        console.log(`  Fecha fin: ${endDate}`);
+
+        if (todayStr > endDate) {
+          console.log("❌ Código expirado");
+          return {
+            isValid: false,
+            reason: "expired",
+            details: `Expiró el: ${endDate}`,
+          };
+        }
+      }
+    } catch (dateError) {
+      console.error("❌ Error validando fechas:", dateError);
+      // Si hay error con fechas, continuar sin validar fechas
+      console.warn("⚠️ Continuando sin validar fechas de validez");
     }
 
     console.log("✅ Validación básica APROBADA");
@@ -74,7 +113,11 @@ export const validateDiscountCodeBasic = async (code, enterpriseData) => {
     };
   } catch (error) {
     console.error("❌ Error validando código básico:", error);
-    return { isValid: false, reason: "error" };
+    return {
+      isValid: false,
+      reason: "error",
+      details: error.message,
+    };
   }
 };
 
@@ -98,7 +141,7 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: basicValidation.reason,
-      message: getErrorMessage(basicValidation.reason),
+      message: getErrorMessage(basicValidation.reason, basicValidation.details),
     };
   }
 
@@ -146,7 +189,10 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: "min_amount",
-      message: `Monto mínimo requerido: $${config.minOrderAmount}`,
+      message: getErrorMessage(
+        "min_amount",
+        `Monto mínimo: $${config.minOrderAmount}`
+      ),
     };
   }
   console.log(
@@ -162,7 +208,7 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: "delivery_excluded",
-      message: "Código no válido para este método de entrega",
+      message: getErrorMessage("delivery_excluded"),
     };
   }
   console.log(`  ✅ Método permitido`);
@@ -176,7 +222,7 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: "payment_excluded",
-      message: "Código no válido para este método de pago",
+      message: getErrorMessage("payment_excluded"),
     };
   }
   console.log(`  ✅ Método permitido`);
@@ -213,49 +259,105 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: "excluded_items",
-      message: "Algunos productos no aplican para este descuento",
+      message: getErrorMessage("excluded_items"),
     };
   }
   console.log("\n✅ Todos los items son elegibles");
 
-  // 6. Validar horarios excluidos
+  // 6. Validar horarios excluidos con timezone awareness
   if (restrictions.timeExcluded && restrictions.timeExcluded.length > 0) {
-    const now = new Date();
-    const currentDay = now
-      .toLocaleDateString("en-US", { weekday: "long" })
-      .toLowerCase();
-    const currentTime = now.getTime();
+    console.log("\n⏰ VALIDANDO HORARIOS EXCLUIDOS:");
 
-    const isTimeExcluded = restrictions.timeExcluded.some((exclusion) => {
-      if (exclusion.day !== currentDay) return false;
+    try {
+      const timezone =
+        enterpriseData.timezone || "America/Argentina/Buenos_Aires";
+      const nowInTimezone = toZonedTime(new Date(), timezone);
 
-      return exclusion.hoursRange?.some((range) => {
-        return currentTime >= range.start && currentTime <= range.end;
+      const currentDay = format(nowInTimezone, "EEEE").toLowerCase(); // "monday", "tuesday", etc.
+      const currentTimeMillis = nowInTimezone.getTime();
+
+      console.log(`  Día actual: ${currentDay}`);
+      console.log(`  Hora actual: ${format(nowInTimezone, "HH:mm")}`);
+
+      const isTimeExcluded = restrictions.timeExcluded.some((exclusion) => {
+        if (exclusion.day !== currentDay) {
+          return false;
+        }
+
+        console.log(`  Revisando exclusiones para ${exclusion.day}:`);
+
+        return exclusion.hoursRange?.some((range) => {
+          // Los timestamps en hoursRange son timestamps absolutos (con fecha)
+          // Solo nos interesan las horas, así que comparamos hora del día
+          const startDate = new Date(range.start);
+          const endDate = new Date(range.end);
+
+          const startHour = startDate.getHours();
+          const startMin = startDate.getMinutes();
+          const endHour = endDate.getHours();
+          const endMin = endDate.getMinutes();
+
+          const currentHour = nowInTimezone.getHours();
+          const currentMin = nowInTimezone.getMinutes();
+
+          const currentTotalMin = currentHour * 60 + currentMin;
+          const startTotalMin = startHour * 60 + startMin;
+          const endTotalMin = endHour * 60 + endMin;
+
+          console.log(
+            `    Rango: ${startHour}:${startMin
+              .toString()
+              .padStart(2, "0")} - ${endHour}:${endMin
+              .toString()
+              .padStart(2, "0")}`
+          );
+
+          const isInRange =
+            currentTotalMin >= startTotalMin && currentTotalMin <= endTotalMin;
+
+          if (isInRange) {
+            console.log(`    ❌ Hora actual está en rango excluido`);
+          }
+
+          return isInRange;
+        });
       });
-    });
 
-    if (isTimeExcluded) {
-      return {
-        isValid: false,
-        discount: 0,
-        reason: "time_excluded",
-        message: "Código no válido en este horario",
-      };
+      if (isTimeExcluded) {
+        console.log("\n❌ Código no válido en este horario");
+        return {
+          isValid: false,
+          discount: 0,
+          reason: "time_excluded",
+          message: getErrorMessage("time_excluded"),
+        };
+      }
+
+      console.log("\n✅ Horario permitido");
+    } catch (timeError) {
+      console.error("❌ Error validando horarios:", timeError);
+      console.warn("⚠️ Continuando sin validar horarios");
     }
   }
 
   // 7. Verificar usos máximos
+  console.log("\n🎯 VALIDANDO USOS MÁXIMOS:");
   const currentUses = discountData.usage?.usageTracking?.length || 0;
   const maxUses = discountData.usage?.maxUses;
 
+  console.log(`  Usos actuales: ${currentUses}`);
+  console.log(`  Usos máximos: ${maxUses || "Sin límite"}`);
+
   if (maxUses && currentUses >= maxUses) {
+    console.log("  ❌ Límite de usos alcanzado");
     return {
       isValid: false,
       discount: 0,
       reason: "max_uses",
-      message: "Este código alcanzó el límite de usos",
+      message: getErrorMessage("max_uses"),
     };
   }
+  console.log("  ✅ Usos disponibles");
 
   // 8. Calcular descuento
   console.log("\n💰 CALCULANDO DESCUENTO:");
@@ -271,7 +373,7 @@ export const validateAndCalculateDiscount = async (
   });
 
   const eligibleSubtotal = eligibleItems.reduce((sum, item) => {
-    const itemPrice = calculateItemPrice(item); // ← USAR HELPER
+    const itemPrice = calculateItemPrice(item);
     const itemTotal = itemPrice * item.quantity;
     console.log(
       `  ${item.productName}: $${itemPrice} x ${item.quantity} = $${itemTotal}`
@@ -319,14 +421,26 @@ export const validateAndCalculateDiscount = async (
 };
 
 // Helper para mensajes de error amigables
-const getErrorMessage = (reason) => {
+const getErrorMessage = (reason, details = "") => {
   const messages = {
-    too_short: "Ingresa un código válido",
-    not_found: "Código no encontrado",
+    too_short: "Código inválido (mínimo 3 caracteres)",
+    not_found: "Código inválido. Verificá que esté bien escrito",
     inactive: "Este código no está activo",
-    not_started: "Este código aún no es válido",
-    expired: "Este código expiró",
-    error: "Error al validar código",
+    not_started: details ? `Código invalido. ${details}` : "Código invalido",
+    expired: details
+      ? `Código inválido. Este código expiró. ${details}`
+      : "Este código expiró",
+    min_amount:
+      details || "Código inválido. No alcanzas el monto mínimo para usar.",
+    delivery_excluded: "Código inválido para este método de entrega",
+    payment_excluded: "Código inválido para este método de pago",
+    excluded_items:
+      "Algunos productos de tu carrito no aplican para este descuento",
+    time_excluded: "Código inválido en este horario",
+    max_uses: "Código inválido. Limite de usos alcanzado",
+    error: details
+      ? `Error: ${details}`
+      : "Error al validar código. Intenta nuevamente",
   };
 
   return messages[reason] || "Código inválido";

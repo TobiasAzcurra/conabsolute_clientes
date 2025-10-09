@@ -66,7 +66,8 @@ const FormCustom = ({ cart, total }) => {
     cart,
     currentDeliveryMethod,
     currentPaymentMethod,
-    subtotal
+    subtotal,
+    timezone // ← Pasar el timezone desde clientConfig
   );
 
   const enterpriseData = {

@@ -7,7 +7,8 @@ export const useDiscountCode = (
   cartItems,
   deliveryMethod,
   paymentMethod,
-  subtotal // ← NUEVO: recibir como parámetro
+  subtotal,
+  timezone = "America/Argentina/Buenos_Aires" // ← NUEVO parámetro
 ) => {
   const [code, setCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -34,29 +35,43 @@ export const useDiscountCode = (
     const timer = setTimeout(async () => {
       setIsValidating(true);
 
-      const enterpriseData = { empresaId, sucursalId };
+      const enterpriseData = {
+        empresaId,
+        sucursalId,
+        timezone, // ← Pasar timezone
+      };
 
-      // Ya no calcular subtotal aquí, usar el que viene por parámetro
-      const result = await validateAndCalculateDiscount(
-        code,
-        cartItems,
-        subtotal, // ← usar el memoizado del context
-        deliveryMethod,
-        paymentMethod,
-        enterpriseData
-      );
+      try {
+        const result = await validateAndCalculateDiscount(
+          code,
+          cartItems,
+          subtotal,
+          deliveryMethod,
+          paymentMethod,
+          enterpriseData
+        );
 
-      setValidation({
-        isValid: result.isValid,
-        checked: true,
-        discount: result.discount || 0,
-        message: result.message,
-        reason: result.reason || "",
-        discountData: result.discountData,
-        discountId: result.discountId,
-      });
-
-      setIsValidating(false);
+        setValidation({
+          isValid: result.isValid,
+          checked: true,
+          discount: result.discount || 0,
+          message: result.message,
+          reason: result.reason || "",
+          discountData: result.discountData,
+          discountId: result.discountId,
+        });
+      } catch (error) {
+        console.error("Error en validación de descuento:", error);
+        setValidation({
+          isValid: false,
+          checked: true,
+          discount: 0,
+          message: "Error al validar el código. Intenta nuevamente.",
+          reason: "error",
+        });
+      } finally {
+        setIsValidating(false);
+      }
     }, 500);
 
     return () => clearTimeout(timer);
@@ -68,6 +83,7 @@ export const useDiscountCode = (
     deliveryMethod,
     paymentMethod,
     subtotal,
+    timezone,
   ]);
 
   return {
