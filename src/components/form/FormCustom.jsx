@@ -1,26 +1,27 @@
 // components/form/FormCustom.jsx - Con timestampHelpers consolidado
-import { Form, Formik } from "formik";
-import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { useCart } from "../../contexts/CartContext";
-import { db } from "../../firebase/config";
-import { doc, getDoc } from "firebase/firestore";
-import validations from "./validations";
+import { Form, Formik } from 'formik';
+import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useCart } from '../../contexts/CartContext';
+import { db } from '../../firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
+import validations from './validations';
 import {
   handlePOSSubmit,
   adaptCartToPOSFormat,
-} from "../../utils/orderProcessing";
-import LoadingPoints from "../LoadingPoints";
-import { useClient } from "../../contexts/ClientContext";
-import { useFormStates } from "../../hooks/useFormStates";
-import AddressInputs from "./AddressInputs";
-import OrderSummary from "./OrderSummary";
-import { extractCoordinates } from "../../helpers/currencyFormat";
-import { isBusinessOpen } from "../../utils/businessHoursValidator";
-import { useDiscountCode } from "../../hooks/useDiscountCode";
-import SimpleModal from "../ui/SimpleModal";
-import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillmentMethods";
-import { parseTimeToTimestamp } from "../../utils/timestampHelpers";
+} from '../../utils/orderProcessing';
+import LoadingPoints from '../LoadingPoints';
+import { useClient } from '../../contexts/ClientContext';
+import { useFormStates } from '../../hooks/useFormStates';
+import AddressInputs from './AddressInputs';
+import OrderSummary from './OrderSummary';
+import { extractCoordinates } from '../../helpers/currencyFormat';
+import { isBusinessOpen } from '../../utils/businessHoursValidator';
+import { useDiscountCode } from '../../hooks/useDiscountCode';
+import SimpleModal from '../ui/SimpleModal';
+import { useAvailableFulfillmentMethods } from '../../hooks/useAvailableFulfillmentMethods';
+import { parseTimeToTimestamp } from '../../utils/timestampHelpers';
+import { cleanPhoneNumber } from '../../firebase/utils/phoneUtils';
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -39,14 +40,14 @@ const FormCustom = ({ cart, total }) => {
   const envio = clientConfig?.logistics?.deliveryFee || 2000;
   const expressDeliveryFee = clientConfig?.logistics?.expressFee || 2000;
   const timezone =
-    clientConfig?.regional?.timezone || "America/Argentina/Buenos_Aires";
+    clientConfig?.regional?.timezone || 'America/Argentina/Buenos_Aires';
 
-  const [mapUrl, setUrl] = useState("");
+  const [mapUrl, setUrl] = useState('');
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
   const [isProcessingStock, setIsProcessingStock] = useState(false);
   const [showClosedModal, setShowClosedModal] = useState(false);
-  const [closedMessage, setClosedMessage] = useState("");
+  const [closedMessage, setClosedMessage] = useState('');
   const [showDiscountWarning, setShowDiscountWarning] = useState(false);
   const [showStockUpdateModal, setShowStockUpdateModal] = useState(false);
   const [pendingSubmitValues, setPendingSubmitValues] = useState(null);
@@ -55,8 +56,8 @@ const FormCustom = ({ cart, total }) => {
   const [pendingDelaySubmit, setPendingDelaySubmit] = useState(null);
 
   const [currentDeliveryMethod, setCurrentDeliveryMethod] =
-    useState("delivery");
-  const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
+    useState('delivery');
+  const [currentPaymentMethod, setCurrentPaymentMethod] = useState('cash');
 
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
 
@@ -84,11 +85,11 @@ const FormCustom = ({ cart, total }) => {
 
         const productRef = doc(
           db,
-          "absoluteClientes",
+          'absoluteClientes',
           empresaId,
-          "sucursales",
+          'sucursales',
           sucursalId,
-          "productos",
+          'productos',
           item.productId
         );
 
@@ -112,7 +113,7 @@ const FormCustom = ({ cart, total }) => {
         }
       }
 
-      console.log("Versiones de stock actualizadas exitosamente");
+      console.log('Versiones de stock actualizadas exitosamente');
 
       setShowStockUpdateModal(false);
 
@@ -124,8 +125,8 @@ const FormCustom = ({ cart, total }) => {
         );
       }
     } catch (error) {
-      console.error("Error actualizando versiones de stock:", error);
-      alert("Error al actualizar el stock. Por favor intenta nuevamente.");
+      console.error('Error actualizando versiones de stock:', error);
+      alert('Error al actualizar el stock. Por favor intenta nuevamente.');
     } finally {
       setIsProcessingStock(false);
     }
@@ -137,31 +138,31 @@ const FormCustom = ({ cart, total }) => {
 
       let estimatedTime = null;
 
-      if (isReserva && values.hora && values.hora.trim() !== "") {
+      if (isReserva && values.hora && values.hora.trim() !== '') {
         estimatedTime = parseTimeToTimestamp(values.hora, timezone);
-        console.log("Hora de reserva convertida a Timestamp UTC");
+        console.log('Hora de reserva convertida a Timestamp UTC');
       }
 
       const coordinates = mapUrl ? extractCoordinates(mapUrl) : [0, 0];
 
-      if (values.deliveryMethod === "delivery" && mapUrl) {
-        console.log("Coordenadas extraídas:", coordinates);
+      if (values.deliveryMethod === 'delivery' && mapUrl) {
+        console.log('Coordenadas extraídas:', coordinates);
       }
 
       const updatedValues = {
         ...values,
         estimatedTime,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
-        shipping: values.deliveryMethod === "delivery" ? envio : 0,
+        shipping: values.deliveryMethod === 'delivery' ? envio : 0,
         coordinates,
         appliedDiscount,
       };
 
-      console.log("Iniciando procesamiento con schema POS");
+      console.log('Iniciando procesamiento con schema POS');
 
       const posCartItems = adaptCartToPOSFormat(cartItems);
 
-      console.log("Items para procesar:", posCartItems.length);
+      console.log('Items para procesar:', posCartItems.length);
 
       const orderId = await handlePOSSubmit(
         updatedValues,
@@ -170,26 +171,28 @@ const FormCustom = ({ cart, total }) => {
         clientData
       );
 
-      if (orderId) {
-        console.log("Pedido procesado exitosamente con ID:", orderId);
+      const cleanPhone = cleanPhoneNumber(updatedValues.phone || '');
 
-        navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
+      if (orderId) {
+        console.log('Pedido procesado exitosamente con ID:', orderId);
+
+        navigate(`/${slugEmpresa}/${slugSucursal}/success/${cleanPhone}`);
         addLastCart();
         clearCart();
       }
     } catch (err) {
-      console.error("Error al procesar el pedido:", err);
+      console.error('Error al procesar el pedido:', err);
 
-      if (err.message.includes("RACE_CONDITION")) {
+      if (err.message.includes('RACE_CONDITION')) {
         setPendingSubmitValues({ values, isReserva, appliedDiscount });
         setShowStockUpdateModal(true);
-      } else if (err.message.includes("INSUFFICIENT_STOCK")) {
+      } else if (err.message.includes('INSUFFICIENT_STOCK')) {
         alert(
-          "No hay suficiente stock disponible.\n\n" +
-            "Por favor verificá las cantidades disponibles."
+          'No hay suficiente stock disponible.\n\n' +
+            'Por favor verificá las cantidades disponibles.'
         );
       } else {
-        alert("Error al procesar el pedido. Por favor intenta nuevamente.");
+        alert('Error al procesar el pedido. Por favor intenta nuevamente.');
       }
     } finally {
       setIsProcessingStock(false);
@@ -215,7 +218,7 @@ const FormCustom = ({ cart, total }) => {
   };
 
   const handleFormSubmit = async (values) => {
-    const isReserva = values.hora.trim() !== "";
+    const isReserva = values.hora.trim() !== '';
 
     if (!isReserva) {
       const businessHours = clientConfig?.logistics?.businessHours;
@@ -255,7 +258,7 @@ const FormCustom = ({ cart, total }) => {
       const tsToDate = (ts) => {
         if (!ts) return null;
         // Firestore Timestamp -> Date
-        if (typeof ts.toDate === "function") return ts.toDate();
+        if (typeof ts.toDate === 'function') return ts.toDate();
         // ISO/string o epoch -> Date
         return new Date(ts);
       };
@@ -375,16 +378,16 @@ const FormCustom = ({ cart, total }) => {
         <Formik
           initialValues={{
             subTotal: total,
-            phone: "",
+            phone: '',
             deliveryMethod: availableMethods.delivery.available
-              ? "delivery"
-              : "takeaway",
-            references: "",
-            paymentMethod: "cash",
-            hora: "",
-            couponCode: "",
-            address: "",
-            deliveryNotes: "",
+              ? 'delivery'
+              : 'takeaway',
+            references: '',
+            paymentMethod: 'cash',
+            hora: '',
+            couponCode: '',
+            address: '',
+            deliveryNotes: '',
           }}
           validationSchema={validations(total + envio, cart)}
           onSubmit={handleFormSubmit}
@@ -402,7 +405,7 @@ const FormCustom = ({ cart, total }) => {
               : 0;
 
             let finalTotal = productsTotal - descuento;
-            if (values.deliveryMethod === "delivery") finalTotal += envio;
+            if (values.deliveryMethod === 'delivery') finalTotal += envio;
             if (isEnabled) finalTotal += expressDeliveryFee;
 
             return (
@@ -413,15 +416,15 @@ const FormCustom = ({ cart, total }) => {
                       type="button"
                       disabled={!availableMethods.delivery.available}
                       className={`h-10 px-4 text-xs flex items-center justify-center gap-2 rounded-full ${
-                        values.deliveryMethod === "delivery"
-                          ? "bg-gray-100 text-black"
+                        values.deliveryMethod === 'delivery'
+                          ? 'bg-gray-100 text-black'
                           : !availableMethods.delivery.available
-                          ? "bg-red-100 text-red-400 cursor-not-allowed"
-                          : "bg-gray-300 text-gray-400"
+                          ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                          : 'bg-gray-300 text-gray-400'
                       }`}
                       onClick={() =>
                         availableMethods.delivery.available &&
-                        setFieldValue("deliveryMethod", "delivery")
+                        setFieldValue('deliveryMethod', 'delivery')
                       }
                     >
                       <p className="font-light">Delivery</p>
@@ -431,15 +434,15 @@ const FormCustom = ({ cart, total }) => {
                       type="button"
                       disabled={!availableMethods.takeaway.available}
                       className={`h-10 px-4 text-xs flex flex-col items-center justify-center rounded-full ${
-                        values.deliveryMethod === "takeaway"
-                          ? "bg-gray-100 text-black"
+                        values.deliveryMethod === 'takeaway'
+                          ? 'bg-gray-100 text-black'
                           : !availableMethods.takeaway.available
-                          ? "bg-red-100 text-red-400 cursor-not-allowed"
-                          : "bg-gray-300 text-gray-400"
+                          ? 'bg-red-100 text-red-400 cursor-not-allowed'
+                          : 'bg-gray-300 text-gray-400'
                       }`}
                       onClick={() =>
                         availableMethods.takeaway.available &&
-                        setFieldValue("deliveryMethod", "takeaway")
+                        setFieldValue('deliveryMethod', 'takeaway')
                       }
                     >
                       <p className="font-light">Retiro</p>
@@ -452,18 +455,18 @@ const FormCustom = ({ cart, total }) => {
                       <p className="text-xs text-yellow-800 font-light">
                         {!availableMethods.delivery.available && (
                           <>
-                            <strong>Delivery no disponible:</strong>{" "}
-                            {availableMethods.delivery.blockedBy.join(", ")}{" "}
+                            <strong>Delivery no disponible:</strong>{' '}
+                            {availableMethods.delivery.blockedBy.join(', ')}{' '}
                             {!availableMethods.takeaway.available
-                              ? ""
-                              : "solo está disponible para retiro en local."}
+                              ? ''
+                              : 'solo está disponible para retiro en local.'}
                           </>
                         )}
                         {!availableMethods.takeaway.available &&
                           availableMethods.delivery.available && (
                             <>
-                              <strong>Retiro no disponible:</strong>{" "}
-                              {availableMethods.takeaway.blockedBy.join(", ")}{" "}
+                              <strong>Retiro no disponible:</strong>{' '}
+                              {availableMethods.takeaway.blockedBy.join(', ')}{' '}
                               solo está disponible para delivery.
                             </>
                           )}
@@ -505,14 +508,14 @@ const FormCustom = ({ cart, total }) => {
                     disabled={isSubmitting || isProcessingStock}
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-primary text-gray-100 rounded-3xl h-20 font-bold transition-colors duration-300 ${
                       isSubmitting || isProcessingStock
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
                     }`}
                   >
                     {isSubmitting || isProcessingStock ? (
                       <LoadingPoints color="text-gray-100" />
                     ) : (
-                      "Pedir"
+                      'Pedir'
                     )}
                   </button>
                 </div>

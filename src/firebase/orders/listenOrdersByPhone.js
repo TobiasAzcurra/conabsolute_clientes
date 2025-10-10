@@ -4,8 +4,8 @@ import {
   onSnapshot,
   query,
   where,
-} from "firebase/firestore";
-import { app } from "../config";
+} from 'firebase/firestore';
+import { app } from '../config';
 
 const db = getFirestore(app);
 
@@ -17,17 +17,17 @@ export const listenOrdersByPhone = (
 ) => {
   const pedidosCollectionRef = collection(
     db,
-    "absoluteClientes",
+    'absoluteClientes',
     empresaId,
-    "sucursales",
+    'sucursales',
     sucursalId,
-    "pedidos"
+    'pedidos'
   );
 
   // CORREGIDO: Usar customer.phone en lugar de telefono
   const pedidosQuery = query(
     pedidosCollectionRef,
-    where("customer.phone", "==", phoneNumber)
+    where('customer.phone', '==', phoneNumber)
   );
 
   return onSnapshot(
@@ -37,20 +37,16 @@ export const listenOrdersByPhone = (
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         // CORREGIDO: status !== 'Cancelled' en lugar de !data.canceled
-        if (data.status !== "Cancelled") {
+        if (data.status !== 'Cancelled') {
           pedidos.push({ id: doc.id, ...data });
         }
       });
 
-      console.log(
-        `📱 Pedidos encontrados para ${phoneNumber}:`,
-        pedidos.length
-      );
       callback(pedidos);
     },
     (error) => {
       console.error(
-        "[listenOrdersByPhone] ❌ Error al escuchar los pedidos por teléfono:",
+        '[listenOrdersByPhone] ❌ Error al escuchar los pedidos por teléfono:',
         error
       );
       callback([]);
