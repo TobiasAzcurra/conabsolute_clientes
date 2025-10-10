@@ -1,16 +1,16 @@
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
-import { app } from "../config";
+import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
+import { app } from '../config';
 
 const db = getFirestore(app);
 
 export const listenOrderById = (empresaId, sucursalId, orderId, callback) => {
   const pedidoDocRef = doc(
     db,
-    "absoluteClientes",
+    'absoluteClientes',
     empresaId,
-    "sucursales",
+    'sucursales',
     sucursalId,
-    "pedidos",
+    'pedidos',
     orderId
   );
 
@@ -27,7 +27,7 @@ export const listenOrderById = (empresaId, sucursalId, orderId, callback) => {
       }
     },
     (error) => {
-      console.error("❌ Error al escuchar el pedido:", error);
+      console.error('❌ Error al escuchar el pedido:', error);
       callback(null);
     }
   );
