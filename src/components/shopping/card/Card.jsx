@@ -326,12 +326,12 @@ const Card = ({ data, path }) => {
 
               {/* Indicadores de stock */}
               {!stockStatus.available && (
-                <span className="bg-red-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40">
+                <span className="bg-red-500 text-gray-50   capitalize  font-primary z-40 text-xs font-medium px-2.5 py-1.5 rounded-full">
                   Agotado
                 </span>
               )}
               {stockStatus.limited && (
-                <span className="bg-yellow-500 text-gray-50 px-4 py-2 text-xs font-medium rounded-full z-40">
+                <span className="bg-yellow-500 capitalize text-gray-50  font-primary z-40 text-xs font-medium px-2.5 py-1.5 rounded-full">
                   Stock limitado
                 </span>
               )}

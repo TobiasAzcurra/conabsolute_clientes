@@ -27,7 +27,7 @@ const Items = ({
     isCarrito || isPedidoComponente
       ? "w-[128px]"
       : "min-w-[128px] max-w-[200px]"
-  } ${isActive ? "border-2 border-gray-900" : ""}`;
+  } ${isActive ? "border-2 border-gray-50" : ""}`;
 
   let imageSrc = img;
   if (isCarrito) {
