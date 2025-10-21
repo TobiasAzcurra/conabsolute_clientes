@@ -529,100 +529,105 @@ const DetailCard = () => {
       <Toast toasts={toasts} onRemove={removeToast} />
       <div className="flex flex-col">
         <div className="flex flex-col justify-items-center items-center">
-          <div className="w-full h-[200px] flex items-center justify-center relative">
-            <img
-              className="w-full h-[250px] object-cover object-center cursor-zoom-in"
-              src={productImages[selectedImageIndex]}
-              alt={displayProduct.name}
-              onClick={handleImageClick}
-            />
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
-              {productImages.length > 1 &&
-                (() => {
-                  const totalImages = productImages.length;
-                  const maxVisible = 5;
+          <div className="px-4 pt-4  h-full w-full">
+            <div className="w-full bg-gray-200 aspect-square rounded-3xl bg-gray-100 flex items-center justify-center relative overflow-hidden">
+              <img
+                className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 hover:scale-105"
+                src={productImages[selectedImageIndex]}
+                alt={displayProduct.name}
+                onClick={handleImageClick}
+              />
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-row gap-1">
+                {productImages.length > 1 &&
+                  (() => {
+                    const totalImages = productImages.length;
+                    const maxVisible = 5;
 
-                  if (totalImages <= maxVisible) {
-                    return productImages.map((image, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedImageIndex(index)}
-                        className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
-                          selectedImageIndex === index
-                            ? "border-white opacity-100 shadow-lg"
-                            : "border-white opacity-70 hover:opacity-90"
-                        }`}
-                      >
-                        <img
-                          src={image}
-                          alt={`${displayProduct.name} - imagen ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    ));
-                  }
+                    if (totalImages <= maxVisible) {
+                      return productImages.map((image, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedImageIndex(index)}
+                          className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                            selectedImageIndex === index
+                              ? "border-white opacity-100 shadow-lg"
+                              : "border-white opacity-70 hover:opacity-90"
+                          }`}
+                        >
+                          <img
+                            src={image}
+                            alt={`${displayProduct.name} - imagen ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ));
+                    }
 
-                  const halfVisible = Math.floor(maxVisible / 2);
-                  let startIndex = Math.max(
-                    0,
-                    selectedImageIndex - halfVisible
-                  );
-                  let endIndex = Math.min(totalImages, startIndex + maxVisible);
-
-                  if (endIndex === totalImages) {
-                    startIndex = Math.max(0, totalImages - maxVisible);
-                  }
-
-                  const visibleImages = [];
-
-                  if (startIndex > 0) {
-                    visibleImages.push(
-                      <div
-                        key="more-left"
-                        className="flex items-center justify-center font-primary mr-2"
-                      >
-                        <span className="text-white text-xs font-light">
-                          +{startIndex}
-                        </span>
-                      </div>
+                    const halfVisible = Math.floor(maxVisible / 2);
+                    let startIndex = Math.max(
+                      0,
+                      selectedImageIndex - halfVisible
                     );
-                  }
-
-                  for (let i = startIndex; i < endIndex; i++) {
-                    visibleImages.push(
-                      <button
-                        key={i}
-                        onClick={() => setSelectedImageIndex(i)}
-                        className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
-                          selectedImageIndex === i
-                            ? "border-white opacity-100 shadow-lg scale-110"
-                            : "border-white opacity-70 hover:opacity-90"
-                        }`}
-                      >
-                        <img
-                          src={productImages[i]}
-                          alt={`${displayProduct.name} - imagen ${i + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
+                    let endIndex = Math.min(
+                      totalImages,
+                      startIndex + maxVisible
                     );
-                  }
 
-                  if (endIndex < totalImages) {
-                    visibleImages.push(
-                      <div
-                        key="more-right"
-                        className="flex items-center ml-2 justify-center font-primary"
-                      >
-                        <span className="text-white text-xs font-light">
-                          +{totalImages - endIndex}
-                        </span>
-                      </div>
-                    );
-                  }
+                    if (endIndex === totalImages) {
+                      startIndex = Math.max(0, totalImages - maxVisible);
+                    }
 
-                  return visibleImages;
-                })()}
+                    const visibleImages = [];
+
+                    if (startIndex > 0) {
+                      visibleImages.push(
+                        <div
+                          key="more-left"
+                          className="flex items-center justify-center font-primary mr-2"
+                        >
+                          <span className="text-white text-xs font-light">
+                            +{startIndex}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    for (let i = startIndex; i < endIndex; i++) {
+                      visibleImages.push(
+                        <button
+                          key={i}
+                          onClick={() => setSelectedImageIndex(i)}
+                          className={`h-10 w-10 rounded-full overflow-hidden border-2 transition-all duration-200 ${
+                            selectedImageIndex === i
+                              ? "border-white opacity-100 shadow-lg scale-110"
+                              : "border-white opacity-70 hover:opacity-90"
+                          }`}
+                        >
+                          <img
+                            src={productImages[i]}
+                            alt={`${displayProduct.name} - imagen ${i + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      );
+                    }
+
+                    if (endIndex < totalImages) {
+                      visibleImages.push(
+                        <div
+                          key="more-right"
+                          className="flex items-center ml-2 justify-center font-primary"
+                        >
+                          <span className="text-white text-xs font-light">
+                            +{totalImages - endIndex}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    return visibleImages;
+                  })()}
+              </div>
             </div>
           </div>
 

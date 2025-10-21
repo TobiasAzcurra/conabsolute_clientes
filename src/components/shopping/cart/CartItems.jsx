@@ -78,7 +78,8 @@ const CartItems = () => {
 
   return (
     <div className="flex flex-col bg-gray-100 font-primary pb-4 overflow-x-hidden">
-      <div className="flex flex-col mt-8 w-full">
+      {/* productos del carrito */}
+      <div className="flex flex-col mt-8 mb-4 w-full">
         {/* header */}
         <div className="flex flex-row items-center px-4 w-fit">
           <svg
@@ -105,7 +106,7 @@ const CartItems = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <div className="flex flex-col md:flex-row gap-1 pb-4 md:w-max">
+          <div className="flex flex-col md:flex-row gap-1  md:w-max">
             {cart.map((item, index) => (
               <CartCard
                 key={item.id || index}
@@ -123,6 +124,9 @@ const CartItems = () => {
       {/* ✅ CAMBIO: Productos destacados usando el hook */}
       <div className="flex flex-col mb-8 w-full">
         <div className="w-full">
+          <p className="font-light border-b border-gray-300 pb-2 ml-4 mb-2 text-xs text-gray-400 pr-4">
+            {clientAssets?.upsellsTitle || "Elegí lo que más te guste"}
+          </p>
           {featuredProducts.length > 0 ? (
             <div
               className="flex gap-2 overflow-x-auto overflow-y-hidden pl-4 pr-4 custom-scrollbar"
@@ -157,9 +161,6 @@ const CartItems = () => {
               </p>
             </div>
           )}
-          <p className="font-light border-b border-gray-300 pb-2 ml-4 text-xs text-gray-400 pr-4">
-            {clientAssets?.upsellsTitle || "Elegí lo que más te guste"}
-          </p>
         </div>
       </div>
 

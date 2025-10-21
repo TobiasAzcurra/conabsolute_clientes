@@ -82,7 +82,7 @@ const ClientLayout = ({ children }) => {
           <>
             <div className="relative z-[10]">
               <Carrusel images={clientAssets?.hero || []} />
-              <div className="top-[215px] inset-0 absolute">
+              <div className="top-[300px] inset-0 absolute">
                 <NavMenu />
               </div>
             </div>
@@ -105,7 +105,7 @@ const ClientLayout = ({ children }) => {
               onClick={handleContactClick}
               className={`bg-gray-300 bg-opacity-50 fixed z-50 ${
                 totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
-              } backdrop-blur-md right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
+              } backdrop-blur-md right-4 left-4 px-2.5 h-8 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
             >
               Contactanos
             </button>
