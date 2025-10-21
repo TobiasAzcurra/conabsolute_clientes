@@ -40,7 +40,7 @@ const Items = ({
 
   const content = (
     <>
-      <div className="w-full aspect-square rounded-[14px] overflow-hidden bg-gray-100 relative flex items-center justify-center">
+      <div className="w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 relative flex items-center justify-center">
         {imageSrc === "/menu//placeholder-product.jpg" ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"

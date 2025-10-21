@@ -167,9 +167,9 @@ const NavMenu = () => {
             <button
               key={tag.id}
               onClick={() => handleFilterClick(tag.id)}
-              className={`shadow-lg shadow-gray-200 w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
+              className={`w-fit px-4 rounded-full text-xs shadow-lg shadow-gray-200  h-10 items-center flex font-light whitespace-nowrap transition-all ${
                 activeFilters.includes(tag.id)
-                  ? "bg-gray-50 text-black"
+                  ? "bg-gray-50 text-black "
                   : "bg-gray-300 text-gray-400 "
               }`}
             >
