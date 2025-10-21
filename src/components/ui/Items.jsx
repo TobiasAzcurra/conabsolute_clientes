@@ -24,7 +24,9 @@ const Items = ({
   const itemId = categoryId || name;
 
   const className = `flex flex-col items-center shadow-lg shadow-gray-200 rounded-2xl bg-gray-50 transition duration-300 text-black ${
-    isCarrito || isPedidoComponente ? "min-w-24 w-24" : "min-w-24  w-24"
+    isCarrito || isPedidoComponente
+      ? "w-[128px]"
+      : "min-w-[128px] max-w-[200px]"
   } ${isActive ? "border-2 border-gray-900" : ""}`;
 
   let imageSrc = img;
@@ -62,11 +64,30 @@ const Items = ({
           />
         )}
 
-        {/* Texto sobre la imagen */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
-          <h5 className="text-xs font-primary font-light text-white truncate">
-            {capitalizeWords(name)}
-          </h5>
+        {/* Texto sobre la imagen con blur desvanecido */}
+        <div className="absolute bottom-0 left-0 right-0">
+          {/* Capa de blur desvanecido */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+              maskImage:
+                "linear-gradient(to top, black, black 30%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(to top, black, black 30%, transparent)",
+            }}
+          />
+
+          {/* Gradiente de color */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+
+          {/* Texto con opacidad completa */}
+          <div className="relative p-4">
+            <h5 className="text-sm font-primary font-light text-white truncate">
+              {capitalizeWords(name)}
+            </h5>
+          </div>
         </div>
       </div>
     </>

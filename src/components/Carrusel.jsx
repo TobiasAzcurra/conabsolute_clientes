@@ -66,7 +66,7 @@ const Carrusel = ({ images = [], interval = DEFAULT_INTERVAL }) => {
       ))}
 
       {/* Overlay con gradiente */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-gray-200 via-gray-200/30 to-transparent z-20 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-gray-100 via-gray-200/30 to-transparent z-20 pointer-events-none" />
     </div>
   );
 };

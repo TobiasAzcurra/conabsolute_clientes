@@ -215,83 +215,86 @@ const Card = ({ data, path }) => {
         state={{ product: data }}
         className="w-full"
       >
-        <div className="relative w-full aspect-square  overflow-hidden rounded-t-3xl bg-gray-100">
-          {!isLoaded && !imageError && (
-            <div className="h-full w-full items-center justify-center flex">
-              <LoadingPoints />
-            </div>
-          )}
-
-          {!currentImageSrc && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
-              <div className="text-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 text-gray-400 mx-auto "
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
+        {/* img */}
+        <div className="p-1">
+          <div className="relative w-full aspect-square  overflow-hidden rounded-3xl bg-gray-100">
+            {!isLoaded && !imageError && (
+              <div className="h-full w-full items-center justify-center flex">
+                <LoadingPoints />
               </div>
-            </div>
-          )}
+            )}
 
-          {Object.keys(variantStats).filter(
-            (key) => variantStats[key].length > 0
-          ).length > 0 && (
-            <div className="absolute bottom-2 left-4 right-4 z-30">
-              <div className="flex flex-wrap gap-1 justify-start">
-                {(() => {
-                  const attributes = Object.keys(variantStats)
-                    .filter((key) => variantStats[key].length > 0)
-                    .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
-                  const maxVisible = 3;
-                  const visibleAttributes = attributes.slice(0, maxVisible);
-                  const hasMore = attributes.length > maxVisible;
-                  return (
-                    <>
-                      {visibleAttributes.map((attr, index) => (
-                        <div
-                          key={index}
-                          className="bg-gray-300 capitalize bg-opacity-50 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full"
-                        >
-                          {attr}
-                        </div>
-                      ))}
-                      {hasMore && (
-                        <div className="bg-gray-300 bg-opacity-70 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full">
-                          +{attributes.length - maxVisible}
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
+            {!currentImageSrc && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
+                <div className="text-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 text-gray-400 mx-auto "
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <img
-            src={currentImageSrc}
-            alt={name || "Producto"}
-            className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
-              isLoaded && !imageError ? "opacity-100" : "opacity-0"
-            }`}
-            onLoad={() => {
-              setIsLoaded(true);
-              setImageError(false);
-            }}
-            onError={() => {
-              setImageError(true);
-              setIsLoaded(false);
-            }}
-          />
+            {Object.keys(variantStats).filter(
+              (key) => variantStats[key].length > 0
+            ).length > 0 && (
+              <div className="absolute bottom-2 left-4 right-4 z-30">
+                <div className="flex flex-wrap gap-1 justify-start">
+                  {(() => {
+                    const attributes = Object.keys(variantStats)
+                      .filter((key) => variantStats[key].length > 0)
+                      .map((key) => key.charAt(0).toUpperCase() + key.slice(1));
+                    const maxVisible = 3;
+                    const visibleAttributes = attributes.slice(0, maxVisible);
+                    const hasMore = attributes.length > maxVisible;
+                    return (
+                      <>
+                        {visibleAttributes.map((attr, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-300 capitalize bg-opacity-50 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full"
+                          >
+                            {attr}
+                          </div>
+                        ))}
+                        {hasMore && (
+                          <div className="bg-gray-300 bg-opacity-70 text-gray-50  font-primary  text-xs font-light px-2.5 py-1.5 backdrop-blur-md rounded-full">
+                            +{attributes.length - maxVisible}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+
+            <img
+              src={currentImageSrc}
+              alt={name || "Producto"}
+              className={`object-cover w-full h-full transition-all duration-500 transform group-hover:scale-105 ${
+                isLoaded && !imageError ? "opacity-100" : "opacity-0"
+              }`}
+              onLoad={() => {
+                setIsLoaded(true);
+                setImageError(false);
+              }}
+              onError={() => {
+                setImageError(true);
+                setIsLoaded(false);
+              }}
+            />
+          </div>
         </div>
 
         {/* datos */}
