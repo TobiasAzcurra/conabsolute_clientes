@@ -27,7 +27,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
         onChange={(e) => setPhoneNumber(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         placeholder="Busca tu pedido. Ej: 3585168275"
-        className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-sm bg-transparent outline-none w-full"
+        className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-xs bg-transparent outline-none w-full"
       />
       <button
         onClick={handleSearch}
