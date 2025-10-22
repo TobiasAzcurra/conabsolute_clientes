@@ -10,7 +10,10 @@ import {
   where,
   runTransaction,
 } from "firebase/firestore";
-import { createServerTimestamp } from "./timestampHelpers";
+import {
+  createServerTimestamp,
+  createClientTimestamp,
+} from "./timestampHelpers";
 
 export class StockManager {
   constructor(enterpriseData) {
@@ -302,7 +305,8 @@ export class StockManager {
             ventasId: newVentasId,
           },
           totalStock: newTotalStock,
-          lastUpdated: createServerTimestamp(),
+          // ✅ Usar createClientTimestamp() porque está dentro de transaction con array
+          lastUpdated: createClientTimestamp(),
           needsReplenishment: true,
         };
       } else {
@@ -315,7 +319,8 @@ export class StockManager {
             ventasId: newVentasId,
           },
           totalStock: newTotalStock,
-          lastUpdated: createServerTimestamp(),
+          // ✅ Usar createClientTimestamp() porque está dentro de transaction con array
+          lastUpdated: createClientTimestamp(),
         };
       }
 
@@ -433,6 +438,7 @@ export class StockManager {
                 ventasId: [],
               },
               totalStock: recalculatedTotalStock,
+              // ✅ Aquí sí usar createServerTimestamp() porque NO está en transaction
               lastUpdated: createServerTimestamp(),
             };
 
