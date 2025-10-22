@@ -18,12 +18,12 @@ const QuickAddToCart = ({
 }) => {
   const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
 
-  console.log("🔄 QuickAddToCart montado/actualizado con:", {
-    productId: product.id,
-    variantId: product.variantId,
-    modifierSelections: product.modifierSelections,
-    hasModifiers: Object.keys(product.modifierSelections || {}).length > 0,
-  });
+  // console.log("🔄 QuickAddToCart montado/actualizado con:", {
+  //   productId: product.id,
+  //   variantId: product.variantId,
+  //   modifierSelections: product.modifierSelections,
+  //   hasModifiers: Object.keys(product.modifierSelections || {}).length > 0,
+  // });
 
   // Generar el ID esperado basado en el producto actual
   const expectedCartItemId = useMemo(() => {
@@ -50,16 +50,16 @@ const QuickAddToCart = ({
     ? cart.find((item) => item.id === expectedCartItemId)
     : null;
 
-  console.log("🔍 Buscando en carrito:", {
-    expectedId: expectedCartItemId,
-    found: !!cartItem,
-    cartItem: cartItem
-      ? {
-          id: cartItem.id,
-          quantity: cartItem.quantity,
-        }
-      : null,
-  });
+  // console.log("🔍 Buscando en carrito:", {
+  //   expectedId: expectedCartItemId,
+  //   found: !!cartItem,
+  //   cartItem: cartItem
+  //     ? {
+  //         id: cartItem.id,
+  //         quantity: cartItem.quantity,
+  //       }
+  //     : null,
+  // });
 
   const initialQuantity = isOrderItem
     ? initialOrderQuantity || product.quantity
