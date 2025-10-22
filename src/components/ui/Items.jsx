@@ -36,7 +36,7 @@ const Items = ({
   }
 
   // Console.log para ver la imagen que se va a mostrar
-  console.log("ee", imageSrc);
+  // console.log("ee", imageSrc);
 
   const content = (
     <>
