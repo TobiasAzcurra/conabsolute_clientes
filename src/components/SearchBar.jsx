@@ -21,18 +21,18 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   };
 
   return (
-    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
+    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-full bg-gray-50 flex items-center">
       <input
         type="tel"
         value={phoneNumber}
         onChange={(e) => setPhoneNumber(cleanPhoneNumber(e.target.value))}
         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         placeholder="Busca tu pedido. Ej: 3585168275"
-        className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-sm bg-transparent outline-none w-full"
+        className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-xs bg-transparent outline-none w-full"
       />
       <button
         onClick={handleSearch}
-        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-xl rounded-l-none"
+        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

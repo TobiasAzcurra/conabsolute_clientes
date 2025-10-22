@@ -82,7 +82,7 @@ const ClientLayout = ({ children }) => {
           <>
             <div className="relative z-[10]">
               <Carrusel images={clientAssets?.hero || []} />
-              <div className="top-[215px] inset-0 absolute">
+              <div className="top-[280px] inset-0 absolute">
                 <NavMenu />
               </div>
             </div>

@@ -53,20 +53,20 @@ const Carrusel = ({ images = [], interval = DEFAULT_INTERVAL }) => {
   }, [currentIndex, images, currentLayer, interval]);
 
   return (
-    <div className="w-full h-[300px]  overflow-hidden relative">
+    <div className="w-full aspect-square bg-gray-100 overflow-hidden relative">
       {imagesState.map((img, i) => (
         <img
           key={i}
           src={img.src}
           alt={`Carrusel ${i}`}
-          className={`absolute  w-full h-full object-cover transition-opacity duration-500 ${
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
             img.visible ? "opacity-100 z-10" : "opacity-0 z-0"
           } ${isCarritoPage ? "brightness-50" : ""}`}
         />
       ))}
 
       {/* Overlay con gradiente */}
-      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-gray-200  via-gray-200/30 to-transparent z-20 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-gray-100 via-gray-200/30 to-transparent z-20 pointer-events-none" />
     </div>
   );
 };

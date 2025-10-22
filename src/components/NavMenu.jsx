@@ -133,7 +133,7 @@ const NavMenu = () => {
       </p>
       <nav
         ref={navRef}
-        className="flex flex-row w-full gap-1 pb-4 px-4 overflow-x-auto nav-scroll-hide"
+        className="flex flex-row w-full gap-2 pb-4 px-4 overflow-x-auto nav-scroll-hide"
         style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
       >
         {categories.map((cat) => (
@@ -167,10 +167,10 @@ const NavMenu = () => {
             <button
               key={tag.id}
               onClick={() => handleFilterClick(tag.id)}
-              className={`shadow-lg shadow-gray-200 bg-gray-50 w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
+              className={`w-fit px-4 rounded-full text-xs shadow-lg shadow-gray-200  h-10 items-center flex font-light whitespace-nowrap transition-all ${
                 activeFilters.includes(tag.id)
-                  ? "border-2 border-gray-900 text-gray-900"
-                  : "text-gray-600 "
+                  ? "bg-gray-50 text-black "
+                  : "bg-gray-300 text-gray-400 "
               }`}
             >
               {tag.name}
@@ -187,10 +187,10 @@ const NavMenu = () => {
             <button
               key={option.id}
               onClick={() => handleSortClick(option.id)}
-              className={`shadow-lg shadow-gray-200 bg-gray-50 w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
+              className={`shadow-lg shadow-gray-200  w-fit px-4 rounded-full text-xs h-10 items-center flex font-light whitespace-nowrap transition-all ${
                 activeSortOption === option.id
-                  ? "border-2 border-gray-900 text-gray-900"
-                  : "text-gray-600 "
+                  ? "bg-gray-50 text-black"
+                  : "bg-gray-300 text-gray-400 "
               }`}
             >
               {option.name}
