@@ -30,7 +30,7 @@ const AddressInputs = ({
     discountHook.code.length >= 3;
 
   return (
-    <div className="w-full items-center rounded-2xl bg-gray-300 transition-all duration-300 overflow-hidden">
+    <div className="w-full items-center rounded-3xl bg-gray-50 shadow-gray-200 shadow-lg transition-all duration-300 overflow-hidden">
       {values.deliveryMethod === "delivery" && (
         <>
           <MapDirection

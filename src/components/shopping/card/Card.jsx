@@ -216,8 +216,8 @@ const Card = ({ data, path }) => {
         className="w-full"
       >
         {/* img */}
-        <div className="p-1">
-          <div className="relative w-full aspect-square  overflow-hidden rounded-3xl bg-gray-100">
+        <div className="px-2 pt-2">
+          <div className="relative w-full aspect-square  overflow-hidden rounded-t-2xl bg-gray-100">
             {!isLoaded && !imageError && (
               <div className="h-full w-full items-center justify-center flex">
                 <LoadingPoints />
@@ -248,7 +248,7 @@ const Card = ({ data, path }) => {
             {Object.keys(variantStats).filter(
               (key) => variantStats[key].length > 0
             ).length > 0 && (
-              <div className="absolute bottom-2 left-4 right-4 z-30">
+              <div className="absolute bottom-2 left-2 right-2 z-30">
                 <div className="flex flex-wrap gap-1 justify-start">
                   {(() => {
                     const attributes = Object.keys(variantStats)
@@ -300,10 +300,7 @@ const Card = ({ data, path }) => {
         {/* datos */}
         <div className="flex px-4 flex-col justify-between leading-normal  font-primary  text-left">
           <div className="flex mt-4 flex-col w-full">
-            <h5 className="text-base font-medium">
-              {(name || "Producto sin nombre").charAt(0).toUpperCase() +
-                (name || "Producto sin nombre").slice(1).toLowerCase()}
-            </h5>
+            <h5 className="text-base capitalize font-medium">{name}</h5>
           </div>
           {data?.cardDescription && (
             <p className="text-xs text-gray-400 font-light  font-primary ">

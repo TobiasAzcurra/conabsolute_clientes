@@ -44,11 +44,11 @@ export const MapDirection = ({
       solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
     >
       <div
-        className="w-full rounded-t-[15px]"
+        className="w-full px-2 pt-2 rounded-t-[45px] "
         style={{
-          height: "25vh",
-          overflow: "hidden", // Para asegurar que el contenido respete los bordes
-          maskImage: "radial-gradient(circle, white, black)", // Para ajustar el canvas interno
+          aspectRatio: "1/1",
+          overflow: "hidden",
+          maskImage: "radial-gradient(circle, white, black)",
         }}
       >
         <Map
@@ -79,14 +79,6 @@ export const MapDirection = ({
       <div className="m">
         <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
       </div>
-
-      {/* <button
-				className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold  font-primary  p-2 uppercase bg-red-500 focus:outline-none hover:bg-black hover:text-red-500"
-				onClick={() => setNoEncontre(true)}
-				type="button"
-			>
-				¿No encontras tu direccion?
-			</button> */}
     </APIProvider>
   );
 };

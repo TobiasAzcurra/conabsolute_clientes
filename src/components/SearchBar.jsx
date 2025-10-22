@@ -20,7 +20,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   };
 
   return (
-    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-xl bg-gray-200 flex items-center">
+    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-full bg-gray-50 flex items-center">
       <input
         type="tel"
         value={phoneNumber}
@@ -31,7 +31,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
       />
       <button
         onClick={handleSearch}
-        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-xl rounded-l-none"
+        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

@@ -105,8 +105,8 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
         }`}
       >
         {/* img */}
-        <div className="pl-4 pt-4">
-          <div className="w-24 h-24 bg-gradient-to-b flex items-center justify-center from-gray-100 via-gray-100 to-gray-300 rounded-2xl  overflow-hidden relative flex-shrink-0">
+        <div className="pl-2 py-2">
+          <div className="w-32 h-32 bg-gradient-to-b flex items-center justify-center from-gray-100 via-gray-100 to-gray-300 rounded-2xl  overflow-hidden relative flex-shrink-0">
             {imageError && (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
                 <div className="text-center">
@@ -150,13 +150,7 @@ const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
         <div className="flex flex-col flex-1 justify-center p-4 gap-4">
           {/* header */}
           <div>
-            <h3
-              className={`text-2xl font-bold ${
-                showConfirmation ? "truncate leading-none" : "leading-6"
-              }`}
-            >
-              {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
-            </h3>
+            <h3 className={`text-base font-bold leading-6`}>{name}</h3>
             {item.variantName === "Estándar" ? null : (
               <p
                 className={`text-xs font-light text-gray-400 ${

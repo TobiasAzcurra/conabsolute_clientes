@@ -408,7 +408,7 @@ const FormCustom = ({ cart, total }) => {
             return (
               <Form>
                 <div className="flex flex-col">
-                  <div className="flex flex-row gap-1 mb-4 p-0.5 bg-gray-300 w-fit rounded-full">
+                  <div className="flex flex-row gap-1 mb-4 p-0.5 shadow-gray-200 shadow-lg bg-gray-300 w-fit rounded-full">
                     <button
                       type="button"
                       disabled={!availableMethods.delivery.available}

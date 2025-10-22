@@ -133,7 +133,7 @@ const NavMenu = () => {
       </p>
       <nav
         ref={navRef}
-        className="flex flex-row w-full gap-1 pb-4 px-4 overflow-x-auto nav-scroll-hide"
+        className="flex flex-row w-full gap-2 pb-4 px-4 overflow-x-auto nav-scroll-hide"
         style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
       >
         {categories.map((cat) => (

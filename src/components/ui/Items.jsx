@@ -23,7 +23,7 @@ const Items = ({
   // Usar categoryId si está disponible, sino usar name (para mantener compatibilidad)
   const itemId = categoryId || name;
 
-  const className = `flex flex-col items-center shadow-lg shadow-gray-200 rounded-2xl bg-gray-50 transition duration-300 text-black ${
+  const className = `flex flex-col items-center shadow-lg shadow-gray-300 rounded-3xl bg-gray-50 transition duration-300 text-black ${
     isCarrito || isPedidoComponente
       ? "w-[128px]"
       : "min-w-[128px] max-w-[200px]"
@@ -40,7 +40,7 @@ const Items = ({
 
   const content = (
     <>
-      <div className="w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 relative flex items-center justify-center">
+      <div className="w-full aspect-square rounded-3xl overflow-hidden bg-gray-100 relative flex items-center justify-center">
         {imageSrc === "/menu//placeholder-product.jpg" ? (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -73,14 +73,14 @@ const Items = ({
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
               maskImage:
-                "linear-gradient(to top, black, black 30%, transparent)",
+                "linear-gradient(to top, black, black 20%, transparent)",
               WebkitMaskImage:
-                "linear-gradient(to top, black, black 30%, transparent)",
+                "linear-gradient(to top, black, black 20%, transparent)",
             }}
           />
 
           {/* Gradiente de color */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/20 to-transparent" />
 
           {/* Texto con opacidad completa */}
           <div className="relative p-4">

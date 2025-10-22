@@ -79,9 +79,9 @@ const CartItems = () => {
   return (
     <div className="flex flex-col bg-gray-100 font-primary pb-4 overflow-x-hidden">
       {/* productos del carrito */}
-      <div className="flex flex-col mt-8 mb-4 w-full">
+      <div className="flex flex-col mt-8  w-full">
         {/* header */}
-        <div className="flex flex-row items-center px-4 w-fit">
+        <div className="flex flex-row items-center px-4 gap-2 w-fit">
           <svg
             onClick={handleGoBack}
             xmlns="http://www.w3.org/2000/svg"
@@ -97,7 +97,9 @@ const CartItems = () => {
               d="M15.75 19.5 8.25 12l7.5-7.5"
             />
           </svg>
-          <p className="text-xs text-blue-700 font-light">Volver</p>
+          <h4 className="font-primary font-bold pr-4  text-xl text-gray-900 leading-tight">
+            Tu pedido
+          </h4>
         </div>
         <div
           className="flex flex-col md:flex-row gap-1 w-full mt-4 px-4 overflow-x-auto custom-scrollbar"
@@ -106,7 +108,7 @@ const CartItems = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <div className="flex flex-col md:flex-row gap-1  md:w-max">
+          <div className="flex flex-col md:flex-row gap-2 pb-4 md:w-max">
             {cart.map((item, index) => (
               <CartCard
                 key={item.id || index}
@@ -138,7 +140,7 @@ const CartItems = () => {
                 width: "100%",
               }}
             >
-              <div className="flex gap-1" style={{ width: "max-content" }}>
+              <div className="flex gap-2" style={{ width: "max-content" }}>
                 {featuredProducts.map((product, index) => {
                   const productImg = getImageSrc(product);
                   return (
