@@ -1,4 +1,3 @@
-// utils/stockManager.js - Con timestampHelpers centralizados
 import { db } from "../firebase/config";
 import {
   collection,
@@ -37,16 +36,12 @@ export class StockManager {
 
   handleInfiniteStockSale(producto, selectedVariant = null, cantidad = 1) {
     console.log(`Procesando venta de stock infinito: ${cantidad} unidades`);
-
     const timestamp = Date.now();
     const infiniteValue = Number.MAX_SAFE_INTEGER;
-
     const variant =
       selectedVariant || producto.variants?.find((v) => v.default);
     const unitCost = variant?.stockSummary?.currentPurchase?.unitCost || 0;
-
     console.log(`Costo unitario para stock infinito: $${unitCost}`);
-
     const purchaseTrace = [
       {
         compraId: `infinite-stock-${timestamp}`,
@@ -56,7 +51,6 @@ export class StockManager {
         remainingAfter: infiniteValue,
       },
     ];
-
     return {
       purchaseTrace,
       unitCostAvg: unitCost,
@@ -80,17 +74,13 @@ export class StockManager {
       "stock",
       stockReference
     );
-
     const stockDoc = await getDoc(stockRef);
     if (!stockDoc.exists()) {
       return 0;
     }
-
     const stockData = stockDoc.data();
     const compras = stockData?.compras || [];
-
     let totalStock = 0;
-
     compras.forEach((compra) => {
       if (currentPurchaseId && compra.compraId === currentPurchaseId) {
         if (currentRemainingStock !== undefined) {
@@ -102,7 +92,6 @@ export class StockManager {
         totalStock += compra.stockRestante || 0;
       }
     });
-
     return totalStock;
   }
 
@@ -116,16 +105,47 @@ export class StockManager {
       "stock",
       stockReference
     );
-
     const stockDoc = await getDoc(stockRef);
     if (!stockDoc.exists()) {
       return null;
     }
-
     const stockData = stockDoc.data();
     const compras = stockData?.compras || [];
-
     return compras.find((compra) => compra.stockRestante > 0) || null;
+  }
+
+  async updateStockRealReducir(stockReference, compraId, cantidad, ventaId) {
+    const stockRef = doc(
+      db,
+      "absoluteClientes",
+      this.enterpriseData.id,
+      "sucursales",
+      this.enterpriseData.selectedSucursal.id,
+      "stock",
+      stockReference
+    );
+    const stockDoc = await getDoc(stockRef);
+    if (!stockDoc.exists()) {
+      throw new Error("Documento de stock no encontrado");
+    }
+    const stockData = stockDoc.data();
+    const compras = stockData?.compras || [];
+    const compraIndex = compras.findIndex((c) => c.compraId === compraId);
+    if (compraIndex === -1) {
+      throw new Error("Compra no encontrada");
+    }
+    compras[compraIndex].stockRestante -= cantidad;
+    compras[compraIndex].ventasId = [
+      ...(compras[compraIndex].ventasId || []),
+      ventaId,
+    ];
+    await updateDoc(stockRef, {
+      compras,
+      lastUpdated: createServerTimestamp(),
+    });
+    console.log(
+      `Stock actualizado: compra ${compraId}, stockRestante: ${compras[compraIndex].stockRestante}, ventaId: ${ventaId}`
+    );
   }
 
   async updateStockRealAgotarCompra(stockReference, compraId, ventasId) {
@@ -138,68 +158,68 @@ export class StockManager {
       "stock",
       stockReference
     );
-
     const stockDoc = await getDoc(stockRef);
     if (!stockDoc.exists()) {
       throw new Error("Documento de stock no encontrado");
     }
-
     const stockData = stockDoc.data();
     const compras = stockData?.compras || [];
-
     const compraIndex = compras.findIndex((c) => c.compraId === compraId);
-    if (compraIndex !== -1) {
-      compras[compraIndex].stockRestante = 0;
-      compras[compraIndex].ventasId = ventasId;
-
-      await updateDoc(stockRef, {
-        compras: compras,
-        lastUpdated: createServerTimestamp(),
-      });
+    if (compraIndex === -1) {
+      throw new Error("Compra no encontrada");
     }
+    compras[compraIndex].stockRestante = 0;
+    compras[compraIndex].ventasId = ventasId;
+    await updateDoc(stockRef, {
+      compras,
+      lastUpdated: createServerTimestamp(),
+    });
+    console.log(`Compra ${compraId} agotada, ventasId: ${ventasId}`);
   }
 
-  async updateStockRealReducir(
-    stockReference,
-    compraId,
-    cantidadVendida,
-    ventaId
-  ) {
-    const stockRef = doc(
-      db,
-      "absoluteClientes",
-      this.enterpriseData.id,
-      "sucursales",
-      this.enterpriseData.selectedSucursal.id,
-      "stock",
-      stockReference
-    );
-
-    const stockDoc = await getDoc(stockRef);
-    if (!stockDoc.exists()) {
-      throw new Error("Documento de stock no encontrado");
-    }
-
-    const stockData = stockDoc.data();
-    const compras = stockData?.compras || [];
-
-    const compraIndex = compras.findIndex((c) => c.compraId === compraId);
-    if (compraIndex !== -1) {
-      compras[compraIndex].stockRestante -= cantidadVendida;
-      const currentVentas = compras[compraIndex].ventasId || [];
-      compras[compraIndex].ventasId = [...currentVentas, ventaId];
-
-      await updateDoc(stockRef, {
-        compras: compras,
-        lastUpdated: createServerTimestamp(),
-      });
+  async updateCartStockVersions(cartItems) {
+    try {
+      const updatedItems = await Promise.all(
+        cartItems.map(async (item) => {
+          const productRef = doc(
+            db,
+            "absoluteClientes",
+            this.enterpriseData.id,
+            "sucursales",
+            this.enterpriseData.selectedSucursal.id,
+            "productos",
+            item.productId
+          );
+          const productDoc = await getDoc(productRef);
+          if (!productDoc.exists()) {
+            throw new Error(`Producto ${item.productId} no encontrado`);
+          }
+          const productData = productDoc.data();
+          const variant = productData.variants?.find(
+            (v) => v.id === item.variantId
+          );
+          if (!variant) {
+            throw new Error(`Variante ${item.variantId} no encontrada`);
+          }
+          return {
+            ...item,
+            stockVersion: variant.stockSummary?.version || 0,
+            availableStock: variant.stockSummary?.totalStock || 0,
+          };
+        })
+      );
+      console.log("Versiones de stock actualizadas exitosamente");
+      return updatedItems;
+    } catch (error) {
+      console.error("Error actualizando versiones de stock:", error);
+      throw error;
     }
   }
 
   async processMultiPurchaseSaleWithTransaction(
     producto,
     selectedVariant,
-    cantidadTotal,
+    cantidad,
     ventaId,
     stockReference
   ) {
@@ -212,244 +232,253 @@ export class StockManager {
       "productos",
       producto.id
     );
-
+    const stockRef = doc(
+      db,
+      "absoluteClientes",
+      this.enterpriseData.id,
+      "sucursales",
+      this.enterpriseData.selectedSucursal.id,
+      "stock",
+      stockReference
+    );
     return await runTransaction(db, async (transaction) => {
       const productDoc = await transaction.get(productRef);
-
       if (!productDoc.exists()) {
-        throw new Error(
-          "PRODUCT_DELETED: Producto eliminado durante la compra"
-        );
+        throw new Error("Producto no encontrado");
       }
-
+      const stockDoc = await transaction.get(stockRef);
+      if (!stockDoc.exists()) {
+        throw new Error("Stock no encontrado");
+      }
       const productData = productDoc.data();
-      const variants = productData?.variants || [];
-
-      let variantIndex;
-      if (selectedVariant) {
-        variantIndex = variants.findIndex((v) => v.id === selectedVariant.id);
-      } else {
-        variantIndex = variants.findIndex((v) => v.default === true);
-      }
-
+      const stockData = stockDoc.data();
+      const variants = productData.variants || [];
+      const variantIndex = variants.findIndex(
+        (v) => v.id === selectedVariant.id
+      );
       if (variantIndex === -1) {
-        throw new Error("VARIANT_NOT_FOUND: Variante no encontrada");
+        throw new Error("Variante no encontrada");
       }
-
-      const variant = variants[variantIndex];
-      const currentStockSummary = variant.stockSummary;
-
-      if (!currentStockSummary) {
-        throw new Error("MISSING_STOCK_SUMMARY: Variante sin stockSummary");
-      }
-
-      const currentVersion = currentStockSummary.version || 0;
-      const expectedVersion = selectedVariant?.stockSummary?.version || 0;
-
-      if (currentVersion !== expectedVersion) {
-        throw new Error(
-          `STOCK_VERSION_MISMATCH: Stock actualizado por otra venta. Versión esperada: ${expectedVersion}, actual: ${currentVersion}`
-        );
-      }
-
-      if (currentStockSummary.totalStock < cantidadTotal) {
-        throw new Error(
-          `INSUFFICIENT_STOCK: Stock insuficiente. Disponible: ${currentStockSummary.totalStock}, solicitado: ${cantidadTotal}`
-        );
-      }
-
-      const totalStockBefore = currentStockSummary.totalStock;
-      const purchaseTrace = [];
-      let cantidadRestante = cantidadTotal;
-
-      const cantidadDeCompraActual = Math.min(
-        cantidadRestante,
-        currentStockSummary.currentPurchase.remainingStock
-      );
-
-      if (cantidadDeCompraActual > 0) {
-        const remainingBefore =
-          currentStockSummary.currentPurchase.remainingStock;
-        const remainingAfter = remainingBefore - cantidadDeCompraActual;
-
-        purchaseTrace.push({
-          compraId: currentStockSummary.currentPurchase.compraID,
-          units: cantidadDeCompraActual,
-          unitCost: currentStockSummary.currentPurchase.unitCost || 0,
-          remainingBefore: remainingBefore,
-          remainingAfter: remainingAfter,
-        });
-
-        cantidadRestante -= cantidadDeCompraActual;
-      }
-
-      const newTotalStock = currentStockSummary.totalStock - cantidadTotal;
-      const newVersion = currentVersion + 1;
-      const newRemainingStock =
-        currentStockSummary.currentPurchase.remainingStock -
-        cantidadDeCompraActual;
-      const newVentasId = [
-        ...(currentStockSummary.currentPurchase.ventasId || []),
-        ventaId,
-      ];
-
-      let updatedStockSummary;
-
-      if (newRemainingStock === 0) {
-        updatedStockSummary = {
-          version: newVersion,
-          currentPurchase: {
-            compraID: currentStockSummary.currentPurchase.compraID,
-            remainingStock: 0,
-            unitCost: currentStockSummary.currentPurchase.unitCost || 0,
-            ventasId: newVentasId,
-          },
-          totalStock: newTotalStock,
-          // ✅ Usar createClientTimestamp() porque está dentro de transaction con array
-          lastUpdated: createClientTimestamp(),
-          needsReplenishment: true,
-        };
-      } else {
-        updatedStockSummary = {
-          ...currentStockSummary,
-          version: newVersion,
-          currentPurchase: {
-            ...currentStockSummary.currentPurchase,
-            remainingStock: newRemainingStock,
-            ventasId: newVentasId,
-          },
-          totalStock: newTotalStock,
-          // ✅ Usar createClientTimestamp() porque está dentro de transaction con array
-          lastUpdated: createClientTimestamp(),
-        };
-      }
-
-      variants[variantIndex] = {
-        ...variant,
-        stockSummary: updatedStockSummary,
-      };
-
-      transaction.update(productRef, { variants: variants });
-
+      const stockSummary = variants[variantIndex].stockSummary || {};
+      const currentVersion = stockSummary.version || 0;
+      const currentPurchase = stockSummary.currentPurchase || {};
+      const totalStock = stockSummary.totalStock || 0;
       console.log(
-        `Stock actualizado con transaction. Nueva versión: ${newVersion}`
+        `Versión en carrito: ${selectedVariant.stockVersion}, Versión en Firestore: ${currentVersion}`
       );
-
-      const unitsTotal = purchaseTrace.reduce((a, e) => a + e.units, 0);
-      const costTotal = purchaseTrace.reduce(
-        (a, e) => a + e.units * e.unitCost,
+      if (currentVersion !== selectedVariant.stockVersion) {
+        throw new Error("STOCK_VERSION_MISMATCH");
+      }
+      if (totalStock < cantidad) {
+        throw new Error("INSUFFICIENT_STOCK");
+      }
+      let unitsToConsume = cantidad;
+      let purchaseTrace = [];
+      let needsReplenishment = false;
+      let compraIdToUpdate = currentPurchase.compraID;
+      let ventasIdToUpdate = [...(currentPurchase.ventasId || []), ventaId];
+      let remainingStock = currentPurchase.remainingStock || 0;
+      let unitsFromCurrent = 0;
+      let unitsFromNext = 0;
+      let nextPurchase = null;
+      if (remainingStock >= unitsToConsume) {
+        unitsFromCurrent = unitsToConsume;
+        remainingStock -= unitsToConsume;
+        unitsToConsume = 0;
+      } else {
+        unitsFromCurrent = remainingStock;
+        unitsToConsume -= remainingStock;
+        remainingStock = 0;
+        needsReplenishment = true;
+      }
+      purchaseTrace.push({
+        compraId: currentPurchase.compraID,
+        units: unitsFromCurrent,
+        unitCost: currentPurchase.unitCost || 0,
+        remainingBefore: currentPurchase.remainingStock,
+        remainingAfter: remainingStock,
+      });
+      if (unitsToConsume > 0) {
+        nextPurchase = stockData.compras.find(
+          (c) => c.compraId !== currentPurchase.compraID && c.stockRestante > 0
+        );
+        if (!nextPurchase) {
+          throw new Error("NO_AVAILABLE_PURCHASE");
+        }
+        if (nextPurchase.stockRestante < unitsToConsume) {
+          throw new Error("INSUFFICIENT_STOCK_IN_NEXT_PURCHASE");
+        }
+        unitsFromNext = unitsToConsume;
+        purchaseTrace.push({
+          compraId: nextPurchase.compraId,
+          units: unitsFromNext,
+          unitCost: nextPurchase.unitCost || 0,
+          remainingBefore: nextPurchase.stockRestante,
+          remainingAfter: nextPurchase.stockRestante - unitsFromNext,
+        });
+      }
+      console.log(
+        `Consumidas ${unitsFromCurrent} unidades de compra ${currentPurchase.compraID}`
+      );
+      if (unitsFromNext > 0)
+        console.log(
+          `Consumidas ${unitsFromNext} unidades de compra ${nextPurchase.compraId}`
+        );
+      const totalCost = purchaseTrace.reduce(
+        (sum, trace) => sum + trace.units * trace.unitCost,
         0
       );
-      const unitCostAvg =
-        unitsTotal > 0 ? this.round2(costTotal / unitsTotal) : 0;
-
+      const unitCostAvg = totalCost / cantidad;
+      const newStockSummary = {
+        version: currentVersion + 1,
+        currentPurchase: needsReplenishment
+          ? {
+              compraID: nextPurchase
+                ? nextPurchase.compraId
+                : currentPurchase.compraID,
+              remainingStock: nextPurchase
+                ? nextPurchase.stockRestante - unitsFromNext
+                : 0,
+              unitCost: nextPurchase
+                ? nextPurchase.unitCost
+                : currentPurchase.unitCost,
+              ventasId: nextPurchase ? [ventaId] : ventasIdToUpdate,
+            }
+          : {
+              compraID: currentPurchase.compraID,
+              remainingStock: remainingStock,
+              unitCost: currentPurchase.unitCost,
+              ventasId: ventasIdToUpdate,
+            },
+        totalStock: totalStock - cantidad,
+        lastUpdated: createClientTimestamp(),
+      };
+      variants[variantIndex].stockSummary = newStockSummary;
+      transaction.update(productRef, { variants });
+      console.log(`Traza generada:`, purchaseTrace);
+      console.log(`Nuevo stockSummary:`, newStockSummary);
       return {
         purchaseTrace,
         unitCostAvg,
-        finalRemainingStock: newRemainingStock,
-        totalStockAfter: newTotalStock,
-        totalStockBefore,
-        needsReplenishment: updatedStockSummary.needsReplenishment || false,
-        stockReference,
-        compraIdToUpdate: currentStockSummary.currentPurchase.compraID,
-        ventasIdToUpdate: newVentasId,
+        needsReplenishment,
+        compraIdToUpdate: currentPurchase.compraID,
+        ventasIdToUpdate,
+        unitsFromCurrent,
+        unitsFromNext,
+        nextPurchaseId: nextPurchase ? nextPurchase.compraId : null,
       };
     });
   }
 
-  async simulateVenta(producto, selectedVariant = null, cantidad = 1) {
-    try {
-      console.log(`Simulando venta de ${cantidad} unidades - ${producto.name}`);
-
-      if (producto.infiniteStock === true) {
-        return this.handleInfiniteStockSale(
+  async simulateVenta(
+    producto,
+    selectedVariant = null,
+    cantidad = 1,
+    maxRetries = 3
+  ) {
+    let retries = 0;
+    while (retries < maxRetries) {
+      try {
+        console.log(
+          `Simulando venta de ${cantidad} unidades - ${
+            producto.name
+          } (Intento ${retries + 1})`
+        );
+        if (producto.infiniteStock === true) {
+          return this.handleInfiniteStockSale(
+            producto,
+            selectedVariant,
+            cantidad
+          );
+        }
+        const ventaId = this.generateUUID();
+        const stockReference = selectedVariant.stockReference;
+        if (!stockReference) {
+          throw new Error(
+            "MISSING_STOCK_REFERENCE: Producto sin referencia de stock"
+          );
+        }
+        const productRef = doc(
+          db,
+          "absoluteClientes",
+          this.enterpriseData.id,
+          "sucursales",
+          this.enterpriseData.selectedSucursal.id,
+          "productos",
+          producto.id
+        );
+        const productDoc = await getDoc(productRef);
+        if (!productDoc.exists()) throw new Error("Producto no encontrado");
+        const productData = productDoc.data();
+        const variant = productData.variants.find(
+          (v) => v.id === selectedVariant.id
+        );
+        if (!variant) throw new Error("Variante no encontrada");
+        selectedVariant.stockVersion = variant.stockSummary.version;
+        const result = await this.processMultiPurchaseSaleWithTransaction(
           producto,
           selectedVariant,
-          cantidad
-        );
-      }
-
-      const ventaId = this.generateUUID();
-      const stockReference = selectedVariant.stockReference;
-      if (!stockReference) {
-        throw new Error(
-          "MISSING_STOCK_REFERENCE: Producto sin referencia de stock"
-        );
-      }
-
-      const result = await this.processMultiPurchaseSaleWithTransaction(
-        producto,
-        selectedVariant,
-        cantidad,
-        ventaId,
-        stockReference
-      );
-
-      // Solo actualizar el documento de stock si la compra activa se agotó
-      if (result.needsReplenishment) {
-        await this.updateStockRealAgotarCompra(
-          stockReference,
-          result.compraIdToUpdate,
-          result.ventasIdToUpdate
-        );
-        const nextPurchase = await this.findNextAvailablePurchase(
+          cantidad,
+          ventaId,
           stockReference
         );
-        if (nextPurchase) {
-          const productRef = doc(
-            db,
-            "absoluteClientes",
-            this.enterpriseData.id,
-            "sucursales",
-            this.enterpriseData.selectedSucursal.id,
-            "productos",
-            producto.id
+        // Actualizar stock solo si la compra actual se agota o se usa una compra siguiente
+        if (result.needsReplenishment) {
+          console.log(
+            `Compra actual agotada, actualizando stock para ${result.compraIdToUpdate}`
           );
-
-          const recalculatedTotalStock =
-            await this.calculateTotalStockFromSource(
-              stockReference,
-              nextPurchase.compraId,
-              nextPurchase.stockRestante
+          await this.updateStockRealAgotarCompra(
+            stockReference,
+            result.compraIdToUpdate,
+            result.ventasIdToUpdate
+          );
+          if (result.unitsFromNext > 0 && result.nextPurchaseId) {
+            console.log(
+              `Actualizando stock para siguiente compra ${result.nextPurchaseId}`
             );
-
-          const productDoc = await getDoc(productRef);
-          const variants = productDoc.data().variants;
-          const variantIndex = variants.findIndex(
-            (v) => v.id === (selectedVariant?.id || variant.id)
-          );
-
-          if (variantIndex !== -1) {
-            const currentVersion = variants[variantIndex].stockSummary.version;
-            variants[variantIndex].stockSummary = {
-              version: currentVersion,
-              currentPurchase: {
-                compraID: nextPurchase.compraId,
-                remainingStock: nextPurchase.stockRestante,
-                unitCost: nextPurchase.unitCost || 0,
-                ventasId: [],
-              },
-              totalStock: recalculatedTotalStock,
-              lastUpdated: createServerTimestamp(),
-            };
-
-            await updateDoc(productRef, { variants });
+            await this.updateStockRealReducir(
+              stockReference,
+              result.nextPurchaseId,
+              result.unitsFromNext,
+              ventaId
+            );
           }
+        } else if (
+          result.unitsFromCurrent > 0 &&
+          result.unitsFromCurrent === result.purchaseTrace[0].remainingBefore
+        ) {
+          // Actualizar stock si la compra actual se agota completamente
+          console.log(
+            `Compra actual agotada (remainingStock = 0), actualizando stock para ${result.compraIdToUpdate}`
+          );
+          await this.updateStockRealAgotarCompra(
+            stockReference,
+            result.compraIdToUpdate,
+            result.ventasIdToUpdate
+          );
+        } else {
+          console.log(
+            `No se actualiza stock: compra ${result.compraIdToUpdate} aún tiene stock restante`
+          );
         }
+        return result;
+      } catch (error) {
+        if (
+          error.message === "STOCK_VERSION_MISMATCH" &&
+          retries < maxRetries - 1
+        ) {
+          console.warn(
+            `STOCK_VERSION_MISMATCH detectado, reintentando (${
+              retries + 1
+            }/${maxRetries})`
+          );
+          retries++;
+          continue;
+        }
+        console.error("Error al simular venta:", error);
+        throw error;
       }
-
-      // No actualizar el documento de stock aquí a menos que sea necesario
-      // await this.updateStockRealReducir(
-      //   stockReference,
-      //   result.compraIdToUpdate,
-      //   cantidad,
-      //   ventaId
-      // );
-
-      return result;
-    } catch (error) {
-      console.error("Error al simular venta:", error);
-      throw error;
     }
+    throw new Error("Max retries reached for STOCK_VERSION_MISMATCH");
   }
 }
