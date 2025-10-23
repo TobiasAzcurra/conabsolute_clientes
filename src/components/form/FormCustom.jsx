@@ -116,6 +116,23 @@ const FormCustom = ({ cart, total }) => {
     setErrorList((prev) => prev.filter((error) => error.itemId !== itemId));
   };
 
+  const handleAdjustStock = (itemId, availableStock) => {
+    console.log("🔧 handleAdjustStock EJECUTADO");
+    console.log("📦 Item ID:", itemId);
+    console.log("📊 Stock disponible:", availableStock);
+    console.log("🛒 Item existe?", !!cartItems[itemId]);
+
+    updateCartItem(itemId, {
+      quantity: availableStock,
+    });
+
+    console.log("✅ Cantidad actualizada");
+
+    setErrorList((prev) => prev.filter((error) => error.itemId !== itemId));
+
+    console.log("✅ Error removido");
+  };
+
   const processPedido = async (values, isReserva, appliedDiscount = null) => {
     try {
       setIsProcessingStock(true);
@@ -302,6 +319,7 @@ const FormCustom = ({ cart, total }) => {
         errorList={errorList}
         onUpdateStock={handleUpdateStock}
         onRemoveItem={handleRemoveItem}
+        onAdjustStock={handleAdjustStock} // ✅ CRÍTICO: Esta línea DEBE estar
       />
       <div className="flex px-4 flex-col">
         <style>{`

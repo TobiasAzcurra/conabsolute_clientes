@@ -8,6 +8,7 @@ const SimpleModal = ({
   errorList = [],
   onUpdateStock,
   onRemoveItem,
+  onAdjustStock,
 }) => {
   if (!isOpen) return null;
 
@@ -35,19 +36,27 @@ const SimpleModal = ({
                       {error.productName}: {error.message}
                     </p>
                     <button
-                      onClick={() =>
-                        error.errorType === "RACE_CONDITION"
-                          ? onUpdateStock(error.itemId)
-                          : onRemoveItem(error.itemId)
-                      }
-                      className={`text-xs px-2.5 py-1.5 rounded-full ${
+                      onClick={() => {
+                        if (error.errorType === "RACE_CONDITION") {
+                          onUpdateStock(error.itemId);
+                        } else if (error.errorType === "ADJUSTABLE_STOCK") {
+                          onAdjustStock(error.itemId, error.availableStock);
+                        } else {
+                          onRemoveItem(error.itemId);
+                        }
+                      }}
+                      className={`text-xs px-2.5 py-1.5 rounded-full whitespace-nowrap ${
                         error.errorType === "RACE_CONDITION"
                           ? "text-blue-700 border border-blue-700"
-                          : "text-red-500  bg-red-50"
+                          : error.errorType === "ADJUSTABLE_STOCK"
+                          ? "text-yellow-500 bg-yellow-50"
+                          : "text-red-500 bg-red-50"
                       }`}
                     >
                       {error.errorType === "RACE_CONDITION"
                         ? "Actualizar"
+                        : error.errorType === "ADJUSTABLE_STOCK"
+                        ? "Ajustar"
                         : "Eliminar"}
                     </button>
                   </li>

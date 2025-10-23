@@ -65,16 +65,19 @@ export const consumeStockForOrderAndReturnTraces = async (
   );
 
   for (const item of cartItems) {
+    let productData = null;
+    let variant = null;
+    let availableStock = 0;
+
     try {
       console.log(
         `Procesando item: ${item.productName} (ID: ${item.productId}, quantity: ${item.quantity})`
       );
-      const productData = await getProductData(enterpriseData, item.productId);
+      productData = await getProductData(enterpriseData, item.productId);
       if (!productData) {
         throw new Error("PRODUCT_DELETED");
       }
 
-      let variant = null;
       if (item.variantId && item.variantId !== "default") {
         variant = productData.variants?.find((v) => v.id === item.variantId);
         if (!variant) {
@@ -88,6 +91,12 @@ export const consumeStockForOrderAndReturnTraces = async (
         variant = productData.variants?.find((v) => v.default === true);
         if (!variant) throw new Error("VARIANT_NOT_FOUND");
       }
+
+      // Capturar stock disponible ANTES de simular la venta
+      availableStock =
+        variant.stockSummary?.currentPurchase?.remainingStock ||
+        variant.stockSummary?.totalStock ||
+        0;
 
       if (productData.infiniteStock === true) {
         console.log(
@@ -133,11 +142,15 @@ export const consumeStockForOrderAndReturnTraces = async (
       let message = `Error al procesar ${item.productName || item.name}: ${
         error.message
       }`;
+
       if (error.message.includes("STOCK_VERSION_MISMATCH")) {
         errorType = "RACE_CONDITION";
         message = `Alguien compró antes que tú el ${
           item.productName || item.name
         }.`;
+      } else if (error.message.includes("NO_AVAILABLE_PURCHASE")) {
+        errorType = "ADJUSTABLE_STOCK";
+        message = `Pediste ${item.quantity} unidades pero solo hay ${availableStock} disponibles.`;
       } else if (error.message.includes("INSUFFICIENT_STOCK")) {
         errorType = "INSUFFICIENT_STOCK";
         const match = error.message.match(/Stock disponible \((\d+)\)/);
@@ -165,12 +178,14 @@ export const consumeStockForOrderAndReturnTraces = async (
           item.productName || item.name
         }. Verifica los datos del producto.`;
       }
+
       errorList.push({
         itemId: item.id,
         productName: item.productName || item.name,
         variantName: item.variantName || "",
         errorType,
         message,
+        availableStock: availableStock, // ✅ Agregamos el stock disponible
       });
     }
   }
@@ -393,8 +408,22 @@ export const handlePOSSubmit = async (
     );
 
     await runTransaction(db, async (transaction) => {
-      // Aplicar actualizaciones de stock dentro de la transacción
-      await stockManager.applyStockUpdates(stockUpdates, transaction);
+      // ✅ FILTRAR productos con stock infinito
+      const validStockUpdates = stockUpdates.filter(
+        (update) => update.productRef && update.stockRef
+      );
+
+      console.log(`📦 Total productos: ${stockUpdates.length}`);
+      console.log(`📊 Stock normal: ${validStockUpdates.length}`);
+      console.log(
+        `♾️ Stock infinito: ${stockUpdates.length - validStockUpdates.length}`
+      );
+
+      // Aplicar solo updates válidos
+      if (validStockUpdates.length > 0) {
+        await stockManager.applyStockUpdates(validStockUpdates, transaction);
+      }
+
       // Guardar el pedido
       transaction.set(pedidoRef, orderData);
     });
