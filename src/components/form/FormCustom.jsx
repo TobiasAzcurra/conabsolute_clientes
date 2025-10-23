@@ -23,8 +23,14 @@ import { parseTimeToTimestamp } from "../../utils/timestampHelpers";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
-  const { addLastCart, clearCart, cartItems, updateCartItem, subtotal } =
-    useCart();
+  const {
+    addLastCart,
+    clearCart,
+    cartItems,
+    updateCartItem,
+    removeFromCart,
+    subtotal,
+  } = useCart();
   const {
     slugEmpresa,
     slugSucursal,
@@ -49,7 +55,8 @@ const FormCustom = ({ cart, total }) => {
   const [showClosedModal, setShowClosedModal] = useState(false);
   const [closedMessage, setClosedMessage] = useState("");
   const [showDiscountWarning, setShowDiscountWarning] = useState(false);
-  const [showStockUpdateModal, setShowStockUpdateModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorList, setErrorList] = useState([]);
   const [pendingSubmitValues, setPendingSubmitValues] = useState(null);
   const [showDelayModal, setShowDelayModal] = useState(false);
   const [delayMinutes, setDelayMinutes] = useState(0);
@@ -69,7 +76,7 @@ const FormCustom = ({ cart, total }) => {
   );
   const availableMethods = useAvailableFulfillmentMethods(cartItems);
 
-  const updateCartStockVersions = async () => {
+  const handleUpdateStock = async (itemId) => {
     try {
       setIsProcessingStock(true);
       const updatedItems = await stockManager.updateCartStockVersions(
@@ -85,20 +92,28 @@ const FormCustom = ({ cart, total }) => {
         );
       });
       console.log("Versiones de stock actualizadas exitosamente");
-      setShowStockUpdateModal(false);
-      if (pendingSubmitValues) {
-        await processPedido(
-          pendingSubmitValues.values,
-          pendingSubmitValues.isReserva,
-          pendingSubmitValues.appliedDiscount
-        );
-      }
+      setErrorList((prev) => prev.filter((error) => error.itemId !== itemId));
     } catch (error) {
       console.error("Error actualizando versiones de stock:", error);
-      alert("Error al actualizar el stock. Por favor intenta nuevamente.");
+      setErrorList((prev) =>
+        prev.map((error) =>
+          error.itemId === itemId
+            ? {
+                ...error,
+                message: "Error al actualizar stock. Intenta nuevamente.",
+              }
+            : error
+        )
+      );
     } finally {
       setIsProcessingStock(false);
     }
+  };
+
+  const handleRemoveItem = (itemId) => {
+    removeFromCart(itemId);
+    console.log(`Item ${itemId} eliminado del carrito`);
+    setErrorList((prev) => prev.filter((error) => error.itemId !== itemId));
   };
 
   const processPedido = async (values, isReserva, appliedDiscount = null) => {
@@ -138,15 +153,25 @@ const FormCustom = ({ cart, total }) => {
       }
     } catch (err) {
       console.error("Error al procesar el pedido:", err);
-      if (err.message.includes("RACE_CONDITION")) {
+      if (err.errorList) {
+        setErrorList(err.errorList);
         setPendingSubmitValues({ values, isReserva, appliedDiscount });
-        setShowStockUpdateModal(true);
-      } else if (err.message.includes("INSUFFICIENT_STOCK")) {
-        alert(
-          "No hay suficiente stock disponible.\n\nPor favor verificá las cantidades disponibles."
-        );
+        setShowErrorModal(true);
       } else {
-        alert("Error al procesar el pedido. Por favor intenta nuevamente.");
+        setErrorList([
+          {
+            itemId: "unknown",
+            productName: "Desconocido",
+            variantName: "",
+            errorType: "GENERIC",
+            message: err.message.includes(
+              "Firestore transactions require all reads to be executed before all writes"
+            )
+              ? "Error al procesar el stock. Intenta nuevamente."
+              : `Error inesperado: ${err.message}`,
+          },
+        ]);
+        setShowErrorModal(true);
       }
     } finally {
       setIsProcessingStock(false);
@@ -267,17 +292,16 @@ const FormCustom = ({ cart, total }) => {
         }}
       />
       <SimpleModal
-        isOpen={showStockUpdateModal}
+        isOpen={showErrorModal}
         onClose={() => {
-          setShowStockUpdateModal(false);
+          setShowErrorModal(false);
+          setErrorList([]);
           setPendingSubmitValues(null);
         }}
-        title="Stock actualizado"
-        message="Alguien compró antes que vos. Actualizá tu versión de stock para poder continuar."
-        twoButtons={true}
-        cancelText="Cancelar"
-        confirmText="Actualizar stock"
-        onConfirm={updateCartStockVersions}
+        title="Problemas con tu pedido"
+        errorList={errorList}
+        onUpdateStock={handleUpdateStock}
+        onRemoveItem={handleRemoveItem}
       />
       <div className="flex px-4 flex-col">
         <style>{`

@@ -1,4 +1,3 @@
-// utils/orderProcessing.js - Usando timestampHelpers centralizados
 import { db } from "../firebase/config";
 import {
   collection,
@@ -7,6 +6,7 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
+  runTransaction,
 } from "firebase/firestore";
 import { StockManager } from "./stockManager";
 import {
@@ -35,43 +35,43 @@ const getProductData = async (enterpriseData, productId) => {
       "productos",
       productId
     );
-
     const productDoc = await getDoc(productRef);
     if (!productDoc.exists()) {
-      console.error(`Producto ${productId} no existe en Firebase`);
-      return null;
+      throw new Error("PRODUCT_DELETED");
     }
-
     const productData = { id: productId, ...productDoc.data() };
     console.log(
       `Producto obtenido: ${productData.name}, infiniteStock: ${productData.infiniteStock}`
     );
-
     return productData;
   } catch (error) {
     console.error("Error al obtener producto:", error);
-    return null;
+    throw error;
   }
 };
 
 export const consumeStockForOrderAndReturnTraces = async (
   cartItems,
-  enterpriseData
+  enterpriseData,
+  orderId
 ) => {
   const stockManager = new StockManager(enterpriseData);
   const results = [];
+  const errorList = [];
+  const stockUpdates = [];
 
-  console.log(`Procesando ${cartItems.length} items del carrito...`);
+  console.log(
+    `Procesando ${cartItems.length} items del carrito para orderId: ${orderId}...`
+  );
 
   for (const item of cartItems) {
     try {
       console.log(
-        `Procesando item: ${item.productName} (ID: ${item.productId})`
+        `Procesando item: ${item.productName} (ID: ${item.productId}, quantity: ${item.quantity})`
       );
-
       const productData = await getProductData(enterpriseData, item.productId);
       if (!productData) {
-        throw new Error(`Producto ${item.productId} no encontrado`);
+        throw new Error("PRODUCT_DELETED");
       }
 
       let variant = null;
@@ -82,9 +82,11 @@ export const consumeStockForOrderAndReturnTraces = async (
             `Variante ${item.variantId} no encontrada, usando default`
           );
           variant = productData.variants?.find((v) => v.default === true);
+          if (!variant) throw new Error("VARIANT_NOT_FOUND");
         }
       } else {
         variant = productData.variants?.find((v) => v.default === true);
+        if (!variant) throw new Error("VARIANT_NOT_FOUND");
       }
 
       if (productData.infiniteStock === true) {
@@ -95,18 +97,19 @@ export const consumeStockForOrderAndReturnTraces = async (
 
       const variantWithCapturedVersion = {
         ...variant,
-        stockSummary: {
-          ...(variant?.stockSummary || {}),
-          version: item.stockVersion || 0,
-        },
+        stockVersion: item.stockVersion || 0,
+        stockReference: item.stockReference || "",
       };
 
-      console.log(`Versión capturada en carrito: ${item.stockVersion}`);
+      console.log(
+        `Versión capturada en carrito: ${item.stockVersion}, stockReference: ${item.stockReference}`
+      );
 
       const saleResult = await stockManager.simulateVenta(
         productData,
         variantWithCapturedVersion,
-        item.quantity
+        item.quantity,
+        orderId
       );
 
       results.push({
@@ -117,29 +120,62 @@ export const consumeStockForOrderAndReturnTraces = async (
         totalStockAfter: saleResult.totalStockAfter || 0,
       });
 
+      stockUpdates.push({
+        ...saleResult,
+        variantId: item.variantId,
+        orderId,
+      });
+
       console.log(`Item procesado exitosamente: ${item.productName}`);
     } catch (error) {
       console.error(`Error procesando item ${item.id}:`, error);
-
+      let errorType = "GENERIC";
+      let message = `Error al procesar ${item.productName || item.name}: ${
+        error.message
+      }`;
       if (error.message.includes("STOCK_VERSION_MISMATCH")) {
-        throw new Error(
-          `RACE_CONDITION: ${
-            item.productName || item.name
-          } fue comprado por alguien más. Por favor recarga la página para ver stock actualizado.`
-        );
+        errorType = "RACE_CONDITION";
+        message = `Alguien compró antes que tú el ${
+          item.productName || item.name
+        }.`;
       } else if (error.message.includes("INSUFFICIENT_STOCK")) {
-        throw new Error(
-          `INSUFFICIENT_STOCK: No hay suficiente stock de ${
-            item.productName || item.name
-          }`
-        );
+        errorType = "INSUFFICIENT_STOCK";
+        const match = error.message.match(/Stock disponible \((\d+)\)/);
+        message = `No hay suficiente stock para ${
+          item.productName || item.name
+        }. Stock disponible: ${match ? match[1] : "desconocido"}.`;
+      } else if (error.message.includes("PRODUCT_DELETED")) {
+        errorType = "PRODUCT_DELETED";
+        message = `El producto ${
+          item.productName || item.name
+        } ya no está disponible.`;
+      } else if (error.message.includes("VARIANT_NOT_FOUND")) {
+        errorType = "VARIANT_NOT_FOUND";
+        message = `La variante ${
+          item.variantName || "desconocida"
+        } del producto ${item.productName || item.name} no está disponible.`;
+      } else if (error.message.includes("MISSING_STOCK_REFERENCE")) {
+        errorType = "MISSING_STOCK_REFERENCE";
+        message = `El producto ${
+          item.productName || item.name
+        } no tiene referencia de stock.`;
+      } else if (error.message.includes("Invalid document reference")) {
+        errorType = "INVALID_STOCK_REFERENCE";
+        message = `Referencia de stock inválida para ${
+          item.productName || item.name
+        }. Verifica los datos del producto.`;
       }
-
-      throw error;
+      errorList.push({
+        itemId: item.id,
+        productName: item.productName || item.name,
+        variantName: item.variantName || "",
+        errorType,
+        message,
+      });
     }
   }
 
-  return results;
+  return { results, errorList, stockUpdates };
 };
 
 const extractModifierOptions = (item) => {
@@ -152,7 +188,6 @@ const extractModifierOptions = (item) => {
 
   variant.modifierGroups.forEach((group) => {
     const selectedOptionIds = item.modifierSelections[group.id] || [];
-
     selectedOptionIds.forEach((optionId) => {
       const option = group.options.find((opt) => opt.id === optionId);
       if (option) {
@@ -174,13 +209,11 @@ export const computeItemFinancials = (item, unitCostAvg) => {
     (item.variantPrice || 0) +
     (item.modifiersPrice || 0);
   const quantity = item.quantity || 0;
-
   const unitCost = round2(unitCostAvg || 0);
   const totalCost = round2(unitCost * quantity);
   const unitMargin = round2(unitPrice - unitCost);
   const totalMargin = round2(unitMargin * quantity);
   const totalPrice = round2(unitPrice * quantity);
-
   return { unitCost, totalCost, unitMargin, totalMargin, totalPrice };
 };
 
@@ -195,11 +228,9 @@ const registerDiscountUsage = async (discountId, orderId, enterpriseData) => {
       "discountCodes",
       discountId
     );
-
     await updateDoc(discountRef, {
       "usage.usageTracking": arrayUnion(orderId),
     });
-
     console.log(`Uso de descuento registrado para orden ${orderId}`);
   } catch (error) {
     console.error("Error registrando uso de descuento:", error);
@@ -214,26 +245,28 @@ export const handlePOSSubmit = async (
 ) => {
   try {
     console.log("Procesando pedido con schema POS");
-
     const orderId = generateUUID();
-
     let confirmedAt = createServerTimestamp();
-
     if (formData.delayMinutes && formData.delayMinutes > 0) {
       confirmedAt = createDelayedTimestamp(formData.delayMinutes);
       console.log(`Pedido confirmado con delay: ${formData.delayMinutes}min`);
     }
 
     console.log("Consumiendo stock...");
-    const traces = await consumeStockForOrderAndReturnTraces(
-      cartItems,
-      enterpriseData
-    );
+    const { results, errorList, stockUpdates } =
+      await consumeStockForOrderAndReturnTraces(
+        cartItems,
+        enterpriseData,
+        orderId
+      );
+
+    if (errorList.length > 0) {
+      throw { errorList };
+    }
 
     const itemsForOrder = cartItems.map((item) => {
-      const trace = traces.find((t) => t.itemId === item.id);
+      const trace = results.find((t) => t.itemId === item.id);
       const financials = computeItemFinancials(item, trace?.unitCostAvg || 0);
-
       return {
         productId: item.productId || "",
         productName: item.productName || item.name || "",
@@ -241,7 +274,6 @@ export const handlePOSSubmit = async (
         variantId: item.variantId || "default",
         variantName: item.variantName || "default",
         modifiers: extractModifierOptions(item),
-
         financeSummary: {
           unitBasePrice: item.basePrice || 0,
           unitVariantPrice: item.variantPrice || 0,
@@ -252,7 +284,6 @@ export const handlePOSSubmit = async (
           unitMargin: financials.unitMargin,
           totalMargin: financials.totalMargin,
         },
-
         stockSummary: {
           stockReference: item.stockReference || "",
           totalStockBefore: trace?.totalStockBefore || 0,
@@ -268,35 +299,27 @@ export const handlePOSSubmit = async (
         0
       )
     );
-
     let descuento = 0;
     let discountArray = [];
-
     if (formData.appliedDiscount && formData.appliedDiscount.isValid) {
       descuento = round2(formData.appliedDiscount.discount);
-
       discountArray.push({
         type: "coupon",
         reason: formData.appliedDiscount.discountData.code,
         value: descuento,
       });
-
       console.log("Descuento aplicado:", {
         code: formData.appliedDiscount.discountData.code,
         value: descuento,
       });
     }
-
     const shippingCost =
       formData.deliveryMethod === "delivery"
         ? round2(parseFloat(formData.shipping) || 0)
         : 0;
-
     const envioExpress = round2(parseFloat(formData.envioExpress) || 0);
-
     const totalAfterDiscounts = round2(subtotal - descuento);
     const total = round2(totalAfterDiscounts + shippingCost + envioExpress);
-
     const totalCosts = round2(
       itemsForOrder.reduce(
         (sum, item) => sum + (item.financeSummary?.totalCost || 0),
@@ -306,7 +329,6 @@ export const handlePOSSubmit = async (
     const grossMargin = round2(totalAfterDiscounts - totalCosts);
     const finalProfitMarginPercentage =
       totalAfterDiscounts > 0 ? round2(grossMargin / totalAfterDiscounts) : 0;
-
     let estimatedTime = null;
     if (formData.estimatedTime) {
       estimatedTime = formData.estimatedTime;
@@ -316,12 +338,10 @@ export const handlePOSSubmit = async (
       status: "Confirmed",
       statusNote: "",
       orderNotes: formData.aclaraciones || "",
-
       from: {
         feature: "webapp",
         employeeUser: "",
       },
-
       timestamps: {
         createdAt: createServerTimestamp(),
         updatedAt: createServerTimestamp(),
@@ -332,11 +352,9 @@ export const handlePOSSubmit = async (
         clientAt: null,
         canceledAt: null,
       },
-
       customer: {
         phone: formData.phone || "",
       },
-
       fulfillment: {
         method: formData.deliveryMethod || "delivery",
         assignedTo: "",
@@ -345,13 +363,10 @@ export const handlePOSSubmit = async (
         estimatedTime: estimatedTime,
         deliveryNotes: formData.references || "",
       },
-
       items: itemsForOrder,
-
       payment: {
         method: formData.paymentMethod || "cash",
         status: "pending",
-
         financeSummary: {
           subtotal: subtotal,
           shipping: shippingCost + envioExpress,
@@ -362,11 +377,11 @@ export const handlePOSSubmit = async (
           taxes: "",
           finalProfitMarginPercentage: finalProfitMarginPercentage,
         },
-
         discounts: discountArray,
       },
     };
 
+    const stockManager = new StockManager(enterpriseData);
     const pedidoRef = doc(
       db,
       "absoluteClientes",
@@ -377,7 +392,20 @@ export const handlePOSSubmit = async (
       orderId
     );
 
-    await setDoc(pedidoRef, orderData);
+    await runTransaction(db, async (transaction) => {
+      // Aplicar actualizaciones de stock dentro de la transacción
+      await stockManager.applyStockUpdates(stockUpdates, transaction);
+      // Guardar el pedido
+      transaction.set(pedidoRef, orderData);
+    });
+
+    if (formData.appliedDiscount?.discountId) {
+      await registerDiscountUsage(
+        formData.appliedDiscount.discountId,
+        orderId,
+        enterpriseData
+      );
+    }
 
     console.log("Pedido guardado con schema POS:");
     console.log("Items con trazabilidad:", itemsForOrder.length);
@@ -386,17 +414,8 @@ export const handlePOSSubmit = async (
       "% Margen:",
       (finalProfitMarginPercentage * 100).toFixed(1) + "%"
     );
-
     if (descuento > 0) {
       console.log("Descuento aplicado:", descuento);
-    }
-
-    if (formData.appliedDiscount?.discountId) {
-      await registerDiscountUsage(
-        formData.appliedDiscount.discountId,
-        orderId,
-        enterpriseData
-      );
     }
 
     return orderId;
@@ -420,7 +439,9 @@ export const adaptCartToPOSFormat = (contextCartItems) => {
     finalPrice: item.finalPrice || item.price || 0,
     category: item.category,
     isInfiniteStock: item.isInfiniteStock || false,
-    stockReference: item.stockReference || "",
+    stockReference: item.stockReference
+      ? item.stockReference.split("/").pop()
+      : "",
     availableStock: item.availableStock || 0,
     stockVersion: item.stockVersion || 0,
     modifierSelections: item.modifierSelections || {},

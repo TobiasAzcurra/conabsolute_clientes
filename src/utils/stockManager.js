@@ -34,6 +34,12 @@ export class StockManager {
     return Math.round(n * 100) / 100;
   }
 
+  cleanStockReference(stockReference) {
+    if (!stockReference) return null;
+    const segments = stockReference.split("/");
+    return segments[segments.length - 1];
+  }
+
   handleInfiniteStockSale(producto, selectedVariant = null, cantidad = 1) {
     console.log(`Procesando venta de stock infinito: ${cantidad} unidades`);
     const timestamp = Date.now();
@@ -63,8 +69,10 @@ export class StockManager {
   async calculateTotalStockFromSource(
     stockReference,
     currentPurchaseId,
-    currentRemainingStock
+    currentRemainingStock,
+    purchaseTrace = []
   ) {
+    const cleanedStockReference = this.cleanStockReference(stockReference);
     const stockRef = doc(
       db,
       "absoluteClientes",
@@ -72,30 +80,45 @@ export class StockManager {
       "sucursales",
       this.enterpriseData.selectedSucursal.id,
       "stock",
-      stockReference
+      cleanedStockReference
     );
     const stockDoc = await getDoc(stockRef);
     if (!stockDoc.exists()) {
+      console.warn(`Stock no encontrado para ${cleanedStockReference}`);
       return 0;
     }
     const stockData = stockDoc.data();
     const compras = stockData?.compras || [];
     let totalStock = 0;
     compras.forEach((compra) => {
-      if (currentPurchaseId && compra.compraId === currentPurchaseId) {
-        if (currentRemainingStock !== undefined) {
-          totalStock += currentRemainingStock;
-        } else {
-          totalStock += compra.stockRestante || 0;
-        }
+      let stockToAdd;
+      const trace = purchaseTrace.find((t) => t.compraId === compra.compraId);
+      if (trace) {
+        stockToAdd = trace.remainingAfter;
+      } else if (
+        currentPurchaseId &&
+        compra.compraId === currentPurchaseId &&
+        currentRemainingStock !== undefined
+      ) {
+        stockToAdd = currentRemainingStock;
       } else {
-        totalStock += compra.stockRestante || 0;
+        stockToAdd = compra.stockRestante || 0;
       }
+      totalStock += stockToAdd;
+      console.log(
+        `Compra ${compra.compraId}: stockRestante=${
+          compra.stockRestante
+        }, stockToAdd=${stockToAdd}, trace=${JSON.stringify(trace)}`
+      );
     });
+    console.log(
+      `Total stock calculado para ${cleanedStockReference}: ${totalStock}`
+    );
     return totalStock;
   }
 
   async findNextAvailablePurchase(stockReference) {
+    const cleanedStockReference = this.cleanStockReference(stockReference);
     const stockRef = doc(
       db,
       "absoluteClientes",
@@ -103,7 +126,7 @@ export class StockManager {
       "sucursales",
       this.enterpriseData.selectedSucursal.id,
       "stock",
-      stockReference
+      cleanedStockReference
     );
     const stockDoc = await getDoc(stockRef);
     if (!stockDoc.exists()) {
@@ -112,69 +135,6 @@ export class StockManager {
     const stockData = stockDoc.data();
     const compras = stockData?.compras || [];
     return compras.find((compra) => compra.stockRestante > 0) || null;
-  }
-
-  async updateStockRealReducir(stockReference, compraId, cantidad, ventaId) {
-    const stockRef = doc(
-      db,
-      "absoluteClientes",
-      this.enterpriseData.id,
-      "sucursales",
-      this.enterpriseData.selectedSucursal.id,
-      "stock",
-      stockReference
-    );
-    const stockDoc = await getDoc(stockRef);
-    if (!stockDoc.exists()) {
-      throw new Error("Documento de stock no encontrado");
-    }
-    const stockData = stockDoc.data();
-    const compras = stockData?.compras || [];
-    const compraIndex = compras.findIndex((c) => c.compraId === compraId);
-    if (compraIndex === -1) {
-      throw new Error("Compra no encontrada");
-    }
-    compras[compraIndex].stockRestante -= cantidad;
-    compras[compraIndex].ventasId = [
-      ...(compras[compraIndex].ventasId || []),
-      ventaId,
-    ];
-    await updateDoc(stockRef, {
-      compras,
-      lastUpdated: createServerTimestamp(),
-    });
-    console.log(
-      `Stock actualizado: compra ${compraId}, stockRestante: ${compras[compraIndex].stockRestante}, ventaId: ${ventaId}`
-    );
-  }
-
-  async updateStockRealAgotarCompra(stockReference, compraId, ventasId) {
-    const stockRef = doc(
-      db,
-      "absoluteClientes",
-      this.enterpriseData.id,
-      "sucursales",
-      this.enterpriseData.selectedSucursal.id,
-      "stock",
-      stockReference
-    );
-    const stockDoc = await getDoc(stockRef);
-    if (!stockDoc.exists()) {
-      throw new Error("Documento de stock no encontrado");
-    }
-    const stockData = stockDoc.data();
-    const compras = stockData?.compras || [];
-    const compraIndex = compras.findIndex((c) => c.compraId === compraId);
-    if (compraIndex === -1) {
-      throw new Error("Compra no encontrada");
-    }
-    compras[compraIndex].stockRestante = 0;
-    compras[compraIndex].ventasId = ventasId;
-    await updateDoc(stockRef, {
-      compras,
-      lastUpdated: createServerTimestamp(),
-    });
-    console.log(`Compra ${compraId} agotada, ventasId: ${ventasId}`);
   }
 
   async updateCartStockVersions(cartItems) {
@@ -192,19 +152,48 @@ export class StockManager {
           );
           const productDoc = await getDoc(productRef);
           if (!productDoc.exists()) {
-            throw new Error(`Producto ${item.productId} no encontrado`);
+            throw new Error(
+              `PRODUCT_DELETED: Producto ${item.productId} no encontrado`
+            );
           }
           const productData = productDoc.data();
           const variant = productData.variants?.find(
             (v) => v.id === item.variantId
           );
           if (!variant) {
-            throw new Error(`Variante ${item.variantId} no encontrada`);
+            throw new Error(
+              `VARIANT_NOT_FOUND: Variante ${item.variantId} no encontrada`
+            );
           }
+          const cleanedStockReference = this.cleanStockReference(
+            variant.stockReference
+          );
+          if (!cleanedStockReference) {
+            throw new Error(
+              `MISSING_STOCK_REFERENCE: Producto ${item.productId} sin referencia de stock válida`
+            );
+          }
+          const stockRef = doc(
+            db,
+            "absoluteClientes",
+            this.enterpriseData.id,
+            "sucursales",
+            this.enterpriseData.selectedSucursal.id,
+            "stock",
+            cleanedStockReference
+          );
+          const stockDoc = await getDoc(stockRef);
+          const totalStock = stockDoc.exists()
+            ? (stockDoc.data().compras || []).reduce(
+                (sum, compra) => sum + (compra.stockRestante || 0),
+                0
+              )
+            : 0;
           return {
             ...item,
             stockVersion: variant.stockSummary?.version || 0,
-            availableStock: variant.stockSummary?.totalStock || 0,
+            availableStock: totalStock,
+            stockReference: cleanedStockReference,
           };
         })
       );
@@ -220,9 +209,10 @@ export class StockManager {
     producto,
     selectedVariant,
     cantidad,
-    ventaId,
+    orderId,
     stockReference
   ) {
+    const cleanedStockReference = this.cleanStockReference(stockReference);
     const productRef = doc(
       db,
       "absoluteClientes",
@@ -239,12 +229,12 @@ export class StockManager {
       "sucursales",
       this.enterpriseData.selectedSucursal.id,
       "stock",
-      stockReference
+      cleanedStockReference
     );
     return await runTransaction(db, async (transaction) => {
       const productDoc = await transaction.get(productRef);
       if (!productDoc.exists()) {
-        throw new Error("Producto no encontrado");
+        throw new Error("PRODUCT_DELETED");
       }
       const stockDoc = await transaction.get(stockRef);
       if (!stockDoc.exists()) {
@@ -257,26 +247,35 @@ export class StockManager {
         (v) => v.id === selectedVariant.id
       );
       if (variantIndex === -1) {
-        throw new Error("Variante no encontrada");
+        throw new Error("VARIANT_NOT_FOUND");
       }
       const stockSummary = variants[variantIndex].stockSummary || {};
       const currentVersion = stockSummary.version || 0;
       const currentPurchase = stockSummary.currentPurchase || {};
-      const totalStock = stockSummary.totalStock || 0;
       console.log(
         `Versión en carrito: ${selectedVariant.stockVersion}, Versión en Firestore: ${currentVersion}`
       );
       if (currentVersion !== selectedVariant.stockVersion) {
         throw new Error("STOCK_VERSION_MISMATCH");
       }
-      if (totalStock < cantidad) {
-        throw new Error("INSUFFICIENT_STOCK");
+      // Validar stock real desde stockRef
+      const realTotalStock = (stockData.compras || []).reduce(
+        (sum, compra) => sum + (compra.stockRestante || 0),
+        0
+      );
+      console.log(
+        `Stock real en stockRef: ${realTotalStock}, cantidad solicitada: ${cantidad}`
+      );
+      if (realTotalStock < cantidad) {
+        throw new Error(
+          `INSUFFICIENT_STOCK: Stock disponible (${realTotalStock}) es menor a la cantidad solicitada (${cantidad})`
+        );
       }
       let unitsToConsume = cantidad;
       let purchaseTrace = [];
       let needsReplenishment = false;
       let compraIdToUpdate = currentPurchase.compraID;
-      let ventasIdToUpdate = [...(currentPurchase.ventasId || []), ventaId];
+      let ventasIdToUpdate = [...(currentPurchase.ventasId || []), orderId];
       let remainingStock = currentPurchase.remainingStock || 0;
       let unitsFromCurrent = 0;
       let unitsFromNext = 0;
@@ -306,7 +305,9 @@ export class StockManager {
           throw new Error("NO_AVAILABLE_PURCHASE");
         }
         if (nextPurchase.stockRestante < unitsToConsume) {
-          throw new Error("INSUFFICIENT_STOCK_IN_NEXT_PURCHASE");
+          throw new Error(
+            `INSUFFICIENT_STOCK_IN_NEXT_PURCHASE: Stock disponible (${nextPurchase.stockRestante}) es menor a la cantidad solicitada (${unitsToConsume})`
+          );
         }
         unitsFromNext = unitsToConsume;
         purchaseTrace.push({
@@ -329,6 +330,12 @@ export class StockManager {
         0
       );
       const unitCostAvg = totalCost / cantidad;
+      const newTotalStock = await this.calculateTotalStockFromSource(
+        cleanedStockReference,
+        currentPurchase.compraID,
+        remainingStock,
+        purchaseTrace
+      );
       const newStockSummary = {
         version: currentVersion + 1,
         currentPurchase: needsReplenishment
@@ -342,7 +349,7 @@ export class StockManager {
               unitCost: nextPurchase
                 ? nextPurchase.unitCost
                 : currentPurchase.unitCost,
-              ventasId: nextPurchase ? [ventaId] : ventasIdToUpdate,
+              ventasId: nextPurchase ? [orderId] : ventasIdToUpdate,
             }
           : {
               compraID: currentPurchase.compraID,
@@ -350,13 +357,9 @@ export class StockManager {
               unitCost: currentPurchase.unitCost,
               ventasId: ventasIdToUpdate,
             },
-        totalStock: totalStock - cantidad,
+        totalStock: newTotalStock,
         lastUpdated: createClientTimestamp(),
       };
-      variants[variantIndex].stockSummary = newStockSummary;
-      transaction.update(productRef, { variants });
-      console.log(`Traza generada:`, purchaseTrace);
-      console.log(`Nuevo stockSummary:`, newStockSummary);
       return {
         purchaseTrace,
         unitCostAvg,
@@ -366,6 +369,11 @@ export class StockManager {
         unitsFromCurrent,
         unitsFromNext,
         nextPurchaseId: nextPurchase ? nextPurchase.compraId : null,
+        productRef,
+        stockRef,
+        variants,
+        variantIndex,
+        newStockSummary,
       };
     });
   }
@@ -374,6 +382,7 @@ export class StockManager {
     producto,
     selectedVariant = null,
     cantidad = 1,
+    orderId,
     maxRetries = 3
   ) {
     let retries = 0;
@@ -391,8 +400,9 @@ export class StockManager {
             cantidad
           );
         }
-        const ventaId = this.generateUUID();
-        const stockReference = selectedVariant.stockReference;
+        const stockReference = this.cleanStockReference(
+          selectedVariant.stockReference
+        );
         if (!stockReference) {
           throw new Error(
             "MISSING_STOCK_REFERENCE: Producto sin referencia de stock"
@@ -408,60 +418,26 @@ export class StockManager {
           producto.id
         );
         const productDoc = await getDoc(productRef);
-        if (!productDoc.exists()) throw new Error("Producto no encontrado");
+        if (!productDoc.exists()) throw new Error("PRODUCT_DELETED");
         const productData = productDoc.data();
         const variant = productData.variants.find(
           (v) => v.id === selectedVariant.id
         );
-        if (!variant) throw new Error("Variante no encontrada");
+        if (!variant) throw new Error("VARIANT_NOT_FOUND");
         selectedVariant.stockVersion = variant.stockSummary.version;
         const result = await this.processMultiPurchaseSaleWithTransaction(
           producto,
           selectedVariant,
           cantidad,
-          ventaId,
+          orderId,
           stockReference
         );
-        // Actualizar stock solo si la compra actual se agota o se usa una compra siguiente
-        if (result.needsReplenishment) {
-          console.log(
-            `Compra actual agotada, actualizando stock para ${result.compraIdToUpdate}`
-          );
-          await this.updateStockRealAgotarCompra(
-            stockReference,
-            result.compraIdToUpdate,
-            result.ventasIdToUpdate
-          );
-          if (result.unitsFromNext > 0 && result.nextPurchaseId) {
-            console.log(
-              `Actualizando stock para siguiente compra ${result.nextPurchaseId}`
-            );
-            await this.updateStockRealReducir(
-              stockReference,
-              result.nextPurchaseId,
-              result.unitsFromNext,
-              ventaId
-            );
-          }
-        } else if (
-          result.unitsFromCurrent > 0 &&
-          result.unitsFromCurrent === result.purchaseTrace[0].remainingBefore
-        ) {
-          // Actualizar stock si la compra actual se agota completamente
-          console.log(
-            `Compra actual agotada (remainingStock = 0), actualizando stock para ${result.compraIdToUpdate}`
-          );
-          await this.updateStockRealAgotarCompra(
-            stockReference,
-            result.compraIdToUpdate,
-            result.ventasIdToUpdate
-          );
-        } else {
-          console.log(
-            `No se actualiza stock: compra ${result.compraIdToUpdate} aún tiene stock restante`
-          );
-        }
-        return result;
+        return {
+          ...result,
+          totalStockBefore: variant.stockSummary.totalStock || 0,
+          totalStockAfter: result.newStockSummary.totalStock,
+          orderId,
+        };
       } catch (error) {
         if (
           error.message === "STOCK_VERSION_MISMATCH" &&
@@ -480,5 +456,108 @@ export class StockManager {
       }
     }
     throw new Error("Max retries reached for STOCK_VERSION_MISMATCH");
+  }
+
+  async applyStockUpdates(updates) {
+    await runTransaction(db, async (transaction) => {
+      const stockDocs = new Map();
+      for (const update of updates) {
+        const { stockRef } = update;
+        if (!stockDocs.has(stockRef.path)) {
+          const stockDoc = await transaction.get(stockRef);
+          stockDocs.set(stockRef.path, stockDoc);
+        }
+      }
+
+      for (const update of updates) {
+        const {
+          productRef,
+          stockRef,
+          variants,
+          variantIndex,
+          newStockSummary,
+          needsReplenishment,
+          compraIdToUpdate,
+          ventasIdToUpdate,
+          unitsFromCurrent,
+          unitsFromNext,
+          nextPurchaseId,
+          orderId,
+          purchaseTrace,
+        } = update;
+
+        const stockDoc = stockDocs.get(stockRef.path);
+        if (!stockDoc.exists()) throw new Error("Stock no encontrado");
+        const stockData = stockDoc.data();
+        const compras = stockData.compras || [];
+
+        if (needsReplenishment) {
+          console.log(
+            `Compra actual agotada, actualizando stock para ${compraIdToUpdate}`
+          );
+          const compraIndex = compras.findIndex(
+            (c) => c.compraId === compraIdToUpdate
+          );
+          if (compraIndex === -1) throw new Error("Compra no encontrada");
+          compras[compraIndex].stockRestante = 0;
+          compras[compraIndex].ventasId = ventasIdToUpdate;
+          if (unitsFromNext > 0 && nextPurchaseId) {
+            console.log(
+              `Actualizando stock para siguiente compra ${nextPurchaseId}`
+            );
+            const nextCompraIndex = compras.findIndex(
+              (c) => c.compraId === nextPurchaseId
+            );
+            if (nextCompraIndex === -1)
+              throw new Error("Siguiente compra no encontrada");
+            compras[nextCompraIndex].stockRestante -= unitsFromNext;
+            compras[nextCompraIndex].ventasId = [
+              ...(compras[nextCompraIndex].ventasId || []),
+              orderId,
+            ];
+          }
+          transaction.update(stockRef, {
+            compras,
+            lastUpdated: createServerTimestamp(),
+          });
+        } else if (
+          unitsFromCurrent > 0 &&
+          update.purchaseTrace[0].remainingAfter === 0
+        ) {
+          console.log(
+            `Compra actual agotada (remainingStock = 0), actualizando stock para ${compraIdToUpdate}`
+          );
+          const compraIndex = compras.findIndex(
+            (c) => c.compraId === compraIdToUpdate
+          );
+          if (compraIndex === -1) throw new Error("Compra no encontrada");
+          compras[compraIndex].stockRestante = 0;
+          compras[compraIndex].ventasId = ventasIdToUpdate;
+          transaction.update(stockRef, {
+            compras,
+            lastUpdated: createServerTimestamp(),
+          });
+        } else {
+          console.log(
+            `No se actualiza stock: compra ${compraIdToUpdate} aún tiene stock restante (${update.purchaseTrace[0].remainingAfter})`
+          );
+        }
+
+        const finalTotalStock = await this.calculateTotalStockFromSource(
+          stockRef.path,
+          compraIdToUpdate,
+          update.purchaseTrace[0].remainingAfter,
+          purchaseTrace
+        );
+        console.log(
+          `Total stock final para ${stockRef.path}: ${finalTotalStock}`
+        );
+        variants[variantIndex].stockSummary = {
+          ...newStockSummary,
+          totalStock: finalTotalStock,
+        };
+        transaction.update(productRef, { variants });
+      }
+    });
   }
 }
