@@ -370,14 +370,7 @@ export class StockManager {
       }
 
       const ventaId = this.generateUUID();
-
-      const variant =
-        selectedVariant || producto.variants?.find((v) => v.default);
-      if (!variant) {
-        throw new Error("VARIANT_NOT_FOUND: No se encontró variante");
-      }
-
-      const stockReference = variant.stockReference;
+      const stockReference = selectedVariant.stockReference;
       if (!stockReference) {
         throw new Error(
           "MISSING_STOCK_REFERENCE: Producto sin referencia de stock"
@@ -392,17 +385,16 @@ export class StockManager {
         stockReference
       );
 
+      // Solo actualizar el documento de stock si la compra activa se agotó
       if (result.needsReplenishment) {
         await this.updateStockRealAgotarCompra(
           stockReference,
           result.compraIdToUpdate,
           result.ventasIdToUpdate
         );
-
         const nextPurchase = await this.findNextAvailablePurchase(
           stockReference
         );
-
         if (nextPurchase) {
           const productRef = doc(
             db,
@@ -438,21 +430,21 @@ export class StockManager {
                 ventasId: [],
               },
               totalStock: recalculatedTotalStock,
-              // ✅ Aquí sí usar createServerTimestamp() porque NO está en transaction
               lastUpdated: createServerTimestamp(),
             };
 
-            await updateDoc(productRef, { variants: variants });
+            await updateDoc(productRef, { variants });
           }
         }
-      } else {
-        await this.updateStockRealReducir(
-          stockReference,
-          result.compraIdToUpdate,
-          cantidad,
-          ventaId
-        );
       }
+
+      // No actualizar el documento de stock aquí a menos que sea necesario
+      // await this.updateStockRealReducir(
+      //   stockReference,
+      //   result.compraIdToUpdate,
+      //   cantidad,
+      //   ventaId
+      // );
 
       return result;
     } catch (error) {
