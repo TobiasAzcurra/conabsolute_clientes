@@ -176,38 +176,123 @@ const DetailCard = () => {
   }, [availableOptions]);
 
   useEffect(() => {
+    // console.log("🔄 ===== INICIO useEffect VARIANTE =====");
+
+    // Verificar si el usuario ha hecho alguna selección
     const hasUserSelections = Object.values(selectedVariants).some(
       (value) => value !== null && value !== undefined && value !== ""
     );
 
-    if (!hasUserSelections && Object.keys(variantStats).length === 0) {
+    // console.log("👤 hasUserSelections:", hasUserSelections);
+    // console.log("🎨 selectedVariants:", selectedVariants);
+    // console.log("📊 variantStats:", variantStats);
+
+    // CASO 1: Producto SIN customización (sin atributos)
+    // → Usar variante default directamente
+    if (Object.keys(variantStats).length === 0) {
+      // console.log("✅ CASO 1: Producto SIN customización");
       const defaultVariant =
         displayProduct.variants?.find((v) => v.default) ||
         displayProduct.variants?.[0];
+      // console.log("🎯 Variante default asignada:", defaultVariant);
       setSelectedVariant(defaultVariant || null);
+      // console.log("🔄 ===== FIN useEffect VARIANTE =====\n");
       return;
     }
 
+    // CASO 2: Producto CON customización (tiene atributos)
+    // console.log("✅ CASO 2: Producto CON customización");
+
+    // Si no hay selecciones, no hay variante válida
     if (!hasUserSelections) {
+      // console.log("⚠️ No hay selecciones, selectedVariant = null");
       setSelectedVariant(null);
+      // console.log("🔄 ===== FIN useEffect VARIANTE =====\n");
       return;
     }
+
+    // Obtener todos los atributos requeridos
+    const requiredAttributes = Object.keys(variantStats);
+    // console.log("📋 Atributos requeridos:", requiredAttributes);
+
+    // Verificar que TODOS los atributos requeridos estén seleccionados
+    const allAttributesSelected = requiredAttributes.every((attr) => {
+      const value = selectedVariants[attr];
+      const isSelected = value !== null && value !== undefined && value !== "";
+      // console.log(
+      //   `  🔍 Atributo "${attr}": ${value} → ${isSelected ? "✅" : "❌"}`
+      // );
+      return isSelected;
+    });
+
+    // console.log("✔️ Todos los atributos seleccionados:", allAttributesSelected);
+
+    // Si falta algún atributo, NO hay variante válida
+    if (!allAttributesSelected) {
+      // console.log("⚠️ Faltan atributos, selectedVariant = null");
+      setSelectedVariant(null);
+      // console.log("🔄 ===== FIN useEffect VARIANTE =====\n");
+      return;
+    }
+
+    // Si está todo seleccionado, buscar el match exacto
+    // console.log("🔍 Buscando match exacto...");
+    // console.log(
+    //   "📦 Total de variantes disponibles:",
+    //   displayProduct.variants?.length
+    // );
+
+    // Mostrar todas las variantes con sus atributos
+    // displayProduct.variants?.forEach((variant, index) => {
+    //   console.log(`  Variante ${index}:`, {
+    //     id: variant.id,
+    //     name: variant.name,
+    //     attributes: variant.attributes,
+    //     default: variant.default,
+    //   });
+    // });
 
     const matched = displayProduct.variants.find((variant) => {
-      return Object.entries(selectedVariants).every(([key, value]) => {
-        if (!value) return false;
+      // console.log(
+      //   `\n  🎯 Comparando con variante: ${variant.name || variant.id}`
+      // );
+      // console.log(`     Atributos de la variante:`, variant.attributes);
+
+      const result = Object.entries(selectedVariants).every(([key, value]) => {
+        if (!value) {
+          // console.log(`     ❌ ${key}: valor vacío`);
+          return false;
+        }
 
         const attributeKey = Object.keys(variant.attributes || {}).find(
           (attrKey) => attrKey.toLowerCase() === key.toLowerCase()
         );
+
         const vAttr = attributeKey
           ? variant.attributes[attributeKey]
           : undefined;
-        return vAttr && vAttr.toLowerCase() === value.toLowerCase();
+        const matches = vAttr && vAttr.toLowerCase() === value.toLowerCase();
+
+        // console.log(
+        //   `     ${
+        //     matches ? "✅" : "❌"
+        //   } ${key}: "${value}" vs "${vAttr}" (key: ${attributeKey})`
+        // );
+
+        return matches;
       });
+
+      // console.log(`     Resultado: ${result ? "✅ MATCH!" : "❌ No match"}`);
+      return result;
     });
+
+    // console.log(
+    //   "\n🎯 Variante matched final:",
+    //   matched ? matched.name || matched.id : "null"
+    // );
     setSelectedVariant(matched || null);
-  }, [selectedVariants, displayProduct.variants, variantStats]);
+    // console.log("🔄 ===== FIN useEffect VARIANTE =====\n");
+  }, [selectedVariants, variantStats, displayProduct.variants]);
 
   // Resetear modifier selections cuando cambia la variante
   useEffect(() => {
@@ -524,6 +609,25 @@ const DetailCard = () => {
     }-${modifiersKey}`;
   }, [displayProduct.id, selectedVariant?.id, modifierSelections.selections]);
 
+  // 🔍 DEBUG: Logear lo que se agrega al carrito
+  // useEffect(() => {
+  //   console.log("════════════════════════════════════");
+  //   console.log("📦 PRODUCTO PARA AGREGAR AL CARRITO:");
+  //   console.log("════════════════════════════════════");
+  //   console.log("✅ Variante seleccionada:", selectedVariant);
+  //   console.log("🎨 Selecciones del usuario:", selectedVariants);
+  //   console.log("💰 Precio total:", totalPrice);
+  //   console.log("🚫 Botón deshabilitado:", shouldDisable);
+  //   console.log("📤 Objeto productToSend:", productToSend);
+  //   console.log("════════════════════════════════════\n");
+  // }, [
+  //   selectedVariant,
+  //   selectedVariants,
+  //   totalPrice,
+  //   shouldDisable,
+  //   productToSend,
+  // ]);
+
   return (
     <div className="overflow-x-hidden">
       <Toast toasts={toasts} onRemove={removeToast} />
@@ -788,9 +892,9 @@ const DetailCard = () => {
                             textStyle = "text-red-300";
                             cursorStyle = "cursor-not-allowed";
                           } else if (!isCompatible) {
-                            borderStyle = "border-gray-300 border-dashed";
-                            backgroundStyle = "bg-gray-50";
-                            textStyle = "text-gray-400";
+                            borderStyle = "border-yellow-200 border-dashed";
+                            backgroundStyle = "bg-yellow-50";
+                            textStyle = "text-yellow-300";
                           } else {
                             backgroundStyle = "bg-gray-50";
                             textStyle = "text-gray-400";

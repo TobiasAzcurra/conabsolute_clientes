@@ -17,6 +17,22 @@ export const createServerTimestamp = () => {
 };
 
 /**
+ * Crea un timestamp del cliente (UTC desde el dispositivo)
+ * ⚠️ USAR SOLO cuando serverTimestamp() no funciona
+ * Casos de uso:
+ * - Transactions que actualizan arrays (limitación de Firestore)
+ * - Cuando necesitas el valor inmediato del timestamp
+ *
+ * Nota: Depende del reloj del dispositivo, puede tener desfase de milisegundos
+ * vs serverTimestamp(), pero es aceptable para trazabilidad de stock.
+ *
+ * @returns {Timestamp} Firestore Timestamp generado en el cliente
+ */
+export const createClientTimestamp = () => {
+  return Timestamp.now();
+};
+
+/**
  * Crea un timestamp a partir de una fecha/hora específica
  * Usar para: delays, reservas, fechas futuras calculadas en el cliente
  * @param {Date} date - Fecha a convertir

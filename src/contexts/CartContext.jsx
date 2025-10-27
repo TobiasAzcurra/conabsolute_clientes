@@ -37,7 +37,7 @@ export const CartProvider = ({ children }) => {
       const saved = localStorage.getItem("cartItems");
       return saved ? JSON.parse(saved) : {};
     } catch (error) {
-      console.error("Error loading cart from localStorage:", error);
+      // console.error("Error loading cart from localStorage:", error);
       return {};
     }
   });
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
     try {
       localStorage.setItem("cartItems", JSON.stringify(cartItems));
     } catch (error) {
-      console.error("Error saving cart to localStorage:", error);
+      // console.error("Error saving cart to localStorage:", error);
     }
   }, [cartItems]);
 
@@ -68,12 +68,12 @@ export const CartProvider = ({ children }) => {
   const cartArray = Object.values(cartItems);
 
   const addToCart = (item) => {
-    console.log("➕ addToCart llamado con:", {
-      productId: item.productId,
-      variantId: item.variantId,
-      modifierSelections: item.modifierSelections,
-      quantity: item.quantity,
-    });
+    // console.log("➕ addToCart llamado con:", {
+    //   productId: item.productId,
+    //   variantId: item.variantId,
+    //   modifierSelections: item.modifierSelections,
+    //   quantity: item.quantity,
+    // });
 
     const cartItemId = generateCartItemId(
       item.productId,
@@ -85,12 +85,12 @@ export const CartProvider = ({ children }) => {
       const existingItem = prevCart[cartItemId];
 
       if (existingItem) {
-        console.log("✅ Item existente encontrado, sumando cantidad:", {
-          cartItemId,
-          cantidadPrevia: existingItem.quantity,
-          cantidadASumar: item.quantity,
-          cantidadFinal: existingItem.quantity + item.quantity,
-        });
+        // console.log("✅ Item existente encontrado, sumando cantidad:", {
+        //   cartItemId,
+        //   cantidadPrevia: existingItem.quantity,
+        //   cantidadASumar: item.quantity,
+        //   cantidadFinal: existingItem.quantity + item.quantity,
+        // });
         return {
           ...prevCart,
           [cartItemId]: {
@@ -99,12 +99,12 @@ export const CartProvider = ({ children }) => {
           },
         };
       } else {
-        console.log("🆕 Item nuevo, agregando al carrito:", {
-          cartItemId,
-          productName: item.productName,
-          variantName: item.variantName,
-          quantity: item.quantity,
-        });
+        // console.log("🆕 Item nuevo, agregando al carrito:", {
+        //   cartItemId,
+        //   productName: item.productName,
+        //   variantName: item.variantName,
+        //   quantity: item.quantity,
+        // });
         return {
           ...prevCart,
           [cartItemId]: {
@@ -264,13 +264,13 @@ export const createCartItem = (
   selectedVariant = null,
   quantity = 1
 ) => {
-  console.log("🏗️ createCartItem llamado:", {
-    productId: product.id,
-    productName: product.name,
-    variantId: selectedVariant?.id,
-    quantity,
-    modifierSelections: product.modifierSelections,
-  });
+  // console.log("🏗️ createCartItem llamado:", {
+  //   productId: product.id,
+  //   productName: product.name,
+  //   variantId: selectedVariant?.id,
+  //   quantity,
+  //   modifierSelections: product.modifierSelections,
+  // });
 
   const variant =
     selectedVariant ||
@@ -281,7 +281,7 @@ export const createCartItem = (
     additionalPrice: product.modifiersPrice || 0,
   });
 
-  console.log("💰 createCartItem - Usando priceCalculator:", priceBreakdown);
+  // console.log("💰 createCartItem - Usando priceCalculator:", priceBreakdown);
 
   const getProductImage = () => {
     if (!product.img) return "";
@@ -320,12 +320,12 @@ export const createCartItem = (
     cartItem.modifierSelections
   );
 
-  console.log("✨ Cart Item creado:", {
-    id: cartItem.id,
-    productName: cartItem.productName,
-    variantName: cartItem.variantName,
-    priceBreakdown: priceBreakdown,
-  });
+  // console.log("✨ Cart Item creado:", {
+  //   id: cartItem.id,
+  //   productName: cartItem.productName,
+  //   variantName: cartItem.variantName,
+  //   priceBreakdown: priceBreakdown,
+  // });
 
   return cartItem;
 };
