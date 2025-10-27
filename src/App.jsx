@@ -1,17 +1,23 @@
-import { BrowserRouter } from 'react-router-dom';
-import AppRouter from './Router';
-import { HelmetProvider } from 'react-helmet-async';
-import { ClientProvider } from './contexts/ClientContext';
-import './fontAwesome';
+import { BrowserRouter } from "react-router-dom";
+import AppRouter from "./Router";
+import { HelmetProvider } from "react-helmet-async";
+import { ClientProvider } from "./contexts/ClientContext";
+import { CartProvider } from "./contexts/CartContext";
+import "./fontAwesome";
+import ThemeProvider from "./components/ThemeProvider";
 
 function App() {
   return (
     <BrowserRouter>
-      <HelmetProvider>
-        <ClientProvider>
-          <AppRouter />
-        </ClientProvider>
-      </HelmetProvider>
+      <ClientProvider>
+        <HelmetProvider>
+          <ThemeProvider>
+            <CartProvider>
+              <AppRouter />
+            </CartProvider>
+          </ThemeProvider>
+        </HelmetProvider>
+      </ClientProvider>
     </BrowserRouter>
   );
 }

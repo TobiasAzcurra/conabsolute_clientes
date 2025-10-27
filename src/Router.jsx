@@ -7,16 +7,13 @@ function NavigateConabsolute() {
     window.location.href = "https://conabsolute.com/";
   }, []);
 
-  return <div>Redirigiendo...</div>;
+  return <div></div>;
 }
 
 const AppRouter = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<NavigateConabsolute />}
-      />
+      <Route path="/" element={<NavigateConabsolute />} />
 
       {/* <Route
         path="/:slugEmpresa/:slugSucursal/admin/agregar-producto"

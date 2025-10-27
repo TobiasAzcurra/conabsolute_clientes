@@ -1,28 +1,24 @@
+// CartCard.jsx - Con display de modifier selections e imagen cuadrada
 import React, { useState, useEffect } from "react";
-import { updateOrderItemQuantity } from "../../../firebase/orders/updateOrderItem";
 import { handleConfirmChanges } from "../../../firebase/orders/confirmChanges";
 import currencyFormat from "../../../helpers/currencyFormat";
+import {
+  calculateItemPrice,
+  calculateItemTotal,
+} from "../../../helpers/priceCalculator";
 import QuickAddToCart from "../card/quickAddToCart";
-import LoadingPoints from "../../LoadingPoints";
 import { getImageSrc } from "../../../helpers/getImageSrc";
 
-const CartCard = ({
-  item,
-  index,
-  getDefaultImage,
-  decrementQuantity,
-  isPedidoComponente,
-  incrementQuantity,
-  deleteItem,
-  currentOrder = null,
-  readOnly = false,
-}) => {
-  const { name, price, quantity, category, img, toppings, extra } = item;
+const capitalizeWords = (str) => {
+  return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
+const CartCard = ({ item, index, isPedidoComponente, currentOrder = null }) => {
+  const { name, quantity, category, img, extra } = item;
   const isConfirmed = item.isConfirmed || false;
   const [isUpdating, setIsUpdating] = useState(false);
   const [countdown, setCountdown] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
@@ -48,23 +44,6 @@ const CartCard = ({
     }
   };
 
-  const handleDelete = async () => {
-    if (!currentOrder || isDeleting) return;
-    setIsDeleting(true);
-    try {
-      await updateOrderItemQuantity(
-        currentOrder.id,
-        currentOrder.fecha,
-        index,
-        0
-      );
-    } catch (error) {
-      console.error("❌ Error al eliminar el producto:", error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   useEffect(() => {
     if (extra && !isConfirmed && currentOrder?.onEditByUser) {
       setCountdown(10);
@@ -78,213 +57,173 @@ const CartCard = ({
       item.extra === undefined ||
       (extra === true && isConfirmed));
 
-  const capitalizeWords = (str) => {
-    if (!str) return "";
-    return str.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-
-  const formatToppings = (toppingsArray) => {
-    if (
-      !toppingsArray ||
-      !Array.isArray(toppingsArray) ||
-      toppingsArray.length === 0
-    )
-      return "";
-    const names = toppingsArray
-      .map((topping) => {
-        if (typeof topping === "string") return capitalizeWords(topping);
-        return topping && typeof topping === "object" && topping.name
-          ? capitalizeWords(topping.name)
-          : "";
-      })
-      .filter((name) => name);
-
-    if (names.length === 0) return "";
-    if (names.length === 1) return names[0];
-    if (names.length === 2) return `${names[0]} y ${names[1]}`;
-    const last = names.pop();
-    return `${names.join(", ")} y ${last}`;
-  };
-
-  const calculateTotalPrice = () => {
-    const toppingsTotal =
-      toppings && Array.isArray(toppings)
-        ? toppings.reduce((acc, topping) => {
-            if (typeof topping === "object" && topping?.price) {
-              return acc + topping.price;
-            }
-            return acc;
-          }, 0)
-        : 0;
-    return (price || 0) + toppingsTotal;
-  };
-
-  const totalPrice = calculateTotalPrice();
+  // Usar helpers centralizados para calcular precios
+  const unitPrice = calculateItemPrice(item);
+  const totalPrice = calculateItemTotal(item, quantity);
 
   const imageSrc = getImageSrc(item || img);
 
-  console.log(name, "acaaaa");
+  // Función para obtener las opciones seleccionadas con sus nombres y precios
+  const getSelectedModifiers = () => {
+    if (!item.modifierSelections || !item.variants?.[0]?.modifierGroups) {
+      return [];
+    }
+
+    const variant = item.variants[0];
+    const selectedGroups = [];
+
+    variant.modifierGroups.forEach((group) => {
+      const selectedOptionIds = item.modifierSelections[group.id] || [];
+
+      if (selectedOptionIds.length > 0) {
+        const selectedOptions = selectedOptionIds
+          .map((optionId) => {
+            const option = group.options.find((opt) => opt.id === optionId);
+            return option || null;
+          })
+          .filter(Boolean);
+
+        if (selectedOptions.length > 0) {
+          selectedGroups.push({
+            groupLabel: group.label,
+            options: selectedOptions,
+          });
+        }
+      }
+    });
+
+    return selectedGroups;
+  };
+
+  const selectedModifiers = getSelectedModifiers();
 
   return (
     <div className="relative">
       <div
-        className={`flex flex-row border bg-gray-50 w-full h-[250px] border-black border-opacity-20 rounded-3xl md:w-[450px] ${
-          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50 " : ""
+        className={`flex flex-row bg-gray-50 w-full h-fit shadow-lg  shadow-gray-200 rounded-3xl md:w-[450px] ${
+          isDisabled ? "blur-sm cursor-not-allowed bg-gray-50" : ""
         }`}
       >
-        <div className="w-1/3 bg-gradient-to-b flex items-center from-gray-100 via-gray-100 to-gray-300 rounded-l-3xl overflow-hidden relative">
-          {imageError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
-              <div className="text-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-8 w-8 text-gray-500 mx-auto mb-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <span className="text-gray-500 text-xs">Sin imagen</span>
+        {/* img */}
+        <div className="pl-2 py-2">
+          <div className="w-32 h-32 bg-gradient-to-b flex items-center justify-center from-gray-100 via-gray-100 to-gray-300 rounded-2xl  overflow-hidden relative flex-shrink-0">
+            {imageError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
+                <div className="text-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 text-gray-400 mx-auto mb-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="text-gray-400 font-light text-xs">
+                    Sin imagen
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <img
-            src={imageSrc}
-            alt={name || "Product"}
-            className={`h-[350px] object-cover transition-opacity duration-300 ${
-              imageError ? "opacity-0" : "opacity-100"
-            }`}
-            onLoad={() => {
-              setImageError(false);
-            }}
-            onError={(e) => {
-              setImageError(true);
-            }}
-          />
-        </div>
-
-        <div className="flex flex-col w-2/3 justify-center px-4 pt-2 pb-4">
-          <div>
-            <h3
-              className={`text-2xl font-bold mb-1.5 ${
-                showConfirmation ? "truncate leading-none" : "leading-6"
+            <img
+              src={imageSrc}
+              alt={name || "Product"}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${
+                imageError ? "opacity-0" : "opacity-100"
               }`}
-            >
-              {name.charAt(0).toUpperCase() + name.slice(1).toLowerCase()}
-            </h3>
-            {toppings && toppings.length > 0 && (
-              <p className="text-xs mb-4 font-medium">
-                Toppings: {formatToppings(toppings)}.
+              onLoad={() => {
+                setImageError(false);
+              }}
+              onError={(e) => {
+                setImageError(true);
+              }}
+            />
+          </div>
+        </div>
+        {/* txt */}
+        <div className="flex flex-col flex-1 justify-center p-4 gap-4">
+          {/* header */}
+          <div>
+            <h3 className={`text-base font-bold leading-6`}>{name}</h3>
+            {item.variantName === "Estándar" ? null : (
+              <p
+                className={`text-xs font-light text-gray-400 ${
+                  showConfirmation ? "truncate leading-none" : "leading-6"
+                }`}
+              >
+                {item.variantName.charAt(0).toUpperCase() +
+                  item.variantName.slice(1).toLowerCase()}
               </p>
             )}
-          </div>
-          <div className="flex flex-col items-start">
-            <p className="text-2xl font-bold mb-4 mt-[-5px]">
-              {currencyFormat(totalPrice * quantity)}
-            </p>
-            <div className="flex flex-col w-full gap-2">
-              <QuickAddToCart
-                product={{
-                  ...item,
-                  name: item.name || item.data?.name || "Producto sin nombre",
-                  price: item.price || item.data?.price || 0,
-                  img: imageSrc,
-                  category:
-                    item.category ||
-                    item.categoria ||
-                    item.data?.categoria ||
-                    "default",
-                  type: item.type || "regular",
-                  data: item.data || item,
-                }}
-                isOrderItem={!!currentOrder}
-                isPedidoComponente={true}
-                initialOrderQuantity={quantity}
-                onOrderQuantityChange={
-                  currentOrder ? handleAutoConfirm : undefined
-                }
-                isUpdating={isUpdating}
-                disabled={isDisabled}
-                animateFrom="left"
-              />
 
-              {showConfirmation && countdown !== null && (
-                <div className="flex flex-col mt-2 items-center w-full">
-                  <p className="text-sm text-gray-600 font-medium">
-                    Tenés {countdown} segundos para cancelar este producto
-                  </p>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div
-                      className="bg-black h-2 rounded-full transition-all duration-1000"
-                      style={{ width: `${(countdown / 10) * 100}%` }}
-                    />
+            {/* Mostrar modifier selections */}
+            {selectedModifiers.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {selectedModifiers.map((group, groupIdx) => (
+                  <div key={groupIdx} className="text-xs">
+                    <span className="font-light text-gray-500">
+                      {group.groupLabel}:{" "}
+                    </span>
+                    <span className="font-light text-gray-600">
+                      {group.options.map((option, optIdx) => (
+                        <span key={option.id}>
+                          {capitalizeWords(option.name)}
+                          {option.price > 0 && (
+                            <span className="text-gray-400">
+                              {" "}
+                              (+${option.price})
+                            </span>
+                          )}
+                          {optIdx < group.options.length - 1 && ", "}
+                        </span>
+                      ))}
+                    </span>
                   </div>
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className={`mt-2 bg-gray-300 text-red-600 font-coolvetica text-center justify-center w-full h-10 flex items-center text-sm rounded-xl px-4 font-bold ${
-                      isDeleting
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1">
-                      {isDeleting ? (
-                        <LoadingPoints />
-                      ) : (
-                        <>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="h-4 w-4"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          ELIMINAR
-                        </>
-                      )}
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* quantity */}
+          <div className="flex flex-col items-start">
+            <QuickAddToCart
+              product={{
+                ...item,
+                id: item.productId,
+                variantId: item.variantId,
+                name: item.name || item.data?.name || "Producto sin nombre",
+                price: item.price || item.data?.price || 0,
+                img: imageSrc,
+                category:
+                  item.category ||
+                  item.categoria ||
+                  item.data?.categoria ||
+                  "default",
+                type: item.type || "regular",
+                data: item.data || item,
+              }}
+              isOrderItem={!!currentOrder}
+              isPedidoComponente={true}
+              initialOrderQuantity={quantity}
+              onOrderQuantityChange={
+                currentOrder ? handleAutoConfirm : undefined
+              }
+              isUpdating={isUpdating}
+              disabled={isDisabled}
+              animateFrom="left"
+            />
+            <p className="text-xs font-light text-gray-400 mt-2">
+              {currencyFormat(totalPrice)}
+            </p>
           </div>
         </div>
       </div>
-
-      {isDisabled && (
-        <div className="absolute border-2 border-black inset-0 flex items-center justify-center rounded-3xl bg-black bg-opacity-40">
-          <div className="flex flex-col items-center space-y-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="white"
-              className="h-12 w-12"
-            >
-              <path
-                fillRule="evenodd"
-                d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="text-white font-bold text-2xl">
-              Ya cocinándose
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

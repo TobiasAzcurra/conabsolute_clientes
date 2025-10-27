@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import {
   APIProvider,
   AdvancedMarker,
@@ -6,9 +6,7 @@ import {
   useMap,
   useMapsLibrary,
   useAdvancedMarkerRef,
-} from '@vis.gl/react-google-maps';
-import Swal from 'sweetalert2';
-import { ErrorMessage } from 'formik';
+} from "@vis.gl/react-google-maps";
 
 const position = { lat: -33.117142, lng: -64.347756 };
 
@@ -32,29 +30,13 @@ export const MapDirection = ({
 
       const formattedGoogleMapsUrl =
         `https://www.google.com/maps?q=${lat},${lng}`.replace(
-          'https://',
-          'https ://'
+          "https://",
+          "https ://"
         );
       setUrl(googleMapsUrl);
-      setFieldValue('address', formattedAddress); // Actualiza la dirección en Formik
+      setFieldValue("address", formattedAddress); // Actualiza la dirección en Formik
     }
   }, [selectedPlace]);
-
-  const handleValidateLocation = () => {
-    setValidarUbi(true);
-    Swal.fire({
-      title: '¡Ubicación Validada!',
-      text: 'La ubicación ha sido validada con éxito.',
-      icon: 'success',
-      confirmButtonText: 'OK',
-      timer: 1200, // Tiempo en milisegundos (3000 ms = 3 segundos)
-      timerProgressBar: true, // Muestra una barra de progreso para el temporizador
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer);
-        toast.addEventListener('mouseleave', Swal.resumeTimer);
-      },
-    });
-  };
 
   return (
     <APIProvider
@@ -62,24 +44,22 @@ export const MapDirection = ({
       solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
     >
       <div
-        className="w-full"
+        className="w-full px-2 pt-2 rounded-t-[45px] "
         style={{
-          height: '25vh',
-          borderTopLeftRadius: '24px',
-          borderTopRightRadius: '24px',
-          overflow: 'hidden', // Para asegurar que el contenido respete los bordes
-          maskImage: 'radial-gradient(circle, white, black)', // Para ajustar el canvas interno
+          aspectRatio: "1/1",
+          overflow: "hidden",
+          maskImage: "radial-gradient(circle, white, black)",
         }}
       >
         <Map
           style={{
-            height: '100%',
-            width: '100%',
+            height: "100%",
+            width: "100%",
           }}
-          mapId={'bf51a910020fa25a'}
+          mapId={"bf51a910020fa25a"}
           defaultZoom={13}
           defaultCenter={position}
-          gestureHandling={'greedy'}
+          gestureHandling={"greedy"}
           disableDefaultUI={true}
         >
           <AdvancedMarker
@@ -99,14 +79,6 @@ export const MapDirection = ({
       <div className="m">
         <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
       </div>
-
-      {/* <button
-				className="w-full md:w-6/12 flex flex-row justify-center mt-[50px] text-xs text-white font-bold font-coolvetica p-2 uppercase bg-red-500 focus:outline-none hover:bg-black hover:text-red-500"
-				onClick={() => setNoEncontre(true)}
-				type="button"
-			>
-				¿No encontras tu direccion?
-			</button> */}
     </APIProvider>
   );
 };
@@ -135,11 +107,11 @@ const MapHandler = ({ place, marker, setPlace }) => {
     };
 
     // Use Google Maps event listener directly
-    google.maps.event.addListener(marker, 'dragend', handleDragEnd);
+    google.maps.event.addListener(marker, "dragend", handleDragEnd);
 
     // Cleanup function to remove the listener when the component unmounts
     return () => {
-      google.maps.event.clearListeners(marker, 'dragend');
+      google.maps.event.clearListeners(marker, "dragend");
     };
   }, [map, place, marker, setPlace]);
 
@@ -149,8 +121,8 @@ const MapHandler = ({ place, marker, setPlace }) => {
 const PlaceAutocomplete = ({ onPlaceSelect }) => {
   const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
   const inputRef = useRef(null);
-  const places = useMapsLibrary('places');
-  const [inputValue, setInputValue] = useState(''); // Estado para el valor del input
+  const places = useMapsLibrary("places");
+  const [inputValue, setInputValue] = useState(""); // Estado para el valor del input
 
   useEffect(() => {
     if (!places || !inputRef.current) return;
@@ -163,7 +135,7 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
       west: position.lng - 0.2,
     };
     const options = {
-      fields: ['geometry', 'name', 'formatted_address'],
+      fields: ["geometry", "name", "formatted_address"],
       bounds: defaultBounds,
       strictBounds: true,
     };
@@ -175,7 +147,7 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
   useEffect(() => {
     if (!placeAutocomplete) return;
 
-    placeAutocomplete.addListener('place_changed', () => {
+    placeAutocomplete.addListener("place_changed", () => {
       const place = placeAutocomplete.getPlace();
       if (place.formatted_address) {
         setInputValue(place.formatted_address); // 🔥 Actualizar el texto mostrado
@@ -189,12 +161,12 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
   };
 
   return (
-    <div className="flex flex-row pl-3 items-center ">
+    <div className="flex flex-row pl-4 items-center ">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="currentColor"
-        className="h-6"
+        className="h-6 text-gray-400"
       >
         <path
           fillRule="evenodd"
@@ -204,13 +176,13 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
       </svg>
       <input
         className={`bg-transparent text-xs font-light h-10 text-black outline-none w-full pl-2 ${
-          inputValue ? 'opacity-100' : 'text-gray-400'
+          inputValue ? "opacity-100" : "text-gray-400"
         }`}
         ref={inputRef}
         value={inputValue}
         onChange={handleInputChange} // Maneja el cambio de valor del input
         placeholder="Escribi tu direccion"
-        style={{ width: '100%', boxSizing: 'border-box' }}
+        style={{ width: "100%", boxSizing: "border-box" }}
       />
     </div>
   );

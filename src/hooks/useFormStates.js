@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { setEnvioExpress } from '../redux/cart/cartSlice';
+// hooks/useFormStates.js - MIGRADO
+import { useState } from "react";
+import { useCart } from "../contexts/CartContext"; // ← NUEVO: Reemplaza Redux
 
 export function useFormStates(expressDeliveryFee) {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -15,12 +15,17 @@ export function useFormStates(expressDeliveryFee) {
     useState(false);
   const [isOpenPaymentMethod, setIsOpenPaymentMethod] = useState(true);
 
-  const dispatch = useDispatch();
+  // ← CAMBIO: Reemplazar Redux con Context
+  // OLD: const dispatch = useDispatch();
+  const { setEnvioExpress } = useCart(); // ← NUEVO
 
   const handleExpressToggle = () => {
     const newValue = !isEnabled;
     setIsEnabled(newValue);
-    dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
+
+    // ← CAMBIO: Usar función del Context en lugar de dispatch
+    // OLD: dispatch(setEnvioExpress(newValue ? expressDeliveryFee : 0));
+    setEnvioExpress(newValue ? expressDeliveryFee : 0); // ← NUEVO
   };
 
   return {

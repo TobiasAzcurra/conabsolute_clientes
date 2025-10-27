@@ -1,8 +1,7 @@
-import { ErrorMessage, Field } from "formik";
+import { ErrorMessage } from "formik";
 import MyTextInput from "./MyTextInput";
 import { MapDirection } from "./MapDirection";
 import AppleErrorMessage from "./AppleErrorMessage";
-import TimeSelector from "./TimeSelector";
 
 const AddressInputs = ({
   values,
@@ -10,35 +9,30 @@ const AddressInputs = ({
   setUrl,
   setValidarUbi,
   setNoEncontre,
-  cart, // Necesitamos agregar cart como prop
+  cart,
+  discountHook,
 }) => {
-  // Función para validar el cupón (misma lógica que en validations.js)
-  const validateCoupon = (couponCode, cart) => {
-    if (!couponCode || !couponCode.trim()) return false;
-
-    const activeCoupons = [
-      "APMCONKINGCAKES",
-      "APMCONANHELO",
-      "APMCONPROVIMARK",
-      "APMCONLATABLITA",
-    ];
-
-    const couponCodeUpper = couponCode.trim().toUpperCase();
-    const hasYerba = cart.some(
-      (item) => item.category?.toLowerCase() === "yerba"
-    );
-
-    // Solo mostrar el tilde si es un cupón activo Y no hay yerba
-    return activeCoupons.includes(couponCodeUpper) && !hasYerba;
+  const handleCouponChange = (e) => {
+    const newCode = e.target.value;
+    setFieldValue("couponCode", newCode);
+    discountHook.setCode(newCode);
   };
 
-  const isCouponValid = validateCoupon(values.couponCode, cart || []);
+  const showCheckmark =
+    discountHook.validation.isValid &&
+    discountHook.validation.checked &&
+    !discountHook.isValidating;
+
+  const showError =
+    !discountHook.validation.isValid &&
+    discountHook.validation.checked &&
+    !discountHook.isValidating &&
+    discountHook.code.length >= 3;
 
   return (
-    <div className="w-full items-center rounded-3xl border-2 border-black transition-all duration-300 overflow-hidden">
+    <div className="w-full items-center rounded-3xl bg-gray-50 shadow-gray-200 shadow-lg transition-all duration-300 overflow-hidden">
       {values.deliveryMethod === "delivery" && (
         <>
-          {/* Mapa y dirección */}
           <MapDirection
             setUrl={setUrl}
             setValidarUbi={setValidarUbi}
@@ -47,13 +41,12 @@ const AddressInputs = ({
           />
           <ErrorMessage name="address" component={AppleErrorMessage} />
 
-          {/* Campo referencias */}
-          <div className="flex flex-row border-t border-black border-opacity-20 gap-2 pl-3 h-10 items-center">
+          <div className="flex flex-row gap-2 pl-4 h-10 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className="h-6"
+              className="h-6 text-gray-400"
             >
               <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
             </svg>
@@ -68,14 +61,13 @@ const AddressInputs = ({
         </>
       )}
 
-      {/* Aclaraciones */}
-      <div className="flex flex-row justify-between px-3 h-auto items-start border-t border-black border-opacity-20">
+      <div className="flex flex-row justify-between px-4 h-auto items-start ">
         <div className="flex flex-row w-full items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="h-6"
+            className="h-6 text-gray-400"
           >
             <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32L19.513 8.2Z" />
           </svg>
@@ -90,14 +82,13 @@ const AddressInputs = ({
         </div>
       </div>
 
-      {/* Teléfono */}
-      <div className="flex flex-col justify-between h-auto items-start border-t border-black border-opacity-20">
-        <div className="flex flex-row items-center px-3 gap-2 w-full">
+      <div className="flex flex-col justify-between h-auto items-start ">
+        <div className="flex flex-row items-center px-4 gap-2 w-full">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="h-6"
+            className="h-6 text-gray-400"
           >
             <path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z" />
             <path
@@ -123,13 +114,13 @@ const AddressInputs = ({
       </div>
 
       {/* Cupón de descuento */}
-      <div className="flex flex-col justify-between h-auto items-start border-t border-black border-opacity-20">
-        <div className="flex flex-row items-center px-3 gap-2 w-full relative">
+      <div className="flex flex-col justify-between h-auto items-start">
+        <div className="flex flex-row items-center px-4 gap-2 w-full relative">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="h-6"
+            className="h-6 text-gray-400"
           >
             <path
               fillRule="evenodd"
@@ -137,16 +128,23 @@ const AddressInputs = ({
               clipRule="evenodd"
             />
           </svg>
-          <MyTextInput
+          <input
             name="couponCode"
             type="text"
+            value={discountHook.code}
+            onChange={handleCouponChange}
             placeholder="¿Tenés un código de descuento?"
             autoComplete="off"
             className="bg-transparent text-xs font-light px-0 h-10 text-opacity-20 outline-none w-full pr-8"
           />
 
-          {/* Tilde verde cuando el cupón es válido */}
-          {isCouponValid && (
+          {discountHook.isValidating && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+            </div>
+          )}
+
+          {showCheckmark && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <svg
                 className="w-5 h-5 text-green-500"
@@ -163,24 +161,13 @@ const AddressInputs = ({
           )}
         </div>
 
-        <div className="w-full">
-          <ErrorMessage
-            name="couponCode"
-            render={(msg) => <AppleErrorMessage>{msg}</AppleErrorMessage>}
-          />
-        </div>
+        {/* ✅ USAR AppleErrorMessage en lugar de <p> */}
+        {showError && (
+          <AppleErrorMessage>
+            {discountHook.validation.message}
+          </AppleErrorMessage>
+        )}
       </div>
-
-      {/* Selector de hora: ¿Quieres reservar para más tarde? */}
-      {/* {values.deliveryMethod === 'delivery' && (
-        <div className="border-t border-black border-opacity-20 px-3">
-          <TimeSelector
-            selectedHora={values.hora}
-            handleChange={() => {}}
-            setFieldValue={setFieldValue}
-          />
-        </div>
-      )} */}
     </div>
   );
 };

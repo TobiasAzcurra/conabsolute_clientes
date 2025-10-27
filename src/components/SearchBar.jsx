@@ -1,17 +1,17 @@
-import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useClient } from "../contexts/ClientContext";
+import React, { useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useClient } from '../contexts/ClientContext';
+import { cleanPhoneNumber } from '../firebase/utils/phoneUtils';
 
-const SearchBar = ({
-  phoneNumber,
-  setPhoneNumber,
-  showSuggestion,
-  setShowSuggestion,
-  previousPhone,
-  onSuggestionClick,
-}) => {
+const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   const { slugEmpresa, slugSucursal } = useClient();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (previousPhone && !phoneNumber) {
+      setPhoneNumber(previousPhone);
+    }
+  }, [previousPhone]);
 
   const handleSearch = () => {
     if (phoneNumber.trim().length < 8) return;
@@ -21,20 +21,18 @@ const SearchBar = ({
   };
 
   return (
-    <div className="fixed z-[60] top-4 right-4 left-4 w-auto h-10 rounded-full backdrop-blur-sm border border-gray-100 bg-opacity-60 flex items-center shadow-black">
+    <div className="fixed z-50 bottom-4 right-4 left-4 h-10 rounded-full bg-gray-50 flex items-center">
       <input
         type="tel"
         value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-        onFocus={() => previousPhone && !phoneNumber && setShowSuggestion(true)}
-        onBlur={() => setTimeout(() => setShowSuggestion(false), 300)}
-        placeholder="Busca tu pedido con tu telefono ej: 3585168275"
-        className="text-gray-100 font-light px-4 placeholder:text-gray-100 font-coolvetica text-xs bg-transparent outline-none w-full"
+        onChange={(e) => setPhoneNumber(cleanPhoneNumber(e.target.value))}
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        placeholder="Busca tu pedido. Ej: 3585168275"
+        className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-xs bg-transparent outline-none w-full"
       />
       <button
         onClick={handleSearch}
-        className="bg-gray-50  h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
+        className="text-blue-700 h-10 w-20 flex items-center justify-center rounded-r-full rounded-l-none"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -49,17 +47,6 @@ const SearchBar = ({
           />
         </svg>
       </button>
-
-      {showSuggestion && previousPhone && (
-        <div className="absolute left-0 right-0 top-12 h-10 bg-gray-50  shadow-lg rounded-full border border-gray-200 z-50">
-          <button
-            onClick={onSuggestionClick}
-            className="w-full font-bold font-coolvetica font-light text-left px-4 h-10 text-xs flex items-center"
-          >
-            Último: {previousPhone}
-          </button>
-        </div>
-      )}
     </div>
   );
 };

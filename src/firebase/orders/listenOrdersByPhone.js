@@ -5,7 +5,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { app } from '../config';
 
 const db = getFirestore(app);
 
@@ -24,20 +24,24 @@ export const listenOrdersByPhone = (
     'pedidos'
   );
 
+  // CORREGIDO: Usar customer.phone en lugar de telefono
   const pedidosQuery = query(
     pedidosCollectionRef,
-    where('telefono', '==', phoneNumber)
+    where('customer.phone', '==', phoneNumber)
   );
+
   return onSnapshot(
     pedidosQuery,
     (querySnapshot) => {
       const pedidos = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        if (!data.canceled) {
+        // CORREGIDO: status !== 'Cancelled' en lugar de !data.canceled
+        if (data.status !== 'Cancelled') {
           pedidos.push({ id: doc.id, ...data });
         }
       });
+
       callback(pedidos);
     },
     (error) => {

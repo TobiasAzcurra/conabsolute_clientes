@@ -1,5 +1,5 @@
 import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
-import { app } from '../config/firebaseConfig';
+import { app } from '../config';
 
 const db = getFirestore(app);
 
@@ -18,7 +18,9 @@ export const listenOrderById = (empresaId, sucursalId, orderId, callback) => {
     pedidoDocRef,
     (docSnapshot) => {
       if (docSnapshot.exists()) {
-        callback(docSnapshot.data());
+        const data = docSnapshot.data();
+        console.log(`📦 Pedido ${orderId} encontrado. Status: ${data.status}`);
+        callback({ id: docSnapshot.id, ...data });
       } else {
         console.warn(`⚠️ Pedido con ID ${orderId} no encontrado.`);
         callback(null);
@@ -26,6 +28,7 @@ export const listenOrderById = (empresaId, sucursalId, orderId, callback) => {
     },
     (error) => {
       console.error('❌ Error al escuchar el pedido:', error);
+      callback(null);
     }
   );
 };

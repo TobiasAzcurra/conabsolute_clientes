@@ -1,37 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { useClient } from '../contexts/ClientContext';
-import Carrusel from '../components/Carrusel';
-import NavMenu from '../components/NavMenu';
-import FloatingCart from '../components/shopping/FloatingCart';
-import { useSelector } from 'react-redux';
-import SearchBar from '../components/SearchBar';
-import { useLocation } from 'react-router-dom';
+// layouts/ClientLayout.js - MIGRADO + WhatsApp
+import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useClient } from "../contexts/ClientContext";
+import { useCart } from "../contexts/CartContext";
+import Carrusel from "../components/Carrusel";
+import NavMenu from "../components/NavMenu";
+import FloatingCart from "../components/shopping/FloatingCart";
+import SearchBar from "../components/SearchBar";
+import { useLocation } from "react-router-dom";
 
 const ClientLayout = ({ children }) => {
-  const { clientData, clientAssets } = useClient();
+  const { clientData, clientAssets, clientConfig } = useClient(); // ← Agregado clientConfig
+
+  const { cart } = useCart();
 
   const location = useLocation();
   const pathname = location.pathname;
 
   const isProductDetail = /\/menu\/[^/]+\/[^/]+$/.test(pathname);
-  const isCart = pathname.endsWith('/carrito');
-  const isSuccessPage = pathname.includes('/success');
-  const isPedidoPage = pathname.includes('/pedido');
+  const isCart = pathname.endsWith("/carrito");
+  const isSuccessPage = pathname.includes("/success");
+  const isPedidoPage = pathname.includes("/pedido");
 
   const shouldHideHeader =
     isProductDetail || isCart || isSuccessPage || isPedidoPage;
+
   const shouldShowFloatingCart = !isCart && !isSuccessPage && !isPedidoPage;
 
-  const cart = useSelector((state) => state.cartState.cart);
+  const shouldHideSearch = isCart && isSuccessPage && isPedidoPage;
+
   const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [showSuggestion, setShowSuggestion] = useState(false);
-  const [previousPhone, setPreviousPhone] = useState('');
+  const [previousPhone, setPreviousPhone] = useState("");
 
   useEffect(() => {
-    const storedPhone = localStorage.getItem('customerPhone');
+    const storedPhone = localStorage.getItem("customerPhone");
     if (storedPhone) {
       setPreviousPhone(storedPhone);
     }
@@ -42,20 +47,27 @@ const ClientLayout = ({ children }) => {
     setShowSuggestion(false);
   };
 
-  const handleInputFocus = () => {
-    if (previousPhone && !phoneNumber) {
-      setShowSuggestion(true);
-    }
+  // ← NUEVO: Función para abrir WhatsApp
+  const handleContactClick = () => {
+    const phone = clientConfig?.logistics?.phone || "";
+    const msg = "Hola! Tengo una consulta.";
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
+      msg
+    )}`;
+    window.open(whatsappUrl, "_blank");
   };
 
-  const handleInputBlur = () => {
-    setTimeout(() => setShowSuggestion(false), 300);
-  };
+  const paddingBottom =
+    isSuccessPage || isPedidoPage || isCart
+      ? ""
+      : shouldShowFloatingCart && totalQuantity > 0
+      ? "pb-[125px]"
+      : "pb-[75px]";
 
   return (
     <>
       <Helmet>
-        <title>{clientData?.name || 'CONABSOLUTE'}</title>
+        <title>{clientData?.name || "Absolute"}</title>
         {clientAssets?.logo && (
           <link
             rel="icon"
@@ -65,10 +77,39 @@ const ClientLayout = ({ children }) => {
           />
         )}
       </Helmet>
-      <div className="flex flex-col relative ">
+      <div className="flex flex-col relative bg-gray-100 ">
         {!shouldHideHeader && (
           <>
-            <div className="fixed inset-x-0 top-0 z-50 h-10 bg-gradient-to-b from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
+            <div className="relative z-[10]">
+              <Carrusel images={clientAssets?.hero || []} />
+              <div className="top-[280px] inset-0 absolute">
+                <NavMenu />
+              </div>
+            </div>
+          </>
+        )}
+
+        {!shouldHideSearch && shouldShowFloatingCart && (
+          <>
+            <div
+              className={`fixed inset-x-0 bottom-0 z-10 
+            ${totalQuantity > 0 ? "h-[125px]" : "h-[75px]"} 
+            
+            bg-gray-300 bg-opacity-50 
+            pointer-events-none 
+            backdrop-blur-md`}
+            />
+
+            {/* ← CAMBIO: Convertido a botón con onClick */}
+            <button
+              onClick={handleContactClick}
+              className={`bg-gray-300 bg-opacity-50 fixed z-50 ${
+                totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
+              } backdrop-blur-md right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
+            >
+              Contactanos
+            </button>
+
             <SearchBar
               phoneNumber={phoneNumber}
               setPhoneNumber={setPhoneNumber}
@@ -78,25 +119,21 @@ const ClientLayout = ({ children }) => {
               onSuggestionClick={onSuggestionClick}
             />
 
-            <div className="relative z-[10]">
-              <Carrusel images={clientAssets?.hero || []} />
-              <div className="top-[215px] inset-0 absolute">
-                <NavMenu />
-              </div>
-            </div>
+            {shouldShowFloatingCart && totalQuantity > 0 && (
+              <>
+                <FloatingCart totalQuantity={totalQuantity} cart={cart} />
+              </>
+            )}
           </>
         )}
 
-        <div className={`${!shouldHideHeader ? 'mt-[100px]' : ''} ${shouldShowFloatingCart && totalQuantity > 0 ? 'pb-20' : ''} z-[5]`}>
+        <div
+          className={`${
+            !shouldHideHeader ? "mt-[150px]" : ""
+          } ${paddingBottom} z-[5]`}
+        >
           {children}
         </div>
-
-        {shouldShowFloatingCart && totalQuantity > 0 && (
-          <>
-            <div className="fixed inset-x-0 bottom-0 z-40 h-12 bg-gradient-to-t from-black/50 to-transparent pointer-events-none backdrop-blur-sm" />
-            <FloatingCart totalQuantity={totalQuantity} cart={cart} />
-          </>
-        )}
       </div>
     </>
   );
