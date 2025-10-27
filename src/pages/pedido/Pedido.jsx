@@ -1,11 +1,12 @@
-import { useRef, useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
-import StickerCanvas from "../../components/StickerCanvas";
-import LoadingPoints from "../../components/LoadingPoints";
-import { listenOrderById } from "../../firebase/orders/listenOrderById";
-import { listenOrdersByPhone } from "../../firebase/orders/listenOrdersByPhone";
-import { useClient } from "../../contexts/ClientContext";
-import currencyFormat from "../../helpers/currencyFormat";
+import { useRef, useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import StickerCanvas from '../../components/StickerCanvas';
+import LoadingPoints from '../../components/LoadingPoints';
+import { listenOrderById } from '../../firebase/orders/listenOrderById';
+import { listenOrdersByPhone } from '../../firebase/orders/listenOrdersByPhone';
+import { useClient } from '../../contexts/ClientContext';
+import currencyFormat from '../../helpers/currencyFormat';
+import { cleanPhoneNumber } from '../../firebase/utils/phoneUtils';
 
 const Pedido = () => {
   const { empresaId, sucursalId, clientConfig, clientData, clientAssets } =
@@ -14,9 +15,9 @@ const Pedido = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const { orderId } = useParams();
+  const { clientPhone } = useParams();
   const location = useLocation();
-  const [phoneNumber, setPhoneNumber] = useState("");
+
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -25,96 +26,68 @@ const Pedido = () => {
   // Mapeo de estados a UI
   const statusConfig = {
     Pending: {
-      label: "Pendiente de confirmación",
-      color: "text-yellow-600",
+      label: 'Pendiente de confirmación',
+      color: 'text-yellow-600',
       barSteps: 1,
     },
     Confirmed: {
-      label: "Confirmado - En preparación",
-      color: "text-blue-600",
+      label: 'Confirmado - En preparación',
+      color: 'text-blue-600',
       barSteps: 2,
     },
     Ready: {
-      label: "Listo para retirar/entregar",
-      color: "text-green-600",
+      label: 'Listo para retirar/entregar',
+      color: 'text-green-600',
       barSteps: 3,
     },
     Delivered: {
-      label: "En camino...",
-      color: "text-gray-600",
+      label: 'En camino...',
+      color: 'text-gray-600',
       barSteps: 4,
     },
     Cancelled: {
-      label: "Cancelado",
-      color: "text-red-600",
+      label: 'Cancelado',
+      color: 'text-red-600',
       barSteps: 0,
     },
   };
 
   const handleSupportClick = () => {
-    const phone = clientConfig?.logistics?.phone || "";
-    const msg = "Hola! Necesito ayuda con mi pedido.";
+    const phone = cleanPhoneNumber(clientConfig?.logistics?.phone || '');
+    const msg = 'Hola! Necesito ayuda con mi pedido.';
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
       msg
     )}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(whatsappUrl, '_blank');
   };
 
   const handlePaymentClick = (orderTotal, orderPhone) => {
-    const phone = clientConfig?.logistics?.phone || "543584306832";
-    const alias = clientConfig?.logistics?.alias || "AbsoluteHSAS.mp";
-    const nameAlias = clientConfig?.logistics?.nameAlias || "________";
+    const phone = cleanPhoneNumber(
+      clientConfig?.logistics?.phone || '543584306832'
+    );
+    const alias = clientConfig?.logistics?.alias || 'AbsoluteHSAS.mp';
+    const nameAlias = clientConfig?.logistics?.nameAlias || '________';
     const msg = `Hola! Hice un pedido de ${currencyFormat(
       orderTotal
-    )} para el número ${orderPhone}. En breve envío foto del comprobante. Transferencia al alias: ${alias} a nombre de ${nameAlias}`;
+    )} para el número ${cleanPhoneNumber(
+      orderPhone
+    )}. En breve envío foto del comprobante. Transferencia al alias: ${alias} a nombre de ${nameAlias}`;
 
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
       msg
     )}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(whatsappUrl, '_blank');
   };
 
   useEffect(() => {
-    let unsubscribe;
-
-    if (orderId) {
-      // Ver un pedido específico
-      setLoading(true);
-      unsubscribe = listenOrderById(
-        empresaId,
-        sucursalId,
-        orderId,
-        (pedido) => {
-          if (pedido) {
-            setOrder(pedido);
-            setPhoneNumber(pedido.customer?.phone || "");
-          } else {
-            setOrder(null);
-          }
-          setLoading(false);
-        }
-      );
-    } else if (location.state?.phoneNumber) {
-      // Ver pedidos por teléfono desde SuccessPage
-      setPhoneNumber(location.state.phoneNumber);
-    }
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
-  }, [orderId, location.state, empresaId, sucursalId]);
-
-  useEffect(() => {
-    if (!phoneNumber || orderId) return;
-
     const unsubscribe = listenOrdersByPhone(
       empresaId,
       sucursalId,
-      phoneNumber,
+      cleanPhoneNumber(clientPhone),
       (pedidos) => {
         // Filtrar solo pedidos activos (no entregados ni cancelados)
         const activePedidos = pedidos.filter(
-          (p) => p.status !== "Delivered" && p.status !== "Cancelled"
+          (p) => p.status !== 'Delivered' && p.status !== 'Cancelled'
         );
         setOrders(activePedidos);
         setLoading(false);
@@ -122,7 +95,7 @@ const Pedido = () => {
     );
 
     return () => unsubscribe();
-  }, [phoneNumber, orderId, empresaId, sucursalId]);
+  }, [clientPhone, clientPhone, empresaId, sucursalId]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -134,8 +107,8 @@ const Pedido = () => {
     };
 
     updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
   }, []);
 
   const renderProgressBar = (status) => {
@@ -149,8 +122,8 @@ const Pedido = () => {
             key={index}
             className={`h-2 rounded-full flex-1 ${
               index < config.barSteps
-                ? "bg-black"
-                : "bg-gray-300 border border-gray-400"
+                ? 'bg-black'
+                : 'bg-gray-300 border border-gray-400'
             }`}
           />
         ))}
@@ -160,10 +133,10 @@ const Pedido = () => {
 
   const renderOrder = (currentOrder) => {
     const config = statusConfig[currentOrder.status] || statusConfig.Pending;
-    const isDelivery = currentOrder.fulfillment?.method === "delivery";
+    const isDelivery = currentOrder.fulfillment?.method === 'delivery';
     const total = currentOrder.payment?.financeSummary?.total || 0;
-    const isPaid = currentOrder.payment?.status === "completed";
-    const canCancel = currentOrder.status === "Pending";
+    const isPaid = currentOrder.payment?.status === 'completed';
+    const canCancel = currentOrder.status === 'Pending';
 
     return (
       <div className="flex flex-col px-4 w-full mb-8">
@@ -179,6 +152,28 @@ const Pedido = () => {
 
         {/* Información del pedido */}
         <div className="flex flex-col gap-1 mb-4">
+          {/* Teléfono del cliente */}
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-6"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+
+            <p className="font-primary font-light text-xs text-gray-400">
+              {currentOrder.customer?.phone
+                ? currentOrder.customer.phone
+                : 'Teléfono no disponible'}
+            </p>
+          </div>
+
           {/* Dirección */}
           <div className="flex items-center gap-2">
             <svg
@@ -192,8 +187,8 @@ const Pedido = () => {
             </svg>
             <p className=" font-primary  font-light text-xs text-gray-400 ">
               {isDelivery
-                ? currentOrder.fulfillment?.address || "Dirección no disponible"
-                : `Retiro en ${clientData?.name || "el local"}`}
+                ? currentOrder.fulfillment?.address || 'Dirección no disponible'
+                : `Retiro en ${clientData?.name || 'el local'}`}
             </p>
           </div>
 
@@ -234,12 +229,12 @@ const Pedido = () => {
               />
             </svg>
             <p className=" font-primary  font-light text-xs text-gray-400 ">
-              {currentOrder.payment?.method === "online"
-                ? "Virtual"
-                : currentOrder.payment?.method === "cash"
-                ? "Efectivo"
-                : "Ambos"}
-              {" - "}
+              {currentOrder.payment?.method === 'online'
+                ? 'Virtual'
+                : currentOrder.payment?.method === 'cash'
+                ? 'Efectivo'
+                : 'Ambos'}
+              {' - '}
             </p>
           </div>
         </div>
@@ -270,10 +265,7 @@ const Pedido = () => {
     );
   };
 
-  const displayOrders = orderId ? (order ? [order] : []) : orders;
-
-  console.log(clientConfig);
-
+  const displayOrders = orders;
   return (
     <div
       ref={containerRef}
