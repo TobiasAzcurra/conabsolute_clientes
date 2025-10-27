@@ -208,7 +208,7 @@ const Card = ({ data, path }) => {
   return (
     <div
       ref={cardRef}
-      className="group relative flex flex-col rounded-3xl items-center shadow-lg shadow-gray-200 bg-gray-50  transition duration-300 w-full max-w-[400px] text-black z-50"
+      className="group relative flex flex-col rounded-3xl items-center   transition duration-300 w-full max-w-[400px] text-black z-50"
     >
       <Link
         to={`/${slugEmpresa}/${slugSucursal}/menu/${path}/${data.id}`}
@@ -216,8 +216,8 @@ const Card = ({ data, path }) => {
         className="w-full"
       >
         {/* img */}
-        <div className="px-2 pt-2">
-          <div className="relative w-full aspect-square  overflow-hidden rounded-t-2xl bg-gray-100">
+        <div className="shadow-md  shadow-gray-200 rounded-3xl ">
+          <div className="relative w-full aspect-square  overflow-hidden rounded-3xl bg-gray-100">
             {!isLoaded && !imageError && (
               <div className="h-full w-full items-center justify-center flex">
                 <LoadingPoints />
@@ -309,7 +309,7 @@ const Card = ({ data, path }) => {
           )}
 
           <div className="flex w-full mt-4 flex-col mb-4">
-            <div className="flex flex-row justify-between items-center">
+            <div className="flex flex-row justify-between ">
               <div className="flex flex-col">
                 <span className="font-bold text-2xl text-black">
                   {currencyFormat(pricingInfo.mainPrice)}
