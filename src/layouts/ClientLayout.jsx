@@ -91,33 +91,15 @@ const ClientLayout = ({ children }) => {
 
         {!shouldHideSearch && shouldShowFloatingCart && (
           <>
-            <div
-              className={`fixed inset-x-0 bottom-0 z-10 
-            ${totalQuantity > 0 ? "h-[125px]" : "h-[75px]"} 
-            
-            bg-gray-300 bg-opacity-50 
-            pointer-events-none 
-            backdrop-blur-md`}
-            />
-
             {/* ← CAMBIO: Convertido a botón con onClick */}
             <button
               onClick={handleContactClick}
-              className={`bg-gray-300 bg-opacity-50 fixed z-50 ${
-                totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
-              } backdrop-blur-md right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
+              className={`bg-gray-300/50 backdrop-blur-md fixed z-50 ${
+                totalQuantity > 0 ? "bottom-[100px]" : "bottom-4"
+              }  right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer `}
             >
               Contactanos
             </button>
-
-            <SearchBar
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              showSuggestion={showSuggestion}
-              setShowSuggestion={setShowSuggestion}
-              previousPhone={previousPhone}
-              onSuggestionClick={onSuggestionClick}
-            />
 
             {shouldShowFloatingCart && totalQuantity > 0 && (
               <>
