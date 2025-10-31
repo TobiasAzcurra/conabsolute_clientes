@@ -57,7 +57,7 @@ const Pedido = () => {
       barSteps: 2,
     },
     Ready: {
-      label: "Listo para retirar/entregar",
+      label: "Tu pedido esta listo",
       color: "text-green-600",
       barSteps: 3,
     },
@@ -251,7 +251,7 @@ const Pedido = () => {
 
     return (
       <div className="flex flex-col   w-full">
-        <div className="bg-gray-50 p-1 rounded-3xl shadow-lg shadow-gray-200">
+        <div className="bg-gray-50 p-2 rounded-3xl shadow-lg shadow-gray-200">
           {/* 📍 Mapa (solo para el pedido más reciente) */}
           {index === 0 && (branchCoordinates || isDelivery) && (
             <div className="  flex flex-col">
@@ -263,7 +263,7 @@ const Pedido = () => {
                 logo={clientAssets?.logo}
               />
               <p
-                className={`font-primary font-medium text-gray-900 text- px-3 py-8 text-left `}
+                className={`font-primary font-medium text-gray-900 text- px-2 py-8 text-left `}
               >
                 {config.label}
               </p>
@@ -275,7 +275,7 @@ const Pedido = () => {
             </h2>
           )}
 
-          <div className="px-3 pb-3 ">
+          <div className="px-2 pb-3 ">
             {/* Información del pedido */}
             <div className="flex flex-col gap-1 ">
               {/* Dirección */}

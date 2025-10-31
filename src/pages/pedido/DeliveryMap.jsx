@@ -27,7 +27,7 @@ const DeliveryMap = ({
   method,
   logo,
   status,
-  className = "rounded-3xl overflow-hidden",
+  className = "rounded-t-3xl overflow-hidden",
 }) => {
   const resolvedKey = apiKey || import.meta.env.VITE_API_GOOGLE_MAPS;
   const resolvedMapId = mapId || import.meta.env.VITE_GOOGLE_MAPS_MAP_ID;
@@ -99,8 +99,16 @@ const MapContent = ({
   // Fit bounds cuando solo hay marcadores (sin ruta)
   useEffect(() => {
     if (!map || !bounds || drawRoute) return;
-    map.fitBounds(bounds, { top: 32, right: 32, bottom: 32, left: 32 });
-  }, [map, bounds, drawRoute]);
+
+    // Si hay ambos marcadores, usamos fitBounds
+    if (storeCoords && clientCoords) {
+      map.fitBounds(bounds, { top: 32, right: 32, bottom: 32, left: 32 });
+    } else {
+      // Si solo hay uno, seteamos manualmente el zoom
+      map.setCenter(storeCoords || clientCoords);
+      map.setZoom(17); // 👈 <-- acá elegís cuán alejado querés (por defecto 13)
+    }
+  }, [map, bounds, drawRoute, storeCoords, clientCoords]);
 
   // Dibujar / limpiar ruta cuando corresponde
   useEffect(() => {
