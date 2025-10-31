@@ -278,8 +278,8 @@ const Pedido = () => {
             />
           </div>
         )}
-        {olderOrders.length >= 1 && (
-          <h2 className="text-2xl px-4 font-bold font-primary mb-4">
+        {olderOrders.length >= 1 && index > 0 && (
+          <h2 className="text-2xl font-bold font-primary mb-4">
             Pedido {index + 1}
           </h2>
         )}
