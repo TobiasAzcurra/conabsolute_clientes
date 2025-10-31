@@ -385,14 +385,14 @@ const Pedido = () => {
               onClick={() =>
                 handlePaymentClick(total, currentOrder.customer?.phone)
               }
-              className="text-blue-700 bg-gray-300 text-sm font-primary h-10 px-4 rounded-full font-medium"
+              className="text-blue-700 bg-gray-300 text-xs font-primary h-10 px-4 rounded-full font-light"
             >
               Pagar virtualmente
             </button>
           )}
           <button
             onClick={handleSupportClick}
-            className="bg-gray-300 font-primary text-sm h-10 px-4 rounded-full font-medium"
+            className="bg-gray-300 font-primary text-xs h-10 px-4 rounded-full font-light"
           >
             Soporte
           </button>
