@@ -366,8 +366,8 @@ const Pedido = () => {
           </div>
         </div>
 
-        {/* 📍 Mapa */}
-        {(branchCoordinates || isDelivery) && (
+        {/* 📍 Mapa (solo para el pedido más reciente) */}
+        {index === 0 && (branchCoordinates || isDelivery) && (
           <div className="mt-2 mb-4">
             <DeliveryMap
               storeCoords={branchCoordinates || null}
