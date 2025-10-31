@@ -266,6 +266,18 @@ const Pedido = () => {
 
     return (
       <div className="flex flex-col px-4 w-full">
+        {/* 📍 Mapa (solo para el pedido más reciente) */}
+        {index === 0 && (branchCoordinates || isDelivery) && (
+          <div className="mt-4 mb-4">
+            <DeliveryMap
+              storeCoords={branchCoordinates || null}
+              clientCoords={isDelivery ? clientCoords : null}
+              method={isDelivery ? "delivery" : "takeaway"}
+              status={currentOrder.status}
+              logo={clientAssets?.logo}
+            />
+          </div>
+        )}
         {olderOrders.length >= 1 && (
           <h2 className="text-2xl px-4 font-bold font-primary mb-4">
             Pedido {index + 1}
@@ -366,18 +378,6 @@ const Pedido = () => {
           </div>
         </div>
 
-        {/* 📍 Mapa (solo para el pedido más reciente) */}
-        {index === 0 && (branchCoordinates || isDelivery) && (
-          <div className="mt-2 mb-4">
-            <DeliveryMap
-              storeCoords={branchCoordinates || null}
-              clientCoords={isDelivery ? clientCoords : null}
-              method={isDelivery ? "delivery" : "takeaway"}
-              status={currentOrder.status}
-            />
-          </div>
-        )}
-
         {/* Botones */}
         <div className="flex flex-row gap-1">
           {!isPaid && (
@@ -412,14 +412,9 @@ const Pedido = () => {
       />
 
       <div className="justify-center my-auto pb-8 items-center flex flex-col">
-        {/* Logo */}
-        <div className="flex items-center flex-col pt-16">
-          <img src={clientAssets?.logo} className="w-2/3" alt="Logo" />
-        </div>
-
         {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center mt-8 px-8">
+          <div className="flex flex-col items-center justify-center px-8">
             <LoadingPoints color="text-gray-900" />
             <p className="font-light text-gray-400 text-center font-primary text-xs mt-4">
               Buscando tus pedidos...
@@ -436,7 +431,7 @@ const Pedido = () => {
 
         {/* Pedidos */}
         {!loading && (recentOrder || olderOrders.length > 0) && (
-          <div className="flex flex-col w-full mt-8 space-y-8">
+          <div className="flex flex-col w-full space-y-8">
             {/* Pedido reciente */}
             {recentOrder && renderOrder(recentOrder, 0)}
 

@@ -25,6 +25,7 @@ const DeliveryMap = ({
   storeCoords,
   clientCoords,
   method,
+  logo,
   status,
   className = "rounded-3xl overflow-hidden",
 }) => {
@@ -51,7 +52,7 @@ const DeliveryMap = ({
       // Cargamos las libs que usamos (places para otros compo, routes para Directions, marker para AdvancedMarker)
       libraries={["places", "routes", "marker"]}
     >
-      <div className={className} style={{ aspectRatio: "16/9" }}>
+      <div className={className} style={{ aspectRatio: "1/1" }}>
         <Map
           disableDefaultUI
           gestureHandling="greedy"
@@ -63,6 +64,7 @@ const DeliveryMap = ({
         >
           <MapContent
             storeCoords={storeCoords}
+            logo={logo}
             clientCoords={shouldShowClient ? clientCoords : null}
             drawRoute={shouldShowRoute}
             hasMapId={!!resolvedMapId}
@@ -75,7 +77,13 @@ const DeliveryMap = ({
 
 export default DeliveryMap;
 
-const MapContent = ({ storeCoords, clientCoords, drawRoute, hasMapId }) => {
+const MapContent = ({
+  storeCoords,
+  clientCoords,
+  drawRoute,
+  hasMapId,
+  logo,
+}) => {
   const map = useMap();
   const routesLib = useMapsLibrary("routes");
   const rendererRef = useRef(null);
@@ -173,9 +181,10 @@ const MapContent = ({ storeCoords, clientCoords, drawRoute, hasMapId }) => {
       {storeCoords &&
         (hasMapId ? (
           <AdvancedMarker position={storeCoords}>
-            <div className="w-6 h-6 grid place-items-center rounded-full bg-black text-white text-xs font-bold">
-              L
-            </div>
+            <img
+              src={logo}
+              className="h-6 bg-gray-100/50 backdrop-blur-md p-1 rounded-md border border-gray-50  "
+            />
           </AdvancedMarker>
         ) : (
           <Marker position={storeCoords} />
@@ -185,8 +194,21 @@ const MapContent = ({ storeCoords, clientCoords, drawRoute, hasMapId }) => {
       {clientCoords &&
         (hasMapId ? (
           <AdvancedMarker position={clientCoords}>
-            <div className="w-6 h-6 grid place-items-center rounded-full bg-red-600 text-white text-xs font-bold">
-              C
+            <div className=" bg-gray-100/50 backdrop-blur-md p-1 rounded-full  border border-gray-50 ">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-6"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                />
+              </svg>
             </div>
           </AdvancedMarker>
         ) : (
