@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+// pages/Pedido.jsx
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   collection,
@@ -10,21 +11,30 @@ import {
   getFirestore,
   startAfter,
   getDocs,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { app } from "../../firebase/config";
 import { useClient } from "../../contexts/ClientContext";
 import StickerCanvas from "../../components/StickerCanvas";
 import LoadingPoints from "../../components/LoadingPoints";
 import currencyFormat from "../../helpers/currencyFormat";
+import DeliveryMap from "./DeliveryMap";
 
 const db = getFirestore(app);
 
 const Pedido = () => {
   const { clientPhone } = useParams();
-  const { empresaId, sucursalId, clientConfig, clientData, clientAssets } =
-    useClient();
+  const {
+    empresaId,
+    sucursalId,
+    clientConfig,
+    clientData,
+    clientAssets,
+    branchCoordinates,
+    setBranchCoordinates,
+  } = useClient();
 
-  // Estados (manteniendo los originales)
   const [recentOrder, setRecentOrder] = useState(null);
   const [olderOrders, setOlderOrders] = useState([]);
   const [lastDoc, setLastDoc] = useState(null);
@@ -35,7 +45,6 @@ const Pedido = () => {
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const containerRef = useRef(null);
 
-  // Mapeo de estados a UI (replicado del original)
   const statusConfig = {
     Pending: {
       label: "Pendiente de confirmación",
@@ -82,14 +91,13 @@ const Pedido = () => {
     const msg = `Hola! Hice un pedido de ${currencyFormat(
       orderTotal
     )} para el número ${orderPhone}. En breve envío foto del comprobante. Transferencia al alias: ${alias} a nombre de ${nameAlias}`;
-
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
       msg
     )}`;
     window.open(whatsappUrl, "_blank");
   };
 
-  // Efecto para medir contenedor
+  // Medición contenedor
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
@@ -98,13 +106,12 @@ const Pedido = () => {
         setContainerSize({ width, height });
       }
     };
-
     updateSize();
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
-  // Cargar el pedido más reciente
+  // Cargar pedido más reciente
   useEffect(() => {
     if (!clientPhone || !empresaId || !sucursalId) {
       setLoading(false);
@@ -132,19 +139,19 @@ const Pedido = () => {
       recentQuery,
       (snapshot) => {
         if (!snapshot.empty) {
-          const doc = snapshot.docs[0];
-          const orderData = { id: doc.id, ...doc.data() };
+          const docSnap = snapshot.docs[0];
+          const orderData = { id: docSnap.id, ...docSnap.data() };
           setRecentOrder(orderData);
-          setLastDoc(doc);
+          setLastDoc(docSnap);
           setHasMore(true);
         } else {
           setRecentOrder(null);
         }
         setLoading(false);
       },
-      (error) => {
-        console.error("Error al cargar pedido:", error);
-        setError(error.message);
+      (err) => {
+        console.error("Error al cargar pedido:", err);
+        setError(err.message);
         setLoading(false);
       }
     );
@@ -152,11 +159,40 @@ const Pedido = () => {
     return () => unsubscribe();
   }, [clientPhone, empresaId, sucursalId]);
 
-  // Función para cargar más pedidos (sin cambios)
+  // Cargar coordenadas de sucursal si no están en contexto
+  useEffect(() => {
+    const loadBranchCoords = async () => {
+      try {
+        if (!empresaId || !sucursalId || branchCoordinates) return;
+        const sucRef = doc(
+          db,
+          "absoluteClientes",
+          empresaId,
+          "sucursales",
+          sucursalId
+        );
+        const sucSnap = await getDoc(sucRef);
+        if (sucSnap.exists()) {
+          const data = sucSnap.data();
+          const arr = data?.coordinates; // [lat, lng]
+          if (
+            Array.isArray(arr) &&
+            arr.length === 2 &&
+            arr.every((n) => typeof n === "number")
+          ) {
+            setBranchCoordinates({ lat: arr[0], lng: arr[1] });
+          }
+        }
+      } catch (e) {
+        console.error("No se pudieron cargar coordenadas de sucursal:", e);
+      }
+    };
+    loadBranchCoords();
+  }, [empresaId, sucursalId, branchCoordinates, setBranchCoordinates]);
+
   const loadMoreOrders = async () => {
     if (!lastDoc || loadingMore) return;
     setLoadingMore(true);
-
     try {
       const ordersRef = collection(
         db,
@@ -166,7 +202,6 @@ const Pedido = () => {
         sucursalId,
         "pedidos"
       );
-
       const moreQuery = query(
         ordersRef,
         where("customer.phone", "==", clientPhone),
@@ -174,37 +209,30 @@ const Pedido = () => {
         startAfter(lastDoc),
         limit(10)
       );
-
       const snapshot = await getDocs(moreQuery);
-
       if (!snapshot.empty) {
         const newOrders = [];
         let lastDocument = null;
-
-        snapshot.forEach((doc) => {
-          const orderData = { id: doc.id, ...doc.data() };
-          newOrders.push(orderData);
-          lastDocument = doc;
+        snapshot.forEach((d) => {
+          newOrders.push({ id: d.id, ...d.data() });
+          lastDocument = d;
         });
-
-        setOlderOrders([...olderOrders, ...newOrders]);
+        setOlderOrders((prev) => [...prev, ...newOrders]);
         setLastDoc(lastDocument);
         setHasMore(snapshot.docs.length === 10);
       } else {
         setHasMore(false);
       }
-    } catch (error) {
-      console.error("Error cargando más pedidos:", error);
+    } catch (e) {
+      console.error("Error cargando más pedidos:", e);
     } finally {
       setLoadingMore(false);
     }
   };
 
-  // Barra de progreso (replicada)
   const renderProgressBar = (status) => {
     const config = statusConfig[status] || statusConfig.Pending;
     const totalSteps = 4;
-
     return (
       <div className="w-full bg-gray-300 p-0.5 rounded-full flex gap-1 mb-2">
         {Array.from({ length: totalSteps }).map((_, index) => (
@@ -221,26 +249,31 @@ const Pedido = () => {
     );
   };
 
-  // Render de un pedido (UI replicada)
   const renderOrder = (currentOrder, index) => {
     const config = statusConfig[currentOrder.status] || statusConfig.Pending;
     const isDelivery = currentOrder.fulfillment?.method === "delivery";
     const total = currentOrder.payment?.financeSummary?.total || 0;
     const isPaid = currentOrder.payment?.status === "completed";
 
+    // Coordenadas del cliente (si delivery)
+    const clientArr = currentOrder?.fulfillment?.coordinates; // [lat, lng]
+    const clientCoords =
+      Array.isArray(clientArr) &&
+      clientArr.length === 2 &&
+      clientArr.every((n) => typeof n === "number")
+        ? { lat: clientArr[0], lng: clientArr[1] }
+        : null;
+
     return (
-      <div className="flex  flex-col px-4 w-full ">
-        {/* Título si hay más de un pedido */}
+      <div className="flex flex-col px-4 w-full">
         {olderOrders.length >= 1 && (
           <h2 className="text-2xl px-4 font-bold font-primary mb-4">
             Pedido {index + 1}
           </h2>
         )}
 
-        {/* Barra de progreso */}
         {renderProgressBar(currentOrder.status)}
 
-        {/* Estado actual */}
         <p
           className={`font-primary font-light text-xs text-left mb-4 ${config.color}`}
         >
@@ -333,6 +366,18 @@ const Pedido = () => {
           </div>
         </div>
 
+        {/* 📍 Mapa */}
+        {(branchCoordinates || isDelivery) && (
+          <div className="mt-2 mb-4">
+            <DeliveryMap
+              storeCoords={branchCoordinates || null}
+              clientCoords={isDelivery ? clientCoords : null}
+              method={isDelivery ? "delivery" : "takeaway"}
+              status={currentOrder.status}
+            />
+          </div>
+        )}
+
         {/* Botones */}
         <div className="flex flex-row gap-1">
           {!isPaid && (
@@ -356,7 +401,6 @@ const Pedido = () => {
     );
   };
 
-  // Render principal
   return (
     <div
       ref={containerRef}

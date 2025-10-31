@@ -12,7 +12,7 @@ export const ClientProvider = ({ children }) => {
   const [clientAssets, setClientAssets] = useState(null);
   const [clientConfig, setClientConfig] = useState(null);
 
-  // ✅ CAMBIO: Solo guardamos productos "crudos" sin procesar
+  // ✅ Sólo guardamos productos "crudos"
   const [rawProducts, setRawProducts] = useState([]);
 
   const [categories, setCategories] = useState([]);
@@ -24,18 +24,20 @@ export const ClientProvider = ({ children }) => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [activeSortOption, setActiveSortOption] = useState(null);
 
-  // ✅ NUEVO: Memoizaciones derivadas (computed values)
+  // ✅ NUEVO: coordenadas de la sucursal en contexto
+  // Formato: { lat: number, lng: number } | null
+  const [branchCoordinates, setBranchCoordinates] = useState(null);
+
+  // ✅ Derivados
   const productsByCategory = useMemo(
     () => groupByCategory(rawProducts),
     [rawProducts]
   );
 
-  // Cargar tipografía y colores cuando tenemos los IDs
   const { typography, loading: typographyLoading } = useTypography(
     empresaId,
     sucursalId
   );
-
   const { colors, loading: colorsLoading } = useColors(empresaId, sucursalId);
 
   const value = useMemo(
@@ -49,15 +51,18 @@ export const ClientProvider = ({ children }) => {
       clientConfig,
       setClientConfig,
 
-      // ✅ CAMBIO: Exponemos rawProducts y productos derivados
+      // Productos
       rawProducts,
       setRawProducts,
-      productsByCategory, // Computed
+      productsByCategory,
 
+      // Cat/Tags
       categories,
       setCategories,
       productTags,
       setProductTags,
+
+      // Slugs/IDs
       slugEmpresa,
       setSlugEmpresa,
       slugSucursal,
@@ -66,14 +71,22 @@ export const ClientProvider = ({ children }) => {
       setEmpresaId,
       sucursalId,
       setSucursalId,
+
+      // Filtros/UI
       activeFilters,
       setActiveFilters,
       activeSortOption,
       setActiveSortOption,
+
+      // Theming
       typography,
       typographyLoading,
       colors,
       colorsLoading,
+
+      // ✅ nuevo en el contexto
+      branchCoordinates,
+      setBranchCoordinates,
     }),
     [
       isLoaded,
@@ -94,6 +107,7 @@ export const ClientProvider = ({ children }) => {
       typographyLoading,
       colors,
       colorsLoading,
+      branchCoordinates,
     ]
   );
 
