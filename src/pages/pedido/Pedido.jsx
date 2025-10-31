@@ -258,13 +258,15 @@ const Pedido = () => {
                 status={currentOrder.status}
                 logo={clientAssets?.logo}
               />
-              <p className={`font-primary font-medium px-3 py-4 text-left `}>
+              <p
+                className={`font-primary font-medium text-gray-900 text-sm px-3 py-4 text-left `}
+              >
                 {config.label}
               </p>
             </div>
           )}
           {olderOrders.length >= 1 && index > 0 && (
-            <h2 className=" font-medium font-primary  p-4">
+            <h2 className=" font-light text-gray-400 text-xs font-primary  p-4">
               Pedido {index + 1}
             </h2>
           )}
@@ -328,14 +330,14 @@ const Pedido = () => {
                     onClick={() =>
                       handlePaymentClick(total, currentOrder.customer?.phone)
                     }
-                    className="text-gray-900 bg-gray-200 text-xs font-primary h-10 px-4 rounded-full font-light"
+                    className="text-gray-600 bg-gray-200 text-xs font-primary h-10 px-4 rounded-full font-light"
                   >
                     Pagar virtualmente
                   </button>
                 )}
                 <button
                   onClick={handleSupportClick}
-                  className="bg-gray-200 font-primary text-xs h-10 px-4 rounded-full font-light"
+                  className="bg-gray-200 text-gray-600 font-primary text-xs h-10 px-4 rounded-full font-light"
                 >
                   Soporte
                 </button>
