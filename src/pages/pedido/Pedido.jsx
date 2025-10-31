@@ -264,7 +264,9 @@ const Pedido = () => {
             </div>
           )}
           {olderOrders.length >= 1 && index > 0 && (
-            <h2 className=" font-bold font-primary  p-4">Pedido {index + 1}</h2>
+            <h2 className=" font-medium font-primary  p-4">
+              Pedido {index + 1}
+            </h2>
           )}
 
           <div className="px-3 pb-3 ">
