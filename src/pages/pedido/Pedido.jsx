@@ -271,7 +271,7 @@ const Pedido = () => {
 
           <div className="p-3">
             {/* Información del pedido */}
-            <div className="flex flex-col gap-1 mb-4">
+            <div className="flex flex-col gap-1 ">
               {/* Teléfono */}
               <div className="flex items-center gap-2">
                 <svg
@@ -344,7 +344,7 @@ const Pedido = () => {
 
             {/* Botones */}
             {index === 0 && (
-              <div className="flex flex-row gap-1">
+              <div className="flex flex-row gap-1 mt-4">
                 {!isPaid && (
                   <button
                     onClick={() =>
