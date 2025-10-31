@@ -15,10 +15,6 @@ const AppRouter = () => {
     <Routes>
       <Route path="/" element={<NavigateConabsolute />} />
 
-      {/* <Route
-        path="/:slugEmpresa/:slugSucursal/admin/agregar-producto"
-        element={<AgregarProductoPage />}
-      /> */}
       <Route path="/:slugEmpresa/:slugSucursal/*" element={<EmpresaRouter />} />
     </Routes>
   );
