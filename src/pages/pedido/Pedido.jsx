@@ -52,7 +52,7 @@ const Pedido = () => {
       barSteps: 1,
     },
     Confirmed: {
-      label: "Confirmado - En preparación",
+      label: "Tu pedido esta confirmado",
       color: "text-blue-600",
       barSteps: 2,
     },
@@ -61,7 +61,11 @@ const Pedido = () => {
       color: "text-green-600",
       barSteps: 3,
     },
-    Delivered: { label: "En camino...", color: "text-gray-600", barSteps: 4 },
+    Delivered: {
+      label: "Tu pedido esta en camino",
+      color: "text-gray-600",
+      barSteps: 4,
+    },
     Client: { label: "Entregado", color: "text-gray-600", barSteps: 4 },
     CanceledByCustomer: {
       label: "Cancelado por el cliente",
@@ -69,7 +73,7 @@ const Pedido = () => {
       barSteps: 0,
     },
     CanceledByEnterprise: {
-      label: "Cancelado por el negocio",
+      label: "Cancelado por la empresa",
       color: "text-red-600",
       barSteps: 0,
     },
@@ -259,7 +263,7 @@ const Pedido = () => {
                 logo={clientAssets?.logo}
               />
               <p
-                className={`font-primary font-medium text-gray-900 text-sm px-3 py-4 text-left `}
+                className={`font-primary font-medium text-gray-900 text- px-3 py-8 text-left `}
               >
                 {config.label}
               </p>
