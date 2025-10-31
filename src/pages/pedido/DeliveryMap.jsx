@@ -181,10 +181,9 @@ const MapContent = ({
       {storeCoords &&
         (hasMapId ? (
           <AdvancedMarker position={storeCoords}>
-            <img
-              src={logo}
-              className="h-6 bg-gray-100/50 backdrop-blur-md p-1 rounded-md border border-gray-50  "
-            />
+            <div className="bg-gray-100/50 backdrop-blur-md p-2 rounded-md">
+              <img src={logo} className="h-4    " />
+            </div>
           </AdvancedMarker>
         ) : (
           <Marker position={storeCoords} />
@@ -194,7 +193,7 @@ const MapContent = ({
       {clientCoords &&
         (hasMapId ? (
           <AdvancedMarker position={clientCoords}>
-            <div className=" bg-gray-100/50 backdrop-blur-md p-1 rounded-full  border border-gray-50 ">
+            <div className=" bg-gray-100/50 backdrop-blur-md p-2 rounded-full   ">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

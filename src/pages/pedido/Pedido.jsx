@@ -230,25 +230,6 @@ const Pedido = () => {
     }
   };
 
-  const renderProgressBar = (status) => {
-    const config = statusConfig[status] || statusConfig.Pending;
-    const totalSteps = 4;
-    return (
-      <div className="w-full bg-gray-300 p-0.5 rounded-full flex gap-1 mb-2">
-        {Array.from({ length: totalSteps }).map((_, index) => (
-          <div
-            key={index}
-            className={`h-2 rounded-full flex-1 ${
-              index < config.barSteps
-                ? "bg-black"
-                : "bg-gray-300 border border-gray-400"
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
   const renderOrder = (currentOrder, index) => {
     const config = statusConfig[currentOrder.status] || statusConfig.Pending;
     const isDelivery = currentOrder.fulfillment?.method === "delivery";
@@ -265,134 +246,124 @@ const Pedido = () => {
         : null;
 
     return (
-      <div className="flex flex-col px-4 w-full">
-        {/* 📍 Mapa (solo para el pedido más reciente) */}
-        {index === 0 && (branchCoordinates || isDelivery) && (
-          <div className="mt-4 mb-4 bg-gray-50 p-1 rounded-3xl shadow-lg shadow-gray-200 flex flex-col">
-            <DeliveryMap
-              storeCoords={branchCoordinates || null}
-              clientCoords={isDelivery ? clientCoords : null}
-              method={isDelivery ? "delivery" : "takeaway"}
-              status={currentOrder.status}
-              logo={clientAssets?.logo}
-            />
-            <p
-              className={`font-primary font-light px-3 py-4 text-left text-xs  ${config.color}`}
-            >
-              {config.label}
-            </p>
-          </div>
-        )}
-        {olderOrders.length >= 1 && index > 0 && (
-          <h2 className="text-2xl font-bold font-primary mb-4">
-            Pedido {index + 1}
-          </h2>
-        )}
-
-        {/* Información del pedido */}
-        <div className="flex flex-col gap-1 mb-4">
-          {/* Teléfono */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path
-                fillRule="evenodd"
-                d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
-                clipRule="evenodd"
+      <div className="flex flex-col   w-full">
+        <div className="bg-gray-50 p-1 rounded-3xl shadow-lg shadow-gray-200">
+          {/* 📍 Mapa (solo para el pedido más reciente) */}
+          {index === 0 && (branchCoordinates || isDelivery) && (
+            <div className="  flex flex-col">
+              <DeliveryMap
+                storeCoords={branchCoordinates || null}
+                clientCoords={isDelivery ? clientCoords : null}
+                method={isDelivery ? "delivery" : "takeaway"}
+                status={currentOrder.status}
+                logo={clientAssets?.logo}
               />
-            </svg>
-            <p className="font-primary font-light text-xs text-gray-400">
-              {currentOrder.customer?.phone || "Teléfono no disponible"}
-            </p>
-          </div>
-
-          {/* Dirección */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-              <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-            </svg>
-            <p className="font-primary font-light text-xs text-gray-400">
-              {isDelivery
-                ? currentOrder.fulfillment?.address || "Dirección no disponible"
-                : `Retiro en ${clientData?.name || "el local"}`}
-            </p>
-          </div>
-
-          {/* Total */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-              <path
-                fillRule="evenodd"
-                d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.4a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-                clipRule="evenodd"
-              />
-              <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-            </svg>
-            <p className="font-primary font-light text-xs text-gray-400">
-              {currencyFormat(total)}
-            </p>
-          </div>
-
-          {/* Método de pago */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
-              <path
-                fillRule="evenodd"
-                d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="font-primary font-light text-xs text-gray-400">
-              {currentOrder.payment?.method === "online"
-                ? "Virtual"
-                : currentOrder.payment?.method === "cash"
-                ? "Efectivo"
-                : "Ambos"}{" "}
-              -
-            </p>
-          </div>
-        </div>
-
-        {/* Botones */}
-        <div className="flex flex-row gap-1">
-          {!isPaid && (
-            <button
-              onClick={() =>
-                handlePaymentClick(total, currentOrder.customer?.phone)
-              }
-              className="text-blue-700 bg-gray-300 text-xs font-primary h-10 px-4 rounded-full font-light"
-            >
-              Pagar virtualmente
-            </button>
+              <p className={`font-primary font-medium px-3 py-4 text-left `}>
+                {config.label}
+              </p>
+            </div>
           )}
-          <button
-            onClick={handleSupportClick}
-            className="bg-gray-300 font-primary text-xs h-10 px-4 rounded-full font-light"
-          >
-            Soporte
-          </button>
+          {olderOrders.length >= 1 && index > 0 && (
+            <h2 className=" font-bold font-primary  px-4 pt-4">
+              Pedido {index + 1}
+            </h2>
+          )}
+
+          <div className="p-3">
+            {/* Información del pedido */}
+            <div className="flex flex-col gap-1 mb-4">
+              {/* Teléfono */}
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="h-6 text-gray-400"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                  />
+                </svg>
+
+                <p className="font-primary font-light text-xs text-gray-400">
+                  {currentOrder.customer?.phone || "Teléfono no disponible"}
+                </p>
+              </div>
+
+              {/* Dirección */}
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="h-6 text-gray-400"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+                  />
+                </svg>
+
+                <p className="font-primary font-light text-xs text-gray-400">
+                  {isDelivery
+                    ? currentOrder.fulfillment?.address ||
+                      "Dirección no disponible"
+                    : `Retiro en ${clientData?.name || "el local"}`}
+                </p>
+              </div>
+
+              {/* Total */}
+              <div className="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  className="h-6 text-gray-400"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z"
+                  />
+                </svg>
+
+                <p className="font-primary font-light text-xs text-gray-400">
+                  {currencyFormat(total)}
+                </p>
+              </div>
+            </div>
+
+            {/* Botones */}
+            {index === 0 && (
+              <div className="flex flex-row gap-1">
+                {!isPaid && (
+                  <button
+                    onClick={() =>
+                      handlePaymentClick(total, currentOrder.customer?.phone)
+                    }
+                    className="text-blue-700 bg-gray-300 text-xs font-primary h-10 px-4 rounded-full font-light"
+                  >
+                    Pagar virtualmente
+                  </button>
+                )}
+                <button
+                  onClick={handleSupportClick}
+                  className="bg-gray-300 font-primary text-xs h-10 px-4 rounded-full font-light"
+                >
+                  Soporte
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -401,14 +372,14 @@ const Pedido = () => {
   return (
     <div
       ref={containerRef}
-      className="bg-gray-150 relative flex justify-between flex-col min-h-screen"
+      className="bg-gray-100 relative flex justify-between flex-col min-h-screen"
     >
       <StickerCanvas
         containerWidth={containerSize.width}
         containerHeight={containerSize.height}
       />
 
-      <div className="justify-center my-auto pb-8 items-center flex flex-col">
+      <div className="justify-center my-auto pb-4 items-center flex flex-col">
         {/* Loading */}
         {loading && (
           <div className="flex flex-col items-center justify-center px-8">
@@ -428,7 +399,7 @@ const Pedido = () => {
 
         {/* Pedidos */}
         {!loading && (recentOrder || olderOrders.length > 0) && (
-          <div className="flex flex-col w-full space-y-8">
+          <div className="flex flex-col p-4 w-full space-y-2">
             {/* Pedido reciente */}
             {recentOrder && renderOrder(recentOrder, 0)}
 
@@ -439,12 +410,12 @@ const Pedido = () => {
 
         {/* Botón cargar más */}
         {hasMore && !loadingMore && (
-          <div className="px-4 mt-8 w-full">
+          <div className="px-4  w-full">
             <button
               onClick={loadMoreOrders}
-              className="px-4 h-10 bg-black text-white rounded-full font-primary font-medium text-sm"
+              className=" font-primary text-blue-500 font-light text-xs"
             >
-              Cargar más pedidos
+              Ver pedidos anteriores
             </button>
           </div>
         )}
