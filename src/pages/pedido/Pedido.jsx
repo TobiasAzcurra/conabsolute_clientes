@@ -268,7 +268,7 @@ const Pedido = () => {
       <div className="flex flex-col px-4 w-full">
         {/* 📍 Mapa (solo para el pedido más reciente) */}
         {index === 0 && (branchCoordinates || isDelivery) && (
-          <div className="mt-4 mb-4">
+          <div className="mt-4 mb-4 bg-gray-50 p-1 rounded-3xl shadow-lg shadow-gray-200 flex flex-col">
             <DeliveryMap
               storeCoords={branchCoordinates || null}
               clientCoords={isDelivery ? clientCoords : null}
@@ -276,6 +276,11 @@ const Pedido = () => {
               status={currentOrder.status}
               logo={clientAssets?.logo}
             />
+            <p
+              className={`font-primary font-light px-3 py-4 text-left text-xs  ${config.color}`}
+            >
+              {config.label}
+            </p>
           </div>
         )}
         {olderOrders.length >= 1 && index > 0 && (
@@ -283,14 +288,6 @@ const Pedido = () => {
             Pedido {index + 1}
           </h2>
         )}
-
-        {renderProgressBar(currentOrder.status)}
-
-        <p
-          className={`font-primary font-light text-xs text-left mb-4 ${config.color}`}
-        >
-          {config.label}
-        </p>
 
         {/* Información del pedido */}
         <div className="flex flex-col gap-1 mb-4">
