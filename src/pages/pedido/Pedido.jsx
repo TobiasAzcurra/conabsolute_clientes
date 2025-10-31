@@ -1,337 +1,337 @@
-import { useRef, useState, useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import StickerCanvas from '../../components/StickerCanvas';
-import LoadingPoints from '../../components/LoadingPoints';
-import { listenOrderById } from '../../firebase/orders/listenOrderById';
-import { listenOrdersByPhone } from '../../firebase/orders/listenOrdersByPhone';
-import { useClient } from '../../contexts/ClientContext';
-import currencyFormat from '../../helpers/currencyFormat';
-import { cleanPhoneNumber } from '../../firebase/utils/phoneUtils';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  onSnapshot,
+  getFirestore,
+  startAfter,
+  getDocs,
+} from "firebase/firestore";
+import { app } from "../../firebase/config";
+import { useClient } from "../../contexts/ClientContext";
+
+const db = getFirestore(app);
 
 const Pedido = () => {
-  const { empresaId, sucursalId, clientConfig, clientData, clientAssets } =
-    useClient();
-  const [order, setOrder] = useState(null);
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const { clientPhone } = useParams();
-  const location = useLocation();
+  const { empresaId, sucursalId } = useClient();
 
-  const [message, setMessage] = useState(null);
+  // Estados
+  const [recentOrder, setRecentOrder] = useState(null);
+  const [olderOrders, setOlderOrders] = useState([]);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const containerRef = useRef(null);
 
-  // Mapeo de estados a UI
-  const statusConfig = {
-    Pending: {
-      label: 'Pendiente de confirmación',
-      color: 'text-yellow-600',
-      barSteps: 1,
-    },
-    Confirmed: {
-      label: 'Confirmado - En preparación',
-      color: 'text-blue-600',
-      barSteps: 2,
-    },
-    Ready: {
-      label: 'Listo para retirar/entregar',
-      color: 'text-green-600',
-      barSteps: 3,
-    },
-    Delivered: {
-      label: 'En camino...',
-      color: 'text-gray-600',
-      barSteps: 4,
-    },
-    Cancelled: {
-      label: 'Cancelado',
-      color: 'text-red-600',
-      barSteps: 0,
-    },
-  };
-
-  const handleSupportClick = () => {
-    const phone = cleanPhoneNumber(clientConfig?.logistics?.phone || '');
-    const msg = 'Hola! Necesito ayuda con mi pedido.';
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
-      msg
-    )}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handlePaymentClick = (orderTotal, orderPhone) => {
-    const phone = cleanPhoneNumber(
-      clientConfig?.logistics?.phone || '543584306832'
-    );
-    const alias = clientConfig?.logistics?.alias || 'AbsoluteHSAS.mp';
-    const nameAlias = clientConfig?.logistics?.nameAlias || '________';
-    const msg = `Hola! Hice un pedido de ${currencyFormat(
-      orderTotal
-    )} para el número ${cleanPhoneNumber(
-      orderPhone
-    )}. En breve envío foto del comprobante. Transferencia al alias: ${alias} a nombre de ${nameAlias}`;
-
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
-      msg
-    )}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
+  // Cargar el pedido más reciente
   useEffect(() => {
-    const unsubscribe = listenOrdersByPhone(
+    if (!clientPhone || !empresaId || !sucursalId) {
+      setLoading(false);
+      setError("Faltan parámetros necesarios");
+      return;
+    }
+
+    const ordersRef = collection(
+      db,
+      "absoluteClientes",
       empresaId,
+      "sucursales",
       sucursalId,
-      cleanPhoneNumber(clientPhone),
-      (pedidos) => {
-        // Filtrar solo pedidos activos (no entregados ni cancelados)
-        const activePedidos = pedidos.filter(
-          (p) => p.status !== 'Delivered' && p.status !== 'Cancelled'
-        );
-        setOrders(activePedidos);
+      "pedidos"
+    );
+
+    // Query para el pedido más reciente
+    const recentQuery = query(
+      ordersRef,
+      where("customer.phone", "==", clientPhone),
+      orderBy("timestamps.createdAt", "desc"),
+      limit(1)
+    );
+
+    const unsubscribe = onSnapshot(
+      recentQuery,
+      (snapshot) => {
+        if (!snapshot.empty) {
+          const doc = snapshot.docs[0];
+          const orderData = { id: doc.id, ...doc.data() };
+          setRecentOrder(orderData);
+          setLastDoc(doc);
+          setHasMore(true);
+        } else {
+          setRecentOrder(null);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error al cargar pedido:", error);
+        setError(error.message);
         setLoading(false);
       }
     );
 
     return () => unsubscribe();
-  }, [clientPhone, clientPhone, empresaId, sucursalId]);
+  }, [clientPhone, empresaId, sucursalId]);
 
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const width = containerRef.current.offsetWidth;
-        const height = containerRef.current.offsetHeight;
-        setContainerSize({ width, height });
+  // Función para cargar más pedidos
+  const loadMoreOrders = async () => {
+    if (!lastDoc || loadingMore) return;
+
+    setLoadingMore(true);
+
+    try {
+      const ordersRef = collection(
+        db,
+        "absoluteClientes",
+        empresaId,
+        "sucursales",
+        sucursalId,
+        "pedidos"
+      );
+
+      const moreQuery = query(
+        ordersRef,
+        where("customer.phone", "==", clientPhone),
+        orderBy("timestamps.createdAt", "desc"),
+        startAfter(lastDoc),
+        limit(10)
+      );
+
+      const snapshot = await getDocs(moreQuery);
+
+      if (!snapshot.empty) {
+        const newOrders = [];
+        let lastDocument = null;
+
+        snapshot.forEach((doc) => {
+          const orderData = { id: doc.id, ...doc.data() };
+          newOrders.push(orderData);
+          lastDocument = doc;
+        });
+
+        setOlderOrders([...olderOrders, ...newOrders]);
+        setLastDoc(lastDocument);
+
+        // Si recibimos menos de 10 documentos, no hay más
+        setHasMore(snapshot.docs.length === 10);
+      } else {
+        setHasMore(false);
       }
+    } catch (error) {
+      console.error("Error cargando más pedidos:", error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Función para obtener el texto del estado
+  const getStatusText = (status) => {
+    const statusMap = {
+      Pending: "Pendiente de confirmación",
+      Confirmed: "Confirmado - En preparación",
+      Ready: "Listo para retirar/entregar",
+      Delivered: "En camino",
+      Client: "Entregado",
+      CanceledByCustomer: "Cancelado por el cliente",
+      CanceledByEnterprise: "Cancelado por el negocio",
     };
+    return statusMap[status] || status;
+  };
 
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
+  // Función para obtener el color del estado
+  const getStatusColor = (status) => {
+    const colorMap = {
+      Pending: "text-yellow-600 bg-yellow-50",
+      Confirmed: "text-blue-600 bg-blue-50",
+      Ready: "text-green-600 bg-green-50",
+      Delivered: "text-purple-600 bg-purple-50",
+      Client: "text-gray-600 bg-gray-50",
+      CanceledByCustomer: "text-red-600 bg-red-50",
+      CanceledByEnterprise: "text-red-600 bg-red-50",
+    };
+    return colorMap[status] || "text-gray-600 bg-gray-50";
+  };
 
-  const renderProgressBar = (status) => {
-    const config = statusConfig[status] || statusConfig.Pending;
-    const totalSteps = 4;
+  // Función para obtener el ícono del estado
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Pending":
+        return "⏳";
+      case "Confirmed":
+        return "✅";
+      case "Ready":
+        return "📦";
+      case "Delivered":
+        return "🚚";
+      case "Client":
+        return "✔️";
+      case "CanceledByCustomer":
+      case "CanceledByEnterprise":
+        return "❌";
+      default:
+        return "📋";
+    }
+  };
 
-    return (
-      <div className="w-full bg-gray-300 p-0.5 rounded-full flex gap-1 mb-2">
-        {Array.from({ length: totalSteps }).map((_, index) => (
+  // Función para renderizar un pedido
+  const renderOrder = (order, index) => (
+    <div key={order.id} className="mb-8 pb-8 border-b last:border-b-0">
+      <div className="space-y-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="font-semibold">ID:</p>
+            <p className="text-sm text-gray-600">#{order.id.slice(-6)}</p>
+          </div>
           <div
-            key={index}
-            className={`h-2 rounded-full flex-1 ${
-              index < config.barSteps
-                ? 'bg-black'
-                : 'bg-gray-300 border border-gray-400'
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const renderOrder = (currentOrder) => {
-    const config = statusConfig[currentOrder.status] || statusConfig.Pending;
-    const isDelivery = currentOrder.fulfillment?.method === 'delivery';
-    const total = currentOrder.payment?.financeSummary?.total || 0;
-    const isPaid = currentOrder.payment?.status === 'completed';
-    const canCancel = currentOrder.status === 'Pending';
-
-    return (
-      <div className="flex flex-col px-4 w-full mb-8">
-        {/* Barra de progreso */}
-        {renderProgressBar(currentOrder.status)}
-
-        {/* Estado actual */}
-        <p
-          className={` font-primary  font-light text-xs text-left mb-4 ${config.color}`}
-        >
-          {config.label}
-        </p>
-
-        {/* Información del pedido */}
-        <div className="flex flex-col gap-1 mb-4">
-          {/* Teléfono del cliente */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
-                clip-rule="evenodd"
-              />
-            </svg>
-
-            <p className="font-primary font-light text-xs text-gray-400">
-              {currentOrder.customer?.phone
-                ? currentOrder.customer.phone
-                : 'Teléfono no disponible'}
-            </p>
-          </div>
-
-          {/* Dirección */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-              <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-            </svg>
-            <p className=" font-primary  font-light text-xs text-gray-400 ">
-              {isDelivery
-                ? currentOrder.fulfillment?.address || 'Dirección no disponible'
-                : `Retiro en ${clientData?.name || 'el local'}`}
-            </p>
-          </div>
-
-          {/* Total */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M12 7.5a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
-              <path
-                fillRule="evenodd"
-                d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 14.625v-9.75ZM8.25 9.75a3.75 3.75 0 1 1 7.5 0 3.75 3.75 0 0 1-7.5 0ZM18.75 9a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V9.75a.75.75 0 0 0-.75-.75h-.008ZM4.5 9.75A.75.75 0 0 1 5.25 9h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H5.25a.75.75 0 0 1-.75-.75V9.75Z"
-                clipRule="evenodd"
-              />
-              <path d="M2.25 18a.75.75 0 0 0 0 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 0 0-.75-.75H2.25Z" />
-            </svg>
-            <p className=" font-primary  font-light text-xs text-gray-400 ">
-              {currencyFormat(total)}
-            </p>
-          </div>
-
-          {/* Método de pago */}
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-6"
-            >
-              <path d="M4.5 3.75a3 3 0 0 0-3 3v.75h21v-.75a3 3 0 0 0-3-3h-15Z" />
-              <path
-                fillRule="evenodd"
-                d="M22.5 9.75h-21v7.5a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-7.5Zm-18 3.75a.75.75 0 0 1 .75-.75h6a.75.75 0 0 1 0 1.5h-6a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className=" font-primary  font-light text-xs text-gray-400 ">
-              {currentOrder.payment?.method === 'online'
-                ? 'Virtual'
-                : currentOrder.payment?.method === 'cash'
-                ? 'Efectivo'
-                : 'Ambos'}
-              {' - '}
-            </p>
-          </div>
-        </div>
-
-        {/* Botones de acción */}
-        <div className="flex flex-row gap-1">
-          {/* Pagar virtualmente */}
-          {!isPaid && (
-            <button
-              onClick={() =>
-                handlePaymentClick(total, currentOrder.customer?.phone)
-              }
-              className="text-blue-700 bg-gray-300 text-sm  font-primary  h-10 px-4 rounded-full font-medium"
-            >
-              Pagar virtualmente
-            </button>
-          )}
-
-          {/* Contactar soporte */}
-          <button
-            onClick={handleSupportClick}
-            className=" bg-gray-300  font-primary  text-sm h-10 px-4 rounded-full font-medium"
+            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(
+              order.status
+            )}`}
           >
-            Soporte
-          </button>
+            <span>{getStatusIcon(order.status)}</span>
+            <span>{getStatusText(order.status)}</span>
+          </div>
         </div>
+
+        <div>
+          <p className="font-semibold">Fecha:</p>
+          <p className="text-sm text-gray-600">
+            {order.timestamps?.createdAt?.toDate?.()?.toLocaleString() ||
+              "No disponible"}
+          </p>
+        </div>
+
+        <div>
+          <p className="font-semibold">Método:</p>
+          <p>
+            {order.fulfillment?.method === "delivery"
+              ? "🚚 Delivery"
+              : "🏪 Retiro en local"}
+          </p>
+          {order.fulfillment?.address && (
+            <p className="text-sm text-gray-600 mt-1">
+              {order.fulfillment.address}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <p className="font-semibold">Items:</p>
+          {order.items?.map((item, idx) => (
+            <div key={idx} className="ml-4 text-sm mt-1">
+              <p>
+                {item.quantity}x {item.productName}
+              </p>
+              <p className="text-gray-600">
+                ${item.financeSummary?.totalPrice}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-between items-center pt-2 border-t">
+          <div>
+            <p className="font-semibold">Total:</p>
+            <p className="text-xl font-bold">
+              ${order.payment?.financeSummary?.total}
+            </p>
+          </div>
+          <div>
+            <p className="font-semibold">Pago:</p>
+            <p>
+              {order.payment?.method === "cash" ? "💵 Efectivo" : "💳 Virtual"}
+            </p>
+          </div>
+        </div>
+
+        {order.orderNotes && (
+          <div className="mt-2 p-3 bg-gray-100 rounded-lg">
+            <p className="font-semibold text-sm">Notas:</p>
+            <p className="text-sm text-gray-600 mt-1">{order.orderNotes}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  // Estados de carga y error
+  if (loading) {
+    return (
+      <div className="p-4 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <p className="mt-2 text-gray-600">Cargando pedidos...</p>
       </div>
     );
-  };
+  }
 
-  const displayOrders = orders;
-  return (
-    <div
-      ref={containerRef}
-      className="bg-gray-150 relative flex justify-between flex-col min-h-screen"
-    >
-      <StickerCanvas
-        containerWidth={containerSize.width}
-        containerHeight={containerSize.height}
-      />
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
 
-      <div className="justify-center my-auto items-center flex flex-col">
-        {/* Logo */}
-        <div className="flex items-center flex-col pt-16">
-          <img src={clientAssets?.logo} className="w-2/3" alt="Logo" />
-        </div>
-
-        {/* Loading */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center mt-8 px-8">
-            <LoadingPoints color="text-gray-900" />
-            <p className="font-light text-gray-400 text-center  font-primary  text-xs mt-4">
-              Buscando tus pedidos...
-            </p>
-          </div>
-        )}
-
-        {/* Mensajes */}
-        {error && (
-          <div className="mt-4 text-red-500  font-primary  text-xs font-light text-center px-4">
-            {error}
-          </div>
-        )}
-        {message && (
-          <div className="mt-4 text-green-500  font-primary  text-xs font-light text-center px-4">
-            {message}
-          </div>
-        )}
-
-        {/* Pedidos */}
-        {!loading && displayOrders.length > 0 && (
-          <div className="flex flex-col w-full mt-8 space-y-6">
-            {displayOrders.map((currentOrder, index) => (
-              <div key={currentOrder.id}>
-                {displayOrders.length > 1 && (
-                  <h2 className="text-2xl px-4 font-bold  font-primary  mb-4">
-                    Pedido {index + 1}
-                  </h2>
-                )}
-                {renderOrder(currentOrder)}
-                {index < displayOrders.length - 1 && (
-                  <div className="w-full h-px bg-gray-300 my-6" />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Sin pedidos */}
-        {!loading && displayOrders.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-8 px-8">
-            <p className="font-light text-gray-400 text-center  font-primary  text-xs">
-              No se encontraron pedidos activos.
-            </p>
-          </div>
-        )}
+  if (!recentOrder && olderOrders.length === 0) {
+    return (
+      <div className="p-4 text-center text-gray-600">
+        <p className="text-lg">No se encontraron pedidos para este número</p>
       </div>
+    );
+  }
+
+  // Render principal
+  return (
+    <div className="p-4 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">
+        {olderOrders.length === 0
+          ? "Tu pedido"
+          : `Tus pedidos (${olderOrders.length + 1})`}
+      </h1>
+
+      {/* Pedido más reciente */}
+      {recentOrder && (
+        <div className="bg-white shadow-lg rounded-lg p-4 mb-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <span className="text-2xl">🆕</span>
+            Pedido más reciente
+          </h2>
+          {renderOrder(recentOrder, 0)}
+        </div>
+      )}
+
+      {/* Pedidos anteriores */}
+      {olderOrders.length > 0 && (
+        <div className="bg-white shadow-md rounded-lg p-4">
+          <h2 className="text-lg font-semibold mb-4">Pedidos anteriores</h2>
+          {olderOrders.map((order, index) => renderOrder(order, index + 1))}
+        </div>
+      )}
+
+      {/* Botón ver más */}
+      {hasMore && !loadingMore && (
+        <button
+          onClick={loadMoreOrders}
+          className="w-full mt-6 py-3 px-4 bg-primary text-white rounded-lg hover:bg-opacity-90 transition-all duration-200 font-medium"
+        >
+          {olderOrders.length === 0 ? "Ver más pedidos" : "Cargar más pedidos"}
+        </button>
+      )}
+
+      {/* Loading más pedidos */}
+      {loadingMore && (
+        <div className="text-center mt-6 text-gray-500">
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+          <p className="mt-2">Cargando más pedidos...</p>
+        </div>
+      )}
+
+      {/* No hay más pedidos */}
+      {!hasMore && olderOrders.length > 0 && (
+        <div className="text-center mt-6 text-gray-500">
+          <p>No hay más pedidos</p>
+        </div>
+      )}
     </div>
   );
 };
