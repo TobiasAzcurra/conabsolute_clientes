@@ -66,7 +66,6 @@ const Pedido = () => {
     },
   };
 
-  // Handlers (sin cleanPhoneNumber)
   const handleSupportClick = () => {
     const phone = clientConfig?.logistics?.phone || "";
     const msg = "Hola! Necesito ayuda con mi pedido.";
