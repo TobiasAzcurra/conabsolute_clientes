@@ -264,36 +264,12 @@ const Pedido = () => {
             </div>
           )}
           {olderOrders.length >= 1 && index > 0 && (
-            <h2 className=" font-bold font-primary  px-4 pt-4">
-              Pedido {index + 1}
-            </h2>
+            <h2 className=" font-bold font-primary  p-4">Pedido {index + 1}</h2>
           )}
 
-          <div className="p-3">
+          <div className="px-3 pb-3 ">
             {/* Información del pedido */}
             <div className="flex flex-col gap-1 ">
-              {/* Teléfono */}
-              <div className="flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  className="h-6 text-gray-400"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-                  />
-                </svg>
-
-                <p className="font-primary font-light text-xs text-gray-400">
-                  {currentOrder.customer?.phone || "Teléfono no disponible"}
-                </p>
-              </div>
-
               {/* Dirección */}
               <div className="flex items-center gap-2">
                 <svg
@@ -350,14 +326,14 @@ const Pedido = () => {
                     onClick={() =>
                       handlePaymentClick(total, currentOrder.customer?.phone)
                     }
-                    className="text-blue-700 bg-gray-300 text-xs font-primary h-10 px-4 rounded-full font-light"
+                    className="text-gray-900 bg-gray-200 text-xs font-primary h-10 px-4 rounded-full font-light"
                   >
                     Pagar virtualmente
                   </button>
                 )}
                 <button
                   onClick={handleSupportClick}
-                  className="bg-gray-300 font-primary text-xs h-10 px-4 rounded-full font-light"
+                  className="bg-gray-200 font-primary text-xs h-10 px-4 rounded-full font-light"
                 >
                   Soporte
                 </button>
