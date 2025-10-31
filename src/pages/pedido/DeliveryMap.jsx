@@ -35,10 +35,7 @@ const DeliveryMap = ({
   const shouldShowClient = method === "delivery" && !!clientCoords;
   const shouldShowStore = !!storeCoords;
   const shouldShowRoute =
-    method === "delivery" &&
-    status === "Delivered" &&
-    !!storeCoords &&
-    !!clientCoords;
+    method === "delivery" && !!storeCoords && !!clientCoords;
 
   if (!shouldShowStore && !shouldShowClient) return null;
 
@@ -66,6 +63,7 @@ const DeliveryMap = ({
             clientCoords={shouldShowClient ? clientCoords : null}
             drawRoute={shouldShowRoute}
             hasMapId={!!resolvedMapId}
+            status={status}
           />
         </Map>
       </div>
@@ -81,6 +79,7 @@ const MapContent = ({
   drawRoute,
   hasMapId,
   logo,
+  status,
 }) => {
   const map = useMap();
   const routesLib = useMapsLibrary("routes");
@@ -117,20 +116,59 @@ const MapContent = ({
       animatedLineRef.current.setMap(null);
     }
 
+    // Configurar colores según el estado
+    let lineColor = "#000000";
+    let baseOpacity = 0.15;
+    let animatedOpacity = 0.9;
+
+    // Ajustar visual según estado
+    switch (status) {
+      case "Pending":
+        lineColor = "#000000ff"; // Amarillo/naranja
+        animatedOpacity = 0;
+        break;
+      case "Confirmed":
+        lineColor = "#000000ff"; // Azul
+        animatedOpacity = 0;
+        break;
+      case "Ready":
+        lineColor = "#000000ff"; // Verde
+        animatedOpacity = 0;
+        break;
+      case "Delivered":
+        lineColor = "#000000"; // Negro
+        animatedOpacity = 0.9;
+        break;
+      case "Client":
+        lineColor = "#000000ff"; // Verde
+        baseOpacity = 0.3;
+        animatedOpacity = 0;
+        break;
+      default:
+        lineColor = "#000000ff"; // Gris
+        animatedOpacity = 0;
+    }
+
     // Crear línea base (más tenue)
     const baseLine = new google.maps.Polyline({
       path: path,
-      strokeColor: "#000000",
-      strokeOpacity: 0.15,
+      strokeColor: lineColor,
+      strokeOpacity: baseOpacity,
       strokeWeight: 4,
       map: map,
     });
 
+    // No animar si el pedido ya fue entregado
+    if (status === "Client") {
+      pathRef.current = baseLine;
+      return;
+    }
+
     // Crear línea animada con gradiente
     const animatedLine = new google.maps.Polyline({
       path: [],
-      strokeColor: "#000000",
-      strokeOpacity: 0.9,
+      strokeColor: lineColor,
+      strokeOpacity: animatedOpacity,
       strokeWeight: 4,
       map: map,
     });
@@ -312,6 +350,7 @@ const MapContent = ({
     storeCoords?.lng,
     clientCoords?.lat,
     clientCoords?.lng,
+    status,
   ]);
 
   return (
@@ -320,8 +359,8 @@ const MapContent = ({
       {storeCoords &&
         (hasMapId ? (
           <AdvancedMarker position={storeCoords}>
-            <div className="bg-white/90 backdrop-blur-md p-3 rounded-2xl shadow-lg">
-              <img src={logo} className="h-5" alt="Store" />
+            <div className="bg-white  p-2 rounded-xl shadow-lg">
+              <img src={logo} className="h-4" alt="Store" />
             </div>
           </AdvancedMarker>
         ) : (
@@ -332,12 +371,12 @@ const MapContent = ({
       {clientCoords &&
         (hasMapId ? (
           <AdvancedMarker position={clientCoords}>
-            <div className="bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg">
+            <div className="bg-white h-10 w-10 flex items-center justify-center rounded-full shadow-lg">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-6 text-gray-700"
+                className="h-6 text-gray-900"
               >
                 <path
                   fillRule="evenodd"
