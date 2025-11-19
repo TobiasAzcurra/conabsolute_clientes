@@ -11,6 +11,7 @@ export const ClientProvider = ({ children }) => {
   const [clientData, setClientData] = useState(null);
   const [clientAssets, setClientAssets] = useState(null);
   const [clientConfig, setClientConfig] = useState(null);
+  const [aiBotConfig, setAiBotConfig] = useState(null); // ✅ NUEVO
 
   // ✅ Sólo guardamos productos "crudos"
   const [rawProducts, setRawProducts] = useState([]);
@@ -24,8 +25,7 @@ export const ClientProvider = ({ children }) => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [activeSortOption, setActiveSortOption] = useState(null);
 
-  // ✅ NUEVO: coordenadas de la sucursal en contexto
-  // Formato: { lat: number, lng: number } | null
+  // ✅ Coordenadas de la sucursal en contexto
   const [branchCoordinates, setBranchCoordinates] = useState(null);
 
   // ✅ Derivados
@@ -50,6 +50,8 @@ export const ClientProvider = ({ children }) => {
       setClientAssets,
       clientConfig,
       setClientConfig,
+      aiBotConfig, // ✅ NUEVO
+      setAiBotConfig, // ✅ NUEVO
 
       // Productos
       rawProducts,
@@ -84,7 +86,7 @@ export const ClientProvider = ({ children }) => {
       colors,
       colorsLoading,
 
-      // ✅ nuevo en el contexto
+      // Coordenadas
       branchCoordinates,
       setBranchCoordinates,
     }),
@@ -93,6 +95,7 @@ export const ClientProvider = ({ children }) => {
       clientData,
       clientAssets,
       clientConfig,
+      aiBotConfig, // ✅ NUEVO
       rawProducts,
       productsByCategory,
       categories,

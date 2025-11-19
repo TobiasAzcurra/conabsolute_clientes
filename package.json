@@ -17,6 +17,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.6.0",
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@google/genai": "^1.30.0",
     "@mercadopago/sdk-react": "^0.0.19",
     "@reduxjs/toolkit": "^1.9.3",
     "@vis.gl/react-google-maps": "^1.1.0",
