@@ -184,7 +184,7 @@ const ClientLayout = ({ children }) => {
             </div>
           </>
         ) : // ✅ MODIFICADO: Botón con avatar del bot
-        isBotEnabled ? (
+        isBotEnabled && shouldShowFloatingCart ? (
           <button
             onClick={openContactModal}
             className={`${
@@ -205,7 +205,7 @@ const ClientLayout = ({ children }) => {
             </div>
             <span>Contactanos</span>
           </button>
-        ) : (
+        ) : shouldShowFloatingCart ? (
           <button
             onClick={handleContactClick}
             className={`${
@@ -214,7 +214,7 @@ const ClientLayout = ({ children }) => {
           >
             <span>Contactanos</span>
           </button>
-        )}
+        ) : null}
       </div>
     </>
   );
