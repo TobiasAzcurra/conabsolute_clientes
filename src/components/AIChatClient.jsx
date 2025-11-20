@@ -32,16 +32,14 @@ const AIChatClient = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null); // ✅ NUEVO
+  const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // ✅ NUEVO: Scroll inicial al montar con historial
+  // Scroll inicial al montar con historial
   useEffect(() => {
     if (messages.length > 0 && messagesContainerRef.current) {
-      // Esperar a que todo se renderice (imágenes incluidas)
       const timer = setTimeout(() => {
         if (messagesContainerRef.current) {
-          // Scroll directo al fondo sin animación
           messagesContainerRef.current.scrollTop =
             messagesContainerRef.current.scrollHeight;
         }
@@ -49,12 +47,12 @@ const AIChatClient = () => {
 
       return () => clearTimeout(timer);
     }
-  }, []); // Solo al montar
+  }, []);
 
-  // ✅ MODIFICADO: Auto-scroll cuando llegan mensajes nuevos
+  // Auto-scroll cuando llegan mensajes nuevos
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, isTyping]); // Solo cuando cambia cantidad de mensajes
+  }, [messages.length, isTyping]);
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files || []);
@@ -111,15 +109,12 @@ const AIChatClient = () => {
     e.preventDefault();
     if ((!inputValue.trim() && selectedImages.length === 0) || isTyping) return;
 
-    // Capturar valores
     const text = inputValue;
     const imgs = [...selectedImages];
 
-    // Limpiar UI INMEDIATAMENTE (antes de enviar)
     setInputValue("");
     handleClearAllImages();
 
-    // Enviar sin bloquear
     sendMessage(text, imgs);
   };
 
@@ -143,6 +138,7 @@ const AIChatClient = () => {
   }
 
   const botAvatar = aiBotConfig.botAvatarUrl || clientAssets?.logo;
+  const botName = aiBotConfig?.name || "Asistente Virtual"; // ✅ NUEVO
 
   return (
     <div className="h-full flex font-primary font-light flex-col">
@@ -160,11 +156,12 @@ const AIChatClient = () => {
           )}
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-white">AnheloR2-D2</h3>
+          {/* ✅ MODIFICADO: Usar nombre dinámico */}
+          <h3 className="text-sm font-medium text-white">{botName}</h3>
         </div>
       </div>
 
-      {/* ✅ MODIFICADO: Área de mensajes con ref */}
+      {/* Área de mensajes con ref */}
       <div
         ref={messagesContainerRef}
         className="flex-1 overflow-y-auto px-4  gap-4 flex flex-col"
