@@ -6,6 +6,7 @@ const STORAGE_KEY_PREFIX = "aiChat_messages_";
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 const MAX_IMAGE_DIMENSION = 1024; // px
 const MAX_IMAGES_PER_MESSAGE = 4;
+const MAX_STORED_MESSAGES = 50; // ✅ NUEVO
 
 const GEMINI_API_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
@@ -15,9 +16,9 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
   const storageKey = `${STORAGE_KEY_PREFIX}${empresaId}_${sucursalId}`;
 
-  // ✅ NUEVO: Ref para AbortController
   const abortControllerRef = useRef(null);
 
+  // ✅ MODIFICADO: Cargar mensajes (ahora sin imágenes persistidas)
   const [messages, setMessages] = useState(() => {
     try {
       const stored = localStorage.getItem(storageKey);
@@ -26,6 +27,7 @@ export const useAIChat = ({ context, systemPrompt }) => {
         console.log(
           `📦 Mensajes cargados desde localStorage: ${parsed.length}`
         );
+        console.log(`⚠️ Las imágenes no persisten entre sesiones`);
         return parsed.map((msg) => ({
           ...msg,
           timestamp: new Date(msg.timestamp),
@@ -40,15 +42,63 @@ export const useAIChat = ({ context, systemPrompt }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
 
+  // ✅ MODIFICADO: Persistir sin imágenes + límite de mensajes
   useEffect(() => {
     if (messages.length > 0) {
       try {
-        localStorage.setItem(storageKey, JSON.stringify(messages));
+        // Tomar solo los últimos N mensajes
+        const recentMessages = messages.slice(-MAX_STORED_MESSAGES);
+
+        // Stripear imágenes antes de guardar (solo metadata)
+        const messagesToStore = recentMessages.map((msg) => {
+          if (msg.images && msg.images.length > 0) {
+            return {
+              ...msg,
+              // Reemplazar array de imágenes con metadata
+              hasImages: true,
+              imageCount: msg.images.length,
+              images: undefined, // No guardar el base64
+            };
+          }
+          return msg;
+        });
+
+        localStorage.setItem(storageKey, JSON.stringify(messagesToStore));
+
+        const savedCount = messagesToStore.length;
+        const withImages = messagesToStore.filter((m) => m.hasImages).length;
         console.log(
-          `💾 Mensajes guardados en localStorage: ${messages.length}`
+          `💾 ${savedCount} mensajes guardados (${withImages} con metadata de imágenes)`
         );
       } catch (error) {
         console.error("❌ Error guardando mensajes en localStorage:", error);
+
+        // ✅ NUEVO: Fallback si localStorage está lleno
+        if (error.name === "QuotaExceededError") {
+          console.warn("⚠️ localStorage lleno, intentando limpiar...");
+          try {
+            // Intentar guardar solo los últimos 20 mensajes
+            const emergencyMessages = messages.slice(-20).map((msg) => ({
+              id: msg.id,
+              role: msg.role,
+              content: msg.content,
+              timestamp: msg.timestamp,
+              // Sin imágenes ni metadata
+            }));
+
+            localStorage.setItem(storageKey, JSON.stringify(emergencyMessages));
+            console.log(`✅ Guardados últimos 20 mensajes (modo emergencia)`);
+          } catch (e) {
+            console.error(
+              "❌ No se pudo guardar ni en modo emergencia, limpiando storage..."
+            );
+            try {
+              localStorage.removeItem(storageKey);
+            } catch (cleanError) {
+              console.error("❌ No se pudo limpiar localStorage");
+            }
+          }
+        }
       }
     }
   }, [messages, storageKey]);
@@ -108,7 +158,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
     });
   }, []);
 
-  // ✅ NUEVO: Función para cancelar generación
   const cancelGeneration = useCallback(() => {
     if (abortControllerRef.current) {
       console.log("🛑 Cancelando generación...");
@@ -160,7 +209,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
       setIsTyping(true);
       setError(null);
 
-      // ✅ NUEVO: Crear AbortController
       abortControllerRef.current = new AbortController();
 
       try {
@@ -177,7 +225,7 @@ export const useAIChat = ({ context, systemPrompt }) => {
         let fullPrompt = `${defaultSystemPrompt}\n\n${context}\n\n`;
 
         messages.forEach((msg) => {
-          const imageCount = msg.images?.length || 0;
+          const imageCount = msg.images?.length || msg.imageCount || 0;
           const content =
             imageCount > 0
               ? `${msg.content} [${imageCount} imagen${
@@ -196,12 +244,10 @@ export const useAIChat = ({ context, systemPrompt }) => {
         console.log("Con imágenes:", imagesData.length);
         console.log("===========================================\n");
 
-        // ✅ NUEVO: Construir payload para fetch directo
         const textContent = `${fullPrompt}Usuario: ${userMessage.content}\n\nAsistente:`;
 
         const parts = [{ text: textContent }];
 
-        // Agregar imágenes si existen
         if (imagesData.length > 0) {
           imagesData.forEach((img) => {
             parts.push({
@@ -226,14 +272,13 @@ export const useAIChat = ({ context, systemPrompt }) => {
           hasImages: imagesData.length > 0,
         });
 
-        // ✅ NUEVO: Fetch con AbortController
         const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestBody),
-          signal: abortControllerRef.current.signal, // ← Cancelable
+          signal: abortControllerRef.current.signal,
         });
 
         if (!response.ok) {
@@ -243,7 +288,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
         const data = await response.json();
 
-        // Extraer texto de la respuesta
         const aiResponse =
           data.candidates?.[0]?.content?.parts?.[0]?.text ||
           "Lo siento, no pude generar una respuesta.";
@@ -263,12 +307,10 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
         setMessages((prev) => [...prev, assistantMessage]);
       } catch (err) {
-        // ✅ NUEVO: Diferenciar error de cancelación vs error real
         if (err.name === "AbortError") {
           console.log("⚠️ Generación cancelada por el usuario");
-          setError(null); // No mostrar error en cancelación
+          setError(null);
 
-          // Opcional: agregar mensaje de cancelación
           const cancelMessage = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
@@ -316,7 +358,7 @@ export const useAIChat = ({ context, systemPrompt }) => {
     isTyping,
     error,
     sendMessage,
-    cancelGeneration, // ✅ NUEVO
+    cancelGeneration,
     clearMessages,
     MAX_IMAGES_PER_MESSAGE,
   };
