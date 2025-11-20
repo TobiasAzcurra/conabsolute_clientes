@@ -89,9 +89,9 @@ const ClientLayout = ({ children }) => {
         {!shouldHideSearch && shouldShowFloatingCart && (
           <>
             <div
-              className={`fixed inset-x-0 bottom-0 z-10 
+              className={`fixed  inset-x-0 bottom-0 z-10 
                 ${totalQuantity > 0 ? "h-[125px]" : "h-[75px]"} 
-                bg-gray-300 bg-opacity-50 pointer-events-none backdrop-blur-md`}
+                bg-gray-300 bg-opacity-50 pointer-events-none backdrop-blur-md `}
             />
 
             <SearchBar
@@ -126,7 +126,7 @@ const ClientLayout = ({ children }) => {
 
             {/* Modal que crece desde el botón hacia arriba */}
             <div
-              className="fixed left-4 right-4 backdrop-blur-md bg-gray-300/50 rounded-3xl z-[9999] overflow-hidden"
+              className="fixed left-4 right-4 backdrop-blur-md  bg-gray-300/50 rounded-3xl z-[9999] overflow-hidden "
               style={{
                 bottom: totalQuantity > 0 ? "132px" : "75px",
                 top: "16px",
@@ -155,7 +155,7 @@ const ClientLayout = ({ children }) => {
                 {/* Botón cerrar */}
                 <button
                   onClick={closeContactModal}
-                  className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center  z-10 text-xl font-light "
+                  className="absolute top-4 right-4 w-10 h-10 bg-white  rounded-full flex items-center justify-center  z-10 text-xl font-light "
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -185,7 +185,7 @@ const ClientLayout = ({ children }) => {
               onClick={openContactModal}
               className={`${
                 totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
-              } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer hover:bg-gray-400/50 transition-colors`}
+              } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer hover:bg-gray-400/50 transition-colors `}
             >
               💬 Contactanos
             </button>
