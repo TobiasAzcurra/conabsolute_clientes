@@ -35,7 +35,6 @@ const AIChatClient = () => {
   const messagesContainerRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Scroll inicial al montar con historial
   useEffect(() => {
     if (messages.length > 0 && messagesContainerRef.current) {
       const timer = setTimeout(() => {
@@ -49,7 +48,6 @@ const AIChatClient = () => {
     }
   }, []);
 
-  // Auto-scroll cuando llegan mensajes nuevos
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length, isTyping]);
@@ -138,7 +136,7 @@ const AIChatClient = () => {
   }
 
   const botAvatar = aiBotConfig.botAvatarUrl || clientAssets?.logo;
-  const botName = aiBotConfig?.name || "Asistente Virtual"; // ✅ NUEVO
+  const botName = aiBotConfig?.name || "Asistente Virtual";
 
   return (
     <div className="h-full flex font-primary font-light flex-col">
@@ -156,15 +154,14 @@ const AIChatClient = () => {
           )}
         </div>
         <div className="flex-1">
-          {/* ✅ MODIFICADO: Usar nombre dinámico */}
           <h3 className="text-sm font-medium text-white">{botName}</h3>
         </div>
       </div>
 
-      {/* Área de mensajes con ref */}
+      {/* Área de mensajes */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-4  gap-4 flex flex-col"
+        className="flex-1 overflow-y-auto px-4 gap-4 flex flex-col"
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
@@ -227,28 +224,25 @@ const AIChatClient = () => {
         onSubmit={handleSendMessage}
         className="p-4 border-t border-gray-200/20"
       >
-        {/* Preview de imágenes */}
+        {/* ✅ MODIFICADO: Preview minimalista */}
         {imagePreviews.length > 0 && (
-          <div className="pb-2 ">
+          <div className="pb-2">
             <div className="flex gap-2 overflow-x-auto">
               {imagePreviews.map((preview, index) => (
-                <div key={index} className="relative flex-shrink-0">
+                <div key={index} className="flex-shrink-0">
+                  {/* ✅ Click directo en la imagen para eliminar */}
                   <img
                     src={preview}
                     alt={`Preview ${index + 1}`}
-                    className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
-                  />
-                  <button
                     onClick={() => handleRemoveImage(index)}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
-                  >
-                    ×
-                  </button>
+                    className="h-20 w-20 object-cover rounded-lg border-2 border-white/20 cursor-pointer hover:opacity-70 transition-opacity"
+                  />
                 </div>
               ))}
 
               {selectedImages.length < MAX_IMAGES_PER_MESSAGE && (
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="h-20 w-20 flex-shrink-0 bg-white/10 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
@@ -257,11 +251,12 @@ const AIChatClient = () => {
               )}
             </div>
 
-            <p className="text-xs text-red-500 mt-1">
-              Clickea una imagen para eliminarla.
+            <p className="text-xs text-white/70 mt-1">
+              Clickeá una imagen para eliminarla.
             </p>
           </div>
         )}
+
         <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}
@@ -300,7 +295,7 @@ const AIChatClient = () => {
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isTyping}
             placeholder="Escribe tu mensaje..."
-            className="flex-1 px-4 h-10 bg-white  rounded-full text-xs text-gray-900 placeholder:text-gray-900/50 focus:outline-none disabled:opacity-50"
+            className="flex-1 px-4 h-10 bg-white rounded-full text-xs text-gray-900 placeholder:text-gray-900/50 focus:outline-none disabled:opacity-50"
           />
 
           {isTyping ? (
@@ -330,7 +325,7 @@ const AIChatClient = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="h-4 "
+                className="h-4"
               >
                 <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
               </svg>
@@ -369,7 +364,7 @@ const MessageBubble = ({ message, botAvatar }) => {
 
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-          isUser ? "bg-white text-gray-900" : "bg-primary  text-white"
+          isUser ? "bg-white text-gray-900" : "bg-primary text-white"
         }`}
       >
         {message.images && message.images.length > 0 && (
