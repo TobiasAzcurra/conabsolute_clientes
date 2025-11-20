@@ -11,8 +11,9 @@ export const ClientProvider = ({ children }) => {
   const [clientData, setClientData] = useState(null);
   const [clientAssets, setClientAssets] = useState(null);
   const [clientConfig, setClientConfig] = useState(null);
+  const [aiBotConfig, setAiBotConfig] = useState(null); // ✅ NUEVO
 
-  // ✅ CAMBIO: Solo guardamos productos "crudos" sin procesar
+  // ✅ Sólo guardamos productos "crudos"
   const [rawProducts, setRawProducts] = useState([]);
 
   const [categories, setCategories] = useState([]);
@@ -24,18 +25,19 @@ export const ClientProvider = ({ children }) => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [activeSortOption, setActiveSortOption] = useState(null);
 
-  // ✅ NUEVO: Memoizaciones derivadas (computed values)
+  // ✅ Coordenadas de la sucursal en contexto
+  const [branchCoordinates, setBranchCoordinates] = useState(null);
+
+  // ✅ Derivados
   const productsByCategory = useMemo(
     () => groupByCategory(rawProducts),
     [rawProducts]
   );
 
-  // Cargar tipografía y colores cuando tenemos los IDs
   const { typography, loading: typographyLoading } = useTypography(
     empresaId,
     sucursalId
   );
-
   const { colors, loading: colorsLoading } = useColors(empresaId, sucursalId);
 
   const value = useMemo(
@@ -48,16 +50,21 @@ export const ClientProvider = ({ children }) => {
       setClientAssets,
       clientConfig,
       setClientConfig,
+      aiBotConfig, // ✅ NUEVO
+      setAiBotConfig, // ✅ NUEVO
 
-      // ✅ CAMBIO: Exponemos rawProducts y productos derivados
+      // Productos
       rawProducts,
       setRawProducts,
-      productsByCategory, // Computed
+      productsByCategory,
 
+      // Cat/Tags
       categories,
       setCategories,
       productTags,
       setProductTags,
+
+      // Slugs/IDs
       slugEmpresa,
       setSlugEmpresa,
       slugSucursal,
@@ -66,20 +73,29 @@ export const ClientProvider = ({ children }) => {
       setEmpresaId,
       sucursalId,
       setSucursalId,
+
+      // Filtros/UI
       activeFilters,
       setActiveFilters,
       activeSortOption,
       setActiveSortOption,
+
+      // Theming
       typography,
       typographyLoading,
       colors,
       colorsLoading,
+
+      // Coordenadas
+      branchCoordinates,
+      setBranchCoordinates,
     }),
     [
       isLoaded,
       clientData,
       clientAssets,
       clientConfig,
+      aiBotConfig, // ✅ NUEVO
       rawProducts,
       productsByCategory,
       categories,
@@ -94,6 +110,7 @@ export const ClientProvider = ({ children }) => {
       typographyLoading,
       colors,
       colorsLoading,
+      branchCoordinates,
     ]
   );
 

@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useClient } from '../contexts/ClientContext';
-import { cleanPhoneNumber } from '../firebase/utils/phoneUtils';
+import React, { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useClient } from "../contexts/ClientContext";
 
 const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
   const { slugEmpresa, slugSucursal } = useClient();
@@ -15,7 +14,7 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
 
   const handleSearch = () => {
     if (phoneNumber.trim().length < 8) return;
-    navigate(`/${slugEmpresa}/${slugSucursal}/pedido`, {
+    navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${phoneNumber}`, {
       state: { phoneNumber },
     });
   };
@@ -25,8 +24,8 @@ const SearchBar = ({ phoneNumber, setPhoneNumber, previousPhone }) => {
       <input
         type="tel"
         value={phoneNumber}
-        onChange={(e) => setPhoneNumber(cleanPhoneNumber(e.target.value))}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         placeholder="Busca tu pedido. Ej: 3585168275"
         className="text-gray-900 font-light px-4 placeholder:text-gray-400  font-primary  text-xs bg-transparent outline-none w-full"
       />

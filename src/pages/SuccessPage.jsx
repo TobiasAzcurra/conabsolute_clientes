@@ -1,19 +1,21 @@
 import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useClient } from "../contexts/ClientContext";
 
 const SuccessPage = () => {
   const { slugEmpresa, slugSucursal } = useClient();
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const phone = location.state?.phone;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${orderId}`);
+      navigate(`/${slugEmpresa}/${slugSucursal}/pedido/${phone}`);
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, slugEmpresa, slugSucursal, phone]);
 
   return (
     <>

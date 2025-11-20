@@ -276,7 +276,7 @@ const QuickAddToCart = ({
               <div className="absolute z-[60]">
                 <button
                   disabled={disabled}
-                  className={`bg-primary text-sm flex flex-row items-center gap-2 font-primary text-gray-50 rounded-full h-10 px-4 font-medium ${
+                  className={`bg-primary text-sm flex flex-row items-center gap-2 font-primary text-gray-50 rounded-full h-10 px-4 font-light ${
                     disabled ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   onClick={!disabled ? startAddingProcess : undefined}
