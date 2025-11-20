@@ -145,7 +145,7 @@ const AIChatClient = () => {
   const botAvatar = aiBotConfig.botAvatarUrl || clientAssets?.logo;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex font-primary font-light flex-col">
       {/* Header del chat */}
       <div className="flex items-center gap-2 p-4 border-b border-gray-200/20">
         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden">
@@ -225,47 +225,46 @@ const AIChatClient = () => {
         </div>
       )}
 
-      {/* Preview de imágenes */}
-      {imagePreviews.length > 0 && (
-        <div className="px-4 pb-2">
-          <div className="flex gap-2 overflow-x-auto">
-            {imagePreviews.map((preview, index) => (
-              <div key={index} className="relative flex-shrink-0">
-                <img
-                  src={preview}
-                  alt={`Preview ${index + 1}`}
-                  className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
-                />
-                <button
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-
-            {selectedImages.length < MAX_IMAGES_PER_MESSAGE && (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="h-20 w-20 flex-shrink-0 bg-white/10 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                <span className="text-2xl text-white/50">+</span>
-              </button>
-            )}
-          </div>
-
-          <p className="text-xs text-white/50 mt-1">
-            {selectedImages.length}/{MAX_IMAGES_PER_MESSAGE} imágenes
-          </p>
-        </div>
-      )}
-
       {/* Input */}
       <form
         onSubmit={handleSendMessage}
         className="p-4 border-t border-gray-200/20"
       >
+        {/* Preview de imágenes */}
+        {imagePreviews.length > 0 && (
+          <div className="pb-2 ">
+            <div className="flex gap-2 overflow-x-auto">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative flex-shrink-0">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
+                  />
+                  <button
+                    onClick={() => handleRemoveImage(index)}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+
+              {selectedImages.length < MAX_IMAGES_PER_MESSAGE && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-20 w-20 flex-shrink-0 bg-white/10 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+                >
+                  <span className="text-2xl text-white/50">+</span>
+                </button>
+              )}
+            </div>
+
+            <p className="text-xs text-red-500 mt-1">
+              Clickea una imagen para eliminarla.
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <input
             ref={fileInputRef}

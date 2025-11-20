@@ -5,7 +5,7 @@ import { useClient } from "../contexts/ClientContext";
 const STORAGE_KEY_PREFIX = "aiChat_messages_";
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 const MAX_IMAGE_DIMENSION = 1024; // px
-const MAX_IMAGES_PER_MESSAGE = 4;
+const MAX_IMAGES_PER_MESSAGE = 3;
 const MAX_STORED_MESSAGES = 50; // ✅ NUEVO
 
 const GEMINI_API_URL =
