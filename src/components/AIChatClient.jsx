@@ -147,7 +147,7 @@ const AIChatClient = () => {
   return (
     <div className="h-full flex flex-col">
       {/* Header del chat */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-200/20">
+      <div className="flex items-center gap-2 p-4 border-b border-gray-200/20">
         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center overflow-hidden">
           {botAvatar ? (
             <img
@@ -160,23 +160,14 @@ const AIChatClient = () => {
           )}
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-white">Asistente Virtual</h3>
-          <p className="text-xs text-white/70">En línea</p>
+          <h3 className="text-sm font-medium text-white">AnheloR2-D2</h3>
         </div>
-        {messages.length > 0 && (
-          <button
-            onClick={clearMessages}
-            className="text-xs text-white/70 hover:text-white"
-          >
-            Limpiar
-          </button>
-        )}
       </div>
 
       {/* ✅ MODIFICADO: Área de mensajes con ref */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+        className="flex-1 overflow-y-auto px-4  gap-4 flex flex-col"
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
@@ -290,14 +281,14 @@ const AIChatClient = () => {
             disabled={
               isTyping || selectedImages.length >= MAX_IMAGES_PER_MESSAGE
             }
-            className="p-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50"
+            className="h-10 w-10 flex items-center justify-center bg-white rounded-full hover:bg-white/20 transition-colors disabled:opacity-50"
             title="Adjuntar imagen"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className="w-5 h-5"
+              className="h-4 text-gray-900"
             >
               <path
                 fillRule="evenodd"
@@ -313,21 +304,21 @@ const AIChatClient = () => {
             onChange={(e) => setInputValue(e.target.value)}
             disabled={isTyping}
             placeholder="Escribe tu mensaje..."
-            className="flex-1 px-4 h-12 bg-white/10 backdrop-blur-sm rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50"
+            className="flex-1 px-4 h-10 bg-white  rounded-full text-xs text-gray-900 placeholder:text-gray-900/50 focus:outline-none disabled:opacity-50"
           />
 
           {isTyping ? (
             <button
               type="button"
               onClick={handleStop}
-              className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+              className="h-10 w-10 bg-red-500 flex items-center justify-center text-white rounded-full hover:bg-red-600 transition-colors"
               title="Detener generación"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="w-5 h-5"
+                className="h-4"
               >
                 <rect x="6" y="6" width="12" height="12" rx="1" />
               </svg>
@@ -336,14 +327,14 @@ const AIChatClient = () => {
             <button
               type="submit"
               disabled={!inputValue.trim() && selectedImages.length === 0}
-              className="p-3 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 disabled:cursor-not-allowed"
+              className="h-10 w-10 flex items-center justify-center bg-white rounded-full hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 text-gray-900 disabled:cursor-not-allowed"
               title="Enviar mensaje"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="w-5 h-5"
+                className="h-4 "
               >
                 <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
               </svg>
@@ -360,7 +351,7 @@ const MessageBubble = ({ message, botAvatar }) => {
 
   return (
     <div
-      className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : ""}`}
+      className={`flex items-start gap-2 ${isUser ? "flex-row-reverse" : ""}`}
     >
       <div
         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center overflow-hidden ${
@@ -382,9 +373,7 @@ const MessageBubble = ({ message, botAvatar }) => {
 
       <div
         className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-          isUser
-            ? "bg-white text-gray-900"
-            : "bg-white/10 backdrop-blur-sm text-white"
+          isUser ? "bg-white text-gray-900" : "bg-primary  text-white"
         }`}
       >
         {message.images && message.images.length > 0 && (
@@ -404,7 +393,7 @@ const MessageBubble = ({ message, botAvatar }) => {
           </div>
         )}
 
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="text-xs leading-relaxed whitespace-pre-wrap">
           {message.content}
         </p>
         <p

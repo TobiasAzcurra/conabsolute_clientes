@@ -122,14 +122,11 @@ const ClientLayout = ({ children }) => {
         {isContactModalOpen && isBotEnabled ? (
           <>
             {/* Overlay oscuro */}
-            <div
-              className="fixed inset-0 bg-black/40 z-[9998]"
-              onClick={closeContactModal}
-            />
+            <div onClick={closeContactModal} />
 
             {/* Modal que crece desde el botón hacia arriba */}
             <div
-              className="fixed left-4 right-4 backdrop-blur-md bg-gray-900/90 rounded-3xl z-[9999] overflow-hidden"
+              className="fixed left-4 right-4 backdrop-blur-md bg-gray-300/50 rounded-3xl z-[9999] overflow-hidden"
               style={{
                 bottom: totalQuantity > 0 ? "132px" : "75px",
                 top: "16px",
@@ -158,9 +155,22 @@ const ClientLayout = ({ children }) => {
                 {/* Botón cerrar */}
                 <button
                   onClick={closeContactModal}
-                  className="absolute top-4 right-4 w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-xl z-10 text-xl font-light hover:bg-gray-100"
+                  className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center  z-10 text-xl font-light "
                 >
-                  ×
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="h-4 text-gray-900"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18 18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
 
                 {/* ✅ Componente del chat */}
