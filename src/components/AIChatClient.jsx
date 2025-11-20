@@ -20,7 +20,7 @@ const AIChatClient = () => {
     isTyping,
     error,
     sendMessage,
-    cancelGeneration, // ✅ NUEVO
+    cancelGeneration,
     clearMessages,
     MAX_IMAGES_PER_MESSAGE,
   } = useAIChat({
@@ -32,11 +32,29 @@ const AIChatClient = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null); // ✅ NUEVO
   const fileInputRef = useRef(null);
 
+  // ✅ NUEVO: Scroll inicial al montar con historial
+  useEffect(() => {
+    if (messages.length > 0 && messagesContainerRef.current) {
+      // Esperar a que todo se renderice (imágenes incluidas)
+      const timer = setTimeout(() => {
+        if (messagesContainerRef.current) {
+          // Scroll directo al fondo sin animación
+          messagesContainerRef.current.scrollTop =
+            messagesContainerRef.current.scrollHeight;
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, []); // Solo al montar
+
+  // ✅ MODIFICADO: Auto-scroll cuando llegan mensajes nuevos
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages.length, isTyping]); // Solo cuando cambia cantidad de mensajes
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files || []);
@@ -89,7 +107,6 @@ const AIChatClient = () => {
     }
   };
 
-  // ✅ MODIFICADO: Limpiar INMEDIATAMENTE y enviar sin bloquear
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if ((!inputValue.trim() && selectedImages.length === 0) || isTyping) return;
@@ -102,11 +119,10 @@ const AIChatClient = () => {
     setInputValue("");
     handleClearAllImages();
 
-    // Enviar sin bloquear (el estado isTyping ya cambiará dentro de sendMessage)
+    // Enviar sin bloquear
     sendMessage(text, imgs);
   };
 
-  // ✅ NUEVO: Handler para stop
   const handleStop = () => {
     cancelGeneration();
   };
@@ -157,8 +173,11 @@ const AIChatClient = () => {
         )}
       </div>
 
-      {/* Área de mensajes */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+      {/* ✅ MODIFICADO: Área de mensajes con ref */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-4"
+      >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
@@ -297,9 +316,7 @@ const AIChatClient = () => {
             className="flex-1 px-4 h-12 bg-white/10 backdrop-blur-sm rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50"
           />
 
-          {/* ✅ MODIFICADO: Botón cambia entre enviar/stop */}
           {isTyping ? (
-            // Botón STOP
             <button
               type="button"
               onClick={handleStop}
@@ -316,7 +333,6 @@ const AIChatClient = () => {
               </svg>
             </button>
           ) : (
-            // Botón ENVIAR
             <button
               type="submit"
               disabled={!inputValue.trim() && selectedImages.length === 0}
