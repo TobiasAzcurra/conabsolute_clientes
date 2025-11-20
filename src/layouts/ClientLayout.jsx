@@ -7,11 +7,11 @@ import Carrusel from "../components/Carrusel";
 import NavMenu from "../components/NavMenu";
 import FloatingCart from "../components/shopping/FloatingCart";
 import SearchBar from "../components/SearchBar";
-import AIChatClient from "../components/AIChatClient"; // ✅ NUEVO
+import AIChatClient from "../components/AIChatClient";
 import { useLocation } from "react-router-dom";
 
 const ClientLayout = ({ children }) => {
-  const { clientData, clientAssets, clientConfig, aiBotConfig } = useClient(); // ✅ NUEVO: aiBotConfig
+  const { clientData, clientAssets, clientConfig, aiBotConfig } = useClient();
   const { cart } = useCart();
   const location = useLocation();
   const pathname = location.pathname;
@@ -32,7 +32,6 @@ const ClientLayout = ({ children }) => {
   const [showSuggestion, setShowSuggestion] = useState(false);
   const [previousPhone, setPreviousPhone] = useState("");
 
-  // Estado del modal de contacto (ahora chat AI)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   useEffect(() => {
@@ -55,8 +54,19 @@ const ClientLayout = ({ children }) => {
       ? "pb-[125px]"
       : "pb-[75px]";
 
-  // ✅ Verificar si el bot está habilitado
   const isBotEnabled = aiBotConfig?.enabled === true;
+
+  // ✅ NUEVO: Obtener avatar del bot
+  const botAvatar = aiBotConfig?.botAvatarUrl || clientAssets?.logo;
+
+  const handleContactClick = () => {
+    const phone = clientConfig?.logistics?.phone || "";
+    const msg = "Hola! Tengo una consulta.";
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(
+      msg
+    )}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   return (
     <>
@@ -121,10 +131,8 @@ const ClientLayout = ({ children }) => {
         {/* ==================== MODAL DE CHAT AI ==================== */}
         {isContactModalOpen && isBotEnabled ? (
           <>
-            {/* Overlay oscuro */}
             <div onClick={closeContactModal} />
 
-            {/* Modal que crece desde el botón hacia arriba */}
             <div
               className="fixed left-4 right-4 backdrop-blur-md  bg-gray-300/50 rounded-3xl z-[9999] overflow-hidden "
               style={{
@@ -133,7 +141,6 @@ const ClientLayout = ({ children }) => {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Animación de crecimiento */}
               <style jsx>{`
                 @keyframes growUp {
                   from {
@@ -152,7 +159,6 @@ const ClientLayout = ({ children }) => {
               `}</style>
 
               <div className="animate-grow-up h-full relative">
-                {/* Botón cerrar */}
                 <button
                   onClick={closeContactModal}
                   className="absolute top-4 right-4 w-10 h-10 bg-white  rounded-full flex items-center justify-center  z-10 text-xl font-light "
@@ -161,36 +167,54 @@ const ClientLayout = ({ children }) => {
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke-width="1.5"
+                    strokeWidth="1.5"
                     stroke="currentColor"
-                    class="h-4 text-gray-900"
+                    className="h-4 text-gray-900"
                   >
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       d="M6 18 18 6M6 6l12 12"
                     />
                   </svg>
                 </button>
 
-                {/* ✅ Componente del chat */}
                 <AIChatClient />
               </div>
             </div>
           </>
-        ) : (
-          // ✅ Botón "Contactanos" solo si el bot está habilitado
-          isBotEnabled && (
-            <button
-              onClick={openContactModal}
-              className={`${
-                totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
-              } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-2.5 py-1.5 text-gray-50 rounded-full text-xs mx-auto w-fit items-center cursor-pointer hover:bg-gray-400/50 transition-colors `}
-            >
-              💬 Contactanos
-            </button>
-          )
-        )}
+        ) : // ✅ MODIFICADO: Botón con avatar del bot
+        isBotEnabled && shouldShowFloatingCart ? (
+          <button
+            onClick={openContactModal}
+            className={`${
+              totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
+            } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-4 h-10 text-gray-50 rounded-full text-xs mx-auto w-fit flex items-center gap-2 cursor-pointer hover:bg-gray-400/50 transition-colors`}
+          >
+            {/* ✅ Avatar del bot */}
+            <div className="w-6 h-6 rounded-full overflow-hidden bg-white flex items-center justify-center">
+              {botAvatar ? (
+                <img
+                  src={botAvatar}
+                  alt="Bot"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-xs">🤖</span>
+              )}
+            </div>
+            <span>Contactanos</span>
+          </button>
+        ) : shouldShowFloatingCart ? (
+          <button
+            onClick={handleContactClick}
+            className={`${
+              totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
+            } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-4 h-10 text-gray-50 rounded-full text-xs mx-auto w-fit flex items-center gap-2 cursor-pointer hover:bg-gray-400/50 transition-colors`}
+          >
+            <span>Contactanos</span>
+          </button>
+        ) : null}
       </div>
     </>
   );
