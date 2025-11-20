@@ -8,7 +8,6 @@ const AIChatClient = () => {
   const { rawProducts, categories, clientConfig, aiBotConfig, clientAssets } =
     useClient();
 
-  // Generar contexto pasando parámetros
   const { context, systemPrompt } = useClientAppAIContext({
     products: rawProducts,
     categories,
@@ -16,67 +15,95 @@ const AIChatClient = () => {
     aiBotConfig,
   });
 
-  // Hook de chat con persistencia
-  const { messages, isTyping, error, sendMessage, clearMessages } = useAIChat({
+  const {
+    messages,
+    isTyping,
+    error,
+    sendMessage,
+    clearMessages,
+    MAX_IMAGES_PER_MESSAGE,
+  } = useAIChat({
     context,
     systemPrompt,
   });
 
   const [inputValue, setInputValue] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null); // ✅ NUEVO
-  const [imagePreview, setImagePreview] = useState(null); // ✅ NUEVO
+  const [selectedImages, setSelectedImages] = useState([]); // ✅ ARRAY
+  const [imagePreviews, setImagePreviews] = useState([]); // ✅ ARRAY
   const messagesEndRef = useRef(null);
-  const fileInputRef = useRef(null); // ✅ NUEVO
+  const fileInputRef = useRef(null);
 
-  // Auto-scroll al último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // ✅ NUEVO: Manejar selección de imagen
+  // ✅ NUEVO: Manejar múltiples imágenes
   const handleImageSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validar tipo
-    if (!file.type.startsWith("image/")) {
-      alert("Por favor selecciona una imagen válida");
+    // Validar que no exceda el límite
+    if (selectedImages.length + files.length > MAX_IMAGES_PER_MESSAGE) {
+      alert(`Máximo ${MAX_IMAGES_PER_MESSAGE} imágenes por mensaje`);
       return;
     }
 
-    // Validar tamaño (max 10MB antes de comprimir)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("La imagen es muy grande (max 10MB)");
-      return;
-    }
+    // Validar cada archivo
+    const validFiles = files.filter((file) => {
+      if (!file.type.startsWith("image/")) {
+        alert(`${file.name} no es una imagen válida`);
+        return false;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`${file.name} es muy grande (max 10MB)`);
+        return false;
+      }
+      return true;
+    });
 
-    setSelectedImage(file);
+    if (validFiles.length === 0) return;
 
-    // Crear preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImagePreview(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    // Agregar al estado
+    setSelectedImages((prev) => [...prev, ...validFiles]);
+
+    // Crear previews
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreviews((prev) => [...prev, e.target.result]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  // ✅ NUEVO: Limpiar imagen seleccionada
-  const handleClearImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
+  // ✅ NUEVO: Eliminar imagen específica
+  const handleRemoveImage = (index) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+
+    // Limpiar input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  // ✅ MODIFICADO: Enviar con imagen opcional
+  // ✅ MODIFICADO: Limpiar todas las imágenes
+  const handleClearAllImages = () => {
+    setSelectedImages([]);
+    setImagePreviews([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // ✅ MODIFICADO: Enviar con múltiples imágenes
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if ((!inputValue.trim() && !selectedImage) || isTyping) return;
+    if ((!inputValue.trim() && selectedImages.length === 0) || isTyping) return;
 
-    await sendMessage(inputValue, selectedImage);
+    await sendMessage(inputValue, selectedImages);
     setInputValue("");
-    handleClearImage();
+    handleClearAllImages();
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -145,7 +172,6 @@ const AIChatClient = () => {
               nuestros productos, horarios o cualquier otra consulta.
             </p>
 
-            {/* Sugerencias iniciales */}
             <div className="space-y-2 w-full max-w-sm">
               <p className="text-xs text-white/70 mb-2">
                 Preguntas frecuentes:
@@ -178,29 +204,46 @@ const AIChatClient = () => {
         )}
       </div>
 
-      {/* Error message */}
       {error && (
         <div className="px-4 py-2 bg-red-500/20 border-t border-red-500/30">
           <p className="text-xs text-red-200">{error}</p>
         </div>
       )}
 
-      {/* ✅ NUEVO: Preview de imagen seleccionada */}
-      {imagePreview && (
+      {/* ✅ NUEVO: Preview horizontal de múltiples imágenes */}
+      {imagePreviews.length > 0 && (
         <div className="px-4 pb-2">
-          <div className="relative inline-block">
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
-            />
-            <button
-              onClick={handleClearImage}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
-            >
-              ×
-            </button>
+          <div className="flex gap-2 overflow-x-auto">
+            {imagePreviews.map((preview, index) => (
+              <div key={index} className="relative flex-shrink-0">
+                <img
+                  src={preview}
+                  alt={`Preview ${index + 1}`}
+                  className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
+                />
+                <button
+                  onClick={() => handleRemoveImage(index)}
+                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+
+            {/* ✅ Botón para agregar más (si no llegó al límite) */}
+            {selectedImages.length < MAX_IMAGES_PER_MESSAGE && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="h-20 w-20 flex-shrink-0 bg-white/10 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <span className="text-2xl text-white/50">+</span>
+              </button>
+            )}
           </div>
+
+          <p className="text-xs text-white/50 mt-1">
+            {selectedImages.length}/{MAX_IMAGES_PER_MESSAGE} imágenes
+          </p>
         </div>
       )}
 
@@ -210,18 +253,21 @@ const AIChatClient = () => {
         className="p-4 border-t border-gray-200/20"
       >
         <div className="flex items-center gap-2">
-          {/* ✅ NUEVO: Botón adjuntar imagen */}
+          {/* ✅ MODIFICADO: Input con multiple */}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
+            multiple // ← Permitir múltiples archivos
             onChange={handleImageSelect}
             className="hidden"
           />
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isTyping}
+            disabled={
+              isTyping || selectedImages.length >= MAX_IMAGES_PER_MESSAGE
+            }
             className="p-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50"
             title="Adjuntar imagen"
           >
@@ -249,7 +295,9 @@ const AIChatClient = () => {
           />
           <button
             type="submit"
-            disabled={(!inputValue.trim() && !selectedImage) || isTyping}
+            disabled={
+              (!inputValue.trim() && selectedImages.length === 0) || isTyping
+            }
             className="p-3 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 disabled:cursor-not-allowed"
           >
             <svg
@@ -267,7 +315,7 @@ const AIChatClient = () => {
   );
 };
 
-// ✅ MODIFICADO: MessageBubble con soporte para imágenes
+// ✅ MODIFICADO: MessageBubble con múltiples imágenes
 const MessageBubble = ({ message, botAvatar }) => {
   const isUser = message.role === "user";
 
@@ -300,13 +348,22 @@ const MessageBubble = ({ message, botAvatar }) => {
             : "bg-white/10 backdrop-blur-sm text-white"
         }`}
       >
-        {/* ✅ NUEVO: Mostrar imagen si existe */}
-        {message.image && (
-          <img
-            src={message.image.preview}
-            alt="Imagen adjunta"
-            className="rounded-lg mb-2 max-w-full h-auto"
-          />
+        {/* ✅ MODIFICADO: Mostrar múltiples imágenes */}
+        {message.images && message.images.length > 0 && (
+          <div
+            className={`mb-2 ${
+              message.images.length > 1 ? "grid grid-cols-2 gap-2" : ""
+            }`}
+          >
+            {message.images.map((img, index) => (
+              <img
+                key={index}
+                src={img.preview}
+                alt={`Imagen ${index + 1}`}
+                className="rounded-lg max-w-full h-auto"
+              />
+            ))}
+          </div>
         )}
 
         <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -327,7 +384,6 @@ const MessageBubble = ({ message, botAvatar }) => {
   );
 };
 
-// Componente TypingIndicator
 const TypingIndicator = ({ botAvatar }) => (
   <div className="flex items-start gap-3">
     <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden">

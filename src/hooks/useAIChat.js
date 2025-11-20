@@ -6,6 +6,7 @@ import { useClient } from "../contexts/ClientContext";
 const STORAGE_KEY_PREFIX = "aiChat_messages_";
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 const MAX_IMAGE_DIMENSION = 1024; // px
+const MAX_IMAGES_PER_MESSAGE = 4; // ✅ NUEVO
 
 export const useAIChat = ({ context, systemPrompt }) => {
   const { empresaId, sucursalId } = useClient();
@@ -102,19 +103,34 @@ export const useAIChat = ({ context, systemPrompt }) => {
     });
   }, []);
 
+  // ✅ MODIFICADO: sendMessage ahora acepta ARRAY de imágenes
   const sendMessage = useCallback(
-    async (userInput, imageFile = null) => {
-      if ((!userInput.trim() && !imageFile) || isTyping) return;
+    async (userInput, imageFiles = []) => {
+      if ((!userInput.trim() && imageFiles.length === 0) || isTyping) return;
 
-      let imageData = null;
+      // ✅ Validar cantidad de imágenes
+      if (imageFiles.length > MAX_IMAGES_PER_MESSAGE) {
+        setError(`Máximo ${MAX_IMAGES_PER_MESSAGE} imágenes por mensaje`);
+        return;
+      }
 
-      if (imageFile) {
+      let imagesData = [];
+
+      // ✅ Procesar TODAS las imágenes
+      if (imageFiles.length > 0) {
         try {
-          console.log(`📷 Procesando imagen: ${imageFile.name}`);
-          imageData = await compressImage(imageFile);
+          console.log(`📷 Procesando ${imageFiles.length} imágenes...`);
+
+          // Procesar en paralelo
+          const compressionPromises = imageFiles.map((file) =>
+            compressImage(file)
+          );
+          imagesData = await Promise.all(compressionPromises);
+
+          console.log(`✅ ${imagesData.length} imágenes procesadas`);
         } catch (err) {
-          console.error("❌ Error procesando imagen:", err);
-          setError("Error al procesar la imagen");
+          console.error("❌ Error procesando imágenes:", err);
+          setError("Error al procesar las imágenes");
           return;
         }
       }
@@ -122,9 +138,13 @@ export const useAIChat = ({ context, systemPrompt }) => {
       const userMessage = {
         id: Date.now().toString(),
         role: "user",
-        content: userInput.trim() || "[Imagen adjunta]",
+        content:
+          userInput.trim() ||
+          `[${imagesData.length} imagen${
+            imagesData.length > 1 ? "es" : ""
+          } adjunta${imagesData.length > 1 ? "s" : ""}]`,
         timestamp: new Date(),
-        ...(imageData && { image: imageData }),
+        ...(imagesData.length > 0 && { images: imagesData }), // ✅ plural: images
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -147,9 +167,13 @@ export const useAIChat = ({ context, systemPrompt }) => {
         let fullPrompt = `${defaultSystemPrompt}\n\n${context}\n\n`;
 
         messages.forEach((msg) => {
-          const content = msg.image
-            ? `${msg.content} [imagen adjunta]`
-            : msg.content;
+          const imageCount = msg.images?.length || 0;
+          const content =
+            imageCount > 0
+              ? `${msg.content} [${imageCount} imagen${
+                  imageCount > 1 ? "es" : ""
+                } adjunta${imageCount > 1 ? "s" : ""}]`
+              : msg.content;
           fullPrompt += `${
             msg.role === "user" ? "Usuario" : "Asistente"
           }: ${content}\n\n`;
@@ -159,26 +183,25 @@ export const useAIChat = ({ context, systemPrompt }) => {
         console.log("🤖 MENSAJE ENVIADO A GEMINI (Cliente):");
         console.log("===========================================");
         console.log("Historial de mensajes:", messages.length);
-        console.log("Con imagen:", !!imageData);
+        console.log("Con imágenes:", imagesData.length);
         console.log("===========================================\n");
 
-        // ✅ FIX: Estructura correcta para Gemini con imágenes
+        // ✅ FIX: Construir array con múltiples imágenes
         let promptParts;
 
-        if (imageData) {
-          // Con imagen: usar array de partes
+        if (imagesData.length > 0) {
+          // Con imágenes: texto + todas las imágenes
           promptParts = [
             `${fullPrompt}Usuario: ${userMessage.content}\n\nAsistente:`,
-            {
+            ...imagesData.map((img) => ({
               inlineData: {
-                // ← camelCase, no snake_case
-                mimeType: imageData.mimeType,
-                data: imageData.data,
+                mimeType: img.mimeType,
+                data: img.data,
               },
-            },
+            })),
           ];
         } else {
-          // Sin imagen: solo texto
+          // Sin imágenes: solo texto
           fullPrompt += `Usuario: ${userMessage.content}\n\nAsistente:`;
           promptParts = fullPrompt;
         }
@@ -186,7 +209,7 @@ export const useAIChat = ({ context, systemPrompt }) => {
         // Generar respuesta
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
-          contents: promptParts, // ← Pasar directamente el array o string
+          contents: promptParts,
         });
 
         const aiResponse =
@@ -245,5 +268,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
     error,
     sendMessage,
     clearMessages,
+    MAX_IMAGES_PER_MESSAGE, // ✅ Exportar límite
   };
 };
