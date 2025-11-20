@@ -4,14 +4,14 @@ import { GoogleGenAI } from "@google/genai";
 import { useClient } from "../contexts/ClientContext";
 
 const STORAGE_KEY_PREFIX = "aiChat_messages_";
+const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
+const MAX_IMAGE_DIMENSION = 1024; // px
 
 export const useAIChat = ({ context, systemPrompt }) => {
   const { empresaId, sucursalId } = useClient();
 
-  // Key única por sucursal para persistencia
   const storageKey = `${STORAGE_KEY_PREFIX}${empresaId}_${sucursalId}`;
 
-  // ✅ Cargar mensajes desde localStorage al montar
   const [messages, setMessages] = useState(() => {
     try {
       const stored = localStorage.getItem(storageKey);
@@ -22,7 +22,7 @@ export const useAIChat = ({ context, systemPrompt }) => {
         );
         return parsed.map((msg) => ({
           ...msg,
-          timestamp: new Date(msg.timestamp), // Rehidratar Date objects
+          timestamp: new Date(msg.timestamp),
         }));
       }
     } catch (error) {
@@ -34,7 +34,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Persistir mensajes en localStorage cada vez que cambien
   useEffect(() => {
     if (messages.length > 0) {
       try {
@@ -48,15 +47,84 @@ export const useAIChat = ({ context, systemPrompt }) => {
     }
   }, [messages, storageKey]);
 
+  const compressImage = useCallback(async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const img = new Image();
+
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+            if (width > height) {
+              height = (height / width) * MAX_IMAGE_DIMENSION;
+              width = MAX_IMAGE_DIMENSION;
+            } else {
+              width = (width / height) * MAX_IMAGE_DIMENSION;
+              height = MAX_IMAGE_DIMENSION;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          let quality = 0.8;
+          let base64 = canvas.toDataURL(file.type, quality);
+
+          while (base64.length > MAX_IMAGE_SIZE && quality > 0.1) {
+            quality -= 0.1;
+            base64 = canvas.toDataURL(file.type, quality);
+          }
+
+          console.log(
+            `📸 Imagen comprimida: ${(base64.length / 1024).toFixed(2)}KB`
+          );
+
+          resolve({
+            data: base64.split(",")[1],
+            mimeType: file.type,
+            preview: base64,
+          });
+        };
+
+        img.onerror = () => reject(new Error("Error al cargar la imagen"));
+        img.src = e.target.result;
+      };
+
+      reader.onerror = () => reject(new Error("Error al leer el archivo"));
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
   const sendMessage = useCallback(
-    async (userInput) => {
-      if (!userInput.trim() || isTyping) return;
+    async (userInput, imageFile = null) => {
+      if ((!userInput.trim() && !imageFile) || isTyping) return;
+
+      let imageData = null;
+
+      if (imageFile) {
+        try {
+          console.log(`📷 Procesando imagen: ${imageFile.name}`);
+          imageData = await compressImage(imageFile);
+        } catch (err) {
+          console.error("❌ Error procesando imagen:", err);
+          setError("Error al procesar la imagen");
+          return;
+        }
+      }
 
       const userMessage = {
         id: Date.now().toString(),
         role: "user",
-        content: userInput.trim(),
+        content: userInput.trim() || "[Imagen adjunta]",
         timestamp: new Date(),
+        ...(imageData && { image: imageData }),
       };
 
       setMessages((prev) => [...prev, userMessage]);
@@ -72,35 +140,53 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
         const ai = new GoogleGenAI({ apiKey });
 
-        // Construir prompt completo con contexto
         const defaultSystemPrompt =
           systemPrompt ||
           "Eres un asistente de atención al cliente. Responde en español de manera profesional, clara y concisa.";
 
         let fullPrompt = `${defaultSystemPrompt}\n\n${context}\n\n`;
 
-        // Agregar historial de conversación
         messages.forEach((msg) => {
-          fullPrompt += `${msg.role === "user" ? "Usuario" : "Asistente"}: ${
-            msg.content
-          }\n\n`;
+          const content = msg.image
+            ? `${msg.content} [imagen adjunta]`
+            : msg.content;
+          fullPrompt += `${
+            msg.role === "user" ? "Usuario" : "Asistente"
+          }: ${content}\n\n`;
         });
-
-        // Agregar mensaje actual
-        fullPrompt += `Usuario: ${userMessage.content}\n\nAsistente:`;
 
         console.log("===========================================");
         console.log("🤖 MENSAJE ENVIADO A GEMINI (Cliente):");
         console.log("===========================================");
         console.log("Historial de mensajes:", messages.length);
-        console.log("\n📝 PROMPT COMPLETO:");
-        console.log(fullPrompt);
+        console.log("Con imagen:", !!imageData);
         console.log("===========================================\n");
+
+        // ✅ FIX: Estructura correcta para Gemini con imágenes
+        let promptParts;
+
+        if (imageData) {
+          // Con imagen: usar array de partes
+          promptParts = [
+            `${fullPrompt}Usuario: ${userMessage.content}\n\nAsistente:`,
+            {
+              inlineData: {
+                // ← camelCase, no snake_case
+                mimeType: imageData.mimeType,
+                data: imageData.data,
+              },
+            },
+          ];
+        } else {
+          // Sin imagen: solo texto
+          fullPrompt += `Usuario: ${userMessage.content}\n\nAsistente:`;
+          promptParts = fullPrompt;
+        }
 
         // Generar respuesta
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
-          contents: fullPrompt,
+          contents: promptParts, // ← Pasar directamente el array o string
         });
 
         const aiResponse =
@@ -139,13 +225,12 @@ export const useAIChat = ({ context, systemPrompt }) => {
         setIsTyping(false);
       }
     },
-    [messages, isTyping, context, systemPrompt]
+    [messages, isTyping, context, systemPrompt, compressImage]
   );
 
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
-    // ✅ Limpiar también del localStorage
     try {
       localStorage.removeItem(storageKey);
       console.log(`🗑️ Mensajes eliminados de localStorage`);

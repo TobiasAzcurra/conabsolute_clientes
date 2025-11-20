@@ -8,7 +8,7 @@ const AIChatClient = () => {
   const { rawProducts, categories, clientConfig, aiBotConfig, clientAssets } =
     useClient();
 
-  // ✅ Generar contexto pasando parámetros (igual que app empresa)
+  // Generar contexto pasando parámetros
   const { context, systemPrompt } = useClientAppAIContext({
     products: rawProducts,
     categories,
@@ -23,18 +23,60 @@ const AIChatClient = () => {
   });
 
   const [inputValue, setInputValue] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null); // ✅ NUEVO
+  const [imagePreview, setImagePreview] = useState(null); // ✅ NUEVO
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null); // ✅ NUEVO
 
   // Auto-scroll al último mensaje
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  // ✅ NUEVO: Manejar selección de imagen
+  const handleImageSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor selecciona una imagen válida");
+      return;
+    }
+
+    // Validar tamaño (max 10MB antes de comprimir)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("La imagen es muy grande (max 10MB)");
+      return;
+    }
+
+    setSelectedImage(file);
+
+    // Crear preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ✅ NUEVO: Limpiar imagen seleccionada
+  const handleClearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // ✅ MODIFICADO: Enviar con imagen opcional
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || isTyping) return;
-    await sendMessage(inputValue);
+    if ((!inputValue.trim() && !selectedImage) || isTyping) return;
+
+    await sendMessage(inputValue, selectedImage);
     setInputValue("");
+    handleClearImage();
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -143,12 +185,60 @@ const AIChatClient = () => {
         </div>
       )}
 
+      {/* ✅ NUEVO: Preview de imagen seleccionada */}
+      {imagePreview && (
+        <div className="px-4 pb-2">
+          <div className="relative inline-block">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="h-20 w-20 object-cover rounded-lg border-2 border-white/20"
+            />
+            <button
+              onClick={handleClearImage}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <form
         onSubmit={handleSendMessage}
         className="p-4 border-t border-gray-200/20"
       >
         <div className="flex items-center gap-2">
+          {/* ✅ NUEVO: Botón adjuntar imagen */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isTyping}
+            className="p-3 bg-white/10 backdrop-blur-sm text-white rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50"
+            title="Adjuntar imagen"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="w-5 h-5"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18.97 3.659a2.25 2.25 0 0 0-3.182 0l-10.94 10.94a3.75 3.75 0 1 0 5.304 5.303l7.693-7.693a.75.75 0 0 1 1.06 1.06l-7.693 7.693a5.25 5.25 0 1 1-7.424-7.424l10.939-10.94a3.75 3.75 0 1 1 5.303 5.304L9.097 18.835l-.008.008-.007.007-.002.002-.003.002A2.25 2.25 0 0 1 5.91 15.66l7.81-7.81a.75.75 0 0 1 1.061 1.06l-7.81 7.81a.75.75 0 0 0 1.054 1.068L18.97 6.84a2.25 2.25 0 0 0 0-3.182Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+
           <input
             type="text"
             value={inputValue}
@@ -159,7 +249,7 @@ const AIChatClient = () => {
           />
           <button
             type="submit"
-            disabled={!inputValue.trim() || isTyping}
+            disabled={(!inputValue.trim() && !selectedImage) || isTyping}
             className="p-3 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 disabled:cursor-not-allowed"
           >
             <svg
@@ -177,7 +267,7 @@ const AIChatClient = () => {
   );
 };
 
-// Componente MessageBubble
+// ✅ MODIFICADO: MessageBubble con soporte para imágenes
 const MessageBubble = ({ message, botAvatar }) => {
   const isUser = message.role === "user";
 
@@ -210,6 +300,15 @@ const MessageBubble = ({ message, botAvatar }) => {
             : "bg-white/10 backdrop-blur-sm text-white"
         }`}
       >
+        {/* ✅ NUEVO: Mostrar imagen si existe */}
+        {message.image && (
+          <img
+            src={message.image.preview}
+            alt="Imagen adjunta"
+            className="rounded-lg mb-2 max-w-full h-auto"
+          />
+        )}
+
         <p className="text-sm leading-relaxed whitespace-pre-wrap">
           {message.content}
         </p>
