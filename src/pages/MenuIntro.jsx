@@ -5,9 +5,10 @@ import { useClient } from "../contexts/ClientContext";
 import { getClientData } from "../firebase/clients/getClientData";
 import { getClientAssets } from "../firebase/clients/getClientAssets";
 import { getCategoriesByClient } from "../firebase/categories/getCategories";
-import { getProducts } from "../firebase/products/getProducts"; // ✅ NUEVO
+import { getProducts } from "../firebase/products/getProducts";
 import { getClientIds } from "../firebase/clients/getClientIds";
 import { getClientConfig } from "../firebase/clients/getClientConfig";
+import { getAIBotConfig } from "../firebase/clients/getAIBotConfig"; // ✅ NUEVO
 import { preloader } from "../utils/imagePreloader";
 import { extractImageUrls } from "../utils/extractImages";
 import {
@@ -28,14 +29,15 @@ const MenuIntro = () => {
     setClientData,
     setClientAssets,
     setClientConfig,
-    setRawProducts, // ✅ CAMBIO
+    setRawProducts,
     setCategories,
     setProductTags,
     setSlugEmpresa,
     setSlugSucursal,
     setEmpresaId,
     setSucursalId,
-    productsByCategory, // ✅ NUEVO: Lo usamos para navegación
+    setAiBotConfig, // ✅ NUEVO
+    productsByCategory,
   } = useClient();
 
   const [introGif, setIntroGif] = useState(null);
@@ -94,22 +96,30 @@ const MenuIntro = () => {
           preloader.preload(heroUrls, "high");
         }, strategy.heroDelay);
 
-        // 3. ✅ CAMBIO: Cargar datos en paralelo con UNA SOLA query de productos
-        const [data, config, categories, productTags, rawProductsData] =
-          await Promise.all([
-            getClientData(empresaId, sucursalId),
-            getClientConfig(empresaId, sucursalId),
-            getCategoriesByClient(empresaId, sucursalId),
-            getProductTagsByClient(empresaId, sucursalId),
-            getProducts(empresaId, sucursalId, { includeInactive: false }), // ✅ NUEVO
-          ]);
+        // 3. ✅ CAMBIO: Cargar datos en paralelo incluyendo AI Bot Config
+        const [
+          data,
+          config,
+          categories,
+          productTags,
+          rawProductsData,
+          aiBotConfig,
+        ] = await Promise.all([
+          getClientData(empresaId, sucursalId),
+          getClientConfig(empresaId, sucursalId),
+          getCategoriesByClient(empresaId, sucursalId),
+          getProductTagsByClient(empresaId, sucursalId),
+          getProducts(empresaId, sucursalId, { includeInactive: false }),
+          getAIBotConfig(empresaId, sucursalId), // ✅ NUEVO
+        ]);
 
         setClientData(data);
         setClientConfig(config);
         setCategories(categories);
         setProductTags(productTags);
+        setAiBotConfig(aiBotConfig); // ✅ NUEVO
 
-        // 4. ✅ CAMBIO: Procesar productos relacionados
+        // 4. Procesar productos relacionados
         const relatedStores = config?.logistics?.relatedStores;
         let relatedProducts = [];
 
@@ -130,7 +140,7 @@ const MenuIntro = () => {
 
         const allProducts = [...rawProductsData, ...relatedProducts];
 
-        // 5. ✅ CAMBIO: Validar productos (precios válidos)
+        // 5. Validar productos (precios válidos)
         const validProducts = allProducts
           .filter((product) => {
             const isValidPrice =
@@ -153,7 +163,7 @@ const MenuIntro = () => {
             return product;
           });
 
-        // ✅ CAMBIO: Guardar productos crudos en el context
+        // Guardar productos crudos en el context
         setRawProducts(validProducts);
 
         // 6. Precarga FASE 2: Categorías (delay adaptativo)
@@ -162,7 +172,7 @@ const MenuIntro = () => {
           preloader.preload(categoryUrls, "high");
         }, strategy.categoriesDelay);
 
-        // 7. ✅ CAMBIO: Funciones para determinar categorías (ahora usan productsByCategory del context)
+        // 7. Funciones para determinar categorías
         const getFirstCategoryByPosition = () => {
           if (!categories || categories.length === 0) return null;
 
@@ -187,7 +197,6 @@ const MenuIntro = () => {
             sortedCategories.length > 0 ? sortedCategories : categories;
 
           for (const category of categoriesToCheck) {
-            // ✅ Ahora usamos el productsByCategory computado del context
             const categoryProducts = validProducts.filter(
               (p) => p.categoryId === category.id
             );

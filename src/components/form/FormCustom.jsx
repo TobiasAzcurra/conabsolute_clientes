@@ -164,7 +164,10 @@ const FormCustom = ({ cart, total }) => {
       );
       if (orderId) {
         console.log("Pedido procesado exitosamente con ID:", orderId);
-        navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`);
+        // Pasar el teléfono junto con el orderId
+        navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`, {
+          state: { phone: values.phone },
+        });
         addLastCart();
         clearCart();
       }
