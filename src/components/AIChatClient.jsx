@@ -20,6 +20,7 @@ const AIChatClient = () => {
     isTyping,
     error,
     sendMessage,
+    cancelGeneration, // ✅ NUEVO
     clearMessages,
     MAX_IMAGES_PER_MESSAGE,
   } = useAIChat({
@@ -28,8 +29,8 @@ const AIChatClient = () => {
   });
 
   const [inputValue, setInputValue] = useState("");
-  const [selectedImages, setSelectedImages] = useState([]); // ✅ ARRAY
-  const [imagePreviews, setImagePreviews] = useState([]); // ✅ ARRAY
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -37,18 +38,15 @@ const AIChatClient = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // ✅ NUEVO: Manejar múltiples imágenes
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Validar que no exceda el límite
     if (selectedImages.length + files.length > MAX_IMAGES_PER_MESSAGE) {
       alert(`Máximo ${MAX_IMAGES_PER_MESSAGE} imágenes por mensaje`);
       return;
     }
 
-    // Validar cada archivo
     const validFiles = files.filter((file) => {
       if (!file.type.startsWith("image/")) {
         alert(`${file.name} no es una imagen válida`);
@@ -63,10 +61,8 @@ const AIChatClient = () => {
 
     if (validFiles.length === 0) return;
 
-    // Agregar al estado
     setSelectedImages((prev) => [...prev, ...validFiles]);
 
-    // Crear previews
     validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -76,18 +72,15 @@ const AIChatClient = () => {
     });
   };
 
-  // ✅ NUEVO: Eliminar imagen específica
   const handleRemoveImage = (index) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
 
-    // Limpiar input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  // ✅ MODIFICADO: Limpiar todas las imágenes
   const handleClearAllImages = () => {
     setSelectedImages([]);
     setImagePreviews([]);
@@ -96,14 +89,26 @@ const AIChatClient = () => {
     }
   };
 
-  // ✅ MODIFICADO: Enviar con múltiples imágenes
+  // ✅ MODIFICADO: Limpiar INMEDIATAMENTE y enviar sin bloquear
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if ((!inputValue.trim() && selectedImages.length === 0) || isTyping) return;
 
-    await sendMessage(inputValue, selectedImages);
+    // Capturar valores
+    const text = inputValue;
+    const imgs = [...selectedImages];
+
+    // Limpiar UI INMEDIATAMENTE (antes de enviar)
     setInputValue("");
     handleClearAllImages();
+
+    // Enviar sin bloquear (el estado isTyping ya cambiará dentro de sendMessage)
+    sendMessage(text, imgs);
+  };
+
+  // ✅ NUEVO: Handler para stop
+  const handleStop = () => {
+    cancelGeneration();
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -210,7 +215,7 @@ const AIChatClient = () => {
         </div>
       )}
 
-      {/* ✅ NUEVO: Preview horizontal de múltiples imágenes */}
+      {/* Preview de imágenes */}
       {imagePreviews.length > 0 && (
         <div className="px-4 pb-2">
           <div className="flex gap-2 overflow-x-auto">
@@ -230,7 +235,6 @@ const AIChatClient = () => {
               </div>
             ))}
 
-            {/* ✅ Botón para agregar más (si no llegó al límite) */}
             {selectedImages.length < MAX_IMAGES_PER_MESSAGE && (
               <button
                 onClick={() => fileInputRef.current?.click()}
@@ -253,12 +257,11 @@ const AIChatClient = () => {
         className="p-4 border-t border-gray-200/20"
       >
         <div className="flex items-center gap-2">
-          {/* ✅ MODIFICADO: Input con multiple */}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            multiple // ← Permitir múltiples archivos
+            multiple
             onChange={handleImageSelect}
             className="hidden"
           />
@@ -293,29 +296,49 @@ const AIChatClient = () => {
             placeholder="Escribe tu mensaje..."
             className="flex-1 px-4 h-12 bg-white/10 backdrop-blur-sm rounded-xl text-sm text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50"
           />
-          <button
-            type="submit"
-            disabled={
-              (!inputValue.trim() && selectedImages.length === 0) || isTyping
-            }
-            className="p-3 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 disabled:cursor-not-allowed"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
+
+          {/* ✅ MODIFICADO: Botón cambia entre enviar/stop */}
+          {isTyping ? (
+            // Botón STOP
+            <button
+              type="button"
+              onClick={handleStop}
+              className="p-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+              title="Detener generación"
             >
-              <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5"
+              >
+                <rect x="6" y="6" width="12" height="12" rx="1" />
+              </svg>
+            </button>
+          ) : (
+            // Botón ENVIAR
+            <button
+              type="submit"
+              disabled={!inputValue.trim() && selectedImages.length === 0}
+              className="p-3 bg-white text-gray-900 rounded-xl hover:bg-gray-100 transition-colors disabled:bg-white/20 disabled:text-white/50 disabled:cursor-not-allowed"
+              title="Enviar mensaje"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-5 h-5"
+              >
+                <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
+              </svg>
+            </button>
+          )}
         </div>
       </form>
     </div>
   );
 };
 
-// ✅ MODIFICADO: MessageBubble con múltiples imágenes
 const MessageBubble = ({ message, botAvatar }) => {
   const isUser = message.role === "user";
 
@@ -348,7 +371,6 @@ const MessageBubble = ({ message, botAvatar }) => {
             : "bg-white/10 backdrop-blur-sm text-white"
         }`}
       >
-        {/* ✅ MODIFICADO: Mostrar múltiples imágenes */}
         {message.images && message.images.length > 0 && (
           <div
             className={`mb-2 ${

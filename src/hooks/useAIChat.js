@@ -1,17 +1,22 @@
 // hooks/useAIChat.js
-import { useState, useCallback, useEffect } from "react";
-import { GoogleGenAI } from "@google/genai";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useClient } from "../contexts/ClientContext";
 
 const STORAGE_KEY_PREFIX = "aiChat_messages_";
 const MAX_IMAGE_SIZE = 1024 * 1024; // 1MB
 const MAX_IMAGE_DIMENSION = 1024; // px
-const MAX_IMAGES_PER_MESSAGE = 4; // ✅ NUEVO
+const MAX_IMAGES_PER_MESSAGE = 4;
+
+const GEMINI_API_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 export const useAIChat = ({ context, systemPrompt }) => {
   const { empresaId, sucursalId } = useClient();
 
   const storageKey = `${STORAGE_KEY_PREFIX}${empresaId}_${sucursalId}`;
+
+  // ✅ NUEVO: Ref para AbortController
+  const abortControllerRef = useRef(null);
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -103,12 +108,20 @@ export const useAIChat = ({ context, systemPrompt }) => {
     });
   }, []);
 
-  // ✅ MODIFICADO: sendMessage ahora acepta ARRAY de imágenes
+  // ✅ NUEVO: Función para cancelar generación
+  const cancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      console.log("🛑 Cancelando generación...");
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsTyping(false);
+    }
+  }, []);
+
   const sendMessage = useCallback(
     async (userInput, imageFiles = []) => {
       if ((!userInput.trim() && imageFiles.length === 0) || isTyping) return;
 
-      // ✅ Validar cantidad de imágenes
       if (imageFiles.length > MAX_IMAGES_PER_MESSAGE) {
         setError(`Máximo ${MAX_IMAGES_PER_MESSAGE} imágenes por mensaje`);
         return;
@@ -116,17 +129,13 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
       let imagesData = [];
 
-      // ✅ Procesar TODAS las imágenes
       if (imageFiles.length > 0) {
         try {
           console.log(`📷 Procesando ${imageFiles.length} imágenes...`);
-
-          // Procesar en paralelo
           const compressionPromises = imageFiles.map((file) =>
             compressImage(file)
           );
           imagesData = await Promise.all(compressionPromises);
-
           console.log(`✅ ${imagesData.length} imágenes procesadas`);
         } catch (err) {
           console.error("❌ Error procesando imágenes:", err);
@@ -144,12 +153,15 @@ export const useAIChat = ({ context, systemPrompt }) => {
             imagesData.length > 1 ? "es" : ""
           } adjunta${imagesData.length > 1 ? "s" : ""}]`,
         timestamp: new Date(),
-        ...(imagesData.length > 0 && { images: imagesData }), // ✅ plural: images
+        ...(imagesData.length > 0 && { images: imagesData }),
       };
 
       setMessages((prev) => [...prev, userMessage]);
       setIsTyping(true);
       setError(null);
+
+      // ✅ NUEVO: Crear AbortController
+      abortControllerRef.current = new AbortController();
 
       try {
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -157,8 +169,6 @@ export const useAIChat = ({ context, systemPrompt }) => {
         if (!apiKey) {
           throw new Error("API Key de Gemini no configurada");
         }
-
-        const ai = new GoogleGenAI({ apiKey });
 
         const defaultSystemPrompt =
           systemPrompt ||
@@ -186,34 +196,57 @@ export const useAIChat = ({ context, systemPrompt }) => {
         console.log("Con imágenes:", imagesData.length);
         console.log("===========================================\n");
 
-        // ✅ FIX: Construir array con múltiples imágenes
-        let promptParts;
+        // ✅ NUEVO: Construir payload para fetch directo
+        const textContent = `${fullPrompt}Usuario: ${userMessage.content}\n\nAsistente:`;
 
+        const parts = [{ text: textContent }];
+
+        // Agregar imágenes si existen
         if (imagesData.length > 0) {
-          // Con imágenes: texto + todas las imágenes
-          promptParts = [
-            `${fullPrompt}Usuario: ${userMessage.content}\n\nAsistente:`,
-            ...imagesData.map((img) => ({
+          imagesData.forEach((img) => {
+            parts.push({
               inlineData: {
                 mimeType: img.mimeType,
                 data: img.data,
               },
-            })),
-          ];
-        } else {
-          // Sin imágenes: solo texto
-          fullPrompt += `Usuario: ${userMessage.content}\n\nAsistente:`;
-          promptParts = fullPrompt;
+            });
+          });
         }
 
-        // Generar respuesta
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
-          contents: promptParts,
+        const requestBody = {
+          contents: [
+            {
+              parts: parts,
+            },
+          ],
+        };
+
+        console.log("📤 Request body:", {
+          partsCount: parts.length,
+          hasImages: imagesData.length > 0,
         });
 
+        // ✅ NUEVO: Fetch con AbortController
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+          signal: abortControllerRef.current.signal, // ← Cancelable
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`API Error: ${JSON.stringify(errorData)}`);
+        }
+
+        const data = await response.json();
+
+        // Extraer texto de la respuesta
         const aiResponse =
-          response.text || "Lo siento, no pude generar una respuesta.";
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "Lo siento, no pude generar una respuesta.";
 
         console.log("===========================================");
         console.log("✅ RESPUESTA DE GEMINI:");
@@ -230,22 +263,38 @@ export const useAIChat = ({ context, systemPrompt }) => {
 
         setMessages((prev) => [...prev, assistantMessage]);
       } catch (err) {
-        console.error("Error al enviar mensaje:", err);
-        setError(
-          err instanceof Error ? err.message : "Error al conectar con la IA"
-        );
+        // ✅ NUEVO: Diferenciar error de cancelación vs error real
+        if (err.name === "AbortError") {
+          console.log("⚠️ Generación cancelada por el usuario");
+          setError(null); // No mostrar error en cancelación
 
-        const errorMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content:
-            "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.",
-          timestamp: new Date(),
-        };
+          // Opcional: agregar mensaje de cancelación
+          const cancelMessage = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "[Generación cancelada]",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, cancelMessage]);
+        } else {
+          console.error("Error al enviar mensaje:", err);
+          setError(
+            err instanceof Error ? err.message : "Error al conectar con la IA"
+          );
 
-        setMessages((prev) => [...prev, errorMessage]);
+          const errorMessage = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content:
+              "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.",
+            timestamp: new Date(),
+          };
+
+          setMessages((prev) => [...prev, errorMessage]);
+        }
       } finally {
         setIsTyping(false);
+        abortControllerRef.current = null;
       }
     },
     [messages, isTyping, context, systemPrompt, compressImage]
@@ -267,7 +316,8 @@ export const useAIChat = ({ context, systemPrompt }) => {
     isTyping,
     error,
     sendMessage,
+    cancelGeneration, // ✅ NUEVO
     clearMessages,
-    MAX_IMAGES_PER_MESSAGE, // ✅ Exportar límite
+    MAX_IMAGES_PER_MESSAGE,
   };
 };
