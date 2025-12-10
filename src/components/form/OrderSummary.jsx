@@ -23,17 +23,27 @@ const OrderSummary = ({
 
       {/* Envío - Solo mostrar si es delivery */}
       {deliveryMethod === "delivery" && (
-        <div className="flex flex-row font-light text-sm justify-between w-full items-center">
-          <div className="flex items-center gap-1">
-            <p className="text-gray-400">Envío</p>
-            {/* ✅ NUEVO: Mostrar distancia si está disponible */}
-            {distance !== null && !isCalculatingDistance && (
-              <span className="text-gray-400">
-                ({formatDistanceInfo(distance, envio)})
-              </span>
+        <div className="flex flex-col w-full">
+          <div className="flex flex-row font-light text-sm justify-between items-center">
+            <div className="flex items-center gap-1">
+              <p className="text-gray-400">Envío</p>
+              {/* Mostrar distancia si está disponible */}
+              {distance !== null && !isCalculatingDistance && (
+                <span className="text-gray-400">
+                  ({formatDistanceInfo(distance, envio)})
+                </span>
+              )}
+            </div>
+
+            {/* ✅ NUEVO: Mostrar mensaje o precio */}
+            {distance === null && !isCalculatingDistance ? (
+              <p className="text text-yellow-500 font-light">
+                *Falta seleccionar dirección
+              </p>
+            ) : (
+              <p>{currencyFormat(envio + expressFee)}</p>
             )}
           </div>
-          <p>{currencyFormat(envio + expressFee)}</p>
         </div>
       )}
 
