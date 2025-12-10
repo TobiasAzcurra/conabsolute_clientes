@@ -15,8 +15,8 @@ export const MapDirection = ({
   setValidarUbi,
   setNoEncontre,
   setFieldValue,
-  branchCoordinates, // ✅ NUEVO
-  logo, // ✅ NUEVO
+  branchCoordinates,
+  logo,
 }) => {
   const APIKEY = import.meta.env.VITE_API_GOOGLE_MAPS;
 
@@ -40,7 +40,6 @@ export const MapDirection = ({
     }
   }, [selectedPlace]);
 
-  // ✅ Convertir branchCoordinates de array a objeto si es necesario
   const branchLatLng = branchCoordinates
     ? Array.isArray(branchCoordinates)
       ? { lat: branchCoordinates[0], lng: branchCoordinates[1] }
@@ -71,7 +70,7 @@ export const MapDirection = ({
           gestureHandling={"greedy"}
           disableDefaultUI={true}
         >
-          {/* ✅ Marcador de sucursal */}
+          {/* Marcador de sucursal */}
           {branchLatLng && (
             <AdvancedMarker position={branchLatLng}>
               <div className="bg-white p-2 rounded-xl shadow-lg">
@@ -92,14 +91,28 @@ export const MapDirection = ({
             </AdvancedMarker>
           )}
 
-          {/* Marcador del cliente (draggable) */}
+          {/* ✅ Marcador del cliente con estilo personalizado */}
           <AdvancedMarker
             ref={markerRef}
             position={selectedPlace?.geometry?.location}
             draggable={true}
-          />
+          >
+            <div className="bg-white h-10 w-10 flex items-center justify-center rounded-full shadow-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-6 text-gray-900"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </AdvancedMarker>
 
-          {/* ✅ Handler de mapa con ruta */}
           <MapHandler
             place={selectedPlace}
             marker={marker}
@@ -109,7 +122,6 @@ export const MapDirection = ({
         </Map>
       </div>
 
-      {/* Input de búsqueda */}
       <div className="m">
         <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
       </div>
@@ -149,10 +161,8 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
     };
   }, [map, place, marker, setPlace]);
 
-  // ✅ NUEVO: Dibujar ruta cuando existen ambos puntos
   useEffect(() => {
     if (!map || !routesLib || !branchCoordinates || !place) {
-      // Limpiar ruta si no hay condiciones
       if (polylineRef.current) {
         polylineRef.current.setMap(null);
         polylineRef.current = null;
@@ -169,7 +179,6 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
         travelMode: google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
-        // Limpiar ruta anterior
         if (polylineRef.current) {
           polylineRef.current.setMap(null);
         }
@@ -178,7 +187,6 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
           const route = result.routes[0];
           const path = route.overview_path;
 
-          // Dibujar nueva ruta
           const polyline = new google.maps.Polyline({
             path: path,
             strokeColor: "#000000",
@@ -190,7 +198,6 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
 
           polylineRef.current = polyline;
 
-          // Ajustar zoom para mostrar toda la ruta
           const bounds = route.bounds;
           if (bounds) {
             map.fitBounds(bounds, {
@@ -206,7 +213,6 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
       }
     );
 
-    // Cleanup
     return () => {
       if (polylineRef.current) {
         polylineRef.current.setMap(null);
