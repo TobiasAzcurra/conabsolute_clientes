@@ -1,4 +1,5 @@
 import currencyFormat from "../../helpers/currencyFormat";
+import { formatDistanceInfo } from "../../utils/distanceCalculator";
 
 const OrderSummary = ({
   productsTotal,
@@ -6,7 +7,9 @@ const OrderSummary = ({
   expressFee = 0,
   descuento = 0,
   finalTotal,
-  deliveryMethod, // AGREGAR
+  deliveryMethod,
+  distance = null, // ✅ NUEVO
+  isCalculatingDistance = false, // ✅ NUEVO
 }) => {
   return (
     <div className="flex justify-center flex-col mt-12 items-center">
@@ -20,8 +23,16 @@ const OrderSummary = ({
 
       {/* Envío - Solo mostrar si es delivery */}
       {deliveryMethod === "delivery" && (
-        <div className="flex flex-row font-light text-sm justify-between w-full">
-          <p className="text-gray-400">Envío</p>
+        <div className="flex flex-row font-light text-sm justify-between w-full items-center">
+          <div className="flex items-center gap-1">
+            <p className="text-gray-400">Envío</p>
+            {/* ✅ NUEVO: Mostrar distancia si está disponible */}
+            {distance !== null && !isCalculatingDistance && (
+              <span className="text-gray-400">
+                ({formatDistanceInfo(distance, envio)})
+              </span>
+            )}
+          </div>
           <p>{currencyFormat(envio + expressFee)}</p>
         </div>
       )}

@@ -2,7 +2,6 @@ import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "../../contexts/CartContext";
-import { db } from "../../firebase/config";
 import { StockManager } from "../../utils/stockManager";
 import validations from "./validations";
 import {
@@ -20,6 +19,7 @@ import { useDiscountCode } from "../../hooks/useDiscountCode";
 import SimpleModal from "../ui/SimpleModal";
 import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillmentMethods";
 import { parseTimeToTimestamp } from "../../utils/timestampHelpers";
+import { useDeliveryDistance } from "../../hooks/useDeliveryDistance";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -49,6 +49,7 @@ const FormCustom = ({ cart, total }) => {
     clientConfig?.regional?.timezone || "America/Argentina/Buenos_Aires";
 
   const [mapUrl, setUrl] = useState("");
+  const [clientCoordinates, setClientCoordinates] = useState(null);
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
   const [isProcessingStock, setIsProcessingStock] = useState(false);
@@ -64,6 +65,8 @@ const FormCustom = ({ cart, total }) => {
   const [currentDeliveryMethod, setCurrentDeliveryMethod] =
     useState("delivery");
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
+  const [showOutOfRangeModal, setShowOutOfRangeModal] = useState(false);
+
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
   const discountHook = useDiscountCode(
     empresaId,
@@ -75,6 +78,23 @@ const FormCustom = ({ cart, total }) => {
     timezone
   );
   const availableMethods = useAvailableFulfillmentMethods(cartItems);
+
+  // Hook de distancia
+  const deliveryDistance = useDeliveryDistance(
+    clientData?.coordinates,
+    clientCoordinates,
+    clientConfig?.logistics?.deliveryPricing,
+    currentDeliveryMethod
+  );
+
+  // Actualizar coordenadas cuando cambie el mapa
+  useEffect(() => {
+    if (mapUrl) {
+      const coords = extractCoordinates(mapUrl);
+      setClientCoordinates(coords);
+      console.log("📍 Coordenadas del cliente actualizadas:", coords);
+    }
+  }, [mapUrl]);
 
   const handleUpdateStock = async (itemId) => {
     try {
@@ -145,14 +165,27 @@ const FormCustom = ({ cart, total }) => {
       if (values.deliveryMethod === "delivery" && mapUrl) {
         console.log("Coordenadas extraídas:", coordinates);
       }
+
+      // Usar deliveryFee dinámico
+      const dynamicShippingCost =
+        values.deliveryMethod === "delivery" ? deliveryDistance.deliveryFee : 0;
+
       const updatedValues = {
         ...values,
         estimatedTime,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
-        shipping: values.deliveryMethod === "delivery" ? envio : 0,
+        shipping: dynamicShippingCost,
         coordinates,
         appliedDiscount,
+        deliveryDistance: deliveryDistance.distance,
       };
+
+      console.log("💰 Procesando con envío dinámico:", {
+        distancia: deliveryDistance.distance,
+        costo: dynamicShippingCost,
+        detalles: deliveryDistance.details,
+      });
+
       console.log("Iniciando procesamiento con schema POS");
       const posCartItems = adaptCartToPOSFormat(cartItems);
       console.log("Items para procesar:", posCartItems.length);
@@ -164,7 +197,6 @@ const FormCustom = ({ cart, total }) => {
       );
       if (orderId) {
         console.log("Pedido procesado exitosamente con ID:", orderId);
-        // Pasar el teléfono junto con el orderId
         navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`, {
           state: { phone: values.phone },
         });
@@ -215,6 +247,13 @@ const FormCustom = ({ cart, total }) => {
 
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
+
+    // Validar radio de entrega
+    if (values.deliveryMethod === "delivery" && deliveryDistance.isOutOfRange) {
+      setShowOutOfRangeModal(true);
+      return;
+    }
+
     if (!isReserva) {
       const businessHours = clientConfig?.logistics?.businessHours;
       const status = isBusinessOpen(businessHours);
@@ -262,6 +301,17 @@ const FormCustom = ({ cart, total }) => {
 
   return (
     <>
+      <SimpleModal
+        isOpen={showOutOfRangeModal}
+        onClose={() => setShowOutOfRangeModal(false)}
+        title="Fuera del radio de entrega"
+        message={`Tu dirección está a ${deliveryDistance.distance?.toFixed(
+          1
+        )} km. Solo realizamos entregas dentro de ${
+          clientConfig?.logistics?.deliveryPricing?.maxDistance || 12
+        } km.`}
+      />
+
       <SimpleModal
         isOpen={showDelayModal}
         onClose={() => {
@@ -322,7 +372,7 @@ const FormCustom = ({ cart, total }) => {
         errorList={errorList}
         onUpdateStock={handleUpdateStock}
         onRemoveItem={handleRemoveItem}
-        onAdjustStock={handleAdjustStock} // ✅ CRÍTICO: Esta línea DEBE estar
+        onAdjustStock={handleAdjustStock}
       />
       <div className="flex px-4 flex-col">
         <style>{`
@@ -356,7 +406,13 @@ const FormCustom = ({ cart, total }) => {
             address: "",
             deliveryNotes: "",
           }}
-          validationSchema={validations(total + envio, cart)}
+          validationSchema={validations(
+            total +
+              (currentDeliveryMethod === "delivery"
+                ? deliveryDistance.deliveryFee
+                : 0),
+            cart
+          )}
           onSubmit={handleFormSubmit}
         >
           {({ values, setFieldValue, isSubmitting }) => {
@@ -369,7 +425,8 @@ const FormCustom = ({ cart, total }) => {
               ? discountHook.validation.discount
               : 0;
             let finalTotal = productsTotal - descuento;
-            if (values.deliveryMethod === "delivery") finalTotal += envio;
+            if (values.deliveryMethod === "delivery")
+              finalTotal += deliveryDistance.deliveryFee;
             if (isEnabled) finalTotal += expressDeliveryFee;
             return (
               <Form>
@@ -451,21 +508,48 @@ const FormCustom = ({ cart, total }) => {
                     cart={cart}
                     discountHook={discountHook}
                   />
+
+                  {values.deliveryMethod === "delivery" &&
+                    deliveryDistance.isOutOfRange && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-xs text-red-800 font-light">
+                          <strong>Fuera del radio:</strong> Tu dirección está a{" "}
+                          {deliveryDistance.distance?.toFixed(1)} km. Solo
+                          entregamos dentro de{" "}
+                          {clientConfig?.logistics?.deliveryPricing
+                            ?.maxDistance || 12}{" "}
+                          km.
+                        </p>
+                      </div>
+                    )}
+
                   <OrderSummary
                     productsTotal={productsTotal}
-                    envio={envio}
+                    envio={deliveryDistance.deliveryFee}
                     expressFee={isEnabled ? expressDeliveryFee : 0}
                     finalTotal={finalTotal}
                     descuento={descuento}
                     handleExpressToggle={handleExpressToggle}
                     isEnabled={isEnabled}
                     deliveryMethod={values.deliveryMethod}
+                    distance={deliveryDistance.distance}
+                    isCalculatingDistance={deliveryDistance.isCalculating}
                   />
                   <button
                     type="submit"
-                    disabled={isSubmitting || isProcessingStock}
+                    disabled={
+                      isSubmitting ||
+                      isProcessingStock ||
+                      deliveryDistance.isOutOfRange ||
+                      (values.deliveryMethod === "delivery" &&
+                        deliveryDistance.isCalculating)
+                    }
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-primary text-gray-100 rounded-3xl h-20 font-bold transition-colors duration-300 ${
-                      isSubmitting || isProcessingStock
+                      isSubmitting ||
+                      isProcessingStock ||
+                      deliveryDistance.isOutOfRange ||
+                      (values.deliveryMethod === "delivery" &&
+                        deliveryDistance.isCalculating)
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}

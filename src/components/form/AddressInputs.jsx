@@ -2,6 +2,7 @@ import { ErrorMessage } from "formik";
 import MyTextInput from "./MyTextInput";
 import { MapDirection } from "./MapDirection";
 import AppleErrorMessage from "./AppleErrorMessage";
+import { useClient } from "../../contexts/ClientContext";
 
 const AddressInputs = ({
   values,
@@ -12,6 +13,8 @@ const AddressInputs = ({
   cart,
   discountHook,
 }) => {
+  const { clientData, clientAssets } = useClient(); // ✅ Obtener datos del contexto
+
   const handleCouponChange = (e) => {
     const newCode = e.target.value;
     setFieldValue("couponCode", newCode);
@@ -38,6 +41,8 @@ const AddressInputs = ({
             setValidarUbi={setValidarUbi}
             setNoEncontre={setNoEncontre}
             setFieldValue={setFieldValue}
+            branchCoordinates={clientData?.coordinates} // ✅ NUEVO
+            logo={clientAssets?.logo} // ✅ NUEVO
           />
           <ErrorMessage name="address" component={AppleErrorMessage} />
 
@@ -161,7 +166,6 @@ const AddressInputs = ({
           )}
         </div>
 
-        {/* ✅ USAR AppleErrorMessage en lugar de <p> */}
         {showError && (
           <AppleErrorMessage>
             {discountHook.validation.message}

@@ -15,6 +15,8 @@ export const MapDirection = ({
   setValidarUbi,
   setNoEncontre,
   setFieldValue,
+  branchCoordinates, // ✅ NUEVO
+  logo, // ✅ NUEVO
 }) => {
   const APIKEY = import.meta.env.VITE_API_GOOGLE_MAPS;
 
@@ -34,9 +36,16 @@ export const MapDirection = ({
           "https ://"
         );
       setUrl(googleMapsUrl);
-      setFieldValue("address", formattedAddress); // Actualiza la dirección en Formik
+      setFieldValue("address", formattedAddress);
     }
   }, [selectedPlace]);
+
+  // ✅ Convertir branchCoordinates de array a objeto si es necesario
+  const branchLatLng = branchCoordinates
+    ? Array.isArray(branchCoordinates)
+      ? { lat: branchCoordinates[0], lng: branchCoordinates[1] }
+      : branchCoordinates
+    : null;
 
   return (
     <APIProvider
@@ -44,7 +53,7 @@ export const MapDirection = ({
       solutionChannel="GMP_devsite_samples_v3_rgmautocomplete"
     >
       <div
-        className="w-full px-2 pt-2 rounded-t-[45px] "
+        className="w-full px-2 pt-2 rounded-t-[45px]"
         style={{
           aspectRatio: "1/1",
           overflow: "hidden",
@@ -58,24 +67,49 @@ export const MapDirection = ({
           }}
           mapId={"bf51a910020fa25a"}
           defaultZoom={13}
-          defaultCenter={position}
+          defaultCenter={branchLatLng || position}
           gestureHandling={"greedy"}
           disableDefaultUI={true}
         >
+          {/* ✅ Marcador de sucursal */}
+          {branchLatLng && (
+            <AdvancedMarker position={branchLatLng}>
+              <div className="bg-white p-2 rounded-xl shadow-lg">
+                {logo ? (
+                  <img src={logo} className="h-4" alt="Sucursal" />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="h-4 text-gray-900"
+                  >
+                    <path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+                    <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+                  </svg>
+                )}
+              </div>
+            </AdvancedMarker>
+          )}
+
+          {/* Marcador del cliente (draggable) */}
           <AdvancedMarker
             ref={markerRef}
             position={selectedPlace?.geometry?.location}
             draggable={true}
           />
+
+          {/* ✅ Handler de mapa con ruta */}
+          <MapHandler
+            place={selectedPlace}
+            marker={marker}
+            setPlace={setSelectedPlace}
+            branchCoordinates={branchLatLng}
+          />
         </Map>
-        <MapHandler
-          place={selectedPlace}
-          marker={marker}
-          setPlace={setSelectedPlace}
-        />
       </div>
 
-      {/* Colocamos el input debajo del mapa */}
+      {/* Input de búsqueda */}
       <div className="m">
         <PlaceAutocomplete onPlaceSelect={setSelectedPlace} />
       </div>
@@ -83,8 +117,10 @@ export const MapDirection = ({
   );
 };
 
-const MapHandler = ({ place, marker, setPlace }) => {
+const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
   const map = useMap();
+  const routesLib = useMapsLibrary("routes");
+  const polylineRef = useRef(null);
 
   useEffect(() => {
     if (!map || !place || !marker) return;
@@ -106,14 +142,78 @@ const MapHandler = ({ place, marker, setPlace }) => {
       }));
     };
 
-    // Use Google Maps event listener directly
     google.maps.event.addListener(marker, "dragend", handleDragEnd);
 
-    // Cleanup function to remove the listener when the component unmounts
     return () => {
       google.maps.event.clearListeners(marker, "dragend");
     };
   }, [map, place, marker, setPlace]);
+
+  // ✅ NUEVO: Dibujar ruta cuando existen ambos puntos
+  useEffect(() => {
+    if (!map || !routesLib || !branchCoordinates || !place) {
+      // Limpiar ruta si no hay condiciones
+      if (polylineRef.current) {
+        polylineRef.current.setMap(null);
+        polylineRef.current = null;
+      }
+      return;
+    }
+
+    const directionsService = new google.maps.DirectionsService();
+
+    directionsService.route(
+      {
+        origin: branchCoordinates,
+        destination: place.geometry.location,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        // Limpiar ruta anterior
+        if (polylineRef.current) {
+          polylineRef.current.setMap(null);
+        }
+
+        if (status === google.maps.DirectionsStatus.OK && result) {
+          const route = result.routes[0];
+          const path = route.overview_path;
+
+          // Dibujar nueva ruta
+          const polyline = new google.maps.Polyline({
+            path: path,
+            strokeColor: "#000000",
+            strokeOpacity: 0.6,
+            strokeWeight: 3,
+            geodesic: true,
+            map: map,
+          });
+
+          polylineRef.current = polyline;
+
+          // Ajustar zoom para mostrar toda la ruta
+          const bounds = route.bounds;
+          if (bounds) {
+            map.fitBounds(bounds, {
+              top: 50,
+              right: 50,
+              bottom: 50,
+              left: 50,
+            });
+          }
+        } else {
+          console.warn("No se pudo calcular la ruta:", status);
+        }
+      }
+    );
+
+    // Cleanup
+    return () => {
+      if (polylineRef.current) {
+        polylineRef.current.setMap(null);
+        polylineRef.current = null;
+      }
+    };
+  }, [map, routesLib, branchCoordinates, place]);
 
   return null;
 };
@@ -122,12 +222,11 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
   const [placeAutocomplete, setPlaceAutocomplete] = useState(null);
   const inputRef = useRef(null);
   const places = useMapsLibrary("places");
-  const [inputValue, setInputValue] = useState(""); // Estado para el valor del input
+  const [inputValue, setInputValue] = useState("");
 
   useEffect(() => {
     if (!places || !inputRef.current) return;
 
-    // Create a bounding box with sides ~20km away from the center point
     const defaultBounds = {
       north: position.lat + 0.2,
       south: position.lat - 0.2,
@@ -150,18 +249,18 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
     placeAutocomplete.addListener("place_changed", () => {
       const place = placeAutocomplete.getPlace();
       if (place.formatted_address) {
-        setInputValue(place.formatted_address); // 🔥 Actualizar el texto mostrado
+        setInputValue(place.formatted_address);
       }
       onPlaceSelect(place);
     });
   }, [onPlaceSelect, placeAutocomplete]);
 
   const handleInputChange = (e) => {
-    setInputValue(e.target.value); // Actualiza el valor del input
+    setInputValue(e.target.value);
   };
 
   return (
-    <div className="flex flex-row pl-4 items-center ">
+    <div className="flex flex-row pl-4 items-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
@@ -180,7 +279,7 @@ const PlaceAutocomplete = ({ onPlaceSelect }) => {
         }`}
         ref={inputRef}
         value={inputValue}
-        onChange={handleInputChange} // Maneja el cambio de valor del input
+        onChange={handleInputChange}
         placeholder="Escribi tu direccion"
         style={{ width: "100%", boxSizing: "border-box" }}
       />
