@@ -1,6 +1,6 @@
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../../contexts/CartContext";
 import { StockManager } from "../../utils/stockManager";
 import validations from "./validations";
@@ -38,6 +38,7 @@ const FormCustom = ({ cart, total }) => {
     sucursalId,
     clientConfig,
     clientData,
+    rawProducts, // ✨ AGREGADO
   } = useClient();
   const stockManager = new StockManager({
     id: empresaId,
@@ -67,10 +68,11 @@ const FormCustom = ({ cart, total }) => {
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
   const [showOutOfRangeModal, setShowOutOfRangeModal] = useState(false);
 
-  // ✨ NUEVOS estados para descuento parcial
+  // ✨ Estados para descuento parcial
   const [showPartialDiscountModal, setShowPartialDiscountModal] =
     useState(false);
   const [partialDiscountInfo, setPartialDiscountInfo] = useState(null);
+  const [showAllExcluded, setShowAllExcluded] = useState(false); // ✨ NUEVO
 
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
   const discountHook = useDiscountCode(
@@ -91,6 +93,43 @@ const FormCustom = ({ cart, total }) => {
     clientConfig?.logistics?.deliveryPricing,
     currentDeliveryMethod
   );
+
+  // ✨ NUEVO: Calcular todos los productos excluidos del catálogo
+  const allExcludedProducts = useMemo(() => {
+    if (!discountHook.validation.discountData?.restrictions?.itemsExcluded) {
+      return [];
+    }
+
+    const excludedIds =
+      discountHook.validation.discountData.restrictions.itemsExcluded;
+    const resolved = [];
+
+    rawProducts.forEach((product) => {
+      // Revisar si el producto completo está excluido
+      if (excludedIds.includes(product.id)) {
+        resolved.push({
+          id: product.id,
+          name: product.name,
+          type: "product",
+        });
+      }
+
+      // Revisar si alguna variante está excluida
+      if (product.variants && Array.isArray(product.variants)) {
+        product.variants.forEach((variant) => {
+          if (excludedIds.includes(variant.id)) {
+            resolved.push({
+              id: variant.id,
+              name: `${product.name} - ${variant.name}`,
+              type: "variant",
+            });
+          }
+        });
+      }
+    });
+
+    return resolved;
+  }, [rawProducts, discountHook.validation.discountData]);
 
   // Actualizar coordenadas cuando cambie el mapa
   useEffect(() => {
@@ -250,7 +289,7 @@ const FormCustom = ({ cart, total }) => {
     await processPedido(updatedValues, false, appliedDiscount);
   };
 
-  // ✨ NUEVA función para aplicar descuento parcial
+  // ✨ Función para aplicar descuento parcial
   const applyPartialDiscount = async () => {
     setShowPartialDiscountModal(false);
 
@@ -294,7 +333,7 @@ const FormCustom = ({ cart, total }) => {
     let appliedDiscount = null;
     if (discountHook.code && discountHook.code.trim()) {
       if (!discountHook.validation.isValid && discountHook.validation.checked) {
-        // ✨ NUEVO: si tiene productos excluidos, mostrar modal especial
+        // ✨ Si tiene productos excluidos, mostrar modal especial
         if (
           discountHook.validation.reason === "excluded_items" &&
           discountHook.validation.partialDiscountDetails
@@ -343,6 +382,65 @@ const FormCustom = ({ cart, total }) => {
     }
     await processPedido(values, isReserva, appliedDiscount);
   };
+
+  // ✨ NUEVO: Construir el mensaje del modal con el toggle
+  const partialDiscountModalMessage = partialDiscountInfo && (
+    <div className="text-left space-y-2">
+      <div className="">
+        <p className="font-light text-xs mb-1">No aplica para:</p>
+        <ul className="list-disc list-inside text-xs space-y-1">
+          {partialDiscountInfo.excludedProducts.map((p) => (
+            <li key={p.id}>
+              {p.name} {p.variantName && `(${p.variantName})`}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p className="font-light text-xs mb-1">Sí aplica para:</p>
+        <ul className="list-disc list-inside text-xs space-y-1">
+          {partialDiscountInfo.eligibleProducts.map((p) => (
+            <li key={p.id}>
+              {p.name} {p.variantName && `(${p.variantName})`} - $
+              {p.price * p.quantity}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="text-sm flex flex-row gap-1 items-baseline">
+        <span className="font-light text-xs ">
+          Descuento de -${partialDiscountInfo.partialDiscount} sobre $
+          {partialDiscountInfo.eligibleSubtotal} de productos elegibles
+        </span>
+      </div>
+
+      {/* ✨ NUEVO: Toggle de productos excluidos del catálogo */}
+      {allExcludedProducts.length > 0 && (
+        <div className=" ">
+          <button
+            onClick={() => setShowAllExcluded(!showAllExcluded)}
+            className="text-xs text-blue-500 font-light  hover:text-blue-600"
+          >
+            {showAllExcluded
+              ? "Ver menos"
+              : `Clickea para ver todos los productos excluidos (${allExcludedProducts.length})`}
+          </button>
+
+          {showAllExcluded && (
+            <div className="mt-2 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-4 border  border-gray-200">
+              <ul className="list-disc list-inside text-xs space-y-1 text-gray-600">
+                {allExcludedProducts.map((p) => (
+                  <li key={p.id}>{p.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -409,50 +507,17 @@ const FormCustom = ({ cart, total }) => {
         }}
       />
 
-      {/* ✨ MODAL de descuento parcial */}
+      {/* ✨ Modal de descuento parcial */}
       <SimpleModal
         isOpen={showPartialDiscountModal}
         onClose={() => {
           setShowPartialDiscountModal(false);
           setPartialDiscountInfo(null);
           setPendingSubmitValues(null);
+          setShowAllExcluded(false); // ✨ Reset del toggle
         }}
         title="Descuento parcial disponible"
-        message={
-          partialDiscountInfo && (
-            <div className="text-left space-y-2">
-              <div className="">
-                <p className="font-light text-xs mb-1">No aplica para:</p>
-                <ul className="list-disc list-inside text-xs space-y-1">
-                  {partialDiscountInfo.excludedProducts.map((p) => (
-                    <li key={p.id}>
-                      {p.name} {p.variantName && `(${p.variantName})`}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <p className="font-light text-xs mb-1">Sí aplica para:</p>
-                <ul className="list-disc list-inside text-xs space-y-1">
-                  {partialDiscountInfo.eligibleProducts.map((p) => (
-                    <li key={p.id}>
-                      {p.name} {p.variantName && `(${p.variantName})`} - $
-                      {p.price * p.quantity}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="text-sm flex flex-row gap-1 items-baseline">
-                <span className="font-light text-xs ">
-                  Descuento de -${partialDiscountInfo.partialDiscount} sobre $
-                  {partialDiscountInfo.eligibleSubtotal} de productos elegibles
-                </span>
-              </div>
-            </div>
-          )
-        }
+        message={partialDiscountModalMessage}
         twoButtons={true}
         cancelText="Modificar"
         confirmText="Pedir"
@@ -522,7 +587,6 @@ const FormCustom = ({ cart, total }) => {
 
             const productsTotal = subtotal;
 
-            // ✨ AGREGADO: logs para debugging
             console.log("🔍 Estado del descuento:", {
               isValid: discountHook.validation.isValid,
               discount: discountHook.validation.discount,
@@ -533,7 +597,6 @@ const FormCustom = ({ cart, total }) => {
                 discountHook.validation.partialDiscountDetails?.partialDiscount,
             });
 
-            // ✨ CORREGIDO: incluir descuento parcial
             const descuento = discountHook.validation.isValid
               ? discountHook.validation.discount
               : (discountHook.validation.reason === "excluded_items" &&

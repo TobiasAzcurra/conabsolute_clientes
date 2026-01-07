@@ -77,13 +77,13 @@ const SimpleModal = ({
           <div className="w-full flex border-t">
             <button
               onClick={onClose}
-              className="flex-1 h-12 text-sm text-gray-500 font-light border-r"
+              className="flex-1 h-12 text-sm font-light text-gray-500  border-r"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 h-12 text-sm text-blue-700 font-semibold"
+              className="flex-1 h-12 text-sm font-light text-blue-700 "
             >
               {confirmText}
             </button>
