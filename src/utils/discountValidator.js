@@ -319,7 +319,8 @@ export const validateAndCalculateDiscount = async (
       isValid: false,
       discount: 0,
       reason: "excluded_items",
-      message: "Algunos productos no aplican para este descuento",
+      message:
+        "Algunos productos no aplican para este descuento. Clickea pedir para ver mas detalle. No se confirmará el pedido sin tu confirmación.",
       discountId,
       discountData,
       partialDiscountDetails: {
@@ -503,7 +504,7 @@ const getErrorMessage = (reason, details = "") => {
     delivery_excluded: "Código inválido para este método de entrega",
     payment_excluded: "Código inválido para este método de pago",
     excluded_items:
-      "Algunos productos de tu carrito no aplican para este descuento",
+      "Algunos productos de tu carrito no aplican para este descuento. Clickea pedir para ver mas detalle. No se confirmará el pedido sin tu confirmación.",
     time_excluded: "Código inválido en este horario",
     max_uses: "Código inválido. Limite de usos alcanzado",
     error: details
