@@ -8,7 +8,7 @@ const AppleErrorMessage = ({ children, voucher = false }) => {
 
   return (
     <div
-      className={`flex flex-row items-center w-full  gap-2 min-h-10 py-2.5  px-4 ${bgColor} text-red-500 `}
+      className={`flex flex-row items-center w-full  gap-2 min-h-10 py-3  px-4 ${bgColor} text-red-500 `}
     >
       {/* SVG de error por defecto */}
       <svg
