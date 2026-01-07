@@ -255,11 +255,79 @@ export const validateAndCalculateDiscount = async (
 
   if (hasExcludedItem) {
     console.log("\n❌ RESULTADO: Carrito contiene items excluidos");
+
+    // ✨ NUEVO: Calcular descuento parcial
+    const excludedProducts = cartItems
+      .filter((item) => {
+        const isProductExcluded = restrictions.itemsExcluded?.includes(
+          item.productId
+        );
+        const isVariantExcluded = restrictions.itemsExcluded?.includes(
+          item.variantId
+        );
+        return isProductExcluded || isVariantExcluded;
+      })
+      .map((item) => ({
+        id: item.id,
+        name: item.productName || item.name,
+        variantName: item.variantName || "",
+      }));
+
+    const eligibleProducts = cartItems
+      .filter((item) => {
+        const isProductExcluded = restrictions.itemsExcluded?.includes(
+          item.productId
+        );
+        const isVariantExcluded = restrictions.itemsExcluded?.includes(
+          item.variantId
+        );
+        return !isProductExcluded && !isVariantExcluded;
+      })
+      .map((item) => ({
+        id: item.id,
+        name: item.productName || item.name,
+        variantName: item.variantName || "",
+        price: calculateItemPrice(item),
+        quantity: item.quantity,
+      }));
+
+    const eligibleSubtotal = eligibleProducts.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    let partialDiscount = 0;
+    if (config.type === "percentage") {
+      partialDiscount = round2((eligibleSubtotal * config.value) / 100);
+      if (
+        config.maxDiscountAmount &&
+        partialDiscount > config.maxDiscountAmount
+      ) {
+        partialDiscount = config.maxDiscountAmount;
+      }
+    } else if (config.type === "fixed_amount") {
+      partialDiscount = round2(config.value);
+      if (partialDiscount > eligibleSubtotal) {
+        partialDiscount = eligibleSubtotal;
+      }
+    }
+
+    console.log(`💰 Descuento parcial calculado: $${partialDiscount}`);
+    console.log(`📊 Sobre subtotal elegible: $${eligibleSubtotal}`);
+
     return {
       isValid: false,
       discount: 0,
       reason: "excluded_items",
-      message: getErrorMessage("excluded_items"),
+      message: "Algunos productos no aplican para este descuento",
+      discountId,
+      discountData,
+      partialDiscountDetails: {
+        excludedProducts,
+        eligibleProducts,
+        partialDiscount,
+        eligibleSubtotal,
+      },
     };
   }
   console.log("\n✅ Todos los items son elegibles");

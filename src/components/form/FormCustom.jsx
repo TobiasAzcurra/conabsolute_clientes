@@ -67,6 +67,11 @@ const FormCustom = ({ cart, total }) => {
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
   const [showOutOfRangeModal, setShowOutOfRangeModal] = useState(false);
 
+  // ✨ NUEVOS estados para descuento parcial
+  const [showPartialDiscountModal, setShowPartialDiscountModal] =
+    useState(false);
+  const [partialDiscountInfo, setPartialDiscountInfo] = useState(null);
+
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
   const discountHook = useDiscountCode(
     empresaId,
@@ -245,6 +250,28 @@ const FormCustom = ({ cart, total }) => {
     await processPedido(updatedValues, false, appliedDiscount);
   };
 
+  // ✨ NUEVA función para aplicar descuento parcial
+  const applyPartialDiscount = async () => {
+    setShowPartialDiscountModal(false);
+
+    if (pendingSubmitValues && partialDiscountInfo) {
+      const appliedDiscount = {
+        isValid: true,
+        discount: partialDiscountInfo.partialDiscount,
+        discountId: discountHook.validation.discountId,
+        discountData: discountHook.validation.discountData,
+        message: `Descuento parcial aplicado: -$${partialDiscountInfo.partialDiscount}`,
+        isPartial: true,
+      };
+
+      await processPedido(
+        pendingSubmitValues.values,
+        pendingSubmitValues.isReserva,
+        appliedDiscount
+      );
+    }
+  };
+
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
 
@@ -263,13 +290,29 @@ const FormCustom = ({ cart, total }) => {
         return;
       }
     }
+
     let appliedDiscount = null;
     if (discountHook.code && discountHook.code.trim()) {
       if (!discountHook.validation.isValid && discountHook.validation.checked) {
+        // ✨ NUEVO: si tiene productos excluidos, mostrar modal especial
+        if (
+          discountHook.validation.reason === "excluded_items" &&
+          discountHook.validation.partialDiscountDetails
+        ) {
+          setPartialDiscountInfo(
+            discountHook.validation.partialDiscountDetails
+          );
+          setPendingSubmitValues({ values, isReserva });
+          setShowPartialDiscountModal(true);
+          return;
+        }
+
+        // Otros errores: modal genérico
         setPendingSubmitValues({ values, isReserva });
         setShowDiscountWarning(true);
         return;
       }
+
       if (discountHook.validation.isValid) {
         appliedDiscount = {
           isValid: true,
@@ -277,9 +320,11 @@ const FormCustom = ({ cart, total }) => {
           discountId: discountHook.validation.discountId,
           discountData: discountHook.validation.discountData,
           message: discountHook.validation.message,
+          isPartial: false,
         };
       }
     }
+
     const delayConfig = clientConfig?.operaciones?.delay;
     if (delayConfig?.isActive && !isReserva) {
       const now = new Date();
@@ -334,12 +379,14 @@ const FormCustom = ({ cart, total }) => {
           }
         }}
       />
+
       <SimpleModal
         isOpen={showClosedModal}
         onClose={() => setShowClosedModal(false)}
         title="Estamos cerrados"
         message={closedMessage}
       />
+
       <SimpleModal
         isOpen={showDiscountWarning}
         onClose={() => {
@@ -361,6 +408,63 @@ const FormCustom = ({ cart, total }) => {
           }
         }}
       />
+
+      {/* ✨ MODAL de descuento parcial */}
+      <SimpleModal
+        isOpen={showPartialDiscountModal}
+        onClose={() => {
+          setShowPartialDiscountModal(false);
+          setPartialDiscountInfo(null);
+          setPendingSubmitValues(null);
+        }}
+        title="Descuento parcial disponible"
+        message={
+          partialDiscountInfo && (
+            <div className="text-left space-y-3">
+              <div>
+                <p className="font-semibold text-sm mb-1">No aplica para:</p>
+                <ul className="list-disc list-inside text-xs space-y-1">
+                  {partialDiscountInfo.excludedProducts.map((p) => (
+                    <li key={p.id}>
+                      {p.name} {p.variantName && `(${p.variantName})`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <p className="font-semibold text-sm mb-1">Sí aplica para:</p>
+                <ul className="list-disc list-inside text-xs space-y-1">
+                  {partialDiscountInfo.eligibleProducts.map((p) => (
+                    <li key={p.id}>
+                      {p.name} {p.variantName && `(${p.variantName})`} - $
+                      {p.price * p.quantity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="pt-2 border-t">
+                <p className="text-sm">
+                  <span className="font-semibold">Descuento: </span>
+                  <span className="text-green-600">
+                    -${partialDiscountInfo.partialDiscount}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-500">
+                  Sobre ${partialDiscountInfo.eligibleSubtotal} de productos
+                  elegibles
+                </p>
+              </div>
+            </div>
+          )
+        }
+        twoButtons={true}
+        cancelText="Modificar carrito"
+        confirmText="Aplicar y pedir"
+        onConfirm={applyPartialDiscount}
+      />
+
       <SimpleModal
         isOpen={showErrorModal}
         onClose={() => {
@@ -374,6 +478,7 @@ const FormCustom = ({ cart, total }) => {
         onRemoveItem={handleRemoveItem}
         onAdjustStock={handleAdjustStock}
       />
+
       <div className="flex px-4 flex-col">
         <style>{`
           .custom-select {
@@ -420,14 +525,41 @@ const FormCustom = ({ cart, total }) => {
               setCurrentDeliveryMethod(values.deliveryMethod);
               setCurrentPaymentMethod(values.paymentMethod);
             }, [values.deliveryMethod, values.paymentMethod]);
+
             const productsTotal = subtotal;
+
+            // ✨ AGREGADO: logs para debugging
+            console.log("🔍 Estado del descuento:", {
+              isValid: discountHook.validation.isValid,
+              discount: discountHook.validation.discount,
+              reason: discountHook.validation.reason,
+              hasPartialDetails:
+                !!discountHook.validation.partialDiscountDetails,
+              partialDiscount:
+                discountHook.validation.partialDiscountDetails?.partialDiscount,
+            });
+
+            // ✨ CORREGIDO: incluir descuento parcial
             const descuento = discountHook.validation.isValid
               ? discountHook.validation.discount
-              : 0;
+              : (discountHook.validation.reason === "excluded_items" &&
+                  discountHook.validation.partialDiscountDetails
+                    ?.partialDiscount) ||
+                0;
+
+            console.log("💰 Descuento calculado:", descuento);
+            console.log(
+              "🏷️ Es parcial:",
+              discountHook.validation.reason === "excluded_items"
+            );
+
             let finalTotal = productsTotal - descuento;
             if (values.deliveryMethod === "delivery")
               finalTotal += deliveryDistance.deliveryFee;
             if (isEnabled) finalTotal += expressDeliveryFee;
+
+            console.log("💵 Total final:", finalTotal);
+
             return (
               <Form>
                 <div className="flex flex-col">
@@ -529,6 +661,9 @@ const FormCustom = ({ cart, total }) => {
                     expressFee={isEnabled ? expressDeliveryFee : 0}
                     finalTotal={finalTotal}
                     descuento={descuento}
+                    isPartialDiscount={
+                      discountHook.validation.reason === "excluded_items"
+                    }
                     handleExpressToggle={handleExpressToggle}
                     isEnabled={isEnabled}
                     deliveryMethod={values.deliveryMethod}

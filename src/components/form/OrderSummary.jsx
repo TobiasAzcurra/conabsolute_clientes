@@ -8,9 +8,17 @@ const OrderSummary = ({
   descuento = 0,
   finalTotal,
   deliveryMethod,
-  distance = null, // ✅ NUEVO
-  isCalculatingDistance = false, // ✅ NUEVO
+  distance = null,
+  isCalculatingDistance = false,
+  isPartialDiscount = false,
 }) => {
+  // ✨ AGREGADO: log para debugging
+  console.log("📊 OrderSummary recibe:", {
+    descuento,
+    isPartialDiscount,
+    shouldShowDiscount: descuento > 0,
+  });
+
   return (
     <div className="flex justify-center flex-col mt-12 items-center">
       <p className="font-bold w-full mb-4">Resumen</p>
@@ -35,7 +43,7 @@ const OrderSummary = ({
               )}
             </div>
 
-            {/* ✅ NUEVO: Mostrar mensaje o precio */}
+            {/* Mostrar mensaje o precio */}
             {distance === null && !isCalculatingDistance ? (
               <p className="text text-yellow-500 font-light">
                 *Falta seleccionar dirección
@@ -49,14 +57,23 @@ const OrderSummary = ({
 
       {/* Descuento */}
       {descuento > 0 && (
-        <div className="flex flex-row font-light text-sm justify-between w-full">
-          <p className="text-green-600">Descuento</p>
-          <p className="text-green-600">-{currencyFormat(descuento)}</p>
+        <div className="flex flex-col w-full gap-1">
+          <div className="flex flex-row font-light text-sm justify-between">
+            <p className="text-green-600">Descuento</p>
+            <p className="text-green-600">-{currencyFormat(descuento)}</p>
+          </div>
+
+          {/* ✨ NUEVO: mensaje de descuento parcial */}
+          {isPartialDiscount && (
+            <p className="text-xs text-gray-400 italic">
+              *Aplicado solo sobre productos elegibles
+            </p>
+          )}
         </div>
       )}
 
       {/* Total */}
-      <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-screen">
+      <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-full">
         <p className="font-bold w-full mb-4">Total</p>
         <p className="font-bold">{currencyFormat(finalTotal)}</p>
       </div>
