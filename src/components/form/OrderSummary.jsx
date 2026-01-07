@@ -65,15 +65,17 @@ const OrderSummary = ({
 
           {/* ✨ NUEVO: mensaje de descuento parcial */}
           {isPartialDiscount && (
-            <p className="text-xs text-gray-400 italic">
-              *Aplicado solo sobre productos elegibles
+            <p className="text-sm text-yellow-500 pr-4 font-light">
+              *Aplicado solo sobre productos elegibles. Para consultar detalle
+              presionar boton pedir, no se generara el pedido sin tu
+              confirmacion.
             </p>
           )}
         </div>
       )}
 
       {/* Total */}
-      <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4 px-4 w-full">
+      <div className="flex flex-row justify-between border-t border-opacity-20 border-black mt-4 pt-4  w-full">
         <p className="font-bold w-full mb-4">Total</p>
         <p className="font-bold">{currencyFormat(finalTotal)}</p>
       </div>

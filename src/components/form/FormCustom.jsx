@@ -420,9 +420,9 @@ const FormCustom = ({ cart, total }) => {
         title="Descuento parcial disponible"
         message={
           partialDiscountInfo && (
-            <div className="text-left space-y-3">
-              <div>
-                <p className="font-semibold text-sm mb-1">No aplica para:</p>
+            <div className="text-left space-y-2">
+              <div className="">
+                <p className="font-light text-xs mb-1">No aplica para:</p>
                 <ul className="list-disc list-inside text-xs space-y-1">
                   {partialDiscountInfo.excludedProducts.map((p) => (
                     <li key={p.id}>
@@ -433,7 +433,7 @@ const FormCustom = ({ cart, total }) => {
               </div>
 
               <div>
-                <p className="font-semibold text-sm mb-1">Sí aplica para:</p>
+                <p className="font-light text-xs mb-1">Sí aplica para:</p>
                 <ul className="list-disc list-inside text-xs space-y-1">
                   {partialDiscountInfo.eligibleProducts.map((p) => (
                     <li key={p.id}>
@@ -444,24 +444,18 @@ const FormCustom = ({ cart, total }) => {
                 </ul>
               </div>
 
-              <div className="pt-2 border-t">
-                <p className="text-sm">
-                  <span className="font-semibold">Descuento: </span>
-                  <span className="text-green-600">
-                    -${partialDiscountInfo.partialDiscount}
-                  </span>
-                </p>
-                <p className="text-xs text-gray-500">
-                  Sobre ${partialDiscountInfo.eligibleSubtotal} de productos
-                  elegibles
-                </p>
+              <div className="text-sm flex flex-row gap-1 items-baseline">
+                <span className="font-light text-xs ">
+                  Descuento de -${partialDiscountInfo.partialDiscount} sobre $
+                  {partialDiscountInfo.eligibleSubtotal} de productos elegibles
+                </span>
               </div>
             </div>
           )
         }
         twoButtons={true}
-        cancelText="Modificar carrito"
-        confirmText="Aplicar y pedir"
+        cancelText="Modificar"
+        confirmText="Pedir"
         onConfirm={applyPartialDiscount}
       />
 
