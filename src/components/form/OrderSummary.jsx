@@ -62,15 +62,6 @@ const OrderSummary = ({
             <p className="text-green-600">Descuento</p>
             <p className="text-green-600">-{currencyFormat(descuento)}</p>
           </div>
-
-          {/* ✨ NUEVO: mensaje de descuento parcial */}
-          {isPartialDiscount && (
-            <p className="text-sm text-yellow-500 pr-4 font-light">
-              *Aplicado solo sobre productos elegibles. Para consultar detalle
-              presionar boton pedir, no se generara el pedido sin tu
-              confirmacion.
-            </p>
-          )}
         </div>
       )}
 
