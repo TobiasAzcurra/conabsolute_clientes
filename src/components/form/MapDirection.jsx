@@ -33,7 +33,7 @@ export const MapDirection = ({
       const formattedGoogleMapsUrl =
         `https://www.google.com/maps?q=${lat},${lng}`.replace(
           "https://",
-          "https ://"
+          "https ://",
         );
       setUrl(googleMapsUrl);
       setFieldValue("address", formattedAddress);
@@ -91,7 +91,7 @@ export const MapDirection = ({
             </AdvancedMarker>
           )}
 
-          {/* ✅ Marcador del cliente con estilo personalizado */}
+          {/* Marcador del cliente */}
           <AdvancedMarker
             ref={markerRef}
             position={selectedPlace?.geometry?.location}
@@ -134,6 +134,10 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
   const routesLib = useMapsLibrary("routes");
   const polylineRef = useRef(null);
 
+  // 🔥 FIX REAL: Guardar últimas coordenadas procesadas
+  const lastProcessedCoordsRef = useRef(null);
+
+  // Manejar posición del marcador y drag
   useEffect(() => {
     if (!map || !place || !marker) return;
 
@@ -161,8 +165,14 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
     };
   }, [map, place, marker, setPlace]);
 
+  // 🔥 FIX REAL: Solo dibujar si coordenadas NUMÉRICAS cambiaron
   useEffect(() => {
-    if (!map || !routesLib || !branchCoordinates || !place) {
+    if (
+      !map ||
+      !routesLib ||
+      !branchCoordinates ||
+      !place?.geometry?.location
+    ) {
       if (polylineRef.current) {
         polylineRef.current.setMap(null);
         polylineRef.current = null;
@@ -170,12 +180,28 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
       return;
     }
 
+    // Extraer coordenadas numéricas
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    const coordsKey = `${lat},${lng}`;
+
+    // 🔥 COMPARAR CON ÚLTIMAS PROCESADAS
+    if (lastProcessedCoordsRef.current === coordsKey) {
+      console.log("⏭️ Coordenadas sin cambios, saltando llamada a API");
+      return;
+    }
+
+    // Actualizar ref
+    lastProcessedCoordsRef.current = coordsKey;
+
+    console.log("🗺️ Dibujando ruta en mapa (Directions API)");
+
     const directionsService = new google.maps.DirectionsService();
 
     directionsService.route(
       {
         origin: branchCoordinates,
-        destination: place.geometry.location,
+        destination: { lat, lng },
         travelMode: google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
@@ -210,7 +236,7 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
         } else {
           console.warn("No se pudo calcular la ruta:", status);
         }
-      }
+      },
     );
 
     return () => {
@@ -219,7 +245,7 @@ const MapHandler = ({ place, marker, setPlace, branchCoordinates }) => {
         polylineRef.current = null;
       }
     };
-  }, [map, routesLib, branchCoordinates, place]);
+  }, [map, routesLib, branchCoordinates, place]); // Sí, depende de place, pero lo filtramos con el ref
 
   return null;
 };
