@@ -40,10 +40,7 @@ const MenuIntro = () => {
     productsByCategory,
   } = useClient();
 
-  const [introGif, setIntroGif] = useState(null);
-  const [mediaLoaded, setMediaLoaded] = useState(false);
-  const [mediaType, setMediaType] = useState(null);
-  const [preloadStats, setPreloadStats] = useState(null);
+
 
   const detectMediaType = (url) => {
     if (!url) return null;
@@ -55,6 +52,22 @@ const MenuIntro = () => {
     if (imageExtensions.some((ext) => urlLower.includes(ext))) return "image";
     return "image";
   };
+
+
+  const [introGif, setIntroGif] = useState(
+    location.state?.preloadUrl || null
+  ); // ✅ Si viene url precargada, la usamos de una
+  
+  // ✅ FIX: Si ya tenemos la URL precargada, asumimos que está lista para mostrarse
+  // Esto evita el "pestañeo" blanco de la transición de opacidad
+  const [mediaLoaded, setMediaLoaded] = useState(
+    !!location.state?.preloadUrl
+  );
+  
+  const [mediaType, setMediaType] = useState(
+    detectMediaType(location.state?.preloadUrl) || null
+  );
+  const [preloadStats, setPreloadStats] = useState(null);
 
   useEffect(() => {
     setSlugEmpresa(slugEmpresa);
@@ -86,9 +99,12 @@ const MenuIntro = () => {
         const assets = await getClientAssets(empresaId, sucursalId);
         setClientAssets(assets);
 
-        const loadingMedia = assets?.loading || null;
-        setIntroGif(loadingMedia);
-        setMediaType(detectMediaType(loadingMedia));
+        // Si no teníamos introGif (no vino por state), lo seteamos aquí
+        if (!introGif) {
+          const loadingMedia = assets?.loading || null;
+          setIntroGif(loadingMedia);
+          setMediaType(detectMediaType(loadingMedia));
+        }
 
         // 2. Precarga FASE 1: Hero + intro (delay adaptativo según conexión)
         setTimeout(() => {
