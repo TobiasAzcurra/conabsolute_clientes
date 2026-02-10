@@ -1,3 +1,4 @@
+
 // layouts/ClientLayout.js
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
@@ -9,6 +10,7 @@ import FloatingCart from "../components/shopping/FloatingCart";
 import SearchBar from "../components/SearchBar";
 import AIChatClient from "../components/AIChatClient";
 import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion"; // ✅ Importar framer-motion
 
 const ClientLayout = ({ children }) => {
   const { clientData, clientAssets, clientConfig, aiBotConfig } = useClient();
@@ -68,6 +70,32 @@ const ClientLayout = ({ children }) => {
     window.open(whatsappUrl, "_blank");
   };
 
+  // 🎥 Variantes para animación de entrada "Apple-like"
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+        duration: 0.5,
+        ease: [0.25, 0.1, 0.25, 1.0] // Ease-out cubic suave
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.6,
+        ease: [0.25, 0.1, 0.25, 1.0]
+      }
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -82,17 +110,20 @@ const ClientLayout = ({ children }) => {
         )}
       </Helmet>
 
-      <div className="flex flex-col relative bg-gray-100 min-h-screen">
+      <motion.div 
+        className="flex flex-col relative bg-gray-100 min-h-screen"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
         {/* HEADER + CARRUSEL */}
         {!shouldHideHeader && (
-          <>
-            <div className="relative z-[10]">
+          <motion.div variants={itemVariants} className="relative z-[10]">
               <Carrusel images={clientAssets?.hero || []} />
               <div className="top-[280px] inset-0 absolute">
                 <NavMenu />
               </div>
-            </div>
-          </>
+          </motion.div>
         )}
 
         {/* SEARCH + BOTÓN CONTACTANOS + FLOATING CART */}
@@ -120,13 +151,14 @@ const ClientLayout = ({ children }) => {
         )}
 
         {/* CONTENIDO PRINCIPAL */}
-        <div
+        <motion.div
+          variants={itemVariants}
           className={`${
             !shouldHideHeader ? "mt-[162px]" : ""
           } ${paddingBottom} z-[5]`}
         >
           {children}
-        </div>
+        </motion.div>
 
         {/* ==================== MODAL DE CHAT AI ==================== */}
         {isContactModalOpen && isBotEnabled ? (
@@ -216,8 +248,9 @@ const ClientLayout = ({ children }) => {
           >
             <span>Contactanos</span>
           </button>
+
         ) : null}
-      </div>
+      </motion.div>
     </>
   );
 };
