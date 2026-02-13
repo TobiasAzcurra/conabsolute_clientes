@@ -377,6 +377,7 @@ export const handlePOSSubmit = async (
         coordinates: formData.coordinates || [0, 0],
         estimatedTime: estimatedTime,
         deliveryNotes: formData.references || "",
+        distance: formData.deliveryDistance || null,
       },
       items: itemsForOrder,
       payment: {

@@ -162,26 +162,6 @@ const NavMenu = () => {
           />
         </svg>
         <div className="flex flex-row  font-primary  gap-1 flex-shrink-0">
-          {/* ✅ Tags de filtro desde DB */}
-          {productTags.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => handleFilterClick(tag.id)}
-              className={`w-fit px-4 rounded-full text-xs shadow-lg shadow-gray-200  h-10 items-center flex font-light whitespace-nowrap transition-all ${
-                activeFilters.includes(tag.id)
-                  ? "bg-gray-50 text-black "
-                  : "bg-gray-300 text-gray-400 "
-              }`}
-            >
-              {tag.name}
-            </button>
-          ))}
-
-          {/* ✅ Separador visual */}
-          {productTags.length > 0 && (
-            <div className="w-px h-6 bg-gray-300 self-center mx-1" />
-          )}
-
           {/* ✅ Tags de ordenamiento */}
           {SORT_OPTIONS.map((option) => (
             <button
@@ -194,6 +174,26 @@ const NavMenu = () => {
               }`}
             >
               {option.name}
+            </button>
+          ))}
+
+          {/* ✅ Separador visual */}
+          {productTags.length > 0 && (
+            <div className="w-px h-6 bg-gray-300 self-center mx-1" />
+          )}
+
+          {/* ✅ Tags de filtro desde DB */}
+          {productTags.map((tag) => (
+            <button
+              key={tag.id}
+              onClick={() => handleFilterClick(tag.id)}
+              className={`w-fit px-4 rounded-full text-xs shadow-lg shadow-gray-200  h-10 items-center flex font-light whitespace-nowrap transition-all ${
+                activeFilters.includes(tag.id)
+                  ? "bg-gray-50 text-black "
+                  : "bg-gray-300 text-gray-400 "
+              }`}
+            >
+              {tag.name}
             </button>
           ))}
         </div>

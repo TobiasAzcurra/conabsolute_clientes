@@ -8,7 +8,7 @@ export const useDiscountCode = (
   deliveryMethod,
   paymentMethod,
   subtotal,
-  timezone = "America/Argentina/Buenos_Aires" // ← NUEVO parámetro
+  timezone = "America/Argentina/Buenos_Aires"
 ) => {
   const [code, setCode] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -28,6 +28,7 @@ export const useDiscountCode = (
         discount: 0,
         message: "",
         reason: "",
+        partialDiscountDetails: null, // ✨ AGREGADO
       });
       return;
     }
@@ -38,7 +39,7 @@ export const useDiscountCode = (
       const enterpriseData = {
         empresaId,
         sucursalId,
-        timezone, // ← Pasar timezone
+        timezone,
       };
 
       try {
@@ -51,6 +52,8 @@ export const useDiscountCode = (
           enterpriseData
         );
 
+        console.log("🎯 Resultado del validator en hook:", result); // ✨ NUEVO LOG
+
         setValidation({
           isValid: result.isValid,
           checked: true,
@@ -59,7 +62,10 @@ export const useDiscountCode = (
           reason: result.reason || "",
           discountData: result.discountData,
           discountId: result.discountId,
+          partialDiscountDetails: result.partialDiscountDetails || null, // ✨ AGREGADO
         });
+
+        console.log("✅ Estado actualizado en hook"); // ✨ NUEVO LOG
       } catch (error) {
         console.error("Error en validación de descuento:", error);
         setValidation({
@@ -68,6 +74,7 @@ export const useDiscountCode = (
           discount: 0,
           message: "Error al validar el código. Intenta nuevamente.",
           reason: "error",
+          partialDiscountDetails: null, // ✨ AGREGADO
         });
       } finally {
         setIsValidating(false);

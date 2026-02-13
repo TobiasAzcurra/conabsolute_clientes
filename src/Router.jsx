@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import EmpresaRouter from "./EmpresaRouter";
+
 import { Routes, Route, Navigate } from "react-router-dom";
+import BranchSelector from "./pages/BranchSelector";
 
 function NavigateConabsolute() {
   useEffect(() => {
@@ -15,6 +17,8 @@ const AppRouter = () => {
     <Routes>
       <Route path="/" element={<NavigateConabsolute />} />
 
+
+      <Route path="/:slugEmpresa" element={<BranchSelector />} />
       <Route path="/:slugEmpresa/:slugSucursal/*" element={<EmpresaRouter />} />
     </Routes>
   );
