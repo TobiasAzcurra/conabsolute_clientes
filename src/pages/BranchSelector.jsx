@@ -8,7 +8,9 @@ import { useClient } from "../contexts/ClientContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faMapMarkerAlt, faStore } from "@fortawesome/free-solid-svg-icons";
+import {  faStore } from "@fortawesome/free-solid-svg-icons";
+import { useMediaQuery } from "react-responsive";
+import PcBlock from "../components/PcBlock";
 
 const BranchSelector = () => {
   const { slugEmpresa } = useParams();
@@ -22,6 +24,7 @@ const BranchSelector = () => {
   } = useClient();
   
 
+  const isDesktop = useMediaQuery({ minWidth: 1024 });
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +32,7 @@ const BranchSelector = () => {
   const [empresaLogo, setEmpresaLogo] = useState(null); // ✅ Estado para el logo
   // Estado para guardar las URLs de los assets precargados
   const [preloadedAssets, setPreloadedAssets] = useState({});
+
 
   useEffect(() => {
     // ✅ Resetear isLoaded para asegurar que MenuIntro corra al navegar a una sucursal
@@ -181,6 +185,10 @@ const BranchSelector = () => {
   const primaryColor = colors?.primary || '#000000';
   const fontFamily = typography?.primary?.name || "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
   const backgroundColor = colors?.background || '#F5F5F7'; // Típico gris claro de Apple
+
+  if (isDesktop) {
+    return <PcBlock />;
+  }
 
   if (loading) {
      return (

@@ -10,24 +10,7 @@ import NotFound from './components/NotFound.jsx';
 import SuccessPage from './pages/SuccessPage.jsx';
 import Pedido from './pages/pedido/Pedido.jsx';
 import { useMediaQuery } from 'react-responsive';
-import Absolute from './assets/isologoAbsolte.png';
-
-const PcBlock = () => (
-  <div className="bg-black  font-primary  flex items-center justify-center flex-col h-screen w-screen">
-    <img className="h-56" src={Absolute} alt="" />
-    <div className="flex flex-col">
-      <div className="flex flex-row gap-1">
-        <p className="text-gray-50 opacity-50 font-light text-xs">
-          Interfaz web
-        </p>
-        <p className="text-gray-50 font-light text-xs">proximamente,</p>
-      </div>
-      <p className="text-gray-50 opacity-50 font-light text-xs">
-        ingresa por tu celular.
-      </p>
-    </div>
-  </div>
-);
+import PcBlock from './components/PcBlock';
 
 const EmpresaRouter = () => {
   const { isLoaded } = useClient();
