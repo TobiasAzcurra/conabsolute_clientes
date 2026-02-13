@@ -102,28 +102,50 @@ const BranchSelector = () => {
       const promises = branches.map(async (branch) => {
         try {
            const assets = await getClientAssets(empresaId, branch.id);
-           if (assets?.loading) {
-             const url = assets.loading;
-             // Guardamos la URL en el mapa local
-             assetsMap[branch.slugSucursal] = url;
+           const branchData = {};
 
-             const isVideo = url.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
-             
-             if (isVideo) {
-                // Precargar video
-                const link = document.createElement('link');
-                link.rel = 'preload';
-                link.as = 'video';
-                link.href = url;
-                document.head.appendChild(link);
-                console.log(`🎥 Precargando video sucursal ${branch.slugSucursal}`);
-             } else {
-                // Precargar imagen
-                const img = new Image();
-                img.src = url;
-                console.log(`🖼️ Precargando imagen sucursal ${branch.slugSucursal}`);
+           // Precargar Hero (para el card)
+           if (assets?.hero) {
+             let heroUrl = Array.isArray(assets.hero) ? assets.hero[0] : assets.hero;
+             if (typeof heroUrl === 'string') {
+               branchData.hero = heroUrl;
+               const isVideo = heroUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
+               if (isVideo) {
+                 const link = document.createElement('link');
+                 link.rel = 'preload';
+                 link.as = 'video';
+                 link.href = heroUrl;
+                 document.head.appendChild(link);
+               } else {
+                 const img = new Image();
+                 img.src = heroUrl;
+               }
              }
            }
+
+           // Precargar Loading (para la intro)
+           if (assets?.loading) {
+             let loadingUrl = Array.isArray(assets.loading) ? assets.loading[0] : assets.loading;
+             if (typeof loadingUrl === 'string') {
+               branchData.loading = loadingUrl;
+               const isVideo = loadingUrl.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
+               if (isVideo) {
+                 const link = document.createElement('link');
+                 link.rel = 'preload';
+                 link.as = 'video';
+                 link.href = loadingUrl;
+                 document.head.appendChild(link);
+                 console.log(`🎥 Precargando video loading sucursal ${branch.slugSucursal}`);
+               } else {
+                 const img = new Image();
+                 img.src = loadingUrl;
+                 console.log(`🖼️ Precargando imagen loading sucursal ${branch.slugSucursal}`);
+               }
+             }
+           }
+           
+           assetsMap[branch.slugSucursal] = branchData;
+
         } catch (err) {
            console.warn(`Error precargando assets para ${branch.slugSucursal}`, err);
         }
@@ -142,11 +164,12 @@ const BranchSelector = () => {
     // setIsLoaded(false) ya se llamó al montar, pero por seguridad:
     setIsLoaded(false);
     
-    // Obtenemos la URL precargada si existe
-    const preloadedUrl = preloadedAssets[branchSlug];
+    // Obtenemos la URL de carga precargada (intro)
+    const branchAssets = preloadedAssets[branchSlug];
+    const preloadUrl = branchAssets?.loading || branchAssets?.hero;
 
     navigate(`/${slugEmpresa}/${branchSlug}`, { 
-      state: { preloadUrl: preloadedUrl } 
+      state: { preloadUrl } 
     });
   };
 
@@ -172,23 +195,12 @@ const BranchSelector = () => {
   return (
     <div 
       style={{ backgroundColor, fontFamily, color: '#1D1D1F' }} 
-      className="min-h-screen flex flex-col items-center justify-start pt-16 px-6 transition-colors duration-500 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center justify-start pt-16 px-2 pb-4 transition-colors duration-500 relative overflow-hidden"
     >
       <Helmet>
         <title>Selecciona una sucursal | {empresaName}</title>
       </Helmet>
 
-      {/* Background blobs for premium feel */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0 opacity-30">
-        <div 
-          className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[100px]"
-          style={{ background: `radial-gradient(circle, ${primaryColor}40 0%, transparent 70%)` }}
-        />
-        <div 
-          className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full blur-[120px]"
-          style={{ background: `radial-gradient(circle, ${colors?.secondary || '#86868b'}20 0%, transparent 70%)` }}
-        />
-      </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -196,18 +208,18 @@ const BranchSelector = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="z-10 w-full max-w-md"
       >
-        <div className="text-center mb-10">
+        <div className="text-center pb-16">
           {empresaLogo ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="flex justify-center mb-4"
+              className="flex justify-center mb-2"
             >
               <img 
                 src={empresaLogo} 
                 alt={empresaName} 
-                className="h-16 object-contain" // Ajusta h-16 según tamaño deseado (64px)
+                className="h-8 object-contain" // Ajusta h-16 según tamaño deseado (64px)
               />
             </motion.div>
           ) : (
@@ -224,52 +236,79 @@ const BranchSelector = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-4xl font-bold tracking-tight text-[#1D1D1F]"
+            className="text-xs font-light "
           >
-           Elige tu sucursal
+           Selecciona tu sucursal preferida
           </motion.h1>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-2">
           <AnimatePresence>
-            {branches.map((branch, index) => (
-              <motion.div
-                key={branch.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index + 0.4, duration: 0.5 }}
-                whileHover={{ scale: 1.02, backgroundColor: "rgba(255, 255, 255, 0.9)" }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleSelectBranch(branch.slugSucursal)}
-                className="group cursor-pointer bg-white/80 backdrop-blur-md border border-white/40 shadow-sm rounded-2xl p-5 flex items-center justify-between transition-all duration-300 hover:shadow-lg"
-              >
-                <div className="flex items-center space-x-4">
-                  <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg shadow-sm"
-                    style={{ backgroundColor: primaryColor }}
-                  >
-                   <FontAwesomeIcon icon={faStore} className="opacity-90" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg text-[#1D1D1F]">
-                      {branch.name || branch.slugSucursal}
-                    </h3>
-                    {branch.address && (
-                      <p className="text-sm text-[#86868b] mt-0.5 flex items-center">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1.5 w-3 h-3 opacity-70" />
-                        {branch.address}
-                      </p>
+            {branches.map((branch, index) => {
+              const heroUrl = preloadedAssets[branch.slugSucursal]?.hero || null;
+              
+              return (
+                <motion.div
+                  key={branch.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index + 0.4, duration: 0.5 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleSelectBranch(branch.slugSucursal)}
+                  className="group cursor-pointer relative overflow-hidden rounded-3xl shadow-lg shadow-black/20  transition-all duration-300"
+                  style={{ height: '280px' }}
+                >
+                  {/* Hero Image Background */}
+                  <div className="absolute inset-0">
+                    {heroUrl ? (
+                      <img 
+                        src={heroUrl} 
+                        alt={branch.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                      />
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ backgroundColor: primaryColor }}
+                      >
+                        <FontAwesomeIcon icon={faStore} className="text-white text-6xl opacity-30" />
+                      </div>
                     )}
                   </div>
-                </div>
-                <div 
-                  className="text-[#86868b] opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
-                  style={{ color: primaryColor }}
-                >
-                  <FontAwesomeIcon icon={faChevronRight} />
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+                  {/* Content Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
+                    <div className="backdrop-blur-xl bg-white/10 rounded-3xl p-4 ">
+                      <h3 className=" text-white mb-2">
+                        {branch.name || branch.slugSucursal}
+                      </h3>
+                      {branch.address && (
+                        <p className="text-xs text-white flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 mr-2">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+</svg>
+
+                          {branch.address}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Chevron Icon */}
+                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center ">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 text-white">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+</svg>
+
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
         

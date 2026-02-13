@@ -43,7 +43,7 @@ const MenuIntro = () => {
 
 
   const detectMediaType = (url) => {
-    if (!url) return null;
+    if (!url || typeof url !== 'string') return null;
     const videoExtensions = [".mp4", ".webm", ".ogg", ".mov", ".avi"];
     const imageExtensions = [".gif", ".png", ".jpg", ".jpeg", ".webp"];
     const urlLower = url.toLowerCase();
