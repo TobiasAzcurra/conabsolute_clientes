@@ -9,6 +9,10 @@ const SimpleModal = ({
   onUpdateStock,
   onRemoveItem,
   onAdjustStock,
+  twoButtons = false,
+  cancelText = "Cancelar",
+  confirmText = "Confirmar",
+  onConfirm,
 }) => {
   if (!isOpen) return null;
 
@@ -64,18 +68,36 @@ const SimpleModal = ({
               </ul>
             </div>
           ) : (
-            <p className="text-xs font-light text-gray-400">{message}</p>
+            <div className="text-xs font-light text-gray-400">{message}</div>
           )}
         </div>
 
-        <div className="w-full">
-          <button
-            onClick={onClose}
-            className="w-full h-12 border-t text-sm text-blue-700 font-light"
-          >
-            Entendido
-          </button>
-        </div>
+        {/* ✨ NUEVO: Layout condicional de botones */}
+        {twoButtons ? (
+          <div className="w-full flex border-t">
+            <button
+              onClick={onClose}
+              className="flex-1 h-12 text-sm font-light text-gray-500  border-r"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 h-12 text-sm font-light text-blue-700 "
+            >
+              {confirmText}
+            </button>
+          </div>
+        ) : (
+          <div className="w-full">
+            <button
+              onClick={onClose}
+              className="w-full h-12 border-t text-sm text-blue-700 font-light"
+            >
+              Entendido
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.getElementById("modal-root")
