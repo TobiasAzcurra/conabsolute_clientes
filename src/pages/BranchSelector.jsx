@@ -160,15 +160,18 @@ const BranchSelector = () => {
     }
   };
 
-  const handleSelectBranch = (branchSlug) => {
+  const handleSelectBranch = (branch) => {
+    // Si la sucursal no está activa, no hacemos nada
+    if (branch.active === false) return;
+
     // setIsLoaded(false) ya se llamó al montar, pero por seguridad:
     setIsLoaded(false);
     
     // Obtenemos la URL de carga precargada (intro)
-    const branchAssets = preloadedAssets[branchSlug];
+    const branchAssets = preloadedAssets[branch.slugSucursal];
     const preloadUrl = branchAssets?.loading || branchAssets?.hero;
 
-    navigate(`/${slugEmpresa}/${branchSlug}`, { 
+    navigate(`/${slugEmpresa}/${branch.slugSucursal}`, { 
       state: { preloadUrl } 
     });
   };
@@ -195,7 +198,7 @@ const BranchSelector = () => {
   return (
     <div 
       style={{ backgroundColor, fontFamily, color: '#1D1D1F' }} 
-      className="min-h-screen flex flex-col items-center justify-start pt-16 px-2 pb-4 transition-colors duration-500 relative overflow-hidden"
+      className="min-h-screen flex flex-col pt-16 px-4 pb-4 transition-colors duration-500 "
     >
       <Helmet>
         <title>Selecciona una sucursal | {empresaName}</title>
@@ -208,7 +211,7 @@ const BranchSelector = () => {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="z-10 w-full max-w-md"
       >
-        <div className="text-center pb-16">
+        <div className="pb-8">
           {empresaLogo ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
@@ -227,25 +230,27 @@ const BranchSelector = () => {
                initial={{ opacity: 0 }}
                animate={{ opacity: 0.6 }}
                transition={{ delay: 0.2 }}
-               className="text-xs font-semibold tracking-widest uppercase mb-2 text-gray-500"
+               className="text-xs font-semibold tracking-widest uppercase text-gray-500"
              >
                {empresaName}
              </motion.h2>
           )}
+        </div>
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-xs font-light "
-          >
-           Selecciona tu sucursal preferida
-          </motion.h1>
-        </div>
+            className="font-primary  pr-8 mb-4  text-sm text-gray-900 leading-tight"
 
-        <div className="grid grid-cols-1 gap-2">
+          >
+           Selecciona en que sucursal queres pedir
+          </motion.h1>
+
+        <div className="flex flex-col gap-2">
           <AnimatePresence>
             {branches.map((branch, index) => {
               const heroUrl = preloadedAssets[branch.slugSucursal]?.hero || null;
+              const isActive = branch.active !== false;
               
               return (
                 <motion.div
@@ -253,10 +258,12 @@ const BranchSelector = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * index + 0.4, duration: 0.5 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleSelectBranch(branch.slugSucursal)}
-                  className="group cursor-pointer relative overflow-hidden rounded-3xl shadow-lg shadow-black/20  transition-all duration-300"
+                  whileHover={isActive ? { scale: 1.02 } : {}}
+                  whileTap={isActive ? { scale: 0.98 } : {}}
+                  onClick={() => handleSelectBranch(branch)}
+                  className={`group relative overflow-hidden rounded-3xl shadow-lg shadow-gray-200  transition-all duration-300 ${
+                    isActive ? "cursor-pointer" : "cursor-default opacity-60 grayscale-[0.2]"
+                  }`}
                   style={{ height: '280px' }}
                 >
                   {/* Hero Image Background */}
@@ -265,7 +272,9 @@ const BranchSelector = () => {
                       <img 
                         src={heroUrl} 
                         alt={branch.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                        className={`w-full h-full object-cover transition-transform duration-500 pointer-events-none ${
+                          isActive ? "group-hover:scale-105" : ""
+                        }`}
                       />
                     ) : (
                       <div 
@@ -282,7 +291,7 @@ const BranchSelector = () => {
 
                   {/* Content Overlay */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-                    <div className="backdrop-blur-xl bg-white/10 rounded-3xl p-4 ">
+                    <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-4 ">
                       <h3 className=" text-white mb-2">
                         {branch.name || branch.slugSucursal}
                       </h3>
@@ -299,18 +308,35 @@ const BranchSelector = () => {
                     </div>
                   </div>
 
-                  {/* Chevron Icon */}
-                  <div className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center ">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 text-white">
-  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                  {/* Status Indicator (Chevron or NO DISPONIBLE) */}
+                  <div className="absolute top-4 right-4">
+
+                  <div className={`h-10 rounded-full  backdrop-blur-sm flex items-center justify-center transition-all duration-300 ${
+                    !isActive ? "px-4 bg-red-300/80" : "w-10 bg-white/20"
+                  }`}>
+                    {isActive ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 text-white">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                      </svg>
+                    ) : (
+                      <div className="flex items-center gap-2 text-red-500">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
 </svg>
 
+                      <span className="text-xs font-bold font-light  ">
+                        No disponible
+                      </span>
+                      </div>
+                    )}
                   </div>
+                    </div>
                 </motion.div>
               );
             })}
           </AnimatePresence>
         </div>
+
         
        
       </motion.div>
