@@ -184,13 +184,35 @@ const BranchSelector = () => {
 
   if (loading) {
      return (
-        <div style={{ backgroundColor, fontFamily }} className="flex items-center justify-center h-screen transition-colors duration-500">
-           <motion.div 
-             initial={{ opacity: 0 }} 
-             animate={{ opacity: 1 }} 
-             className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
-             style={{ borderColor: `${primaryColor} transparent transparent transparent` }}
-           />
+        <div 
+          style={{ backgroundColor, fontFamily }} 
+          className="min-h-screen flex flex-col pt-16 px-4 pb-4 transition-colors duration-500"
+        >
+          {/* Header Skeleton */}
+          <div className="pb-8 animate-pulse">
+            <div className="h-8 w-32 bg-gray-200 rounded-lg mx-auto mb-2" />
+          </div>
+          <div className="animate-pulse mb-8">
+            <div className="h-4 w-64 bg-gray-200 rounded-md" />
+          </div>
+
+          {/* Cards Skeleton */}
+          <div className="flex flex-col gap-2">
+            {[1, 2].map((i) => (
+              <div 
+                key={i}
+                className="relative overflow-hidden rounded-3xl bg-gray-200 animate-pulse transition-all duration-300 shadow-lg shadow-gray-100"
+                style={{ height: '280px' }}
+              >
+                {/* Simulated Content Area */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <div className="bg-white/40 backdrop-blur-sm rounded-3xl p-4 h-24" />
+                </div>
+                {/* Simulated Indicator Area */}
+                <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/40 backdrop-blur-sm" />
+              </div>
+            ))}
+          </div>
         </div>
      );
   }
