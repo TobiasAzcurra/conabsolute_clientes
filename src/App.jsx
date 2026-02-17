@@ -5,6 +5,7 @@ import { ClientProvider } from "./contexts/ClientContext";
 import { CartProvider } from "./contexts/CartContext";
 import "./fontAwesome";
 import ThemeProvider from "./components/ThemeProvider";
+import DebugOverlay from "./components/DebugOverlay";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             </CartProvider>
           </ThemeProvider>
         </HelmetProvider>
+        {/* <DebugOverlay /> */}
       </ClientProvider>
     </BrowserRouter>
   );
