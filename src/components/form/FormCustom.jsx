@@ -1,8 +1,7 @@
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../../contexts/CartContext";
-import { db } from "../../firebase/config";
 import { StockManager } from "../../utils/stockManager";
 import validations from "./validations";
 import {
@@ -20,6 +19,7 @@ import { useDiscountCode } from "../../hooks/useDiscountCode";
 import SimpleModal from "../ui/SimpleModal";
 import { useAvailableFulfillmentMethods } from "../../hooks/useAvailableFulfillmentMethods";
 import { parseTimeToTimestamp } from "../../utils/timestampHelpers";
+import { useDeliveryDistance } from "../../hooks/useDeliveryDistance";
 
 const FormCustom = ({ cart, total }) => {
   const navigate = useNavigate();
@@ -38,6 +38,7 @@ const FormCustom = ({ cart, total }) => {
     sucursalId,
     clientConfig,
     clientData,
+    rawProducts, // ✨ AGREGADO
   } = useClient();
   const stockManager = new StockManager({
     id: empresaId,
@@ -49,6 +50,7 @@ const FormCustom = ({ cart, total }) => {
     clientConfig?.regional?.timezone || "America/Argentina/Buenos_Aires";
 
   const [mapUrl, setUrl] = useState("");
+  const [clientCoordinates, setClientCoordinates] = useState(null);
   const [validarUbi, setValidarUbi] = useState(false);
   const [noEncontre, setNoEncontre] = useState(false);
   const [isProcessingStock, setIsProcessingStock] = useState(false);
@@ -64,6 +66,14 @@ const FormCustom = ({ cart, total }) => {
   const [currentDeliveryMethod, setCurrentDeliveryMethod] =
     useState("delivery");
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState("cash");
+  const [showOutOfRangeModal, setShowOutOfRangeModal] = useState(false);
+
+  // ✨ Estados para descuento parcial
+  const [showPartialDiscountModal, setShowPartialDiscountModal] =
+    useState(false);
+  const [partialDiscountInfo, setPartialDiscountInfo] = useState(null);
+  const [showAllExcluded, setShowAllExcluded] = useState(false); // ✨ NUEVO
+
   const { isEnabled, handleExpressToggle } = useFormStates(expressDeliveryFee);
   const discountHook = useDiscountCode(
     empresaId,
@@ -75,6 +85,60 @@ const FormCustom = ({ cart, total }) => {
     timezone
   );
   const availableMethods = useAvailableFulfillmentMethods(cartItems);
+
+  // Hook de distancia
+  const deliveryDistance = useDeliveryDistance(
+    clientData?.coordinates,
+    clientCoordinates,
+    clientConfig?.logistics?.deliveryPricing,
+    currentDeliveryMethod
+  );
+
+  // ✨ NUEVO: Calcular todos los productos excluidos del catálogo
+  const allExcludedProducts = useMemo(() => {
+    if (!discountHook.validation.discountData?.restrictions?.itemsExcluded) {
+      return [];
+    }
+
+    const excludedIds =
+      discountHook.validation.discountData.restrictions.itemsExcluded;
+    const resolved = [];
+
+    rawProducts.forEach((product) => {
+      // Revisar si el producto completo está excluido
+      if (excludedIds.includes(product.id)) {
+        resolved.push({
+          id: product.id,
+          name: product.name,
+          type: "product",
+        });
+      }
+
+      // Revisar si alguna variante está excluida
+      if (product.variants && Array.isArray(product.variants)) {
+        product.variants.forEach((variant) => {
+          if (excludedIds.includes(variant.id)) {
+            resolved.push({
+              id: variant.id,
+              name: `${product.name} - ${variant.name}`,
+              type: "variant",
+            });
+          }
+        });
+      }
+    });
+
+    return resolved;
+  }, [rawProducts, discountHook.validation.discountData]);
+
+  // Actualizar coordenadas cuando cambie el mapa
+  useEffect(() => {
+    if (mapUrl) {
+      const coords = extractCoordinates(mapUrl);
+      setClientCoordinates(coords);
+      console.log("📍 Coordenadas del cliente actualizadas:", coords);
+    }
+  }, [mapUrl]);
 
   const handleUpdateStock = async (itemId) => {
     try {
@@ -145,14 +209,27 @@ const FormCustom = ({ cart, total }) => {
       if (values.deliveryMethod === "delivery" && mapUrl) {
         console.log("Coordenadas extraídas:", coordinates);
       }
+
+      // Usar deliveryFee dinámico
+      const dynamicShippingCost =
+        values.deliveryMethod === "delivery" ? deliveryDistance.deliveryFee : 0;
+
       const updatedValues = {
         ...values,
         estimatedTime,
         envioExpress: isEnabled ? expressDeliveryFee : 0,
-        shipping: values.deliveryMethod === "delivery" ? envio : 0,
+        shipping: dynamicShippingCost,
         coordinates,
         appliedDiscount,
+        deliveryDistance: deliveryDistance.distance,
       };
+
+      console.log("💰 Procesando con envío dinámico:", {
+        distancia: deliveryDistance.distance,
+        costo: dynamicShippingCost,
+        detalles: deliveryDistance.details,
+      });
+
       console.log("Iniciando procesamiento con schema POS");
       const posCartItems = adaptCartToPOSFormat(cartItems);
       console.log("Items para procesar:", posCartItems.length);
@@ -164,7 +241,6 @@ const FormCustom = ({ cart, total }) => {
       );
       if (orderId) {
         console.log("Pedido procesado exitosamente con ID:", orderId);
-        // Pasar el teléfono junto con el orderId
         navigate(`/${slugEmpresa}/${slugSucursal}/success/${orderId}`, {
           state: { phone: values.phone },
         });
@@ -213,8 +289,37 @@ const FormCustom = ({ cart, total }) => {
     await processPedido(updatedValues, false, appliedDiscount);
   };
 
+  // ✨ Función para aplicar descuento parcial
+  const applyPartialDiscount = async () => {
+    setShowPartialDiscountModal(false);
+
+    if (pendingSubmitValues && partialDiscountInfo) {
+      const appliedDiscount = {
+        isValid: true,
+        discount: partialDiscountInfo.partialDiscount,
+        discountId: discountHook.validation.discountId,
+        discountData: discountHook.validation.discountData,
+        message: `Descuento parcial aplicado: -$${partialDiscountInfo.partialDiscount}`,
+        isPartial: true,
+      };
+
+      await processPedido(
+        pendingSubmitValues.values,
+        pendingSubmitValues.isReserva,
+        appliedDiscount
+      );
+    }
+  };
+
   const handleFormSubmit = async (values) => {
     const isReserva = values.hora.trim() !== "";
+
+    // Validar radio de entrega
+    if (values.deliveryMethod === "delivery" && deliveryDistance.isOutOfRange) {
+      setShowOutOfRangeModal(true);
+      return;
+    }
+
     if (!isReserva) {
       const businessHours = clientConfig?.logistics?.businessHours;
       const status = isBusinessOpen(businessHours);
@@ -224,13 +329,29 @@ const FormCustom = ({ cart, total }) => {
         return;
       }
     }
+
     let appliedDiscount = null;
     if (discountHook.code && discountHook.code.trim()) {
       if (!discountHook.validation.isValid && discountHook.validation.checked) {
+        // ✨ Si tiene productos excluidos, mostrar modal especial
+        if (
+          discountHook.validation.reason === "excluded_items" &&
+          discountHook.validation.partialDiscountDetails
+        ) {
+          setPartialDiscountInfo(
+            discountHook.validation.partialDiscountDetails
+          );
+          setPendingSubmitValues({ values, isReserva });
+          setShowPartialDiscountModal(true);
+          return;
+        }
+
+        // Otros errores: modal genérico
         setPendingSubmitValues({ values, isReserva });
         setShowDiscountWarning(true);
         return;
       }
+
       if (discountHook.validation.isValid) {
         appliedDiscount = {
           isValid: true,
@@ -238,9 +359,11 @@ const FormCustom = ({ cart, total }) => {
           discountId: discountHook.validation.discountId,
           discountData: discountHook.validation.discountData,
           message: discountHook.validation.message,
+          isPartial: false,
         };
       }
     }
+
     const delayConfig = clientConfig?.operaciones?.delay;
     if (delayConfig?.isActive && !isReserva) {
       const now = new Date();
@@ -260,8 +383,78 @@ const FormCustom = ({ cart, total }) => {
     await processPedido(values, isReserva, appliedDiscount);
   };
 
+  // ✨ NUEVO: Construir el mensaje del modal con el toggle
+  const partialDiscountModalMessage = partialDiscountInfo && (
+    <div className="text-left space-y-2">
+      <div className="">
+        <p className="font-light text-xs mb-1">No aplica para:</p>
+        <ul className="list-disc list-inside text-xs space-y-1">
+          {partialDiscountInfo.excludedProducts.map((p) => (
+            <li key={p.id}>
+              {p.name} {p.variantName && `(${p.variantName})`}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <p className="font-light text-xs mb-1">Sí aplica para:</p>
+        <ul className="list-disc list-inside text-xs space-y-1">
+          {partialDiscountInfo.eligibleProducts.map((p) => (
+            <li key={p.id}>
+              {p.name} {p.variantName && `(${p.variantName})`} - $
+              {p.price * p.quantity}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="text-sm flex flex-row gap-1 items-baseline">
+        <span className="font-light text-xs ">
+          Descuento de -${partialDiscountInfo.partialDiscount} sobre $
+          {partialDiscountInfo.eligibleSubtotal} de productos elegibles
+        </span>
+      </div>
+
+      {/* ✨ NUEVO: Toggle de productos excluidos del catálogo */}
+      {allExcludedProducts.length > 0 && (
+        <div className=" ">
+          <button
+            onClick={() => setShowAllExcluded(!showAllExcluded)}
+            className="text-xs text-blue-500 font-light  hover:text-blue-600"
+          >
+            {showAllExcluded
+              ? "Ver menos"
+              : `Clickea para ver todos los productos excluidos (${allExcludedProducts.length})`}
+          </button>
+
+          {showAllExcluded && (
+            <div className="mt-2 max-h-40 overflow-y-auto bg-gray-50 rounded-lg p-4 border  border-gray-200">
+              <ul className="list-disc list-inside text-xs space-y-1 text-gray-600">
+                {allExcludedProducts.map((p) => (
+                  <li key={p.id}>{p.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <>
+      <SimpleModal
+        isOpen={showOutOfRangeModal}
+        onClose={() => setShowOutOfRangeModal(false)}
+        title="Fuera del radio de entrega"
+        message={`Tu dirección está a ${deliveryDistance.distance?.toFixed(
+          1
+        )} km. Solo realizamos entregas dentro de ${
+          clientConfig?.logistics?.deliveryPricing?.maxDistance || 12
+        } km.`}
+      />
+
       <SimpleModal
         isOpen={showDelayModal}
         onClose={() => {
@@ -284,12 +477,14 @@ const FormCustom = ({ cart, total }) => {
           }
         }}
       />
+
       <SimpleModal
         isOpen={showClosedModal}
         onClose={() => setShowClosedModal(false)}
         title="Estamos cerrados"
         message={closedMessage}
       />
+
       <SimpleModal
         isOpen={showDiscountWarning}
         onClose={() => {
@@ -311,6 +506,24 @@ const FormCustom = ({ cart, total }) => {
           }
         }}
       />
+
+      {/* ✨ Modal de descuento parcial */}
+      <SimpleModal
+        isOpen={showPartialDiscountModal}
+        onClose={() => {
+          setShowPartialDiscountModal(false);
+          setPartialDiscountInfo(null);
+          setPendingSubmitValues(null);
+          setShowAllExcluded(false); // ✨ Reset del toggle
+        }}
+        title="Descuento parcial disponible"
+        message={partialDiscountModalMessage}
+        twoButtons={true}
+        cancelText="Modificar"
+        confirmText="Pedir"
+        onConfirm={applyPartialDiscount}
+      />
+
       <SimpleModal
         isOpen={showErrorModal}
         onClose={() => {
@@ -322,8 +535,9 @@ const FormCustom = ({ cart, total }) => {
         errorList={errorList}
         onUpdateStock={handleUpdateStock}
         onRemoveItem={handleRemoveItem}
-        onAdjustStock={handleAdjustStock} // ✅ CRÍTICO: Esta línea DEBE estar
+        onAdjustStock={handleAdjustStock}
       />
+
       <div className="flex px-4 flex-col">
         <style>{`
           .custom-select {
@@ -356,7 +570,13 @@ const FormCustom = ({ cart, total }) => {
             address: "",
             deliveryNotes: "",
           }}
-          validationSchema={validations(total + envio, cart)}
+          validationSchema={validations(
+            total +
+              (currentDeliveryMethod === "delivery"
+                ? deliveryDistance.deliveryFee
+                : 0),
+            cart
+          )}
           onSubmit={handleFormSubmit}
         >
           {({ values, setFieldValue, isSubmitting }) => {
@@ -364,13 +584,39 @@ const FormCustom = ({ cart, total }) => {
               setCurrentDeliveryMethod(values.deliveryMethod);
               setCurrentPaymentMethod(values.paymentMethod);
             }, [values.deliveryMethod, values.paymentMethod]);
+
             const productsTotal = subtotal;
+
+            console.log("🔍 Estado del descuento:", {
+              isValid: discountHook.validation.isValid,
+              discount: discountHook.validation.discount,
+              reason: discountHook.validation.reason,
+              hasPartialDetails:
+                !!discountHook.validation.partialDiscountDetails,
+              partialDiscount:
+                discountHook.validation.partialDiscountDetails?.partialDiscount,
+            });
+
             const descuento = discountHook.validation.isValid
               ? discountHook.validation.discount
-              : 0;
+              : (discountHook.validation.reason === "excluded_items" &&
+                  discountHook.validation.partialDiscountDetails
+                    ?.partialDiscount) ||
+                0;
+
+            console.log("💰 Descuento calculado:", descuento);
+            console.log(
+              "🏷️ Es parcial:",
+              discountHook.validation.reason === "excluded_items"
+            );
+
             let finalTotal = productsTotal - descuento;
-            if (values.deliveryMethod === "delivery") finalTotal += envio;
+            if (values.deliveryMethod === "delivery")
+              finalTotal += deliveryDistance.deliveryFee;
             if (isEnabled) finalTotal += expressDeliveryFee;
+
+            console.log("💵 Total final:", finalTotal);
+
             return (
               <Form>
                 <div className="flex flex-col">
@@ -451,21 +697,51 @@ const FormCustom = ({ cart, total }) => {
                     cart={cart}
                     discountHook={discountHook}
                   />
+
+                  {values.deliveryMethod === "delivery" &&
+                    deliveryDistance.isOutOfRange && (
+                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-xs text-red-800 font-light">
+                          <strong>Fuera del radio:</strong> Tu dirección está a{" "}
+                          {deliveryDistance.distance?.toFixed(1)} km. Solo
+                          entregamos dentro de{" "}
+                          {clientConfig?.logistics?.deliveryPricing
+                            ?.maxDistance || 12}{" "}
+                          km.
+                        </p>
+                      </div>
+                    )}
+
                   <OrderSummary
                     productsTotal={productsTotal}
-                    envio={envio}
+                    envio={deliveryDistance.deliveryFee}
                     expressFee={isEnabled ? expressDeliveryFee : 0}
                     finalTotal={finalTotal}
                     descuento={descuento}
+                    isPartialDiscount={
+                      discountHook.validation.reason === "excluded_items"
+                    }
                     handleExpressToggle={handleExpressToggle}
                     isEnabled={isEnabled}
                     deliveryMethod={values.deliveryMethod}
+                    distance={deliveryDistance.distance}
+                    isCalculatingDistance={deliveryDistance.isCalculating}
                   />
                   <button
                     type="submit"
-                    disabled={isSubmitting || isProcessingStock}
+                    disabled={
+                      isSubmitting ||
+                      isProcessingStock ||
+                      deliveryDistance.isOutOfRange ||
+                      (values.deliveryMethod === "delivery" &&
+                        deliveryDistance.isCalculating)
+                    }
                     className={`text-4xl z-50 text-center mt-6 flex items-center justify-center bg-primary text-gray-100 rounded-3xl h-20 font-bold transition-colors duration-300 ${
-                      isSubmitting || isProcessingStock
+                      isSubmitting ||
+                      isProcessingStock ||
+                      deliveryDistance.isOutOfRange ||
+                      (values.deliveryMethod === "delivery" &&
+                        deliveryDistance.isCalculating)
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}

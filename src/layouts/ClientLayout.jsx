@@ -183,29 +183,31 @@ const ClientLayout = ({ children }) => {
               </div>
             </div>
           </>
-        ) : // ✅ MODIFICADO: Botón con avatar del bot
-        isBotEnabled && shouldShowFloatingCart ? (
-          <button
-            onClick={openContactModal}
-            className={`${
-              totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
-            } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-4 h-10 text-gray-50 rounded-full text-xs mx-auto w-fit flex items-center gap-2 cursor-pointer hover:bg-gray-400/50 transition-colors`}
-          >
-            {/* ✅ Avatar del bot */}
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-white flex items-center justify-center">
-              {botAvatar ? (
-                <img
-                  src={botAvatar}
-                  alt="Bot"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span className="text-xs">🤖</span>
-              )}
-            </div>
-            <span>Contactanos</span>
-          </button>
-        ) : shouldShowFloatingCart ? (
+        ) : // : // ✅ MODIFICADO: Botón con avatar del bot
+        // isBotEnabled && shouldShowFloatingCart ? (
+        //   <button
+        //     onClick={openContactModal}
+        //     className={`${
+        //       totalQuantity > 0 ? "bottom-[133px]" : "bottom-[83px]"
+        //     } backdrop-blur-md bg-gray-300/50 fixed z-50 right-4 left-4 px-4 h-10 text-gray-50 rounded-full text-xs mx-auto w-fit flex items-center gap-2 cursor-pointer hover:bg-gray-400/50 transition-colors`}
+        //   >
+        //     {/* ✅ Avatar del bot */}
+        //     <div className="w-6 h-6 rounded-full overflow-hidden bg-white flex items-center justify-center">
+        //       {botAvatar ? (
+        //         <img
+        //           src={botAvatar}
+        //           alt="Bot"
+        //           className="w-full h-full object-cover"
+        //         />
+        //       ) : (
+        //         <span className="text-xs">🤖</span>
+        //       )}
+        //     </div>
+        //     <span>Contactanos</span>
+        //   </button>
+        // )
+
+        shouldShowFloatingCart ? (
           <button
             onClick={handleContactClick}
             className={`${
